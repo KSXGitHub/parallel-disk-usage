@@ -1,0 +1,18 @@
+[package]
+name = "dirt"
+version = "0.0.0"
+authors = ["khai96_ <hvksmr1996@gmail.com>"]
+edition = "2018"
+
+[lib]
+name = "dirt"
+path = "src/lib.rs"
+
+[[bin]]
+name = "dirt"
+path = "src/main.rs"
+
+[dependencies]
+pipe-trait = "^0.3.0"
+structopt = "^0.3.21"
+structopt-utilities = "^0.0.8"
