@@ -4,12 +4,10 @@ pub use args::Args;
 
 use structopt_utilities::StructOptUtils;
 
-pub const LICENSE: &str = include_str!("LICENSE");
-
 pub fn main() {
-    let Args { license, files } = Args::strict_from_args();
-    if license {
-        println!("{}", LICENSE);
+    let Args { copyright, files } = Args::strict_from_args();
+    if copyright {
+        println!("Apache-2.0 © 2021 Hoàng Văn Khải");
         return;
     }
     dbg!(files);

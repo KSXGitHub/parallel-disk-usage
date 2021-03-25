@@ -7,7 +7,7 @@ use structopt::StructOpt;
 pub struct Args {
     /// Print license to stdout and exit
     #[structopt(long)]
-    pub license: bool,
+    pub copyright: bool,
 
     /// List of files and/or directories
     #[structopt(name = "files")]
