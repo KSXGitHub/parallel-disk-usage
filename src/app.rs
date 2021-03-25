@@ -16,7 +16,8 @@ impl App {
         let Args { copyright, files } = self.args;
 
         if copyright {
-            println!("Apache-2.0 © 2021 Hoàng Văn Khải");
+            println!("Apache-2.0 © 2021 Hoàng Văn Khải <https://ksxgithub.github.io/>");
+            println!("Donation: https://patreon.com/khai96_");
             return;
         }
 
