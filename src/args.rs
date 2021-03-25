@@ -5,7 +5,7 @@ use structopt::StructOpt;
 #[derive(Debug, Clone, StructOpt)]
 #[structopt(name = "dirt")]
 pub struct Args {
-    /// Print license to stdout and exit
+    /// Print author information to stdout and exit
     #[structopt(long)]
     pub copyright: bool,
 
