@@ -45,7 +45,7 @@ dependencies = [
 name = "dirt"
 version = "0.0.0"
 dependencies = [
- "pipe-trait 0.3.0",
+ "pipe-trait 0.3.1",
  "structopt",
  "structopt-utilities",
 ]
@@ -88,9 +88,9 @@ checksum = "7d4c36ce339a5efdc0e3e60766952bc1df1b9e2b80cb14f1502c00aa90070ce0"
 
 [[package]]
 name = "pipe-trait"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac3561d8750b7d7bf48d3d4f612e1809d9f4ddd69801cfa8fdd8910b21c282b8"
+checksum = "1f794ff1ce7b09190d7ce7b571df3a4162efeefbaa5171ac2f4675d5689d5384"
 
 [[package]]
 name = "proc-macro-error"

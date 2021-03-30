@@ -14,6 +14,6 @@ name = "dirt"
 path = "src/main.rs"
 
 [dependencies]
-pipe-trait = "^0.3.0"
+pipe-trait = "^0.3.1"
 structopt = "^0.3.21"
 structopt-utilities = "^0.0.8"
