@@ -20,7 +20,7 @@ impl<Data: Size> Tree<Data> {
     /// Total disk usage of the subtrees will be assigned to `data`,
     /// this `data` does not include the size of the folder itself,
     /// use [`Self::add_dir_size`] to include it
-    pub fn from_children(children: Vec<Tree<Data>>) -> Self {
+    pub fn from_children(children: Vec<Self>) -> Self {
         let data = children.iter().map(Tree::data).sum();
         Tree { data, children }
     }
