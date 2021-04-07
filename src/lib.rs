@@ -1,5 +1,6 @@
 pub mod app;
 pub mod args;
+pub mod fs_tree_builder;
 pub mod size;
 pub mod tree;
 pub mod tree_builder;
