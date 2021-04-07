@@ -23,3 +23,24 @@ impl<'a> Display for TextReport<'a> {
         )
     }
 }
+
+#[cfg(test)]
+use super::Operation;
+#[cfg(test)]
+use std::{io, path::PathBuf};
+
+#[test]
+fn test() {
+    let report = ErrorReport {
+        operation: Operation::ReadDirectory,
+        path: &PathBuf::from("path/to/a/directory"),
+        error: io::Error::new(
+            io::ErrorKind::NotFound,
+            "Something goes wrong (os error 420)",
+        ),
+    };
+    let actual = TextReport(&report).to_string();
+    let expected =
+        "\r[error] read_dir \"path/to/a/directory\": Something goes wrong (os error 420)\n";
+    assert_eq!(actual, expected);
+}
