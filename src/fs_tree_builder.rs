@@ -1,5 +1,7 @@
+pub mod error_report;
 pub mod progress;
 
+pub use error_report::ErrorReport;
 pub use progress::Progress;
 
 use super::{
@@ -7,6 +9,7 @@ use super::{
     tree::Tree,
     tree_builder::{Info, TreeBuilder},
 };
+use error_report::Operation::*;
 use pipe_trait::Pipe;
 use std::{
     fs::{read_dir, symlink_metadata, Metadata},
@@ -30,11 +33,12 @@ pub const GET_BLOCK_COUNT: SizeGetter<Blocks> = |metadata| metadata.blocks().int
 
 /// Build a [`Tree`] from a directory tree using [`From`] or [`Into`]
 #[derive(Debug)]
-pub struct FsTreeBuilder<Data, GetData, ReportProgress>
+pub struct FsTreeBuilder<Data, GetData, ReportProgress, ReportError>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
     ReportProgress: Fn(&Progress<Data>) + Sync,
+    ReportError: for<'r> Fn(&ErrorReport<'r>) + Sync,
 {
     /// Root of the directory tree
     pub root: PathBuf,
@@ -42,20 +46,24 @@ where
     pub get_data: GetData,
     /// Reports progress to external system
     pub report_progress: ReportProgress,
+    /// Reports error to external system
+    pub report_error: ReportError,
 }
 
-impl<Data, GetData, ReportProgress> From<FsTreeBuilder<Data, GetData, ReportProgress>>
-    for Tree<PathBuf, Data>
+impl<Data, GetData, ReportProgress, ReportError>
+    From<FsTreeBuilder<Data, GetData, ReportProgress, ReportError>> for Tree<PathBuf, Data>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
     ReportProgress: Fn(&Progress<Data>) + Sync,
+    ReportError: for<'r> Fn(&ErrorReport<'r>) + Sync,
 {
-    fn from(builder: FsTreeBuilder<Data, GetData, ReportProgress>) -> Self {
+    fn from(builder: FsTreeBuilder<Data, GetData, ReportProgress, ReportError>) -> Self {
         let FsTreeBuilder {
             root,
             get_data,
             report_progress,
+            report_error,
         } = builder;
 
         let progress = Arc::new(RwLock::new(Progress::<Data>::default()));
@@ -82,7 +90,11 @@ where
 
         let stats = match symlink_metadata(&root) {
             Err(error) => {
-                eprintln!("\r[error] symlink_metadata {:?}: {}", &root, error);
+                report_error(&ErrorReport {
+                    operation: SymlinkMetadata,
+                    path: root.as_path(),
+                    error,
+                });
                 mut_progress!(errors);
                 return Tree::from_children(root, Vec::new());
             }
@@ -96,7 +108,11 @@ where
                 let children: Vec<_> = if stats.file_type().is_dir() {
                     match read_dir(path) {
                         Err(error) => {
-                            eprintln!("\r[error] read_dir {:?}: {}", path, error);
+                            report_error(&ErrorReport {
+                                operation: ReadDirectory,
+                                path,
+                                error,
+                            });
                             mut_progress!(errors);
                             return Info::default();
                         }
@@ -105,7 +121,11 @@ where
                     .into_iter()
                     .filter_map(|entry| match entry {
                         Err(error) => {
-                            eprintln!("\r[error] access entry of {:?}: {}", path, error);
+                            report_error(&ErrorReport {
+                                operation: AccessEntry,
+                                path,
+                                error,
+                            });
                             mut_progress!(errors);
                             None
                         }
