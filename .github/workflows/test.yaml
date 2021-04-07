@@ -1,0 +1,118 @@
+name: Test
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  test:
+    name: Test
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache
+        uses: actions/cache@v2.1.4
+        timeout-minutes: 1
+        continue-on-error: true
+        if: matrix.os != 'macos-latest' # Cache causes errors on macOS
+        with:
+          path:
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          override: 'true'
+          default: 'true'
+
+      - name: Build
+        run: cargo build --locked
+
+      - name: Test
+        run: cargo test --no-fail-fast
+
+  clippy_check:
+    name: Clippy
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache
+        uses: actions/cache@v2.1.4
+        timeout-minutes: 1
+        continue-on-error: true
+        if: matrix.os != 'macos-latest' # Cache causes errors on macOS
+        with:
+          path:
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-
+
+      - uses: actions-rs/toolchain@v1.0.6
+        with:
+          profile: minimal
+          components: clippy
+          override: 'true'
+          default: 'true'
+
+      - name: Use clippy to lint code
+        uses: actions-rs/clippy-check@v1
+        with:
+          name: Clippy Report (${{ hashFiles('rust-toolchain') }}, ${{ matrix.os }})
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features --all-targets -- -D warnings
+
+  fmt_check:
+    name: Fmt
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1.0.6
+        with:
+          profile: minimal
+          components: rustfmt
+          override: 'true'
+          default: 'true'
+
+      - name: Check code formatting
+        run: cargo fmt -- --check
