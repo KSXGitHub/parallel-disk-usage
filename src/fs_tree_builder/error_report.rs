@@ -1,3 +1,7 @@
+pub mod operation;
+
+pub use operation::Operation;
+
 use std::{io::Error, path::Path};
 
 /// Information regarding a filesystem error
@@ -11,15 +15,17 @@ pub struct ErrorReport<'a> {
     pub error: Error,
 }
 
-/// Operation that caused the error
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Operation {
-    /// Error is caused by calling [`std::fs::symlink_metadata`]
-    SymlinkMetadata,
-    /// Error is caused by calling [`std::fs::read_dir`]
-    ReadDirectory,
-    /// Error when trying to access [`std::fs::DirEntry`] of one of the element of [`std::fs::read_dir`]
-    AccessEntry,
-}
+impl<'a> ErrorReport<'a> {
+    /// Do nothing
+    pub fn silent(&self) {}
 
-mod implementations;
+    /// Prints error message in form of a line of text to stderr
+    pub fn text_report(&self) {
+        eprintln!(
+            "\r[error] {operation} {path:?}: {error}",
+            operation = self.operation.name(),
+            path = self.path,
+            error = self.error,
+        );
+    }
+}
