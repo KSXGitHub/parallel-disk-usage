@@ -21,3 +21,5 @@ pub enum Operation {
     /// Error when trying to access [`std::fs::DirEntry`] of one of the element of [`std::fs::read_dir`]
     AccessEntry,
 }
+
+mod implementations;
