@@ -5,7 +5,7 @@ pub use info::Info;
 use super::{size::Size, tree::Tree};
 use rayon::prelude::*;
 
-/// Collection of functions and starting points to build a [`Tree`]
+/// Collection of functions and starting points in order to build a [`Tree`] with [`From`] or [`Into`]
 #[derive(Debug)]
 pub struct TreeBuilder<Id, Data, GetInfo, JoinPath>
 where
@@ -22,32 +22,31 @@ where
     pub join_path: JoinPath,
 }
 
-impl<Id, Data, GetInfo, JoinPath> TreeBuilder<Id, Data, GetInfo, JoinPath>
+impl<Id, Data, GetInfo, JoinPath> From<TreeBuilder<Id, Data, GetInfo, JoinPath>> for Tree<Id, Data>
 where
     Id: Send + Sync,
     Data: Size + Send,
     GetInfo: Fn(&Id) -> Info<Id, Data> + Copy + Send + Sync,
     JoinPath: Fn(&Id, &Id) -> Id + Copy + Send + Sync,
 {
-    /// Build a [`Tree`]
-    pub fn build(self) -> Tree<Id, Data> {
+    fn from(builder: TreeBuilder<Id, Data, GetInfo, JoinPath>) -> Self {
         let TreeBuilder {
             id,
             get_info,
             join_path,
-        } = self;
+        } = builder;
 
         let Info { data, children } = get_info(&id);
 
         let children: Vec<_> = children
             .into_par_iter()
-            .map(|child_name| {
+            .map(|child_name| -> Self {
                 TreeBuilder {
                     id: join_path(&id, &child_name),
                     get_info,
                     join_path,
                 }
-                .build()
+                .into()
             })
             .collect();
 

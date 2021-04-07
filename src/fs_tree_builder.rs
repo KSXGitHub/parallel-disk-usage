@@ -28,7 +28,7 @@ pub const GET_BLOCK_SIZE: SizeGetter<Bytes> = |metadata| metadata.blksize().into
 #[cfg(unix)]
 pub const GET_BLOCK_COUNT: SizeGetter<Blocks> = |metadata| metadata.blocks().into();
 
-/// Build a [`Tree`] from a directory tree
+/// Build a [`Tree`] from a directory tree using [`From`] or [`Into`]
 #[derive(Debug)]
 pub struct FsTreeBuilder<Data, GetData, ReportProgress>
 where
@@ -44,38 +44,39 @@ where
     pub report_progress: ReportProgress,
 }
 
-impl<Data, GetData, ReportProgress> FsTreeBuilder<Data, GetData, ReportProgress>
+impl<Data, GetData, ReportProgress> From<FsTreeBuilder<Data, GetData, ReportProgress>>
+    for Tree<PathBuf, Data>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
     ReportProgress: Fn(&Progress<Data>) + Sync,
 {
-    pub fn build(self) -> Tree<PathBuf, Data> {
+    fn from(builder: FsTreeBuilder<Data, GetData, ReportProgress>) -> Self {
         let FsTreeBuilder {
             root,
             get_data,
             report_progress,
-        } = self;
+        } = builder;
 
         let progress = Arc::new(RwLock::new(Progress::<Data>::default()));
 
         macro_rules! mut_progress {
-            ($field:ident $operator:tt $addend:expr) => {
-                {
-                    let expect_message = concat!("lock progress to mutate", stringify!($field));
-                    let mut progress = progress.write().expect(expect_message);
-                    progress.$field $operator $addend;
-                }
-                {
-                    let progress = progress.read().expect("lock progress to report");
-                    report_progress(&progress);
-                }
-            };
+                ($field:ident $operator:tt $addend:expr) => {
+                    {
+                        let expect_message = concat!("lock progress to mutate", stringify!($field));
+                        let mut progress = progress.write().expect(expect_message);
+                        progress.$field $operator $addend;
+                    }
+                    {
+                        let progress = progress.read().expect("lock progress to report");
+                        report_progress(&progress);
+                    }
+                };
 
-            ($field:ident) => {
-                mut_progress!($field += 1)
-            };
-        }
+                ($field:ident) => {
+                    mut_progress!($field += 1)
+                };
+            }
 
         mut_progress!(known_items);
 
@@ -125,6 +126,6 @@ where
 
             join_path: |prefix, name| prefix.join(name),
         }
-        .build()
+        .into()
     }
 }
