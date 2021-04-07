@@ -40,14 +40,12 @@ where
 
         let children: Vec<_> = children
             .into_par_iter()
-            .map(|child_name| -> Self {
-                TreeBuilder {
-                    id: join_path(&id, &child_name),
-                    get_info,
-                    join_path,
-                }
-                .into()
+            .map(|child_name| TreeBuilder {
+                id: join_path(&id, &child_name),
+                get_info,
+                join_path,
             })
+            .map(Into::<Self>::into)
             .collect();
 
         Tree::from_children(id, children).add_dir_size(data)
