@@ -27,7 +27,7 @@ jobs:
         continue-on-error: true
         if: matrix.os != 'macos-latest' # Cache causes errors on macOS
         with:
-          path:
+          path: |
             ~/.cargo/registry
             ~/.cargo/git
             target
@@ -69,7 +69,7 @@ jobs:
         continue-on-error: true
         if: matrix.os != 'macos-latest' # Cache causes errors on macOS
         with:
-          path:
+          path: |
             ~/.cargo/registry
             ~/.cargo/git
             target
