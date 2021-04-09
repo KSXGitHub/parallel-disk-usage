@@ -12,9 +12,9 @@ pub trait Size: Debug + Default + Clone + Copy + PartialEq + Eq + Add + AddAssig
 }
 
 macro_rules! newtype {
-    ($name:ident = $inner:ty | $doc:literal) => {
+    ($(#[$attribute:meta])* $name:ident = $inner:ty) => {
         #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, From, Into, Add, AddAssign, Sum)]
-        #[doc = $doc]
+        $(#[$attribute])*
         pub struct $name($inner);
 
         impl Size for $name {
@@ -23,5 +23,11 @@ macro_rules! newtype {
     };
 }
 
-newtype!(Bytes = u64 | "Number of bytes");
-newtype!(Blocks = u64 | "Number of blocks");
+newtype!(
+    #[doc = "Number of bytes"]
+    Bytes = u64
+);
+newtype!(
+    #[doc = "Number of blocks"]
+    Blocks = u64
+);
