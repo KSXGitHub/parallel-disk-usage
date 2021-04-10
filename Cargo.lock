@@ -121,7 +121,7 @@ name = "dirt"
 version = "0.0.0"
 dependencies = [
  "derive_more",
- "pipe-trait 0.3.1",
+ "pipe-trait 0.3.2",
  "rayon",
  "smart-default",
  "structopt",
@@ -160,9 +160,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.91"
+version = "0.2.93"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8916b1f6ca17130ec6568feccee27c156ad12037880833a3b842a823236502e7"
+checksum = "9385f66bf6105b241aa65a61cb923ef20efc665cb9f9bb50ac2f0c4b7f378d41"
 
 [[package]]
 name = "memoffset"
@@ -191,9 +191,9 @@ checksum = "7d4c36ce339a5efdc0e3e60766952bc1df1b9e2b80cb14f1502c00aa90070ce0"
 
 [[package]]
 name = "pipe-trait"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f794ff1ce7b09190d7ce7b571df3a4162efeefbaa5171ac2f4675d5689d5384"
+checksum = "3fd92f5561e74c246a0b7332e09d2364afb40b67d152c4520b3ba2a7d3dea5b3"
 
 [[package]]
 name = "proc-macro-error"
@@ -221,9 +221,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.24"
+version = "1.0.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e0704ee1a7e00d7bb417d0770ea303c1bccbabf0ef1667dae92b5967f5f8a71"
+checksum = "a152013215dca273577e18d2bf00fa862b89b24169fb78c4c95aeb07992c9cec"
 dependencies = [
  "unicode-xid",
 ]
@@ -321,9 +321,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "1.0.64"
+version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3fd9d1e9976102a03c542daa2eff1b43f9d72306342f3f8b3ed5fb8908195d6f"
+checksum = "48fe99c6bd8b1cc636890bcc071842de909d902c81ac7dab53ba33c421ab8ffb"
 dependencies = [
  "proc-macro2",
  "quote",
