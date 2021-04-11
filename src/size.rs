@@ -5,7 +5,7 @@ use std::{
     ops::{Add, AddAssign},
 };
 
-/// Types whose values can be used as disk usage statistic
+/// Types whose values can be used as disk usage statistic.
 pub trait Size: Debug + Default + Clone + Copy + PartialEq + Eq + Add + AddAssign + Sum {
     /// Underlying type
     type Inner: From<Self> + Into<Self>;
@@ -24,10 +24,10 @@ macro_rules! newtype {
 }
 
 newtype!(
-    #[doc = "Number of bytes"]
+    #[doc = "Number of bytes."]
     Bytes = u64
 );
 newtype!(
-    #[doc = "Number of blocks"]
+    #[doc = "Number of blocks."]
     Blocks = u64
 );

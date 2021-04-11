@@ -1,16 +1,16 @@
 /// Operation that caused the error
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Operation {
-    /// Error is caused by calling [`std::fs::symlink_metadata`]
+    /// Error is caused by calling [`std::fs::symlink_metadata`].
     SymlinkMetadata,
-    /// Error is caused by calling [`std::fs::read_dir`]
+    /// Error is caused by calling [`std::fs::read_dir`].
     ReadDirectory,
-    /// Error when trying to access [`std::fs::DirEntry`] of one of the element of [`std::fs::read_dir`]
+    /// Error when trying to access [`std::fs::DirEntry`] of one of the element of [`std::fs::read_dir`].
     AccessEntry,
 }
 
 impl Operation {
-    /// Get name of the operation
+    /// Get name of the operation.
     pub const fn name(self) -> &'static str {
         use Operation::*;
         match self {

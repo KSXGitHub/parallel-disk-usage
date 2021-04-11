@@ -5,7 +5,7 @@ pub use info::Info;
 use super::{size::Size, tree::Tree};
 use rayon::prelude::*;
 
-/// Collection of functions and starting points in order to build a [`Tree`] with [`From`] or [`Into`]
+/// Collection of functions and starting points in order to build a [`Tree`] with [`From`] or [`Into`].
 #[derive(Debug)]
 pub struct TreeBuilder<Id, Data, GetInfo, JoinPath>
 where
@@ -14,11 +14,11 @@ where
     GetInfo: Fn(&Id) -> Info<Id, Data> + Copy + Send + Sync,
     JoinPath: Fn(&Id, &Id) -> Id + Copy + Send + Sync,
 {
-    /// Root identification
+    /// Root identification.
     pub id: Id,
-    /// Function to extract necessary information from `id` (`data` and `children`)
+    /// Function to extract necessary information from `id` (`data` and `children`).
     pub get_info: GetInfo,
-    /// Function to join parent's `id` with a child's name to make the child's `id`
+    /// Function to join parent's `id` with a child's name to make the child's `id`.
     pub join_path: JoinPath,
 }
 

@@ -8,7 +8,7 @@ pub mod tree_builder;
 pub use app::App;
 pub use args::Args;
 
-/// The main program
+/// The main program.
 pub fn main() {
     App::from_env().run()
 }

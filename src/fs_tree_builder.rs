@@ -20,18 +20,18 @@ use std::{
 #[cfg(unix)]
 use std::os::unix::prelude::MetadataExt;
 
-/// Infers size from a [`Metadata`]
+/// Infers size from a [`Metadata`].
 pub type SizeGetter<Size> = fn(&Metadata) -> Size;
-/// Returns `metadata.len()`
+/// Returns `metadata.len()`.
 pub const GET_APPARENT_SIZE: SizeGetter<Bytes> = |metadata| metadata.len().into();
-/// Returns `metadata.blksize()` (POSIX only)
+/// Returns `metadata.blksize()` (POSIX only).
 #[cfg(unix)]
 pub const GET_BLOCK_SIZE: SizeGetter<Bytes> = |metadata| metadata.blksize().into();
-/// Returns `metadata.blocks()` (POSIX only)
+/// Returns `metadata.blocks()` (POSIX only).
 #[cfg(unix)]
 pub const GET_BLOCK_COUNT: SizeGetter<Blocks> = |metadata| metadata.blocks().into();
 
-/// Build a [`Tree`] from a directory tree using [`From`] or [`Into`]
+/// Build a [`Tree`] from a directory tree using [`From`] or [`Into`].
 #[derive(Debug)]
 pub struct FsTreeBuilder<Data, GetData, ReportProgress, ReportError>
 where
@@ -40,13 +40,13 @@ where
     ReportProgress: Fn(&Progress<Data>) + Sync,
     ReportError: for<'r> Fn(&ErrorReport<'r>) + Sync,
 {
-    /// Root of the directory tree
+    /// Root of the directory tree.
     pub root: PathBuf,
-    /// Returns size of an item
+    /// Returns size of an item.
     pub get_data: GetData,
-    /// Reports progress to external system
+    /// Reports progress to external system.
     pub report_progress: ReportProgress,
-    /// Reports error to external system
+    /// Reports error to external system.
     pub report_error: ReportError,
 }
 
