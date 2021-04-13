@@ -51,3 +51,6 @@ where
         Tree::from_children(id, children).add_dir_size(data)
     }
 }
+
+#[cfg(test)]
+mod test;
