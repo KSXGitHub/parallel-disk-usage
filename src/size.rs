@@ -17,6 +17,16 @@ macro_rules! newtype {
         $(#[$attribute])*
         pub struct $name($inner);
 
+        impl $name {
+            pub const fn new(inner: $inner) -> Self {
+                $name(inner)
+            }
+
+            pub const fn inner(self) -> $inner {
+                self.0
+            }
+        }
+
         impl Size for $name {
             type Inner = $inner;
         }
