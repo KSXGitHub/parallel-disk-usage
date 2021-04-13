@@ -1,7 +1,7 @@
 use super::size::Size;
 
 /// Disk usage data of a filesystem tree.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Tree<Id, Data: Size> {
     /// Identification of the tree.
     pub id: Id,
