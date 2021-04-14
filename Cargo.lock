@@ -168,6 +168,7 @@ dependencies = [
  "smart-default",
  "structopt",
  "structopt-utilities",
+ "text-block-macros",
 ]
 
 [[package]]
