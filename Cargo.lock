@@ -162,6 +162,7 @@ version = "0.0.0"
 dependencies = [
  "build-fs-tree",
  "derive_more",
+ "maplit",
  "pipe-trait 0.3.2",
  "pretty_assertions",
  "rand",
@@ -230,6 +231,12 @@ name = "linked-hash-map"
 version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7fb9b38af92608140b86b693604b9ffcc5824240a484d1ecd4795bacb2fe88f3"
+
+[[package]]
+name = "maplit"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "memoffset"

@@ -7,7 +7,17 @@ use std::{
 
 /// Types whose values can be used as disk usage statistic.
 pub trait Size:
-    Debug + Default + Clone + Copy + PartialEq + Eq + Add<Output = Self> + AddAssign + Sum
+    Debug
+    + Default
+    + Clone
+    + Copy
+    + PartialEq
+    + Eq
+    + PartialOrd
+    + Ord
+    + Add<Output = Self>
+    + AddAssign
+    + Sum
 {
     /// Underlying type
     type Inner: From<Self> + Into<Self>;
@@ -15,7 +25,7 @@ pub trait Size:
 
 macro_rules! newtype {
     ($(#[$attribute:meta])* $name:ident = $inner:ty) => {
-        #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, From, Into, Add, AddAssign, Sum)]
+        #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, From, Into, Add, AddAssign, Sum)]
         $(#[$attribute])*
         pub struct $name($inner);
 

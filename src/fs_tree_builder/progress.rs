@@ -1,7 +1,7 @@
 use super::Size;
 
 /// Scan progress
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Progress<Data: Size> {
     /// Number of known items
     pub known_items: u64,
