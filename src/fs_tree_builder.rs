@@ -86,12 +86,12 @@ where
                 };
             }
 
-        mut_progress!(known_items);
-
         TreeBuilder::<PathBuf, Data, _, _> {
             id: root,
 
             get_info: |path| {
+                mut_progress!(known_items);
+
                 let stats = match symlink_metadata(&path) {
                     Err(error) => {
                         report_error(&ErrorReport {
