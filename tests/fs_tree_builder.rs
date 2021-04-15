@@ -69,54 +69,63 @@ fn progress_reports() {
     let actual = reports.lock().unwrap().clone();
     dbg!(&actual);
     let expected = btreeset! {
+        // begin scanning /
         Progress {
             known_items: 1,
             scanned_items: 0,
             scanned_total: scanned_total!(),
             errors: 0,
         },
+        // finish scanning /
         Progress {
             known_items: 1,
             scanned_items: 1,
             scanned_total: scanned_total!(),
             errors: 0,
         },
+        // update scanned_total
         Progress {
             known_items: 1,
             scanned_items: 1,
             scanned_total: scanned_total!(""),
             errors: 0,
         },
+        // begin scanning /0
         Progress {
             known_items: 2,
             scanned_items: 1,
             scanned_total: scanned_total!(""),
             errors: 0,
         },
+        // finish scanning /0
         Progress {
             known_items: 2,
             scanned_items: 2,
             scanned_total: scanned_total!(""),
             errors: 0,
         },
+        // update scanned_total
         Progress {
             known_items: 2,
             scanned_items: 2,
             scanned_total: scanned_total!("", "0"),
             errors: 0,
         },
+        // begin scanning /0/1
         Progress {
             known_items: 3,
             scanned_items: 2,
             scanned_total: scanned_total!("", "0"),
             errors: 0,
         },
+        // finish scanning /0/1
         Progress {
             known_items: 3,
             scanned_items: 3,
             scanned_total: scanned_total!("", "0"),
             errors: 0,
         },
+        // update scanned_total
         Progress {
             known_items: 3,
             scanned_items: 3,
