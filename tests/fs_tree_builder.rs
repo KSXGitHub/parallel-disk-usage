@@ -67,6 +67,7 @@ fn progress_reports() {
         };
     }
     let actual = reports.lock().unwrap().clone();
+    dbg!(&actual);
     let expected = btreeset! {
         Progress {
             known_items: 1,
