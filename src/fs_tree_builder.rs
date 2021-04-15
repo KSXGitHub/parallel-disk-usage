@@ -88,23 +88,26 @@ where
 
         mut_progress!(known_items);
 
-        let stats = match symlink_metadata(&root) {
-            Err(error) => {
-                report_error(&ErrorReport {
-                    operation: SymlinkMetadata,
-                    path: root.as_path(),
-                    error,
-                });
-                mut_progress!(errors);
-                return Tree::from_children(root, Vec::new());
-            }
-            Ok(stats) => stats,
-        };
-
-        TreeBuilder {
+        TreeBuilder::<PathBuf, Data, _, _> {
             id: root,
 
             get_info: |path| {
+                let stats = match symlink_metadata(&path) {
+                    Err(error) => {
+                        report_error(&ErrorReport {
+                            operation: SymlinkMetadata,
+                            path,
+                            error,
+                        });
+                        mut_progress!(errors);
+                        return Info {
+                            data: Data::default(),
+                            children: Vec::new(),
+                        };
+                    }
+                    Ok(stats) => stats,
+                };
+
                 let children: Vec<_> = if stats.file_type().is_dir() {
                     match read_dir(path) {
                         Err(error) => {
