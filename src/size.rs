@@ -6,7 +6,9 @@ use std::{
 };
 
 /// Types whose values can be used as disk usage statistic.
-pub trait Size: Debug + Default + Clone + Copy + PartialEq + Eq + Add + AddAssign + Sum {
+pub trait Size:
+    Debug + Default + Clone + Copy + PartialEq + Eq + Add<Output = Self> + AddAssign + Sum
+{
     /// Underlying type
     type Inner: From<Self> + Into<Self>;
 }
