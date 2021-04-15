@@ -139,22 +139,22 @@ where
                 Tree {
                     id: root.join("flat").join("0"),
                     data: suffix_size("flat/0"),
-                    children: Vec::new()
+                    children: Vec::new(),
                 },
                 Tree {
                     id: root.join("flat").join("1"),
                     data: suffix_size("flat/1"),
-                    children: Vec::new()
+                    children: Vec::new(),
                 },
                 Tree {
                     id: root.join("flat").join("2"),
                     data: suffix_size("flat/2"),
-                    children: Vec::new()
+                    children: Vec::new(),
                 },
                 Tree {
                     id: root.join("flat").join("3"),
                     data: suffix_size("flat/3"),
-                    children: Vec::new()
+                    children: Vec::new(),
                 },
             ]
         }),
@@ -171,7 +171,7 @@ where
                 children: vec![Tree {
                     id: root.join("nested").join("0").join("1"),
                     data: suffix_size!("nested/0/1"),
-                    children: Vec::new()
+                    children: Vec::new(),
                 }]
             }],
         }),
@@ -182,7 +182,7 @@ where
         sanitize_tree(Tree {
             id: root.join("empty-dir"),
             data: suffix_size!("empty-dir"),
-            children: Vec::new()
+            children: Vec::new(),
         }),
     );
 }
