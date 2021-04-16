@@ -1,4 +1,4 @@
-use super::{ErrorReport, Event, Progress, Reporter, Size};
+use super::{ErrorReport, Event, ProgressReport, Reporter, Size};
 use pipe_trait::Pipe;
 use std::sync::{Arc, RwLock};
 
@@ -7,11 +7,11 @@ use std::sync::{Arc, RwLock};
 pub struct ProgressAndErrorReporter<Data, ReportProgress, ReportError>
 where
     Data: Size,
-    ReportProgress: Fn(&Progress<Data>) + Sync,
+    ReportProgress: Fn(&ProgressReport<Data>) + Sync,
     ReportError: Fn(ErrorReport) + Sync,
 {
     /// Progress information.
-    pub progress: Arc<RwLock<Progress<Data>>>,
+    pub progress: Arc<RwLock<ProgressReport<Data>>>,
     /// Report progress information.
     pub report_progress: ReportProgress,
     /// Report encountered error.
@@ -21,15 +21,15 @@ where
 impl<Data, ReportProgress, ReportError> ProgressAndErrorReporter<Data, ReportProgress, ReportError>
 where
     Data: Size,
-    ReportProgress: Fn(&Progress<Data>) + Sync,
+    ReportProgress: Fn(&ProgressReport<Data>) + Sync,
     ReportError: Fn(ErrorReport) + Sync,
 {
     /// Create a new [`ProgressAndErrorReporter`] from a report function.
     pub fn new(report_progress: ReportProgress, report_error: ReportError) -> Self
     where
-        Progress<Data>: Default,
+        ProgressReport<Data>: Default,
     {
-        let progress = Progress::default().pipe(RwLock::new).pipe(Arc::new);
+        let progress = ProgressReport::default().pipe(RwLock::new).pipe(Arc::new);
         ProgressAndErrorReporter {
             progress,
             report_progress,
@@ -42,7 +42,7 @@ impl<Data, ReportProgress, ReportError> Reporter<Data>
     for ProgressAndErrorReporter<Data, ReportProgress, ReportError>
 where
     Data: Size,
-    ReportProgress: Fn(&Progress<Data>) + Sync,
+    ReportProgress: Fn(&ProgressReport<Data>) + Sync,
     ReportError: Fn(ErrorReport) + Sync,
 {
     fn report(&self, event: Event<Data>) {

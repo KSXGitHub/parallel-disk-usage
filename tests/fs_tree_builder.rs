@@ -4,7 +4,7 @@ pub use _utils::*;
 
 use dirt::{
     fs_tree_builder::FsTreeBuilder,
-    reporter::{Progress, ProgressAndErrorReporter},
+    reporter::{ProgressAndErrorReporter, ProgressReport},
     size::Bytes,
     tree::Tree,
 };
@@ -73,63 +73,63 @@ fn progress_reports() {
     dbg!(&actual);
     let expected = btreeset! {
         // begin scanning /
-        Progress {
+        ProgressReport {
             known_items: 1,
             scanned_items: 0,
             scanned_total: scanned_total!(),
             errors: 0,
         },
         // finish scanning /
-        Progress {
+        ProgressReport {
             known_items: 1,
             scanned_items: 1,
             scanned_total: scanned_total!(),
             errors: 0,
         },
         // update scanned_total
-        Progress {
+        ProgressReport {
             known_items: 1,
             scanned_items: 1,
             scanned_total: scanned_total!(""),
             errors: 0,
         },
         // begin scanning /0
-        Progress {
+        ProgressReport {
             known_items: 2,
             scanned_items: 1,
             scanned_total: scanned_total!(""),
             errors: 0,
         },
         // finish scanning /0
-        Progress {
+        ProgressReport {
             known_items: 2,
             scanned_items: 2,
             scanned_total: scanned_total!(""),
             errors: 0,
         },
         // update scanned_total
-        Progress {
+        ProgressReport {
             known_items: 2,
             scanned_items: 2,
             scanned_total: scanned_total!("", "0"),
             errors: 0,
         },
         // begin scanning /0/1
-        Progress {
+        ProgressReport {
             known_items: 3,
             scanned_items: 2,
             scanned_total: scanned_total!("", "0"),
             errors: 0,
         },
         // finish scanning /0/1
-        Progress {
+        ProgressReport {
             known_items: 3,
             scanned_items: 3,
             scanned_total: scanned_total!("", "0"),
             errors: 0,
         },
         // update scanned_total
-        Progress {
+        ProgressReport {
             known_items: 3,
             scanned_items: 3,
             scanned_total: scanned_total!("", "0", "0/1"),
