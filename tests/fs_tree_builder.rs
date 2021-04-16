@@ -11,7 +11,7 @@ use dirt::{
 use maplit::btreeset;
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use std::{collections::BTreeSet, fs::metadata, path::PathBuf, sync::Mutex};
+use std::{collections::BTreeSet, ffi::OsString, fs::metadata, sync::Mutex};
 
 #[cfg(unix)]
 use dirt::size::Blocks;
@@ -42,7 +42,7 @@ fn blocks_as_blocks() {
 fn progress_reports() {
     let workspace = SampleWorkspace::default();
     let reports = Mutex::new(BTreeSet::new());
-    Tree::<PathBuf, Bytes>::from(FsTreeBuilder {
+    Tree::<OsString, Bytes>::from(FsTreeBuilder {
         get_data: |metadata| metadata.len().into(),
         reporter: ProgressAndErrorReporter::new(
             |progress| {

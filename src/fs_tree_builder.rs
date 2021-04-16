@@ -6,6 +6,7 @@ use super::{
 };
 use pipe_trait::Pipe;
 use std::{
+    ffi::OsString,
     fs::{read_dir, symlink_metadata, Metadata},
     path::PathBuf,
 };
@@ -40,7 +41,7 @@ where
     pub reporter: Report,
 }
 
-impl<Data, GetData, Report> From<FsTreeBuilder<Data, GetData, Report>> for Tree<PathBuf, Data>
+impl<Data, GetData, Report> From<FsTreeBuilder<Data, GetData, Report>> for Tree<OsString, Data>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
@@ -53,7 +54,12 @@ where
             reporter,
         } = builder;
 
-        TreeBuilder::<PathBuf, Data, _, _> {
+        TreeBuilder::<PathBuf, OsString, Data, _, _> {
+            name: root
+                .file_name()
+                .map(OsString::from)
+                .unwrap_or_else(|| OsString::from(".")),
+
             id: root,
 
             get_info: |path| {
@@ -96,7 +102,7 @@ where
                             }));
                             None
                         }
-                        Ok(entry) => entry.file_name().pipe(PathBuf::from).pipe(Some),
+                        Ok(entry) => entry.file_name().pipe(OsString::from).pipe(Some),
                     })
                     .collect()
                 } else {

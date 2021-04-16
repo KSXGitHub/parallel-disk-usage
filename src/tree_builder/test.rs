@@ -7,7 +7,7 @@ use derive_more::From;
 use pretty_assertions::assert_eq;
 
 type SampleData = Bytes;
-type SampleId = String;
+type SampleName = String;
 const SAMPLE_SEPARATOR: char = '/';
 const SAMPLE_DIR_SIZE: SampleData = Bytes::new(5);
 
@@ -36,9 +36,10 @@ impl SampleTree {
         })
     }
 
-    fn tree(&self, id: SampleId) -> Tree<SampleId, SampleData> {
+    fn tree(&self, root: &'static str) -> Tree<SampleName, SampleData> {
         Tree::from(TreeBuilder {
-            id,
+            id: root.to_string(),
+            name: root.to_string(),
             get_info: |path| {
                 let path: Vec<_> = path
                     .split(SAMPLE_SEPARATOR)
@@ -61,7 +62,7 @@ impl SampleTree {
 
 #[test]
 fn flat() {
-    let actual = SampleTree::create_sample().tree("flat".to_string());
+    let actual = SampleTree::create_sample().tree("flat");
     let expected = Tree {
         id: "flat".to_string(),
         data: len("") + len("a") + len("ab") + len("abc") + SAMPLE_DIR_SIZE,
@@ -93,7 +94,7 @@ fn flat() {
 
 #[test]
 fn nested() {
-    let actual = SampleTree::create_sample().tree("nested".to_string());
+    let actual = SampleTree::create_sample().tree("nested");
     let expected = Tree {
         id: "nested".to_string(),
         data: len("abcdef") + SAMPLE_DIR_SIZE + SAMPLE_DIR_SIZE,
@@ -112,7 +113,7 @@ fn nested() {
 
 #[test]
 fn empty_dir() {
-    let actual = SampleTree::create_sample().tree("empty-dir".to_string());
+    let actual = SampleTree::create_sample().tree("empty-dir");
     let expected = Tree {
         id: "empty-dir".to_string(),
         data: SAMPLE_DIR_SIZE,
