@@ -1,9 +1,7 @@
 #![cfg(test)]
 use build_fs_tree::{dir, file, Build, MergeableFileSystemTree};
 use derive_more::{AsRef, Deref};
-use dirt::{
-    fs_tree_builder::FsTreeBuilder, progress_report::SilencedReporter, size::Size, tree::Tree,
-};
+use dirt::{fs_tree_builder::FsTreeBuilder, reporter::ErrorOnlyReporter, size::Size, tree::Tree};
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
@@ -120,7 +118,7 @@ where
     let measure = |suffix: &str| {
         FsTreeBuilder {
             get_data: |metadata| size_from_metadata(metadata).into(),
-            report_progress: SilencedReporter::new(|error| {
+            report_progress: ErrorOnlyReporter::new(|error| {
                 panic!("Unexpected call to report_error: {:?}", error)
             }),
             root: root.join(suffix),

@@ -4,7 +4,7 @@ pub use _utils::*;
 
 use dirt::{
     fs_tree_builder::FsTreeBuilder,
-    progress_report::{EffectualReporter, Progress},
+    reporter::{Progress, ProgressAndErrorReporter},
     size::Bytes,
     tree::Tree,
 };
@@ -44,7 +44,7 @@ fn progress_reports() {
     let reports = Mutex::new(BTreeSet::new());
     Tree::<PathBuf, Bytes>::from(FsTreeBuilder {
         get_data: |metadata| metadata.len().into(),
-        report_progress: EffectualReporter::new(
+        report_progress: ProgressAndErrorReporter::new(
             |progress| {
                 reports.lock().unwrap().insert(*progress);
             },

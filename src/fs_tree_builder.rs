@@ -1,6 +1,6 @@
 use super::{
     error_report::{ErrorReport, Operation::*},
-    progress_report::{Event, ProgressReport},
+    reporter::{Event, Reporter},
     size::{Blocks, Bytes, Size},
     tree::Tree,
     tree_builder::{Info, TreeBuilder},
@@ -31,7 +31,7 @@ pub struct FsTreeBuilder<Data, GetData, ReportProgress>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
-    ReportProgress: ProgressReport<Data> + Sync,
+    ReportProgress: Reporter<Data> + Sync,
 {
     /// Root of the directory tree.
     pub root: PathBuf,
@@ -46,7 +46,7 @@ impl<Data, GetData, ReportProgress> From<FsTreeBuilder<Data, GetData, ReportProg
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
-    ReportProgress: ProgressReport<Data> + Sync,
+    ReportProgress: Reporter<Data> + Sync,
 {
     fn from(builder: FsTreeBuilder<Data, GetData, ReportProgress>) -> Self {
         let FsTreeBuilder {

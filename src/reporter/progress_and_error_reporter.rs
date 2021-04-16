@@ -1,11 +1,11 @@
-use super::{Event, Progress, ProgressReport, Size};
+use super::{Event, Progress, Reporter, Size};
 use crate::error_report::ErrorReport;
 use pipe_trait::Pipe;
 use std::sync::{Arc, RwLock};
 
 /// Store progress information and call report function on said information.
 #[derive(Debug)]
-pub struct EffectualReporter<Data, ReportProgress, ReportError>
+pub struct ProgressAndErrorReporter<Data, ReportProgress, ReportError>
 where
     Data: Size,
     ReportProgress: Fn(&Progress<Data>) + Sync,
@@ -19,19 +19,19 @@ where
     pub report_error: ReportError,
 }
 
-impl<Data, ReportProgress, ReportError> EffectualReporter<Data, ReportProgress, ReportError>
+impl<Data, ReportProgress, ReportError> ProgressAndErrorReporter<Data, ReportProgress, ReportError>
 where
     Data: Size,
     ReportProgress: Fn(&Progress<Data>) + Sync,
     ReportError: Fn(ErrorReport) + Sync,
 {
-    /// Create a new [`EffectualReporter`] from a report function.
+    /// Create a new [`ProgressAndErrorReporter`] from a report function.
     pub fn new(report_progress: ReportProgress, report_error: ReportError) -> Self
     where
         Progress<Data>: Default,
     {
         let progress = Progress::default().pipe(RwLock::new).pipe(Arc::new);
-        EffectualReporter {
+        ProgressAndErrorReporter {
             progress,
             report_progress,
             report_error,
@@ -39,8 +39,8 @@ where
     }
 }
 
-impl<Data, ReportProgress, ReportError> ProgressReport<Data>
-    for EffectualReporter<Data, ReportProgress, ReportError>
+impl<Data, ReportProgress, ReportError> Reporter<Data>
+    for ProgressAndErrorReporter<Data, ReportProgress, ReportError>
 where
     Data: Size,
     ReportProgress: Fn(&Progress<Data>) + Sync,
@@ -48,7 +48,7 @@ where
 {
     fn report(&self, event: Event<Data>) {
         use Event::*;
-        let EffectualReporter {
+        let ProgressAndErrorReporter {
             progress,
             report_progress,
             report_error,
