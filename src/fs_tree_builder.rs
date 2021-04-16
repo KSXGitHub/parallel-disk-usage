@@ -69,22 +69,22 @@ where
         let progress = Arc::new(RwLock::new(Progress::<Data>::default()));
 
         macro_rules! mut_progress {
-                ($field:ident $operator:tt $addend:expr) => {
-                    {
-                        let expect_message = concat!("lock progress to mutate", stringify!($field));
-                        let mut progress = progress.write().expect(expect_message);
-                        progress.$field $operator $addend;
-                    }
-                    {
-                        let progress = progress.read().expect("lock progress to report");
-                        report_progress(&progress);
-                    }
-                };
+            ($field:ident $operator:tt $addend:expr) => {{
+                {
+                    let expect_message = concat!("lock progress to mutate", stringify!($field));
+                    let mut progress = progress.write().expect(expect_message);
+                    progress.$field $operator $addend;
+                }
+                {
+                    let progress = progress.read().expect("lock progress to report");
+                    report_progress(&progress);
+                }
+            }};
 
-                ($field:ident) => {
-                    mut_progress!($field += 1)
-                };
-            }
+            ($field:ident) => {
+                mut_progress!($field += 1)
+            };
+        }
 
         TreeBuilder::<PathBuf, Data, _, _> {
             id: root,
