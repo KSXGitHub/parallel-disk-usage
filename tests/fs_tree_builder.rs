@@ -44,7 +44,7 @@ fn progress_reports() {
     let reports = Mutex::new(BTreeSet::new());
     Tree::<PathBuf, Bytes>::from(FsTreeBuilder {
         get_data: |metadata| metadata.len().into(),
-        report_progress: ProgressAndErrorReporter::new(
+        reporter: ProgressAndErrorReporter::new(
             |progress| {
                 reports.lock().unwrap().insert(*progress);
             },

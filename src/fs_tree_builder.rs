@@ -26,43 +26,42 @@ pub const GET_BLOCK_COUNT: SizeGetter<Blocks> = |metadata| metadata.blocks().int
 
 /// Build a [`Tree`] from a directory tree using [`From`] or [`Into`].
 #[derive(Debug)]
-pub struct FsTreeBuilder<Data, GetData, ReportProgress>
+pub struct FsTreeBuilder<Data, GetData, Report>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
-    ReportProgress: Reporter<Data> + Sync,
+    Report: Reporter<Data> + Sync,
 {
     /// Root of the directory tree.
     pub root: PathBuf,
     /// Returns size of an item.
     pub get_data: GetData,
     /// Reports progress to external system.
-    pub report_progress: ReportProgress,
+    pub reporter: Report,
 }
 
-impl<Data, GetData, ReportProgress> From<FsTreeBuilder<Data, GetData, ReportProgress>>
-    for Tree<PathBuf, Data>
+impl<Data, GetData, Report> From<FsTreeBuilder<Data, GetData, Report>> for Tree<PathBuf, Data>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
-    ReportProgress: Reporter<Data> + Sync,
+    Report: Reporter<Data> + Sync,
 {
-    fn from(builder: FsTreeBuilder<Data, GetData, ReportProgress>) -> Self {
+    fn from(builder: FsTreeBuilder<Data, GetData, Report>) -> Self {
         let FsTreeBuilder {
             root,
             get_data,
-            report_progress,
+            reporter,
         } = builder;
 
         TreeBuilder::<PathBuf, Data, _, _> {
             id: root,
 
             get_info: |path| {
-                report_progress.report(Event::BeginScanning);
+                reporter.report(Event::BeginScanning);
 
                 let stats = match symlink_metadata(&path) {
                     Err(error) => {
-                        report_progress.report(Event::EncounterError(ErrorReport {
+                        reporter.report(Event::EncounterError(ErrorReport {
                             operation: SymlinkMetadata,
                             path,
                             error,
@@ -78,7 +77,7 @@ where
                 let children: Vec<_> = if stats.file_type().is_dir() {
                     match read_dir(path) {
                         Err(error) => {
-                            report_progress.report(Event::EncounterError(ErrorReport {
+                            reporter.report(Event::EncounterError(ErrorReport {
                                 operation: ReadDirectory,
                                 path,
                                 error,
@@ -90,7 +89,7 @@ where
                     .into_iter()
                     .filter_map(|entry| match entry {
                         Err(error) => {
-                            report_progress.report(Event::EncounterError(ErrorReport {
+                            reporter.report(Event::EncounterError(ErrorReport {
                                 operation: AccessEntry,
                                 path,
                                 error,
@@ -104,10 +103,10 @@ where
                     Vec::new()
                 };
 
-                report_progress.report(Event::FinishScanning);
+                reporter.report(Event::FinishScanning);
 
                 let data = get_data(&stats);
-                report_progress.report(Event::ReceiveData(data));
+                reporter.report(Event::ReceiveData(data));
 
                 Info { data, children }
             },
