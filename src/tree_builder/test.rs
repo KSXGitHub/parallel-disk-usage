@@ -68,22 +68,22 @@ fn flat() {
         data: len("") + len("a") + len("ab") + len("abc") + SAMPLE_DIR_SIZE,
         children: vec![
             Tree {
-                id: "flat/0".to_string(),
+                id: "0".to_string(),
                 data: len(""),
                 children: Vec::new(),
             },
             Tree {
-                id: "flat/1".to_string(),
+                id: "1".to_string(),
                 data: len("a"),
                 children: Vec::new(),
             },
             Tree {
-                id: "flat/2".to_string(),
+                id: "2".to_string(),
                 data: len("ab"),
                 children: Vec::new(),
             },
             Tree {
-                id: "flat/3".to_string(),
+                id: "3".to_string(),
                 data: len("abc"),
                 children: Vec::new(),
             },
@@ -99,10 +99,10 @@ fn nested() {
         id: "nested".to_string(),
         data: len("abcdef") + SAMPLE_DIR_SIZE + SAMPLE_DIR_SIZE,
         children: vec![Tree {
-            id: "nested/0".to_string(),
+            id: "0".to_string(),
             data: len("abcdef") + SAMPLE_DIR_SIZE,
             children: vec![Tree {
-                id: "nested/0/1".to_string(),
+                id: "1".to_string(),
                 data: len("abcdef"),
                 children: Vec::new(),
             }],

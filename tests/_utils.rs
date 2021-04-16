@@ -131,26 +131,26 @@ where
     assert_eq!(
         measure("flat"),
         sanitize_tree(Tree {
-            id: root.join("flat").into(),
+            id: "flat".into(),
             data: suffix_size!("flat", "flat/0", "flat/1", "flat/2", "flat/3"),
             children: vec![
                 Tree {
-                    id: root.join("flat").join("0").into(),
+                    id: "0".into(),
                     data: suffix_size("flat/0"),
                     children: Vec::new(),
                 },
                 Tree {
-                    id: root.join("flat").join("1").into(),
+                    id: "1".into(),
                     data: suffix_size("flat/1"),
                     children: Vec::new(),
                 },
                 Tree {
-                    id: root.join("flat").join("2").into(),
+                    id: "2".into(),
                     data: suffix_size("flat/2"),
                     children: Vec::new(),
                 },
                 Tree {
-                    id: root.join("flat").join("3").into(),
+                    id: "3".into(),
                     data: suffix_size("flat/3"),
                     children: Vec::new(),
                 },
@@ -161,13 +161,13 @@ where
     assert_eq!(
         measure("nested"),
         sanitize_tree(Tree {
-            id: root.join("nested").into(),
+            id: "nested".into(),
             data: suffix_size!("nested", "nested/0", "nested/0/1"),
             children: vec![Tree {
-                id: root.join("nested").join("0").into(),
+                id: "0".into(),
                 data: suffix_size!("nested/0", "nested/0/1"),
                 children: vec![Tree {
-                    id: root.join("nested").join("0").join("1").into(),
+                    id: "1".into(),
                     data: suffix_size!("nested/0/1"),
                     children: Vec::new(),
                 }]
@@ -178,7 +178,7 @@ where
     assert_eq!(
         measure("empty-dir"),
         sanitize_tree(Tree {
-            id: root.join("empty-dir").into(),
+            id: "empty-dir".into(),
             data: suffix_size!("empty-dir"),
             children: Vec::new(),
         }),
