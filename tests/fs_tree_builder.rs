@@ -44,10 +44,12 @@ fn progress_reports() {
     let reports = Mutex::new(BTreeSet::new());
     Tree::<PathBuf, Bytes>::from(FsTreeBuilder {
         get_data: |metadata| metadata.len().into(),
-        report_error: |error| panic!("Unexpected call to report_error: {:?}", error),
-        report_progress: EffectualReporter::new(|progress| {
-            reports.lock().unwrap().insert(*progress);
-        }),
+        report_progress: EffectualReporter::new(
+            |progress| {
+                reports.lock().unwrap().insert(*progress);
+            },
+            |error| panic!("Unexpected call to report_error: {:?}", error),
+        ),
         root: workspace.join("nested"),
     });
     macro_rules! scanned_total {

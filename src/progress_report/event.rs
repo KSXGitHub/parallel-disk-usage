@@ -1,10 +1,10 @@
-use crate::size::Size;
+use crate::{error_report::ErrorReport, size::Size};
 
 /// Report trigger event
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Event<Data: Size> {
+#[derive(Debug)]
+pub enum Event<'a, Data: Size> {
     BeginScanning,
     FinishScanning,
     ReceiveData(Data),
-    EncounterError,
+    EncounterError(ErrorReport<'a>),
 }

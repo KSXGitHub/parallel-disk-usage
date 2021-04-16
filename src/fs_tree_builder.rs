@@ -1,14 +1,10 @@
-pub mod error_report;
-
-pub use error_report::ErrorReport;
-
 use super::{
+    error_report::{ErrorReport, Operation::*},
     progress_report::{Event, ProgressReport},
     size::{Blocks, Bytes, Size},
     tree::Tree,
     tree_builder::{Info, TreeBuilder},
 };
-use error_report::Operation::*;
 use pipe_trait::Pipe;
 use std::{
     fs::{read_dir, symlink_metadata, Metadata},
@@ -31,12 +27,11 @@ pub const GET_BLOCK_COUNT: SizeGetter<Blocks> = |metadata| metadata.blocks().int
 
 /// Build a [`Tree`] from a directory tree using [`From`] or [`Into`].
 #[derive(Debug)]
-pub struct FsTreeBuilder<Data, GetData, ReportProgress, ReportError>
+pub struct FsTreeBuilder<Data, GetData, ReportProgress>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
     ReportProgress: ProgressReport<Data> + Sync,
-    ReportError: for<'r> Fn(&ErrorReport<'r>) + Sync,
 {
     /// Root of the directory tree.
     pub root: PathBuf,
@@ -44,24 +39,20 @@ where
     pub get_data: GetData,
     /// Reports progress to external system.
     pub report_progress: ReportProgress,
-    /// Reports error to external system.
-    pub report_error: ReportError,
 }
 
-impl<Data, GetData, ReportProgress, ReportError>
-    From<FsTreeBuilder<Data, GetData, ReportProgress, ReportError>> for Tree<PathBuf, Data>
+impl<Data, GetData, ReportProgress> From<FsTreeBuilder<Data, GetData, ReportProgress>>
+    for Tree<PathBuf, Data>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
     ReportProgress: ProgressReport<Data> + Sync,
-    ReportError: for<'r> Fn(&ErrorReport<'r>) + Sync,
 {
-    fn from(builder: FsTreeBuilder<Data, GetData, ReportProgress, ReportError>) -> Self {
+    fn from(builder: FsTreeBuilder<Data, GetData, ReportProgress>) -> Self {
         let FsTreeBuilder {
             root,
             get_data,
             report_progress,
-            report_error,
         } = builder;
 
         TreeBuilder::<PathBuf, Data, _, _> {
@@ -72,12 +63,11 @@ where
 
                 let stats = match symlink_metadata(&path) {
                     Err(error) => {
-                        report_error(&ErrorReport {
+                        report_progress.report(Event::EncounterError(ErrorReport {
                             operation: SymlinkMetadata,
                             path,
                             error,
-                        });
-                        report_progress.report(Event::EncounterError);
+                        }));
                         return Info {
                             data: Data::default(),
                             children: Vec::new(),
@@ -89,12 +79,11 @@ where
                 let children: Vec<_> = if stats.file_type().is_dir() {
                     match read_dir(path) {
                         Err(error) => {
-                            report_error(&ErrorReport {
+                            report_progress.report(Event::EncounterError(ErrorReport {
                                 operation: ReadDirectory,
                                 path,
                                 error,
-                            });
-                            report_progress.report(Event::EncounterError);
+                            }));
                             return Info::default();
                         }
                         Ok(entries) => entries,
@@ -102,12 +91,11 @@ where
                     .into_iter()
                     .filter_map(|entry| match entry {
                         Err(error) => {
-                            report_error(&ErrorReport {
+                            report_progress.report(Event::EncounterError(ErrorReport {
                                 operation: AccessEntry,
                                 path,
                                 error,
-                            });
-                            report_progress.report(Event::EncounterError);
+                            }));
                             None
                         }
                         Ok(entry) => entry.file_name().pipe(PathBuf::from).pipe(Some),

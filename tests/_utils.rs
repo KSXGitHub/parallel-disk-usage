@@ -120,7 +120,6 @@ where
     let measure = |suffix: &str| {
         FsTreeBuilder {
             get_data: |metadata| size_from_metadata(metadata).into(),
-            report_error: |error| panic!("Unexpected call to report_error: {:?}", error),
             report_progress: SilencedReporter,
             root: root.join(suffix),
         }

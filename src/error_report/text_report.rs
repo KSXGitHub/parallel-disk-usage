@@ -2,14 +2,14 @@ use super::ErrorReport;
 use std::fmt::{Display, Error, Formatter};
 
 impl<'a> ErrorReport<'a> {
-    /// Prints error message in form of a line of text to stderr
+    /// Prints error message in form of a line of text to stderr.
     pub fn text_report(&self) {
         eprint!("{}", TextReport(self));
     }
 }
 
 /// Wrapper around [`ErrorReport`] that `impl`s [`Display`]
-/// to make `ErrorReport::text_report` testable
+/// to make `ErrorReport::text_report` testable.
 struct TextReport<'a>(&'a ErrorReport<'a>);
 
 impl<'a> Display for TextReport<'a> {
