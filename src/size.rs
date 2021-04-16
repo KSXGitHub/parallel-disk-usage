@@ -25,7 +25,8 @@ pub trait Size:
 
 macro_rules! newtype {
     ($(#[$attribute:meta])* $name:ident = $inner:ty) => {
-        #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, From, Into, Add, AddAssign, Sum)]
+        #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+        #[derive(From, Into, Add, AddAssign, Sum)]
         $(#[$attribute])*
         pub struct $name($inner);
 
