@@ -64,26 +64,26 @@ impl SampleTree {
 fn flat() {
     let actual = SampleTree::create_sample().tree("flat");
     let expected = Tree {
-        id: "flat".to_string(),
+        name: "flat".to_string(),
         data: len("") + len("a") + len("ab") + len("abc") + SAMPLE_DIR_SIZE,
         children: vec![
             Tree {
-                id: "0".to_string(),
+                name: "0".to_string(),
                 data: len(""),
                 children: Vec::new(),
             },
             Tree {
-                id: "1".to_string(),
+                name: "1".to_string(),
                 data: len("a"),
                 children: Vec::new(),
             },
             Tree {
-                id: "2".to_string(),
+                name: "2".to_string(),
                 data: len("ab"),
                 children: Vec::new(),
             },
             Tree {
-                id: "3".to_string(),
+                name: "3".to_string(),
                 data: len("abc"),
                 children: Vec::new(),
             },
@@ -96,13 +96,13 @@ fn flat() {
 fn nested() {
     let actual = SampleTree::create_sample().tree("nested");
     let expected = Tree {
-        id: "nested".to_string(),
+        name: "nested".to_string(),
         data: len("abcdef") + SAMPLE_DIR_SIZE + SAMPLE_DIR_SIZE,
         children: vec![Tree {
-            id: "0".to_string(),
+            name: "0".to_string(),
             data: len("abcdef") + SAMPLE_DIR_SIZE,
             children: vec![Tree {
-                id: "1".to_string(),
+                name: "1".to_string(),
                 data: len("abcdef"),
                 children: Vec::new(),
             }],
@@ -115,7 +115,7 @@ fn nested() {
 fn empty_dir() {
     let actual = SampleTree::create_sample().tree("empty-dir");
     let expected = Tree {
-        id: "empty-dir".to_string(),
+        name: "empty-dir".to_string(),
         data: SAMPLE_DIR_SIZE,
         children: Vec::new(),
     };

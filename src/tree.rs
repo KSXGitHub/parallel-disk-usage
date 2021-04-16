@@ -2,16 +2,16 @@ use super::size::Size;
 
 /// Disk usage data of a filesystem tree.
 #[derive(Debug, PartialEq, Eq)]
-pub struct Tree<Id, Data: Size> {
-    /// Identification of the tree.
-    pub id: Id,
+pub struct Tree<Name, Data: Size> {
+    /// Name of the tree.
+    pub name: Name,
     /// Disk usage of a file or total disk usage of a folder.
     pub data: Data,
     /// Data of children filesystem subtrees.
     pub children: Vec<Self>,
 }
 
-impl<Id, Data: Size> Tree<Id, Data> {
+impl<Name, Data: Size> Tree<Name, Data> {
     /// Extract total disk usage
     fn data(&self) -> Data {
         self.data
@@ -22,9 +22,13 @@ impl<Id, Data: Size> Tree<Id, Data> {
     /// Total disk usage of the subtrees will be assigned to `data`,
     /// this `data` does not include the size of the folder itself,
     /// use [`Self::add_dir_size`] to include it.
-    pub fn from_children(id: Id, children: Vec<Self>) -> Self {
+    pub fn from_children(name: Name, children: Vec<Self>) -> Self {
         let data = children.iter().map(Tree::data).sum();
-        Tree { id, data, children }
+        Tree {
+            name,
+            data,
+            children,
+        }
     }
 
     /// Add missing directory size.

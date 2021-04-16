@@ -84,13 +84,17 @@ where
     Data: Size,
 {
     let Tree {
-        id,
+        name,
         data,
         mut children,
     } = tree;
-    children.sort_by(|left, right| left.id.cmp(&right.id));
+    children.sort_by(|left, right| left.name.cmp(&right.name));
     let children = children.into_iter().map(sanitize_tree).collect();
-    Tree { id, data, children }
+    Tree {
+        name,
+        data,
+        children,
+    }
 }
 
 /// Test the result of tree builder on the sample workspace.
@@ -131,26 +135,26 @@ where
     assert_eq!(
         measure("flat"),
         sanitize_tree(Tree {
-            id: "flat".into(),
+            name: "flat".into(),
             data: suffix_size!("flat", "flat/0", "flat/1", "flat/2", "flat/3"),
             children: vec![
                 Tree {
-                    id: "0".into(),
+                    name: "0".into(),
                     data: suffix_size("flat/0"),
                     children: Vec::new(),
                 },
                 Tree {
-                    id: "1".into(),
+                    name: "1".into(),
                     data: suffix_size("flat/1"),
                     children: Vec::new(),
                 },
                 Tree {
-                    id: "2".into(),
+                    name: "2".into(),
                     data: suffix_size("flat/2"),
                     children: Vec::new(),
                 },
                 Tree {
-                    id: "3".into(),
+                    name: "3".into(),
                     data: suffix_size("flat/3"),
                     children: Vec::new(),
                 },
@@ -161,13 +165,13 @@ where
     assert_eq!(
         measure("nested"),
         sanitize_tree(Tree {
-            id: "nested".into(),
+            name: "nested".into(),
             data: suffix_size!("nested", "nested/0", "nested/0/1"),
             children: vec![Tree {
-                id: "0".into(),
+                name: "0".into(),
                 data: suffix_size!("nested/0", "nested/0/1"),
                 children: vec![Tree {
-                    id: "1".into(),
+                    name: "1".into(),
                     data: suffix_size!("nested/0/1"),
                     children: Vec::new(),
                 }]
@@ -178,7 +182,7 @@ where
     assert_eq!(
         measure("empty-dir"),
         sanitize_tree(Tree {
-            id: "empty-dir".into(),
+            name: "empty-dir".into(),
             data: suffix_size!("empty-dir"),
             children: Vec::new(),
         }),
