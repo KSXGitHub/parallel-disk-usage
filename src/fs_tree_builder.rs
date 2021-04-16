@@ -1,10 +1,9 @@
 pub mod error_report;
-pub mod progress;
 
 pub use error_report::ErrorReport;
-pub use progress::Progress;
 
 use super::{
+    progress_report::{Event, ProgressReport},
     size::{Blocks, Bytes, Size},
     tree::Tree,
     tree_builder::{Info, TreeBuilder},
@@ -14,7 +13,6 @@ use pipe_trait::Pipe;
 use std::{
     fs::{read_dir, symlink_metadata, Metadata},
     path::PathBuf,
-    sync::{Arc, RwLock},
 };
 
 #[cfg(unix)]
@@ -37,7 +35,7 @@ pub struct FsTreeBuilder<Data, GetData, ReportProgress, ReportError>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
-    ReportProgress: Fn(&Progress<Data>) + Sync,
+    ReportProgress: ProgressReport<Data> + Sync,
     ReportError: for<'r> Fn(&ErrorReport<'r>) + Sync,
 {
     /// Root of the directory tree.
@@ -55,7 +53,7 @@ impl<Data, GetData, ReportProgress, ReportError>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
-    ReportProgress: Fn(&Progress<Data>) + Sync,
+    ReportProgress: ProgressReport<Data> + Sync,
     ReportError: for<'r> Fn(&ErrorReport<'r>) + Sync,
 {
     fn from(builder: FsTreeBuilder<Data, GetData, ReportProgress, ReportError>) -> Self {
@@ -66,31 +64,11 @@ where
             report_error,
         } = builder;
 
-        let progress = Arc::new(RwLock::new(Progress::<Data>::default()));
-
-        macro_rules! mut_progress {
-            ($field:ident $operator:tt $addend:expr) => {{
-                {
-                    let expect_message = concat!("lock progress to mutate", stringify!($field));
-                    let mut progress = progress.write().expect(expect_message);
-                    progress.$field $operator $addend;
-                }
-                {
-                    let progress = progress.read().expect("lock progress to report");
-                    report_progress(&progress);
-                }
-            }};
-
-            ($field:ident) => {
-                mut_progress!($field += 1)
-            };
-        }
-
         TreeBuilder::<PathBuf, Data, _, _> {
             id: root,
 
             get_info: |path| {
-                mut_progress!(known_items);
+                report_progress.report(Event::BeginScanning);
 
                 let stats = match symlink_metadata(&path) {
                     Err(error) => {
@@ -99,7 +77,7 @@ where
                             path,
                             error,
                         });
-                        mut_progress!(errors);
+                        report_progress.report(Event::EncounterError);
                         return Info {
                             data: Data::default(),
                             children: Vec::new(),
@@ -116,7 +94,7 @@ where
                                 path,
                                 error,
                             });
-                            mut_progress!(errors);
+                            report_progress.report(Event::EncounterError);
                             return Info::default();
                         }
                         Ok(entries) => entries,
@@ -129,7 +107,7 @@ where
                                 path,
                                 error,
                             });
-                            mut_progress!(errors);
+                            report_progress.report(Event::EncounterError);
                             None
                         }
                         Ok(entry) => entry.file_name().pipe(PathBuf::from).pipe(Some),
@@ -139,10 +117,10 @@ where
                     Vec::new()
                 };
 
-                mut_progress!(scanned_items);
+                report_progress.report(Event::FinishScanning);
 
                 let data = get_data(&stats);
-                mut_progress!(scanned_total += data);
+                report_progress.report(Event::ReceiveData(data));
 
                 Info { data, children }
             },

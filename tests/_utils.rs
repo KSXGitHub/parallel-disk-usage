@@ -2,9 +2,7 @@
 use build_fs_tree::{dir, file, Build, MergeableFileSystemTree};
 use derive_more::{AsRef, Deref};
 use dirt::{
-    fs_tree_builder::{FsTreeBuilder, Progress},
-    size::Size,
-    tree::Tree,
+    fs_tree_builder::FsTreeBuilder, progress_report::SilencedReporter, size::Size, tree::Tree,
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
@@ -123,7 +121,7 @@ where
         FsTreeBuilder {
             get_data: |metadata| size_from_metadata(metadata).into(),
             report_error: |error| panic!("Unexpected call to report_error: {:?}", error),
-            report_progress: |_: &Progress<Data>| {},
+            report_progress: SilencedReporter,
             root: root.join(suffix),
         }
         .pipe(Tree::<PathBuf, Data>::from)

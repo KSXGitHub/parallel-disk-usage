@@ -3,7 +3,8 @@ pub mod _utils;
 pub use _utils::*;
 
 use dirt::{
-    fs_tree_builder::{FsTreeBuilder, Progress},
+    fs_tree_builder::FsTreeBuilder,
+    progress_report::{EffectualReporter, Progress},
     size::Bytes,
     tree::Tree,
 };
@@ -44,9 +45,9 @@ fn progress_reports() {
     Tree::<PathBuf, Bytes>::from(FsTreeBuilder {
         get_data: |metadata| metadata.len().into(),
         report_error: |error| panic!("Unexpected call to report_error: {:?}", error),
-        report_progress: |progress| {
+        report_progress: EffectualReporter::new(|progress| {
             reports.lock().unwrap().insert(*progress);
-        },
+        }),
         root: workspace.join("nested"),
     });
     macro_rules! scanned_total {
