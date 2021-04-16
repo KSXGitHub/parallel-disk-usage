@@ -1,5 +1,4 @@
-use super::{Event, Progress, Reporter, Size};
-use crate::error_report::ErrorReport;
+use super::{ErrorReport, Event, Progress, Reporter, Size};
 use pipe_trait::Pipe;
 use std::sync::{Arc, RwLock};
 

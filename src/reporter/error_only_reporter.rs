@@ -1,5 +1,4 @@
-use super::{Event, Reporter, Size};
-use crate::error_report::ErrorReport;
+use super::{ErrorReport, Event, Reporter, Size};
 
 /// Only report errors.
 #[derive(Debug)]

@@ -1,6 +1,5 @@
 use super::{
-    error_report::{ErrorReport, Operation::*},
-    reporter::{Event, Reporter},
+    reporter::{error_report::Operation::*, ErrorReport, Event, Reporter},
     size::{Blocks, Bytes, Size},
     tree::Tree,
     tree_builder::{Info, TreeBuilder},

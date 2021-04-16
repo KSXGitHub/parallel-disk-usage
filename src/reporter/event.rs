@@ -1,4 +1,5 @@
-use crate::{error_report::ErrorReport, size::Size};
+use super::ErrorReport;
+use crate::size::Size;
 
 /// Report trigger event
 #[derive(Debug)]
