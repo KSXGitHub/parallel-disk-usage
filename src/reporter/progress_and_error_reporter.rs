@@ -3,6 +3,8 @@ use pipe_trait::Pipe;
 use std::sync::{Arc, RwLock};
 
 /// Store progress information and call report function on said information.
+///
+/// **NOTE:** If an error occurred, `report_error` would be called before `report_progress`.
 #[derive(Debug)]
 pub struct ProgressAndErrorReporter<Data, ReportProgress, ReportError>
 where
