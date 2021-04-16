@@ -60,7 +60,7 @@ where
                 .map(OsString::from)
                 .unwrap_or_else(|| OsString::from(".")),
 
-            id: root,
+            path: root,
 
             get_info: |path| {
                 reporter.report(Event::BeginScanning);

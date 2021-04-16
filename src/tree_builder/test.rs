@@ -38,7 +38,7 @@ impl SampleTree {
 
     fn tree(&self, root: &'static str) -> Tree<SampleName, SampleData> {
         Tree::from(TreeBuilder {
-            id: root.to_string(),
+            path: root.to_string(),
             name: root.to_string(),
             get_info: |path| {
                 let path: Vec<_> = path

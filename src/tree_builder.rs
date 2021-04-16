@@ -7,47 +7,47 @@ use rayon::prelude::*;
 
 /// Collection of functions and starting points in order to build a [`Tree`] with [`From`] or [`Into`].
 #[derive(Debug)]
-pub struct TreeBuilder<Id, Name, Data, GetInfo, JoinPath>
+pub struct TreeBuilder<Path, Name, Data, GetInfo, JoinPath>
 where
-    Id: Send + Sync,
+    Path: Send + Sync,
     Name: Send + Sync,
     Data: Size + Send,
-    GetInfo: Fn(&Id) -> Info<Name, Data> + Copy + Send + Sync,
-    JoinPath: Fn(&Id, &Name) -> Id + Copy + Send + Sync,
+    GetInfo: Fn(&Path) -> Info<Name, Data> + Copy + Send + Sync,
+    JoinPath: Fn(&Path, &Name) -> Path + Copy + Send + Sync,
 {
-    /// Root identification.
-    pub id: Id,
-    /// Root name.
+    /// Path to the root.
+    pub path: Path,
+    /// Name of the root.
     pub name: Name,
-    /// Function to extract necessary information from `id` (`data` and `children`).
+    /// Function to extract necessary information from `path` (`data` and `children`).
     pub get_info: GetInfo,
-    /// Function to join parent's `id` with a child's name to make the child's `id`.
+    /// Function to join parent's `path` with a child's name to make the child's `name`.
     pub join_path: JoinPath,
 }
 
-impl<Id, Name, Data, GetInfo, JoinPath> From<TreeBuilder<Id, Name, Data, GetInfo, JoinPath>>
+impl<Path, Name, Data, GetInfo, JoinPath> From<TreeBuilder<Path, Name, Data, GetInfo, JoinPath>>
     for Tree<Name, Data>
 where
-    Id: Send + Sync,
+    Path: Send + Sync,
     Name: Send + Sync,
     Data: Size + Send,
-    GetInfo: Fn(&Id) -> Info<Name, Data> + Copy + Send + Sync,
-    JoinPath: Fn(&Id, &Name) -> Id + Copy + Send + Sync,
+    GetInfo: Fn(&Path) -> Info<Name, Data> + Copy + Send + Sync,
+    JoinPath: Fn(&Path, &Name) -> Path + Copy + Send + Sync,
 {
-    fn from(builder: TreeBuilder<Id, Name, Data, GetInfo, JoinPath>) -> Self {
+    fn from(builder: TreeBuilder<Path, Name, Data, GetInfo, JoinPath>) -> Self {
         let TreeBuilder {
-            id,
+            path,
             name,
             get_info,
             join_path,
         } = builder;
 
-        let Info { data, children } = get_info(&id);
+        let Info { data, children } = get_info(&path);
 
         let children: Vec<_> = children
             .into_par_iter()
             .map(|name| TreeBuilder {
-                id: join_path(&id, &name),
+                path: join_path(&path, &name),
                 name,
                 get_info,
                 join_path,
