@@ -167,6 +167,7 @@ dependencies = [
  "pretty_assertions",
  "rand",
  "rayon",
+ "rounded-div",
  "smart-default",
  "structopt",
  "structopt-utilities",
@@ -402,6 +403,12 @@ dependencies = [
  "lazy_static",
  "num_cpus",
 ]
+
+[[package]]
+name = "rounded-div"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6254d99b9f9e3d5f6bee8f9a3e99dcfdb2b7250ef4a5de3e5be585010422e662"
 
 [[package]]
 name = "scopeguard"
