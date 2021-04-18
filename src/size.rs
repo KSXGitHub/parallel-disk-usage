@@ -1,5 +1,4 @@
 use derive_more::{Add, AddAssign, From, Into, Sum};
-use rounded_div::RoundedDiv;
 use std::{
     fmt::Debug,
     iter::Sum,
@@ -62,20 +61,6 @@ macro_rules! newtype {
         impl MulAssign<$inner> for $name {
             fn mul_assign(&mut self, rhs: $inner) {
                 self.0 *= rhs;
-            }
-        }
-
-        impl RoundedDiv<$inner> for $name {
-            type Output = Self;
-            fn rounded_div(self, rhs: $inner) -> Self::Output {
-                self.0.rounded_div(rhs).into()
-            }
-        }
-
-        impl RoundedDiv<$name> for $name {
-            type Output = $inner;
-            fn rounded_div(self, rhs: $name) -> Self::Output {
-                self.0.rounded_div(rhs.0)
             }
         }
     };
