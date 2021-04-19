@@ -8,7 +8,7 @@ pub use child_position::ChildPosition;
 pub use direction::Direction;
 pub use lookup_block::lookup_block;
 pub use parenthood::Parenthood;
-pub use tree_skeletal_component::TreeSkeletalComponent;
+pub use tree_skeletal_component::{TreeSkeletalComponent, TreeSkeletalComponentVisualization};
 
 use super::{size::Size, tree::Tree};
 use std::fmt::Display;
