@@ -1,13 +1,13 @@
 pub mod child_position;
 pub mod direction;
-pub mod lookup_block;
 pub mod parenthood;
+pub mod proportion_bar_block;
 pub mod tree_skeletal_component;
 
 pub use child_position::ChildPosition;
 pub use direction::Direction;
-pub use lookup_block::lookup_block;
 pub use parenthood::Parenthood;
+pub use proportion_bar_block::ProportionBarBlock;
 pub use tree_skeletal_component::{TreeSkeletalComponent, TreeSkeletalComponentVisualization};
 
 use super::{size::Size, tree::Tree};
