@@ -1,5 +1,5 @@
 use super::{ChildPosition, Direction, Parenthood};
-use derive_more::{AsRef, Deref, Display, From, Into};
+use derive_more::{AsRef, Deref, Display, Into};
 use std::fmt::{Display, Error, Formatter};
 
 /// Determine 3 characters to use as skeletal component that connect a node
@@ -15,7 +15,7 @@ pub struct TreeSkeletalComponent {
 }
 
 /// String made by calling [`TreeSkeletalComponent::visualize`](TreeSkeletalComponent).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, AsRef, Deref, Display, From, Into)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, AsRef, Deref, Display, Into)]
 pub struct TreeSkeletalComponentVisualization(&'static str);
 
 impl TreeSkeletalComponent {
