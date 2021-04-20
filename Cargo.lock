@@ -19,6 +19,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "assert-cmp"
+version = "0.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e5d764ebe960680a517c6f1cfac0cf05b60218d30a4bad049749aa2d657af35e"
+
+[[package]]
 name = "atty"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -160,6 +166,7 @@ checksum = "0e25ea47919b1560c4e3b7fe0aaab9becf5b84a10325ddf7db0f0ba5e1026499"
 name = "dirt"
 version = "0.0.0"
 dependencies = [
+ "assert-cmp",
  "build-fs-tree",
  "derive_more",
  "fmt-iter",

@@ -3,6 +3,7 @@ use super::{
     TreeSkeletalComponentVisualization, Visualizer,
 };
 use crate::{size::Size, tree::Tree};
+use assert_cmp::{debug_assert_op, debug_assert_op_expr};
 use fmt_iter::repeat;
 use itertools::izip;
 use std::{cmp::max, fmt::Display};
@@ -41,28 +42,6 @@ where
     Column { max_width, content }
 }
 
-macro_rules! debug_assert_cmp {
-    ($left:ident $op:tt $right:ident) => {
-        debug_assert_cmp!(($left) $op ($right));
-    };
-
-    (($left:expr) $op:tt ($right:expr)) => {
-        match ($left, $right) {
-            (left, right) => {
-                debug_assert!(
-                    left $op right,
-                    "{left_expr} {op} {right_expr} ⇒ {left_value} {op} {right_value} ⇒ false",
-                    op = stringify!(op),
-                    left_expr = stringify!($left),
-                    right_expr = stringify!($right),
-                    left_value = left,
-                    right_value = right,
-                );
-            }
-        }
-    };
-}
-
 impl<Name, Data> Visualizer<Name, Data>
 where
     Name: Display,
@@ -78,7 +57,7 @@ where
         let total = self.tree.data.into();
         make_column(&self.tree, |tree| {
             let current = tree.data.into();
-            debug_assert_cmp!(current <= total);
+            debug_assert_op!(current <= total);
             let percentage = rounded_div::u64(current * 100, total);
             format!("{}%", percentage)
         })
@@ -102,7 +81,7 @@ where
         let mut content = Vec::new();
 
         traverse(&self.tree, &mut |tree, index, count| {
-            debug_assert_cmp!(count > index);
+            debug_assert_op!(count > index);
             let skeleton = TreeSkeletalComponent {
                 child_position: ChildPosition::from_index(index, count),
                 direction: self.direction,
@@ -162,20 +141,21 @@ where
             &mut |tree, level, lv1_value, lv2_value, lv3_value| {
                 let _ = level; // level can be used to limit depth, but it isn't implemented for now.
                 let current = tree.data.into();
-                debug_assert_cmp!(current <= total);
+                debug_assert_op!(current <= total);
                 let lv0_value = rounded_div::u64(current * width, total);
-                debug_assert_cmp!(lv0_value <= lv1_value);
-                debug_assert_cmp!(lv1_value <= lv2_value);
-                debug_assert_cmp!(lv2_value <= lv3_value);
-                debug_assert_cmp!(lv3_value <= width);
+                debug_assert_op!(lv0_value <= lv1_value);
+                debug_assert_op!(lv1_value <= lv2_value);
+                debug_assert_op!(lv2_value <= lv3_value);
+                debug_assert_op!(lv3_value <= width);
                 let lv0_visible = lv0_value;
                 let lv1_visible = lv1_value - lv0_value;
                 let lv2_visible = lv2_value - lv1_value;
                 let lv3_visible = lv3_value - lv2_value;
                 let empty_spaces = width - lv3_value;
-                debug_assert_cmp!(
-                    (lv0_visible + lv1_visible + lv2_visible + lv3_visible + empty_spaces)
-                        == (width)
+                debug_assert_op_expr!(
+                    lv0_visible + lv1_visible + lv2_visible + lv3_visible + empty_spaces,
+                    ==,
+                    width
                 );
                 bars.push(format!(
                     "{space}{lv3}{lv2}{lv1}{lv0}",
@@ -203,9 +183,9 @@ where
         let bar_width =
             width - size_column.max_width - percentage_column.max_width - tree_column.max_width;
         let bars = self.visualize_bars(bar_width as u64);
-        debug_assert_cmp!((bars.len()) == (size_column.content.len()));
-        debug_assert_cmp!((bars.len()) == (percentage_column.content.len()));
-        debug_assert_cmp!((bars.len()) == (tree_column.content.len()));
+        debug_assert_op_expr!(bars.len(), ==, size_column.content.len());
+        debug_assert_op_expr!(bars.len(), ==, percentage_column.content.len());
+        debug_assert_op_expr!(bars.len(), ==, tree_column.content.len());
         izip!(
             size_column.content.into_iter(),
             percentage_column.content.into_iter(),
