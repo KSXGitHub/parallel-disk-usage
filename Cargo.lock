@@ -162,6 +162,8 @@ version = "0.0.0"
 dependencies = [
  "build-fs-tree",
  "derive_more",
+ "fmt-iter",
+ "itertools",
  "maplit",
  "pipe-trait 0.3.2",
  "pretty_assertions",
@@ -185,6 +187,16 @@ name = "either"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
+
+[[package]]
+name = "fmt-iter"
+version = "0.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6cb733ed0ed74e403883757e647546186285b6d9664367975e2ce9d76bcae1d"
+dependencies = [
+ "derive_more",
+ "pipe-trait 0.3.2",
+]
 
 [[package]]
 name = "getrandom"
@@ -213,6 +225,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "322f4de77956e22ed0e5032c359a0f1273f1f7f0d79bfa3b8ffbc730d7fbcc5c"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "itertools"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37d572918e350e82412fe766d24b15e6682fb2ed2bbe018280caa810397cb319"
+dependencies = [
+ "either",
 ]
 
 [[package]]
