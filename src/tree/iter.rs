@@ -105,6 +105,10 @@ impl<'a, Name> PostYield<LinkedList<&'a Name>> for IterPathPostYield {
     }
 }
 
+/// The return type of `Tree::iter_path`.
+pub type IterPathResult<'a, Name, Data> =
+    TraverseIter<'a, Name, Data, LinkedList<&'a Name>, IterPathYield, IterPathPostYield>;
+
 impl<Name, Data: Size> Tree<Name, Data> {
     /// Recursively traverse the tree.
     pub fn traverse<'a, Record, OnYield, OnPostYield>(
@@ -128,9 +132,7 @@ impl<Name, Data: Size> Tree<Name, Data> {
     }
 
     /// Recursively traverse the tree with parent path.
-    pub fn iter_path(
-        &self,
-    ) -> TraverseIter<'_, Name, Data, LinkedList<&'_ Name>, IterPathYield, IterPathPostYield> {
+    pub fn iter_path(&self) -> IterPathResult<'_, Name, Data> {
         self.traverse(IterPathYield, IterPathPostYield)
     }
 }
