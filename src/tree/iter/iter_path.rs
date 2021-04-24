@@ -1,24 +1,32 @@
 use super::{PostYield, TraverseIter, Yield};
 use crate::{size::Size, tree::Tree};
 use derive_more::{AsMut, AsRef, Deref, From, Into};
-use std::collections::LinkedList;
+use std::{collections::LinkedList, iter::FromIterator, marker::PhantomData};
 
 /// The [Item](Iterator::Item) type of `Tree::iter_path`.
 #[derive(Debug, Clone, PartialEq, Eq, AsMut, AsRef, Deref, From, Into)]
-pub struct IterPathItem<'a, Name, Data: Size> {
+pub struct IterPathItem<'a, Name, Data, Path>
+where
+    Data: Size,
+    Path: FromIterator<&'a Name>,
+{
     /// Names of the tree's ancestors.
     #[as_mut(ignore)]
     #[as_ref(ignore)]
-    pub path: Vec<&'a Name>,
+    pub path: Path,
     /// The current tree.
     #[deref]
     pub tree: &'a Tree<Name, Data>,
 }
 
 /// The [`Yield`] type of `Tree::iter_path`.
-pub struct IterPathYield;
-impl<'a, Name, Data: Size + 'a> Yield<'a, Name, Data, LinkedList<&'a Name>> for IterPathYield {
-    type Item = IterPathItem<'a, Name, Data>;
+pub struct IterPathYield<Path>(PhantomData<Path>);
+impl<'a, Name, Data, Path> Yield<'a, Name, Data, LinkedList<&'a Name>> for IterPathYield<Path>
+where
+    Data: Size + 'a,
+    Path: FromIterator<&'a Name>,
+{
+    type Item = IterPathItem<'a, Name, Data, Path>;
 
     fn execute(
         &mut self,
@@ -40,12 +48,15 @@ impl<'a, Name> PostYield<LinkedList<&'a Name>> for IterPathPostYield {
 }
 
 /// The return type of `Tree::iter_path`.
-pub type IterPathResult<'a, Name, Data> =
-    TraverseIter<'a, Name, Data, LinkedList<&'a Name>, IterPathYield, IterPathPostYield>;
+pub type IterPathResult<'a, Name, Data, Path> =
+    TraverseIter<'a, Name, Data, LinkedList<&'a Name>, IterPathYield<Path>, IterPathPostYield>;
 
 impl<Name, Data: Size> Tree<Name, Data> {
     /// Recursively traverse the tree with parent path.
-    pub fn iter_path(&self) -> IterPathResult<'_, Name, Data> {
-        self.traverse(IterPathYield, IterPathPostYield)
+    pub fn iter_path<'a, Path>(&'a self) -> IterPathResult<'a, Name, Data, Path>
+    where
+        Path: FromIterator<&'a Name>,
+    {
+        self.traverse(IterPathYield(PhantomData), IterPathPostYield)
     }
 }
