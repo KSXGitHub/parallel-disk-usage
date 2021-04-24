@@ -7,6 +7,7 @@ use assert_cmp::{debug_assert_op, debug_assert_op_expr};
 use fmt_iter::repeat;
 use itertools::izip;
 use std::{cmp::max, fmt::Display};
+use zero_copy_pads::align_right;
 
 #[derive(Debug)]
 struct Column<Item> {
@@ -186,6 +187,7 @@ where
         debug_assert_op_expr!(bars.len(), ==, size_column.content.len());
         debug_assert_op_expr!(bars.len(), ==, percentage_column.content.len());
         debug_assert_op_expr!(bars.len(), ==, tree_column.content.len());
+        let size_column_width = size_column.max_width;
         izip!(
             size_column.content.into_iter(),
             percentage_column.content.into_iter(),
@@ -193,8 +195,15 @@ where
             bars.into_iter(),
         )
         .map(|(size, percentage, (skeleton, name), bar)| {
-            // TODO: proper padding
-            format!("{}{}{}{}{}", size, skeleton, name, bar, percentage)
+            // TODO: proper indentation for the tree column
+            format!(
+                "{}{}{}{}{}",
+                align_right(size, size_column_width),
+                skeleton,
+                name,
+                bar,
+                align_right(percentage, "100%".len()),
+            )
         })
         .collect()
     }
