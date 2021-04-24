@@ -1,3 +1,7 @@
+pub mod iter;
+
+pub use iter::{Item as IterItem, Iter};
+
 use super::size::Size;
 
 /// Disk usage data of a filesystem tree.
