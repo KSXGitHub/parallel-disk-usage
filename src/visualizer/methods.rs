@@ -15,18 +15,6 @@ struct Column<Item> {
     content: Vec<Item>,
 }
 
-fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act)
-where
-    Data: Size,
-    Act: FnMut(&Tree<Name, Data>),
-{
-    act(tree);
-    for child in &tree.children {
-        act(child);
-        traverse(child, act);
-    }
-}
-
 #[inline]
 fn make_column<Name, Data, MakeItem>(tree: &Tree<Name, Data>, make_item: MakeItem) -> Column<String>
 where
@@ -35,11 +23,11 @@ where
 {
     let mut max_width = 0;
     let mut content = Vec::new();
-    traverse(tree, &mut |tree| {
+    for tree in tree.iter_tree() {
         let item = make_item(tree);
         max_width = max(max_width, item.len());
         content.push(item);
-    });
+    }
     Column { max_width, content }
 }
 
