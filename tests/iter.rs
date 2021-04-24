@@ -26,7 +26,7 @@ macro_rules! test_case {
                 root: prefix.clone(),
             });
             let actual: BTreeSet<_> = tree
-                .iter()
+                .iter_path()
                 .map(|item| {
                     (
                         item.path

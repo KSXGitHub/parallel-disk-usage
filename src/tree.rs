@@ -1,6 +1,6 @@
 pub mod iter;
 
-pub use iter::{Item as IterItem, Iter};
+pub use iter::{IterPathItem, TraverseIter};
 
 use super::size::Size;
 

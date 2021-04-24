@@ -3,9 +3,75 @@ use crate::size::Size;
 use derive_more::{AsMut, AsRef, Deref, From, Into};
 use std::{collections::LinkedList, mem::replace, slice};
 
+/// Pre-process the record and produce item to be emitted by [the iterator](TraverseIter).
+///
+/// This trait is executed when the iterator finds a tree and descends.
+pub trait Yield<'a, Name, Data: Size, Record> {
+    /// Iterator item.
+    type Item;
+
+    /// Pre-process the record and produce item to be emitted by the iterator.
+    fn execute(&mut self, record: &mut Record, tree: &'a Tree<Name, Data>) -> Self::Item;
+}
+
+/// Post-process the record.
+///
+/// This trait is executed when the iterator ascends one level.
+pub trait PostYield<Record> {
+    fn execute(&mut self, record: &mut Record);
+}
+
+type SubIter<'a, Name, Data> = slice::Iter<'a, Tree<Name, Data>>;
+
+/// [`Iterator`] type of [`Tree`]. Created by calling `Tree::iter`.
+#[derive(Debug, Clone)]
+pub struct TraverseIter<'a, Name, Data, Record, OnYield, OnPostYield>
+where
+    Data: Size,
+    Record: Default,
+    OnYield: Yield<'a, Name, Data, Record>,
+    OnPostYield: PostYield<Record>,
+{
+    waiting_tree: Option<&'a Tree<Name, Data>>,
+    children_iter: SubIter<'a, Name, Data>,
+    stacked_children_iter: LinkedList<SubIter<'a, Name, Data>>,
+    record: Record,
+    on_yield: OnYield,
+    on_post_yield: OnPostYield,
+}
+
+impl<'a, Name, Data, Record, OnYield, OnPostYield> Iterator
+    for TraverseIter<'a, Name, Data, Record, OnYield, OnPostYield>
+where
+    Data: Size,
+    Record: Default,
+    OnYield: Yield<'a, Name, Data, Record>,
+    OnPostYield: PostYield<Record>,
+{
+    type Item = OnYield::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(tree) = self.waiting_tree {
+            self.waiting_tree = None;
+            Some(self.on_yield.execute(&mut self.record, tree))
+        } else if let Some(tree) = self.children_iter.next() {
+            self.waiting_tree = Some(tree);
+            let prev_children_iter = replace(&mut self.children_iter, tree.children.iter());
+            self.stacked_children_iter.push_back(prev_children_iter);
+            self.next()
+        } else if let Some(next_children_iter) = self.stacked_children_iter.pop_back() {
+            self.children_iter = next_children_iter;
+            self.on_post_yield.execute(&mut self.record);
+            self.next()
+        } else {
+            None
+        }
+    }
+}
+
 /// [Item](Iterator::Item) type of [`TreeIter`].
 #[derive(Debug, Clone, PartialEq, Eq, AsMut, AsRef, Deref, From, Into)]
-pub struct Item<'a, Name, Data: Size> {
+pub struct IterPathItem<'a, Name, Data: Size> {
     /// Names of the tree's ancestors.
     #[as_mut(ignore)]
     #[as_ref(ignore)]
@@ -15,54 +81,56 @@ pub struct Item<'a, Name, Data: Size> {
     pub tree: &'a Tree<Name, Data>,
 }
 
-type SubIter<'a, Name, Data> = slice::Iter<'a, Tree<Name, Data>>;
+/// The [`Yield`] type of `Tree::iter_path`.
+pub struct IterPathYield;
+impl<'a, Name, Data: Size + 'a> Yield<'a, Name, Data, LinkedList<&'a Name>> for IterPathYield {
+    type Item = IterPathItem<'a, Name, Data>;
 
-/// [`Iterator`] type of [`Tree`]. Created by calling `Tree::iter`.
-#[derive(Debug, Clone)]
-pub struct Iter<'a, Name, Data: Size> {
-    waiting_tree: Option<&'a Tree<Name, Data>>,
-    children_iter: SubIter<'a, Name, Data>,
-    stacked_children_iter: LinkedList<SubIter<'a, Name, Data>>,
-    path: LinkedList<&'a Name>,
+    fn execute(
+        &mut self,
+        parent_path: &mut LinkedList<&'a Name>,
+        tree: &'a Tree<Name, Data>,
+    ) -> Self::Item {
+        let path = parent_path.iter().copied().collect();
+        parent_path.push_back(&tree.name);
+        IterPathItem { path, tree }
+    }
 }
 
-impl<'a, Name, Data: Size> Iterator for Iter<'a, Name, Data> {
-    type Item = Item<'a, Name, Data>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        macro_rules! path {
-            () => {
-                self.path.iter().copied().collect::<Vec<_>>()
-            };
-        }
-        if let Some(tree) = self.waiting_tree {
-            self.waiting_tree = None;
-            let path = path!();
-            self.path.push_back(&tree.name);
-            Some(Item { path, tree })
-        } else if let Some(tree) = self.children_iter.next() {
-            self.waiting_tree = Some(tree);
-            let prev_children_iter = replace(&mut self.children_iter, tree.children.iter());
-            self.stacked_children_iter.push_back(prev_children_iter);
-            self.next()
-        } else if let Some(next_children_iter) = self.stacked_children_iter.pop_back() {
-            self.children_iter = next_children_iter;
-            self.path.pop_back();
-            self.next()
-        } else {
-            None
-        }
+/// The [`PostYield`] type of `Tree::iter_path`.
+pub struct IterPathPostYield;
+impl<'a, Name> PostYield<LinkedList<&'a Name>> for IterPathPostYield {
+    fn execute(&mut self, parent_path: &mut LinkedList<&'a Name>) {
+        parent_path.pop_back();
     }
 }
 
 impl<Name, Data: Size> Tree<Name, Data> {
     /// Recursively traverse the tree.
-    pub fn iter(&self) -> Iter<'_, Name, Data> {
-        Iter {
+    pub fn traverse<'a, Record, OnYield, OnPostYield>(
+        &'a self,
+        on_yield: OnYield,
+        on_post_yield: OnPostYield,
+    ) -> TraverseIter<'a, Name, Data, Record, OnYield, OnPostYield>
+    where
+        Record: Default,
+        OnYield: Yield<'a, Name, Data, Record>,
+        OnPostYield: PostYield<Record>,
+    {
+        TraverseIter {
             waiting_tree: Some(self),
             children_iter: self.children.iter(),
             stacked_children_iter: LinkedList::new(),
-            path: LinkedList::new(),
+            record: Default::default(),
+            on_yield,
+            on_post_yield,
         }
+    }
+
+    /// Recursively traverse the tree with parent path.
+    pub fn iter_path(
+        &self,
+    ) -> TraverseIter<'_, Name, Data, LinkedList<&'_ Name>, IterPathYield, IterPathPostYield> {
+        self.traverse(IterPathYield, IterPathPostYield)
     }
 }
