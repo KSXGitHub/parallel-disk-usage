@@ -78,6 +78,10 @@ test_case! {
         (vec!["nested", "0"], "1", total_size! { prefix ++ "0/1" }),
     ];
 
+    empty_dir in "empty-dir" => |prefix| btreeset![
+        (vec![], "empty-dir", total_size! { prefix ++ "" }),
+    ];
+
     all in "." => |prefix| btreeset![
         (vec![], get_name(prefix), total_size! {
             prefix ++
