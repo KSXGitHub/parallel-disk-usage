@@ -23,7 +23,7 @@ where
 {
     let mut max_width = 0;
     let mut content = Vec::new();
-    for tree in tree.iter_tree() {
+    for tree in tree.iter_node() {
         let item = make_item(tree);
         max_width = max(max_width, item.len());
         content.push(item);

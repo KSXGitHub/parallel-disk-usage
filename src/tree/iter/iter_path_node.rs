@@ -53,7 +53,7 @@ pub type IterPathResult<'a, Name, Data, Path> =
 
 impl<Name, Data: Size> Tree<Name, Data> {
     /// Recursively traverse the tree with parent path.
-    pub fn iter_path<'a, Path>(&'a self) -> IterPathResult<'a, Name, Data, Path>
+    pub fn iter_path_node<'a, Path>(&'a self) -> IterPathResult<'a, Name, Data, Path>
     where
         Path: FromIterator<&'a Name>,
     {

@@ -25,7 +25,7 @@ type IterTreeResult<'a, Name, Data> =
 
 impl<Name, Data: Size> Tree<Name, Data> {
     /// Recursively traverse the tree.
-    pub fn iter_tree(&self) -> IterTreeResult<'_, Name, Data> {
+    pub fn iter_node(&self) -> IterTreeResult<'_, Name, Data> {
         self.traverse(IterTreeYield, IterTreePostYield)
     }
 }
