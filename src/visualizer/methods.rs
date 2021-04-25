@@ -16,22 +16,6 @@ struct Column<Item> {
     content: Vec<Item>,
 }
 
-#[inline]
-fn make_column<Name, Data, MakeItem>(tree: &Tree<Name, Data>, make_item: MakeItem) -> Column<String>
-where
-    Data: Size,
-    MakeItem: Fn(&Tree<Name, Data>) -> String,
-{
-    let mut max_width = 0;
-    let mut content = Vec::new();
-    for tree in tree.iter_node() {
-        let item = make_item(tree);
-        max_width = max(max_width, item.len());
-        content.push(item);
-    }
-    Column { max_width, content }
-}
-
 impl<Name, Data> Visualizer<Name, Data>
 where
     Name: Display,
@@ -45,14 +29,17 @@ where
             .pipe(align_column_right)
     }
 
-    fn visualize_percentage(&self) -> Column<String> {
+    fn visualize_percentage(&self) -> Vec<String> {
         let total = self.tree.data.into();
-        make_column(&self.tree, |tree| {
-            let current = tree.data.into();
-            debug_assert_op!(current <= total);
-            let percentage = rounded_div::u64(current * 100, total);
-            format!("{}%", percentage)
-        })
+        self.tree
+            .iter_node()
+            .map(|node| {
+                let current = node.data.into();
+                debug_assert_op!(current <= total);
+                let percentage = rounded_div::u64(current * 100, total);
+                format!("{}%", percentage)
+            })
+            .collect()
     }
 
     fn visualize_tree(&self) -> Column<(TreeSkeletalComponentVisualization, String)> {
@@ -172,15 +159,16 @@ where
         let percentage_column = self.visualize_percentage();
         let tree_column = self.visualize_tree();
         // TODO: handle case where the total max_width is greater than given width
+        let percentage_column_max_width = "100%".len();
         let bar_width =
-            width - size_column.total_width() - percentage_column.max_width - tree_column.max_width;
+            width - size_column.total_width() - percentage_column_max_width - tree_column.max_width;
         let bars = self.visualize_bars(bar_width as u64);
         debug_assert_op_expr!(bars.len(), ==, size_column.len());
-        debug_assert_op_expr!(bars.len(), ==, percentage_column.content.len());
+        debug_assert_op_expr!(bars.len(), ==, percentage_column.len());
         debug_assert_op_expr!(bars.len(), ==, tree_column.content.len());
         izip!(
             size_column,
-            percentage_column.content.into_iter(),
+            percentage_column.into_iter(),
             tree_column.content.into_iter(),
             bars.into_iter(),
         )
@@ -192,7 +180,7 @@ where
                 skeleton,
                 name,
                 bar,
-                align_right(percentage, "100%".len()),
+                align_right(percentage, percentage_column_max_width),
             )
         })
         .collect()
