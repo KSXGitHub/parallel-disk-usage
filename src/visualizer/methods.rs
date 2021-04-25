@@ -6,8 +6,9 @@ use crate::{size::Size, tree::Tree};
 use assert_cmp::{debug_assert_op, debug_assert_op_expr};
 use fmt_iter::repeat;
 use itertools::izip;
+use pipe_trait::Pipe;
 use std::{cmp::max, fmt::Display};
-use zero_copy_pads::align_right;
+use zero_copy_pads::{align_column_right, align_right, AlignRight, PaddedColumnIter};
 
 #[derive(Debug)]
 struct Column<Item> {
@@ -36,10 +37,12 @@ where
     Name: Display,
     Data: Size + Into<u64>,
 {
-    fn visualize_sizes(&self) -> Column<String> {
-        make_column(&self.tree, |tree| {
-            tree.data.display(self.measurement_system).to_string()
-        })
+    fn visualize_sizes(&self) -> PaddedColumnIter<String, char, AlignRight> {
+        let measurement_system = self.measurement_system;
+        self.tree
+            .iter_node()
+            .map(|node| node.data.display(measurement_system).to_string())
+            .pipe(align_column_right)
     }
 
     fn visualize_percentage(&self) -> Column<String> {
@@ -170,14 +173,13 @@ where
         let tree_column = self.visualize_tree();
         // TODO: handle case where the total max_width is greater than given width
         let bar_width =
-            width - size_column.max_width - percentage_column.max_width - tree_column.max_width;
+            width - size_column.total_width() - percentage_column.max_width - tree_column.max_width;
         let bars = self.visualize_bars(bar_width as u64);
-        debug_assert_op_expr!(bars.len(), ==, size_column.content.len());
+        debug_assert_op_expr!(bars.len(), ==, size_column.len());
         debug_assert_op_expr!(bars.len(), ==, percentage_column.content.len());
         debug_assert_op_expr!(bars.len(), ==, tree_column.content.len());
-        let size_column_width = size_column.max_width;
         izip!(
-            size_column.content.into_iter(),
+            size_column,
             percentage_column.content.into_iter(),
             tree_column.content.into_iter(),
             bars.into_iter(),
@@ -186,7 +188,7 @@ where
             // TODO: proper indentation for the tree column
             format!(
                 "{}{}{}{}{}",
-                align_right(size, size_column_width),
+                size,
                 skeleton,
                 name,
                 bar,
