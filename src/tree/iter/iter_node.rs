@@ -9,8 +9,8 @@ where
 {
     type Item = &'a Tree<Name, Data>;
 
-    fn execute(&mut self, _: &mut (), tree: &'a Tree<Name, Data>) -> Self::Item {
-        tree
+    fn execute(&mut self, _: &mut (), node: &'a Tree<Name, Data>) -> Self::Item {
+        node
     }
 }
 

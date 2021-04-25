@@ -9,7 +9,7 @@ pub trait Yield<'a, Name, Data: Size, Record> {
     type Item;
 
     /// Pre-process the record and produce item to be emitted by the iterator.
-    fn execute(&mut self, record: &mut Record, tree: &'a Tree<Name, Data>) -> Self::Item;
+    fn execute(&mut self, record: &mut Record, node: &'a Tree<Name, Data>) -> Self::Item;
 }
 
 /// Post-process the record.
@@ -30,7 +30,7 @@ where
     OnYield: Yield<'a, Name, Data, Record>,
     OnPostYield: PostYield<Record>,
 {
-    waiting_tree: Option<&'a Tree<Name, Data>>,
+    target_node: Option<&'a Tree<Name, Data>>,
     children_iter: SubIter<'a, Name, Data>,
     stacked_children_iter: LinkedList<SubIter<'a, Name, Data>>,
     record: Record,
@@ -49,12 +49,12 @@ where
     type Item = OnYield::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(tree) = self.waiting_tree {
-            self.waiting_tree = None;
-            Some(self.on_yield.execute(&mut self.record, tree))
-        } else if let Some(tree) = self.children_iter.next() {
-            self.waiting_tree = Some(tree);
-            let prev_children_iter = replace(&mut self.children_iter, tree.children.iter());
+        if let Some(node) = self.target_node {
+            self.target_node = None;
+            Some(self.on_yield.execute(&mut self.record, node))
+        } else if let Some(node) = self.children_iter.next() {
+            self.target_node = Some(node);
+            let prev_children_iter = replace(&mut self.children_iter, node.children.iter());
             self.stacked_children_iter.push_back(prev_children_iter);
             self.next()
         } else if let Some(next_children_iter) = self.stacked_children_iter.pop_back() {
@@ -80,7 +80,7 @@ impl<Name, Data: Size> Tree<Name, Data> {
         OnPostYield: PostYield<Record>,
     {
         TraverseIter {
-            waiting_tree: Some(self),
+            target_node: Some(self),
             children_iter: self.children.iter(),
             stacked_children_iter: LinkedList::new(),
             record: Default::default(),

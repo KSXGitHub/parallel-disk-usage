@@ -16,7 +16,7 @@ where
     pub path: Path,
     /// The current tree.
     #[deref]
-    pub tree: &'a Tree<Name, Data>,
+    pub node: &'a Tree<Name, Data>,
 }
 
 /// The [`Yield`] type of `Tree::iter_path_node`.
@@ -31,11 +31,11 @@ where
     fn execute(
         &mut self,
         parent_path: &mut LinkedList<&'a Name>,
-        tree: &'a Tree<Name, Data>,
+        node: &'a Tree<Name, Data>,
     ) -> Self::Item {
         let path = parent_path.iter().copied().collect();
-        parent_path.push_back(&tree.name);
-        IterPathNodeItem { path, tree }
+        parent_path.push_back(&node.name);
+        IterPathNodeItem { path, node }
     }
 }
 
