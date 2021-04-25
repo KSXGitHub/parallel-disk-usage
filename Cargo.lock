@@ -20,9 +20,9 @@ dependencies = [
 
 [[package]]
 name = "assert-cmp"
-version = "0.0.0"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5d764ebe960680a517c6f1cfac0cf05b60218d30a4bad049749aa2d657af35e"
+checksum = "7b5bf47999cb2d47405f3b3b194c7cc4dd7b5bb002fc9116bf3b5284e519c7f0"
 
 [[package]]
 name = "atty"
@@ -49,9 +49,9 @@ checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
 
 [[package]]
 name = "build-fs-tree"
-version = "0.2.3"
+version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57786819e6a9128794e2cf5dd008ab7d812bb14f070c1cae9ef6c3041b28a24c"
+checksum = "371db1daa00155264023867554806c56b87dcfe741c94e81cfea2f0fc95d1539"
 dependencies = [
  "derive_more",
  "pipe-trait 0.3.2",
@@ -91,9 +91,9 @@ checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
 
 [[package]]
 name = "crossbeam-channel"
-version = "0.5.0"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dca26ee1f8d361640700bde38b2c37d8c22b3ce2d360e1fc1c74ea4b0aa7d775"
+checksum = "06ed27e177f16d65f0f0c22a213e17c696ace5dd64b14258b52f9417ccb52db4"
 dependencies = [
  "cfg-if",
  "crossbeam-utils",
@@ -235,7 +235,7 @@ dependencies = [
  "assert-cmp",
  "build-fs-tree",
  "derive_more",
- "fmt-iter 0.0.0",
+ "fmt-iter",
  "itertools",
  "maplit",
  "pipe-trait 0.3.2",
@@ -261,16 +261,6 @@ name = "either"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
-
-[[package]]
-name = "fmt-iter"
-version = "0.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6cb733ed0ed74e403883757e647546186285b6d9664367975e2ce9d76bcae1d"
-dependencies = [
- "derive_more",
- "pipe-trait 0.3.2",
-]
 
 [[package]]
 name = "fmt-iter"
@@ -404,9 +394,9 @@ checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
 
 [[package]]
 name = "pretty_assertions"
-version = "0.7.1"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f297542c27a7df8d45de2b0e620308ab883ad232d06c14b76ac3e144bda50184"
+checksum = "1cab0e7c02cf376875e9335e0ba1da535775beb5450d21e1dffca068818ed98b"
 dependencies = [
  "ansi_term 0.12.1",
  "ctor",
@@ -523,9 +513,9 @@ dependencies = [
 
 [[package]]
 name = "rounded-div"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6254d99b9f9e3d5f6bee8f9a3e99dcfdb2b7250ef4a5de3e5be585010422e662"
+checksum = "464c8fb0a126d6a0326baf6abf1aa62c2da0d5780aa781a81451d64f543f5e2f"
 
 [[package]]
 name = "scopeguard"
@@ -624,9 +614,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "1.0.69"
+version = "1.0.70"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "48fe99c6bd8b1cc636890bcc071842de909d902c81ac7dab53ba33c421ab8ffb"
+checksum = "b9505f307c872bab8eb46f77ae357c8eba1fdacead58ee5a850116b1d7f82883"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -717,12 +707,12 @@ dependencies = [
 
 [[package]]
 name = "zero-copy-pads"
-version = "0.1.2"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43e6a1aba05b25d84d1384bf6b3782ca0a201d27b2b9bb4bf69236233d2547ee"
+checksum = "b74c27a08f871eeac3d566d7272605da8649e9001f5c3dfb3e8ac2ea0d3ae9d4"
 dependencies = [
  "derive_builder",
  "derive_more",
- "fmt-iter 0.1.0",
+ "fmt-iter",
  "unicode-width",
 ]
