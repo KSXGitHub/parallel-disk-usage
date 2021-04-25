@@ -10,11 +10,11 @@ where
     Data: Size,
     Path: FromIterator<&'a Name>,
 {
-    /// Names of the tree's ancestors.
+    /// Names of the node's ancestors.
     #[as_mut(ignore)]
     #[as_ref(ignore)]
     pub path: Path,
-    /// The current tree.
+    /// The current node.
     #[deref]
     pub node: &'a Tree<Name, Data>,
 }
