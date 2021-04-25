@@ -1,9 +1,9 @@
 use super::{PostYield, TraverseIter, Yield};
 use crate::{size::Size, tree::Tree};
 
-/// The [`Yield`] type of `Tree::iter_tree`.
-pub struct IterTreeYield;
-impl<'a, Name, Data: Size> Yield<'a, Name, Data, ()> for IterTreeYield
+/// The [`Yield`] type of `Tree::iter_node`.
+pub struct IterNodeYield;
+impl<'a, Name, Data: Size> Yield<'a, Name, Data, ()> for IterNodeYield
 where
     Tree<Name, Data>: 'a,
 {
@@ -14,18 +14,18 @@ where
     }
 }
 
-/// The [`PostYield`] type of `Tree::iter_tree`.
-pub struct IterTreePostYield;
-impl PostYield<()> for IterTreePostYield {
+/// The [`PostYield`] type of `Tree::iter_node`.
+pub struct IterNodePostYield;
+impl PostYield<()> for IterNodePostYield {
     fn execute(&mut self, _: &mut ()) {}
 }
 
-type IterTreeResult<'a, Name, Data> =
-    TraverseIter<'a, Name, Data, (), IterTreeYield, IterTreePostYield>;
+type IterNodeResult<'a, Name, Data> =
+    TraverseIter<'a, Name, Data, (), IterNodeYield, IterNodePostYield>;
 
 impl<Name, Data: Size> Tree<Name, Data> {
     /// Recursively traverse the tree.
-    pub fn iter_node(&self) -> IterTreeResult<'_, Name, Data> {
-        self.traverse(IterTreeYield, IterTreePostYield)
+    pub fn iter_node(&self) -> IterNodeResult<'_, Name, Data> {
+        self.traverse(IterNodeYield, IterNodePostYield)
     }
 }
