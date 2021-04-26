@@ -8,7 +8,7 @@ use fmt_iter::repeat;
 use itertools::izip;
 use pipe_trait::Pipe;
 use std::{cmp::max, fmt::Display};
-use zero_copy_pads::{align_column_right, align_right, AlignRight, PaddedColumnIter};
+use zero_copy_pads::{align_column_right, align_left, align_right, AlignRight, PaddedColumnIter};
 
 #[derive(Debug)]
 struct Column<Item> {
@@ -170,6 +170,7 @@ where
         debug_assert_op_expr!(bars.len(), ==, size_column.len());
         debug_assert_op_expr!(bars.len(), ==, percentage_column.len());
         debug_assert_op_expr!(bars.len(), ==, tree_column.content.len());
+        let tree_column_max_width = tree_column.max_width;
         izip!(
             size_column,
             percentage_column.into_iter(),
@@ -181,7 +182,7 @@ where
             format!(
                 "{}{}{}{}",
                 size,
-                tree_horizontal_slice,
+                align_left(tree_horizontal_slice, tree_column_max_width),
                 bar,
                 align_right(percentage, percentage_column_max_width),
             )
