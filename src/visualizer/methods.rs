@@ -106,13 +106,6 @@ where
             let next_lv2_value = lv1_value;
             let next_lv3_value = lv2_value;
             for child in &tree.children {
-                act(
-                    child,
-                    level + 1,
-                    next_lv1_value,
-                    next_lv2_value,
-                    next_lv3_value,
-                );
                 traverse(
                     child,
                     act,
