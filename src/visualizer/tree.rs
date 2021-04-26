@@ -56,9 +56,9 @@ impl Width for TreeSkeletalComponentVisualization {
 /// Horizontal slice of a tree of the height of exactly 1 line of text.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TreeHorizontalSlice<Name: Width> {
-    depth: usize,
-    skeleton: TreeSkeletalComponentVisualization,
-    name: Name,
+    pub(super) depth: usize,
+    pub(super) skeleton: TreeSkeletalComponentVisualization,
+    pub(super) name: Name,
 }
 
 impl<Name: Width> TreeHorizontalSlice<Name> {

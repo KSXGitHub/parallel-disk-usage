@@ -1,6 +1,6 @@
 use super::{
-    ChildPosition, Parenthood, ProportionBarBlock, TreeSkeletalComponent,
-    TreeSkeletalComponentVisualization, Visualizer,
+    ChildPosition, Parenthood, ProportionBarBlock, TreeHorizontalSlice, TreeSkeletalComponent,
+    Visualizer,
 };
 use crate::{size::Size, tree::Tree};
 use assert_cmp::{debug_assert_op, debug_assert_op_expr};
@@ -42,7 +42,7 @@ where
             .collect()
     }
 
-    fn visualize_tree(&self) -> Column<(TreeSkeletalComponentVisualization, String)> {
+    fn visualize_tree(&self) -> Column<TreeHorizontalSlice<String>> {
         fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act)
         where
             Data: Size,
@@ -69,7 +69,11 @@ where
             .visualize();
             let name = tree.name.to_string();
             max_width = max(max_width, skeleton.len() + name.len());
-            content.push((skeleton, name))
+            content.push(TreeHorizontalSlice {
+                depth: 0, // TODO: use actual depth
+                skeleton,
+                name,
+            })
         });
 
         Column { max_width, content }
@@ -172,13 +176,12 @@ where
             tree_column.content.into_iter(),
             bars.into_iter(),
         )
-        .map(|(size, percentage, (skeleton, name), bar)| {
+        .map(|(size, percentage, tree_horizontal_slice, bar)| {
             // TODO: proper indentation for the tree column
             format!(
-                "{}{}{}{}{}",
+                "{}{}{}{}",
                 size,
-                skeleton,
-                name,
+                tree_horizontal_slice,
                 bar,
                 align_right(percentage, percentage_column_max_width),
             )
