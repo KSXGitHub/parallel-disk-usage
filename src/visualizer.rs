@@ -2,13 +2,13 @@ pub mod child_position;
 pub mod direction;
 pub mod parenthood;
 pub mod proportion_bar_block;
-pub mod tree_skeletal_component;
+pub mod tree;
 
 pub use child_position::ChildPosition;
 pub use direction::Direction;
 pub use parenthood::Parenthood;
 pub use proportion_bar_block::ProportionBarBlock;
-pub use tree_skeletal_component::{TreeSkeletalComponent, TreeSkeletalComponentVisualization};
+pub use tree::{TreeSkeletalComponent, TreeSkeletalComponentVisualization};
 
 use super::{measurement_system::MeasurementSystem, size::Size, tree::Tree};
 use std::fmt::Display;
