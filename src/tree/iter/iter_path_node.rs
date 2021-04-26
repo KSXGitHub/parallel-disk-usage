@@ -23,8 +23,9 @@ where
 pub struct IterPathNodeYield<Path>(PhantomData<Path>);
 impl<'a, Name, Data, Path> Yield<'a, Name, Data, LinkedList<&'a Name>> for IterPathNodeYield<Path>
 where
-    Data: Size + 'a,
+    Data: Size,
     Path: FromIterator<&'a Name>,
+    Tree<Name, Data>: 'a,
 {
     type Item = IterPathNodeItem<'a, Name, Data, Path>;
 
