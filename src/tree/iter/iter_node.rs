@@ -3,8 +3,9 @@ use crate::{size::Size, tree::Tree};
 
 /// The [`Yield`] type of `Tree::iter_node`.
 pub struct IterNodeYield;
-impl<'a, Name, Data: Size> Yield<'a, Name, Data, ()> for IterNodeYield
+impl<'a, Name, Data> Yield<'a, Name, Data, ()> for IterNodeYield
 where
+    Data: Size,
     Tree<Name, Data>: 'a,
 {
     type Item = &'a Tree<Name, Data>;

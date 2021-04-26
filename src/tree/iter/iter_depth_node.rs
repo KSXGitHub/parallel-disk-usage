@@ -16,8 +16,9 @@ pub struct IterDepthNodeItem<'a, Name, Data: Size> {
 
 /// The [`Yield`] type of `Tree::iter_depth_node`.
 pub struct IterDepthNodeYield;
-impl<'a, Name, Data: Size> Yield<'a, Name, Data, usize> for IterDepthNodeYield
+impl<'a, Name, Data> Yield<'a, Name, Data, usize> for IterDepthNodeYield
 where
+    Data: Size,
     Tree<Name, Data>: 'a,
 {
     type Item = IterDepthNodeItem<'a, Name, Data>;
