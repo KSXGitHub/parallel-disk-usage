@@ -1,6 +1,6 @@
 pub mod iter;
 
-pub use iter::{IterDepthNodeItem, IterPathNodeItem, TraverseIter};
+pub use iter::{IterDepthIndexNodeItem, IterDepthNodeItem, IterPathNodeItem, TraverseIter};
 
 use super::size::Size;
 
