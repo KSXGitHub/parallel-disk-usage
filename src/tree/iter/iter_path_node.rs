@@ -3,7 +3,7 @@ use crate::{size::Size, tree::Tree};
 use derive_more::{AsMut, AsRef, Deref, From, Into};
 use std::{collections::LinkedList, iter::FromIterator, marker::PhantomData};
 
-/// The [Item](Iterator::Item) type of `Tree::iter_path_node`.
+/// The [`Item`](Iterator::Item) type of `Tree::iter_path_node`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, AsMut, AsRef, Deref, From, Into)]
 pub struct IterPathNodeItem<'a, Name, Data, Path>
 where

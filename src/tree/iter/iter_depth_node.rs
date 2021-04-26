@@ -2,7 +2,7 @@ use super::{PostYield, TraverseIter, Yield};
 use crate::{size::Size, tree::Tree};
 use derive_more::{AsMut, AsRef, Deref, From, Into};
 
-/// The [Item](Iterator::Item) type of `Tree::iter_depth_node`.
+/// The [`Item`](Iterator::Item) type of `Tree::iter_depth_node`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, AsMut, AsRef, Deref, From, Into)]
 pub struct IterDepthNodeItem<'a, Name, Data: Size> {
     /// Distance from the tree root to this node.
