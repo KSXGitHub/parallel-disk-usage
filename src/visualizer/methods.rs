@@ -43,16 +43,21 @@ where
     }
 
     fn visualize_tree(&self) -> Column<TreeHorizontalSlice<String>> {
-        fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, depth: usize)
-        where
+        fn traverse<Name, Data, Act>(
+            tree: &Tree<Name, Data>,
+            act: &mut Act,
+            index: usize,
+            count: usize,
+            depth: usize,
+        ) where
             Data: Size,
             Act: FnMut(&Tree<Name, Data>, usize, usize, usize),
         {
-            act(tree, 0, 1, depth);
-            let count = tree.children.len();
-            for (index, child) in tree.children.iter().enumerate() {
-                act(child, index, count, depth + 1);
-                traverse(child, act, depth);
+            act(tree, index, count, depth);
+            let next_count = tree.children.len();
+            let next_depth = depth + 1;
+            for (next_index, child) in tree.children.iter().enumerate() {
+                traverse(child, act, next_index, next_count, next_depth);
             }
         }
 
@@ -77,6 +82,8 @@ where
                     name,
                 });
             },
+            0,
+            1,
             0,
         );
 
