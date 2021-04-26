@@ -1,5 +1,6 @@
 use super::{ChildPosition, Direction, Parenthood};
 use derive_more::{AsRef, Deref, Display, Into};
+use fmt_iter::repeat;
 use std::fmt::{Display, Error, Formatter};
 use zero_copy_pads::Width;
 
@@ -49,5 +50,43 @@ impl Display for TreeSkeletalComponent {
 impl Width for TreeSkeletalComponentVisualization {
     fn width(&self) -> usize {
         self.len()
+    }
+}
+
+/// Horizontal slice of a tree of the height of exactly 1 line of text.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TreeHorizontalSlice<Name: Width> {
+    depth: usize,
+    skeleton: TreeSkeletalComponentVisualization,
+    name: Name,
+}
+
+impl<Name: Width> TreeHorizontalSlice<Name> {
+    #[inline]
+    fn indent_width(&self) -> usize {
+        self.depth
+    }
+
+    #[inline]
+    fn indent(&self) -> impl Display {
+        repeat(' ', self.indent_width())
+    }
+}
+
+impl<Name: Width> Display for TreeHorizontalSlice<Name> {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> Result<(), Error> {
+        write!(
+            formatter,
+            "{}{}{}",
+            self.indent(),
+            self.skeleton,
+            &self.name,
+        )
+    }
+}
+
+impl<Name: Width> Width for TreeHorizontalSlice<Name> {
+    fn width(&self) -> usize {
+        self.indent_width() + self.skeleton.width() + self.name.width()
     }
 }
