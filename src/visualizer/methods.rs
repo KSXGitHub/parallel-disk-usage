@@ -178,7 +178,6 @@ where
             bars.into_iter(),
         )
         .map(|(size, percentage, tree_horizontal_slice, bar)| {
-            // TODO: proper indentation for the tree column
             format!(
                 "{}{}{}{}",
                 size,
