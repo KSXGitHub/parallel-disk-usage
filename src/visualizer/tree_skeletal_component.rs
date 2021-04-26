@@ -1,6 +1,7 @@
 use super::{ChildPosition, Direction, Parenthood};
 use derive_more::{AsRef, Deref, Display, Into};
 use std::fmt::{Display, Error, Formatter};
+use zero_copy_pads::Width;
 
 /// Determine 3 characters to use as skeletal component that connect a node
 /// to the rest of the tree.
@@ -42,5 +43,11 @@ impl TreeSkeletalComponent {
 impl Display for TreeSkeletalComponent {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> Result<(), Error> {
         write!(formatter, "{}", self.visualize())
+    }
+}
+
+impl Width for TreeSkeletalComponentVisualization {
+    fn width(&self) -> usize {
+        self.len()
     }
 }
