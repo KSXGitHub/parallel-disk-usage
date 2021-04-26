@@ -43,38 +43,42 @@ where
     }
 
     fn visualize_tree(&self) -> Column<TreeHorizontalSlice<String>> {
-        fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act)
+        fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, depth: usize)
         where
             Data: Size,
-            Act: FnMut(&Tree<Name, Data>, usize, usize),
+            Act: FnMut(&Tree<Name, Data>, usize, usize, usize),
         {
-            act(tree, 0, 1);
+            act(tree, 0, 1, depth);
             let count = tree.children.len();
             for (index, child) in tree.children.iter().enumerate() {
-                act(child, index, count);
-                traverse(child, act);
+                act(child, index, count, depth + 1);
+                traverse(child, act, depth);
             }
         }
 
         let mut max_width = 0;
         let mut content = Vec::new();
 
-        traverse(&self.tree, &mut |tree, index, count| {
-            debug_assert_op!(count > index);
-            let skeleton = TreeSkeletalComponent {
-                child_position: ChildPosition::from_index(index, count),
-                direction: self.direction,
-                parenthood: Parenthood::from_node(tree),
-            }
-            .visualize();
-            let name = tree.name.to_string();
-            max_width = max(max_width, skeleton.len() + name.len());
-            content.push(TreeHorizontalSlice {
-                depth: 0, // TODO: use actual depth
-                skeleton,
-                name,
-            })
-        });
+        traverse(
+            &self.tree,
+            &mut |tree, index, count, depth| {
+                debug_assert_op!(count > index);
+                let skeleton = TreeSkeletalComponent {
+                    child_position: ChildPosition::from_index(index, count),
+                    direction: self.direction,
+                    parenthood: Parenthood::from_node(tree),
+                }
+                .visualize();
+                let name = tree.name.to_string();
+                max_width = max(max_width, skeleton.len() + name.len());
+                content.push(TreeHorizontalSlice {
+                    depth,
+                    skeleton,
+                    name,
+                });
+            },
+            0,
+        );
 
         Column { max_width, content }
     }
