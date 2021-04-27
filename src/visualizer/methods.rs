@@ -10,12 +10,6 @@ use pipe_trait::Pipe;
 use std::fmt::Display;
 use zero_copy_pads::{align_column_right, align_right, AlignLeft, AlignRight, PaddedColumnIter};
 
-#[derive(Debug)]
-struct Column<Item> {
-    max_width: usize,
-    content: Vec<Item>,
-}
-
 impl<Name, Data> Visualizer<Name, Data>
 where
     Name: Display,
