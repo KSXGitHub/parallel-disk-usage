@@ -1,10 +1,9 @@
 use super::{
-    ChildPosition, Parenthood, ProportionBarBlock, TreeHorizontalSlice, TreeSkeletalComponent,
+    ChildPosition, Parenthood, ProportionBar, TreeHorizontalSlice, TreeSkeletalComponent,
     Visualizer,
 };
 use crate::{size::Size, tree::Tree};
 use assert_cmp::{debug_assert_op, debug_assert_op_expr};
-use fmt_iter::repeat;
 use itertools::izip;
 use pipe_trait::Pipe;
 use std::fmt::Display;
@@ -99,7 +98,7 @@ where
         padded_column_iter
     }
 
-    fn visualize_bars(&self, width: u64) -> Vec<String> {
+    fn visualize_bars(&self, width: u64) -> Vec<ProportionBar> {
         fn traverse<Name, Data, Act>(
             tree: &Tree<Name, Data>,
             act: &mut Act,
@@ -127,11 +126,6 @@ where
         }
         let mut bars = Vec::new();
         let total = self.tree.data.into();
-        let space_block = ProportionBarBlock::new(4);
-        let lv3_block = ProportionBarBlock::new(3);
-        let lv2_block = ProportionBarBlock::new(2);
-        let lv1_block = ProportionBarBlock::new(1);
-        let lv0_block = ProportionBarBlock::new(0);
         traverse(
             &self.tree,
             &mut |tree, level, lv1_value, lv2_value, lv3_value| {
@@ -153,14 +147,13 @@ where
                     ==,
                     width
                 );
-                bars.push(format!(
-                    "{space}{lv3}{lv2}{lv1}{lv0}",
-                    space = repeat(space_block, empty_spaces as usize),
-                    lv3 = repeat(lv3_block, lv3_visible as usize),
-                    lv2 = repeat(lv2_block, lv2_visible as usize),
-                    lv1 = repeat(lv1_block, lv1_visible as usize),
-                    lv0 = repeat(lv0_block, lv0_visible as usize),
-                ));
+                bars.push(ProportionBar {
+                    level0: lv0_visible as usize,
+                    level1: lv1_visible as usize,
+                    level2: lv2_visible as usize,
+                    level3: lv3_visible as usize,
+                    spaces: empty_spaces as usize,
+                });
                 lv0_value
             },
             0,
