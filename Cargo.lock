@@ -707,9 +707,9 @@ dependencies = [
 
 [[package]]
 name = "zero-copy-pads"
-version = "0.1.7"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e14357b2e38d7d6d7f8f08305aa0c59f2036cef735898cbfbbfd824f81a99882"
+checksum = "5649a5dce1370c707880332f781f6566883736a41861a5749890f4671d5746b6"
 dependencies = [
  "derive_builder",
  "derive_more",
