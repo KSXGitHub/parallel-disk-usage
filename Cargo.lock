@@ -264,12 +264,12 @@ checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
 
 [[package]]
 name = "fmt-iter"
-version = "0.1.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "452a9ddee3dd4d1be28093e5bce8de89b7188cf10b63766cdaa99cc3509dbd35"
+checksum = "d0b9289d76691c7084d8830f1d0a29ddefbad768f8b5f276e012840bb0fca610"
 dependencies = [
  "derive_more",
- "pipe-trait 0.3.2",
+ "itertools",
 ]
 
 [[package]]
@@ -330,9 +330,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.93"
+version = "0.2.94"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9385f66bf6105b241aa65a61cb923ef20efc665cb9f9bb50ac2f0c4b7f378d41"
+checksum = "18794a8ad5b29321f790b55d93dfba91e125cb1a9edbd4f8e3150acc771c1a5e"
 
 [[package]]
 name = "linked-hash-map"
@@ -707,9 +707,9 @@ dependencies = [
 
 [[package]]
 name = "zero-copy-pads"
-version = "0.1.5"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9604a620d97389f2b3b56897919498f88e5e3ad638aa4e931c78c9714c7dd5a3"
+checksum = "e14357b2e38d7d6d7f8f08305aa0c59f2036cef735898cbfbbfd824f81a99882"
 dependencies = [
  "derive_builder",
  "derive_more",
