@@ -8,9 +8,7 @@ use fmt_iter::repeat;
 use itertools::izip;
 use pipe_trait::Pipe;
 use std::fmt::Display;
-use zero_copy_pads::{
-    align_column_right, align_right, AlignLeft, AlignRight, PaddedColumn, PaddedColumnIter,
-};
+use zero_copy_pads::{align_column_right, align_right, AlignLeft, AlignRight, PaddedColumnIter};
 
 #[derive(Debug)]
 struct Column<Item> {
@@ -63,12 +61,7 @@ where
             }
         }
 
-        let mut padded_column_iter = PaddedColumn {
-            pad: AlignLeft,
-            pad_block: ' ',
-            values: Vec::new().into_iter(),
-        }
-        .into_iter();
+        let mut padded_column_iter = PaddedColumnIter::new(' ', AlignLeft);
 
         traverse(
             &self.tree,
