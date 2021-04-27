@@ -7,8 +7,10 @@ use assert_cmp::{debug_assert_op, debug_assert_op_expr};
 use fmt_iter::repeat;
 use itertools::izip;
 use pipe_trait::Pipe;
-use std::{cmp::max, fmt::Display};
-use zero_copy_pads::{align_column_right, align_left, align_right, AlignRight, PaddedColumnIter};
+use std::fmt::Display;
+use zero_copy_pads::{
+    align_column_right, align_right, AlignLeft, AlignRight, PaddedColumn, PaddedColumnIter,
+};
 
 #[derive(Debug)]
 struct Column<Item> {
@@ -42,7 +44,7 @@ where
             .collect()
     }
 
-    fn visualize_tree(&self) -> Column<TreeHorizontalSlice<String>> {
+    fn visualize_tree(&self) -> PaddedColumnIter<TreeHorizontalSlice<String>, char, AlignLeft> {
         fn traverse<Name, Data, Act>(
             tree: &Tree<Name, Data>,
             act: &mut Act,
@@ -61,8 +63,12 @@ where
             }
         }
 
-        let mut max_width = 0;
-        let mut content = Vec::new();
+        let mut padded_column_iter = PaddedColumn {
+            pad: AlignLeft,
+            pad_block: ' ',
+            values: Vec::new().into_iter(),
+        }
+        .into_iter();
 
         traverse(
             &self.tree,
@@ -75,8 +81,7 @@ where
                 }
                 .visualize();
                 let name = tree.name.to_string();
-                max_width = max(max_width, skeleton.len() + name.len());
-                content.push(TreeHorizontalSlice {
+                padded_column_iter.push_back(TreeHorizontalSlice {
                     depth,
                     skeleton,
                     name,
@@ -87,7 +92,7 @@ where
             0,
         );
 
-        Column { max_width, content }
+        padded_column_iter
     }
 
     fn visualize_bars(&self, width: u64) -> Vec<String> {
@@ -168,24 +173,25 @@ where
         let tree_column = self.visualize_tree();
         // TODO: handle case where the total max_width is greater than given width
         let percentage_column_max_width = "100%".len();
-        let bar_width =
-            width - size_column.total_width() - percentage_column_max_width - tree_column.max_width;
+        let bar_width = width
+            - size_column.total_width()
+            - percentage_column_max_width
+            - tree_column.total_width();
         let bars = self.visualize_bars(bar_width as u64);
         debug_assert_op_expr!(bars.len(), ==, size_column.len());
         debug_assert_op_expr!(bars.len(), ==, percentage_column.len());
-        debug_assert_op_expr!(bars.len(), ==, tree_column.content.len());
-        let tree_column_max_width = tree_column.max_width;
+        debug_assert_op_expr!(bars.len(), ==, tree_column.len());
         izip!(
             size_column,
             percentage_column.into_iter(),
-            tree_column.content.into_iter(),
+            tree_column.into_iter(),
             bars.into_iter(),
         )
         .map(|(size, percentage, tree_horizontal_slice, bar)| {
             format!(
                 "{}{}{}{}",
                 size,
-                align_left(tree_horizontal_slice, tree_column_max_width),
+                tree_horizontal_slice,
                 bar,
                 align_right(percentage, percentage_column_max_width),
             )
