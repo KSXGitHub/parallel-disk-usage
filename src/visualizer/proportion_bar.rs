@@ -6,25 +6,17 @@ use std::fmt::{Display, Error, Formatter};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, AsRef, Deref, Display, Into)]
 pub struct ProportionBarBlock(char);
 
-impl ProportionBarBlock {
-    /// Create a new [`ProportionBarBlock`] according to a distance level.
-    pub const fn new(level: u8) -> Self {
-        ProportionBarBlock(lookup_block(level))
-    }
+macro_rules! make_const {
+    ($name:ident = $content:literal) => {
+        pub const $name: ProportionBarBlock = ProportionBarBlock($content);
+    };
 }
 
-/// Lookup visualization block according to distance from parent.
-///
-/// The closer the child, the bolder the block.
-pub const fn lookup_block(level: u8) -> char {
-    match level {
-        0 => '█',
-        1 => '▓',
-        2 => '▒',
-        3 => '░',
-        _ => ' ',
-    }
-}
+make_const!(LEVEL0_BLOCK = '█');
+make_const!(LEVEL1_BLOCK = '▓');
+make_const!(LEVEL2_BLOCK = '▒');
+make_const!(LEVEL3_BLOCK = '░');
+make_const!(SPACE_BLOCK = ' ');
 
 /// Proportion bar.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, From, Into)]
@@ -38,23 +30,23 @@ pub struct ProportionBar {
 
 impl ProportionBar {
     pub fn display_level0(self) -> impl Display {
-        repeat(lookup_block(0), self.level0)
+        repeat(LEVEL0_BLOCK, self.level0)
     }
 
     pub fn display_level1(self) -> impl Display {
-        repeat(lookup_block(1), self.level1)
+        repeat(LEVEL1_BLOCK, self.level1)
     }
 
     pub fn display_level2(self) -> impl Display {
-        repeat(lookup_block(2), self.level2)
+        repeat(LEVEL2_BLOCK, self.level2)
     }
 
     pub fn display_level3(self) -> impl Display {
-        repeat(lookup_block(3), self.level3)
+        repeat(LEVEL3_BLOCK, self.level3)
     }
 
     pub fn display_spaces(self) -> impl Display {
-        repeat(lookup_block(4), self.spaces)
+        repeat(SPACE_BLOCK, self.spaces)
     }
 }
 
