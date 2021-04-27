@@ -37,21 +37,31 @@ where
     }
 
     fn visualize_tree(&self) -> PaddedColumnIter<TreeHorizontalSlice<String>, char, AlignLeft> {
-        fn traverse<Name, Data, Act>(
-            tree: &Tree<Name, Data>,
-            act: &mut Act,
+        #[derive(Clone, Copy)]
+        struct Param {
             index: usize,
             count: usize,
             depth: usize,
-        ) where
+        }
+
+        fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, param: Param)
+        where
             Data: Size,
-            Act: FnMut(&Tree<Name, Data>, usize, usize, usize),
+            Act: FnMut(&Tree<Name, Data>, Param),
         {
-            act(tree, index, count, depth);
-            let next_count = tree.children.len();
-            let next_depth = depth + 1;
-            for (next_index, child) in tree.children.iter().enumerate() {
-                traverse(child, act, next_index, next_count, next_depth);
+            act(tree, param);
+            let count = tree.children.len();
+            let depth = param.depth + 1;
+            for (index, child) in tree.children.iter().enumerate() {
+                traverse(
+                    child,
+                    act,
+                    Param {
+                        index,
+                        count,
+                        depth,
+                    },
+                );
             }
         }
 
@@ -59,7 +69,12 @@ where
 
         traverse(
             &self.tree,
-            &mut |tree, index, count, depth| {
+            &mut |tree, param| {
+                let Param {
+                    index,
+                    count,
+                    depth,
+                } = param;
                 debug_assert_op!(count > index);
                 let skeleton = TreeSkeletalComponent {
                     child_position: ChildPosition::from_index(index, count),
@@ -74,9 +89,11 @@ where
                     name,
                 });
             },
-            0,
-            1,
-            0,
+            Param {
+                index: 0,
+                count: 1,
+                depth: 0,
+            },
         );
 
         padded_column_iter
