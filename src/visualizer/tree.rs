@@ -68,6 +68,11 @@ impl<Name: Width> TreeHorizontalSlice<Name> {
     }
 
     #[inline]
+    fn required_width(&self) -> usize {
+        self.indent_width() + self.skeleton.width()
+    }
+
+    #[inline]
     fn indent(&self) -> impl Display {
         repeat(' ', self.indent_width())
     }
@@ -87,6 +92,30 @@ impl<Name: Width> Display for TreeHorizontalSlice<Name> {
 
 impl<Name: Width> Width for TreeHorizontalSlice<Name> {
     fn width(&self) -> usize {
-        self.indent_width() + self.skeleton.width() + self.name.width()
+        self.required_width() + self.name.width()
+    }
+}
+
+impl TreeHorizontalSlice<String> {
+    /// Truncate the name to fit specified `max_width`.
+    ///
+    /// * If `max_width` is already sufficient, do nothing other than return `Ok(())`.
+    /// * If `max_width` is insufficient even for the required part, return `Err(N)`
+    ///   where `N` is the required width.
+    /// * If `max_width` is sufficient for the required part but insufficient for the
+    ///   name, truncate and add `"..."` to the name.
+    pub fn truncate(&mut self, max_width: usize) -> Result<(), usize> {
+        if self.width() <= max_width {
+            return Ok(());
+        }
+
+        let min_width = self.required_width() + "...".len();
+        if min_width >= max_width {
+            return Err(min_width);
+        }
+
+        self.name.truncate(max_width - min_width);
+        self.name += "...";
+        Ok(())
     }
 }

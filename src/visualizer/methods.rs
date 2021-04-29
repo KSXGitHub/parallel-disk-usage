@@ -35,7 +35,10 @@ where
             .collect()
     }
 
-    fn visualize_tree(&self) -> PaddedColumnIter<TreeHorizontalSlice<String>, char, AlignLeft> {
+    fn visualize_tree(
+        &self,
+        max_width: usize,
+    ) -> PaddedColumnIter<TreeHorizontalSlice<String>, char, AlignLeft> {
         #[derive(Clone, Copy)]
         struct Param {
             index: usize,
@@ -82,11 +85,15 @@ where
                 }
                 .visualize();
                 let name = tree.name.to_string();
-                padded_column_iter.push_back(TreeHorizontalSlice {
+                let mut tree_horizontal_slice = TreeHorizontalSlice {
                     depth,
                     skeleton,
                     name,
-                });
+                };
+                tree_horizontal_slice
+                    .truncate(max_width)
+                    .expect("truncate the name"); // TODO: gracefully handle this by skipping
+                padded_column_iter.push_back(tree_horizontal_slice);
             },
             Param {
                 index: 0,
@@ -167,9 +174,10 @@ where
     pub fn visualize(&self, width: usize) -> Vec<String> {
         let size_column = self.visualize_sizes();
         let percentage_column = self.visualize_percentage();
-        let tree_column = self.visualize_tree();
-        // TODO: handle case where the total max_width is greater than given width
         let percentage_column_max_width = "100%".len();
+        let tree_max_width = width - size_column.total_width() - percentage_column_max_width;
+        let tree_column = self.visualize_tree(tree_max_width);
+        // TODO: handle case where the total max_width is greater than given width
         let bar_width = width
             - size_column.total_width()
             - percentage_column_max_width
