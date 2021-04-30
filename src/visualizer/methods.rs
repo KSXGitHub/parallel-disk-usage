@@ -1,6 +1,6 @@
 use super::{
-    ChildPosition, Parenthood, ProportionBar, TreeHorizontalSlice, TreeSkeletalComponent,
-    Visualizer,
+    ChildPosition, MaybeTreeHorizontalSlice, Parenthood, ProportionBar, TreeHorizontalSlice,
+    TreeSkeletalComponent, Visualizer,
 };
 use crate::{size::Size, tree::Tree};
 use assert_cmp::{debug_assert_op, debug_assert_op_expr};
@@ -38,7 +38,7 @@ where
     fn visualize_tree(
         &self,
         max_width: usize,
-    ) -> PaddedColumnIter<TreeHorizontalSlice<String>, char, AlignLeft> {
+    ) -> PaddedColumnIter<MaybeTreeHorizontalSlice<String>, char, AlignLeft> {
         #[derive(Clone, Copy)]
         struct Param {
             index: usize,
@@ -90,9 +90,13 @@ where
                     skeleton,
                     name,
                 };
-                tree_horizontal_slice
-                    .truncate(max_width)
-                    .expect("truncate the name"); // TODO: gracefully handle this by skipping
+                let tree_horizontal_slice = MaybeTreeHorizontalSlice::from(
+                    if let Ok(()) = tree_horizontal_slice.truncate(max_width) {
+                        Some(tree_horizontal_slice)
+                    } else {
+                        None
+                    },
+                );
                 padded_column_iter.push_back(tree_horizontal_slice);
             },
             Param {
@@ -192,6 +196,13 @@ where
             tree_column.into_iter(),
             bars.into_iter(),
         )
+        .filter_map(|(size, percentage, tree_horizontal_slice, bar)| {
+            if let Some(tree_horizontal_slice) = tree_horizontal_slice.into() {
+                Some((size, percentage, tree_horizontal_slice, bar))
+            } else {
+                None
+            }
+        })
         .map(|(size, percentage, tree_horizontal_slice, bar)| {
             format!(
                 "{}{}{}{}",

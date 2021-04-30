@@ -1,5 +1,5 @@
 use super::{ChildPosition, Direction, Parenthood};
-use derive_more::{AsRef, Deref, Display, Into};
+use derive_more::{AsMut, AsRef, Deref, DerefMut, Display, From, Into};
 use fmt_iter::repeat;
 use std::fmt::{Display, Error, Formatter};
 use zero_copy_pads::Width;
@@ -116,6 +116,31 @@ impl TreeHorizontalSlice<String> {
 
         self.name.truncate(max_width - min_width);
         self.name += "...";
+        Ok(())
+    }
+}
+
+/// [`Option`] of [`TreeHorizontalSlice`] that can be inserted into
+/// [`PaddedColumnIter`](zero_copy_pads::PaddedColumnIter).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, AsRef, Deref, AsMut, DerefMut, From, Into)]
+pub struct MaybeTreeHorizontalSlice<Name: Width>(Option<TreeHorizontalSlice<Name>>);
+
+impl<Name: Width> Width for MaybeTreeHorizontalSlice<Name> {
+    fn width(&self) -> usize {
+        if let Some(content) = self.as_ref() {
+            content.width()
+        } else {
+            0
+        }
+    }
+}
+
+impl<Name: Width> Display for MaybeTreeHorizontalSlice<Name> {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> Result<(), Error> {
+        if let Some(content) = self.as_ref() {
+            content.fmt(formatter)?;
+        }
+
         Ok(())
     }
 }
