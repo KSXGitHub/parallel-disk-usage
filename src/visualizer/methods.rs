@@ -9,6 +9,9 @@ use pipe_trait::Pipe;
 use std::fmt::Display;
 use zero_copy_pads::{align_column_right, align_right, AlignLeft, AlignRight, PaddedColumnIter};
 
+// NOTE: The 4 methods below, despite sharing the same structure, cannot be unified due to
+//       them relying on each other's `PaddedColumnIter::total_width`.
+
 impl<Name, Data> Visualizer<Name, Data>
 where
     Name: Display,
