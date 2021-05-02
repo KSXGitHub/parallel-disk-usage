@@ -33,6 +33,7 @@ where
         }
 
         let mut iter = PaddedColumnIter::new(' ', AlignRight);
+
         traverse(
             &self.tree,
             &mut |node| {
@@ -194,8 +195,10 @@ where
                 );
             }
         }
-        let mut bars = Vec::new();
+
         let total = self.tree.data.into();
+        let mut bars = Vec::new();
+
         traverse(
             &self.tree,
             &mut |tree, lv1_value, lv2_value, lv3_value| {
@@ -230,6 +233,7 @@ where
             width,
             max_depth,
         );
+
         bars
     }
 
