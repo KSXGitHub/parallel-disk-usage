@@ -5,9 +5,8 @@ use super::{
 use crate::{size::Size, tree::Tree};
 use assert_cmp::{debug_assert_op, debug_assert_op_expr};
 use itertools::izip;
-use pipe_trait::Pipe;
 use std::fmt::Display;
-use zero_copy_pads::{align_column_right, align_right, AlignLeft, AlignRight, PaddedColumnIter};
+use zero_copy_pads::{align_right, AlignLeft, AlignRight, PaddedColumnIter};
 
 // NOTE: The 4 methods below, despite sharing the same structure, cannot be unified due to
 //       them relying on each other's `PaddedColumnIter::total_width`.
@@ -17,30 +16,73 @@ where
     Name: Display,
     Data: Size + Into<u64>,
 {
-    fn visualize_sizes(&self) -> PaddedColumnIter<String, char, AlignRight> {
-        let measurement_system = self.measurement_system;
-        self.tree
-            .iter_node()
-            .map(|node| node.data.display(measurement_system).to_string())
-            .pipe(align_column_right)
+    fn visualize_sizes(&self, max_depth: usize) -> PaddedColumnIter<String, char, AlignRight> {
+        fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, remaining_depth: usize)
+        where
+            Data: Size,
+            Act: FnMut(&Tree<Name, Data>),
+        {
+            if remaining_depth == 0 {
+                return;
+            }
+            act(tree);
+            let next_remaining_depth = remaining_depth - 1;
+            for child in &tree.children {
+                traverse(child, act, next_remaining_depth);
+            }
+        }
+
+        let mut iter = PaddedColumnIter::new(' ', AlignRight);
+        traverse(
+            &self.tree,
+            &mut |node| {
+                let value = node.data.display(self.measurement_system).to_string();
+                iter.push_back(value);
+            },
+            max_depth,
+        );
+
+        iter
     }
 
-    fn visualize_percentage(&self) -> Vec<String> {
+    fn visualize_percentage(&self, max_depth: usize) -> Vec<String> {
+        fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, remaining_depth: usize)
+        where
+            Data: Size,
+            Act: FnMut(&Tree<Name, Data>),
+        {
+            if remaining_depth == 0 {
+                return;
+            }
+            act(tree);
+            let next_remaining_depth = remaining_depth - 1;
+            for child in &tree.children {
+                traverse(child, act, next_remaining_depth);
+            }
+        }
+
         let total = self.tree.data.into();
-        self.tree
-            .iter_node()
-            .map(|node| {
+        let mut result = Vec::new();
+
+        traverse(
+            &self.tree,
+            &mut |node| {
                 let current = node.data.into();
                 debug_assert_op!(current <= total);
                 let percentage = rounded_div::u64(current * 100, total);
-                format!("{}%", percentage)
-            })
-            .collect()
+                let percentage = format!("{}%", percentage);
+                result.push(percentage);
+            },
+            max_depth,
+        );
+
+        result
     }
 
     fn visualize_tree(
         &self,
         max_width: usize,
+        max_depth: usize,
     ) -> PaddedColumnIter<MaybeTreeHorizontalSlice<String>, char, AlignLeft> {
         #[derive(Clone, Copy)]
         struct Param {
@@ -49,14 +91,22 @@ where
             depth: usize,
         }
 
-        fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, param: Param)
-        where
+        fn traverse<Name, Data, Act>(
+            tree: &Tree<Name, Data>,
+            act: &mut Act,
+            param: Param,
+            remaining_depth: usize,
+        ) where
             Data: Size,
             Act: FnMut(&Tree<Name, Data>, Param),
         {
+            if remaining_depth == 0 {
+                return;
+            }
             act(tree, param);
             let count = tree.children.len();
             let depth = param.depth + 1;
+            let next_remaining_depth = remaining_depth - 1;
             for (index, child) in tree.children.iter().enumerate() {
                 traverse(
                     child,
@@ -66,6 +116,7 @@ where
                         count,
                         depth,
                     },
+                    next_remaining_depth,
                 );
             }
         }
@@ -107,34 +158,39 @@ where
                 count: 1,
                 depth: 0,
             },
+            max_depth,
         );
 
         padded_column_iter
     }
 
-    fn visualize_bars(&self, width: u64) -> Vec<ProportionBar> {
+    fn visualize_bars(&self, width: u64, max_depth: usize) -> Vec<ProportionBar> {
         fn traverse<Name, Data, Act>(
             tree: &Tree<Name, Data>,
             act: &mut Act,
-            level: usize,
             lv1_value: u64,
             lv2_value: u64,
             lv3_value: u64,
+            remaining_depth: usize,
         ) where
             Data: Size,
-            Act: FnMut(&Tree<Name, Data>, usize, u64, u64, u64) -> u64,
+            Act: FnMut(&Tree<Name, Data>, u64, u64, u64) -> u64,
         {
-            let next_lv1_value = act(tree, level, lv1_value, lv2_value, lv3_value);
+            if remaining_depth == 0 {
+                return;
+            }
+            let next_lv1_value = act(tree, lv1_value, lv2_value, lv3_value);
             let next_lv2_value = lv1_value;
             let next_lv3_value = lv2_value;
+            let next_remaining_depth = remaining_depth - 1;
             for child in &tree.children {
                 traverse(
                     child,
                     act,
-                    level + 1,
                     next_lv1_value,
                     next_lv2_value,
                     next_lv3_value,
+                    next_remaining_depth,
                 );
             }
         }
@@ -142,8 +198,7 @@ where
         let total = self.tree.data.into();
         traverse(
             &self.tree,
-            &mut |tree, level, lv1_value, lv2_value, lv3_value| {
-                let _ = level; // level can be used to limit depth, but it isn't implemented for now.
+            &mut |tree, lv1_value, lv2_value, lv3_value| {
                 let current = tree.data.into();
                 debug_assert_op!(current <= total);
                 let lv0_value = rounded_div::u64(current * width, total);
@@ -170,26 +225,26 @@ where
                 });
                 lv0_value
             },
-            0,
             width,
             width,
             width,
+            max_depth,
         );
         bars
     }
 
-    pub fn visualize(&self, width: usize) -> Vec<String> {
-        let size_column = self.visualize_sizes();
-        let percentage_column = self.visualize_percentage();
+    pub fn visualize(&self, width: usize, max_depth: usize) -> Vec<String> {
+        let size_column = self.visualize_sizes(max_depth);
+        let percentage_column = self.visualize_percentage(max_depth);
         let percentage_column_max_width = "100%".len();
         let tree_max_width = width - size_column.total_width() - percentage_column_max_width;
-        let tree_column = self.visualize_tree(tree_max_width);
+        let tree_column = self.visualize_tree(tree_max_width, max_depth);
         // TODO: handle case where the total max_width is greater than given width
         let bar_width = width
             - size_column.total_width()
             - percentage_column_max_width
             - tree_column.total_width();
-        let bars = self.visualize_bars(bar_width as u64);
+        let bars = self.visualize_bars(bar_width as u64, max_depth);
         debug_assert_op_expr!(bars.len(), ==, size_column.len());
         debug_assert_op_expr!(bars.len(), ==, percentage_column.len());
         debug_assert_op_expr!(bars.len(), ==, tree_column.len());
