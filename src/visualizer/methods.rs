@@ -237,6 +237,8 @@ where
         bars
     }
 
+    /// Create ASCII visualization of the [tree](Tree), such visualization is meant to be
+    /// printed to a terminal screen.
     pub fn visualize(&self, width: usize, max_depth: usize) -> Vec<String> {
         let size_column = self.visualize_sizes(max_depth);
         let percentage_column = self.visualize_percentage(max_depth);
