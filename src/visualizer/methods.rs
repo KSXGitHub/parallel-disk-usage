@@ -241,15 +241,13 @@ where
         let size_column = self.visualize_sizes(max_depth);
         let percentage_column = self.visualize_percentage(max_depth);
         let percentage_column_max_width = "100%".len();
-        let size_percentage_total_max_width =
-            size_column.total_width() + percentage_column_max_width;
-        assert_op!(width > size_percentage_total_max_width); // TODO: switch to debug_assert_op
-        let tree_max_width = width - size_percentage_total_max_width;
+        let min_width = size_column.total_width() + percentage_column_max_width;
+        assert_op!(width > min_width); // TODO: switch to debug_assert_op
+        let tree_max_width = width - min_width;
         let tree_column = self.visualize_tree(tree_max_width, max_depth);
-        let total_max_width =
-            size_column.total_width() + percentage_column_max_width + tree_column.total_width();
-        assert_op!(width > total_max_width); // TODO: switch to debug_assert_op
-        let bar_width = width - total_max_width;
+        let min_width = min_width + tree_column.total_width();
+        assert_op!(width > min_width); // TODO: switch to debug_assert_op
+        let bar_width = width - min_width;
         let bars = self.visualize_bars(bar_width as u64, max_depth);
         debug_assert_op_expr!(bars.len(), ==, size_column.len());
         debug_assert_op_expr!(bars.len(), ==, percentage_column.len());
