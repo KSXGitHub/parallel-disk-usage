@@ -241,7 +241,8 @@ where
         let size_column = self.visualize_sizes(max_depth);
         let percentage_column = self.visualize_percentage(max_depth);
         let percentage_column_max_width = "100%".len();
-        let min_width = size_column.total_width() + percentage_column_max_width;
+        let border_cols = 3; // 4 columns, 3 borders, each border has a width of 1
+        let min_width = size_column.total_width() + percentage_column_max_width + border_cols;
         if width <= min_width {
             let extra_cols = 3; // make space for tree_column to minimize second-time re-rendering.
             return self.visualize(min_width + extra_cols, max_depth);
@@ -272,7 +273,7 @@ where
         })
         .map(|(size, percentage, tree_horizontal_slice, bar)| {
             format!(
-                "{}{}{}{}",
+                "{} {}│{}│{}",
                 size,
                 tree_horizontal_slice,
                 bar,
