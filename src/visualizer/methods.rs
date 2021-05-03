@@ -253,7 +253,7 @@ where
         let tree_column = self.visualize_tree(tree_max_width, max_depth);
         let min_width = min_width + tree_column.total_width();
         if width <= min_width {
-            return self.visualize(min_width, max_depth);
+            return self.visualize(min_width + 1, max_depth);
         }
         let bar_width = width - min_width;
         let bars = self.visualize_bars(bar_width as u64, max_depth);
