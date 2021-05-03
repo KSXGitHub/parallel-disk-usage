@@ -2,7 +2,7 @@ use super::{ChildPosition, Direction, Parenthood};
 use derive_more::{AsMut, AsRef, Deref, DerefMut, Display, From, Into};
 use fmt_iter::repeat;
 use std::fmt::{Display, Error, Formatter};
-use zero_copy_pads::Width;
+use zero_copy_pads::{ExcessHandler, PaddedValue, Width};
 
 /// Determine 3 characters to use as skeletal component that connect a node
 /// to the rest of the tree.
@@ -75,6 +75,33 @@ impl<Name: Width> TreeHorizontalSlice<Name> {
     #[inline]
     fn indent(&self) -> impl Display {
         repeat(' ', self.indent_width())
+    }
+
+    #[inline]
+    pub(super) fn resolve_padded_maybe<PadBlock, HandleExcess, Pad>(
+        source: PaddedValue<MaybeTreeHorizontalSlice<Name>, PadBlock, HandleExcess, Pad>,
+    ) -> Option<PaddedValue<Self, PadBlock, HandleExcess, Pad>>
+    where
+        PadBlock: Display,
+        HandleExcess:
+            ExcessHandler<MaybeTreeHorizontalSlice<Name>, PadBlock> + ExcessHandler<Self, PadBlock>,
+        Pad: zero_copy_pads::Pad<MaybeTreeHorizontalSlice<Name>, PadBlock>
+            + zero_copy_pads::Pad<Self, PadBlock>,
+    {
+        let PaddedValue {
+            value,
+            pad_block,
+            total_width,
+            pad,
+            handle_excess,
+        } = source;
+        value.0.map(|value| PaddedValue {
+            value,
+            pad_block,
+            total_width,
+            pad,
+            handle_excess,
+        })
     }
 }
 

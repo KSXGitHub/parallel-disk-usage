@@ -267,7 +267,9 @@ where
             bars.into_iter(),
         )
         .filter_map(|(size, percentage, tree_horizontal_slice, bar)| {
-            if let Some(tree_horizontal_slice) = tree_horizontal_slice.into() {
+            if let Some(tree_horizontal_slice) =
+                TreeHorizontalSlice::resolve_padded_maybe(tree_horizontal_slice)
+            {
                 Some((size, percentage, tree_horizontal_slice, bar))
             } else {
                 None
