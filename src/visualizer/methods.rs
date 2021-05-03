@@ -243,7 +243,8 @@ where
         let percentage_column_max_width = "100%".len();
         let min_width = size_column.total_width() + percentage_column_max_width;
         if width < min_width {
-            return self.visualize(min_width, max_depth);
+            let extra_cols = 3; // make space for tree_column to minimize second-time re-rendering.
+            return self.visualize(min_width + extra_cols, max_depth);
         }
         let tree_max_width = width - min_width;
         let tree_column = self.visualize_tree(tree_max_width, max_depth);
