@@ -273,11 +273,11 @@ where
         })
         .map(|(size, percentage, tree_horizontal_slice, bar)| {
             format!(
-                "{} {}│{}│{}",
-                size,
-                tree_horizontal_slice,
-                bar,
-                align_right(percentage, percentage_column_max_width),
+                "{size} {tree}│{bar}│{ratio}",
+                size = size,
+                tree = tree_horizontal_slice,
+                bar = bar,
+                ratio = align_right(percentage, percentage_column_max_width),
             )
         })
         .collect()
