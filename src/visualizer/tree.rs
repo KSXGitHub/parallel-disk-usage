@@ -64,7 +64,7 @@ pub struct TreeHorizontalSlice<Name: Width> {
 impl<Name: Width> TreeHorizontalSlice<Name> {
     #[inline]
     fn indent_width(&self) -> usize {
-        self.depth
+        self.depth * 2
     }
 
     #[inline]
