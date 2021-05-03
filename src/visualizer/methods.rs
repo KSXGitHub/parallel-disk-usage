@@ -3,7 +3,7 @@ use super::{
     TreeSkeletalComponent, Visualizer,
 };
 use crate::{size::Size, tree::Tree};
-use assert_cmp::{assert_op, debug_assert_op, debug_assert_op_expr};
+use assert_cmp::{debug_assert_op, debug_assert_op_expr};
 use itertools::izip;
 use std::fmt::Display;
 use zero_copy_pads::{align_right, AlignLeft, AlignRight, PaddedColumnIter};
@@ -242,11 +242,15 @@ where
         let percentage_column = self.visualize_percentage(max_depth);
         let percentage_column_max_width = "100%".len();
         let min_width = size_column.total_width() + percentage_column_max_width;
-        assert_op!(width > min_width); // TODO: switch to debug_assert_op
+        if width < min_width {
+            return self.visualize(min_width, max_depth);
+        }
         let tree_max_width = width - min_width;
         let tree_column = self.visualize_tree(tree_max_width, max_depth);
         let min_width = min_width + tree_column.total_width();
-        assert_op!(width > min_width); // TODO: switch to debug_assert_op
+        if width < min_width {
+            return self.visualize(min_width, max_depth);
+        }
         let bar_width = width - min_width;
         let bars = self.visualize_bars(bar_width as u64, max_depth);
         debug_assert_op_expr!(bars.len(), ==, size_column.len());
