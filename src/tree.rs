@@ -1,7 +1,3 @@
-pub mod iter;
-
-pub use iter::{IterDepthIndexNodeItem, IterDepthNodeItem, IterPathNodeItem, TraverseIter};
-
 use super::size::Size;
 
 /// Disk usage data of a filesystem tree.
