@@ -141,7 +141,7 @@ where
                 } else {
                     Parenthood::from_node(tree)
                 };
-                let skeleton = TreeSkeletalComponent {
+                let skeletal_component_visualization = TreeSkeletalComponent {
                     direction: self.direction,
                     child_position,
                     parenthood,
@@ -149,9 +149,9 @@ where
                 .visualize();
                 let name = tree.name.to_string();
                 let mut tree_horizontal_slice = TreeHorizontalSlice {
-                    skeleton,
-                    name,
                     ancestor_relative_positions,
+                    skeletal_component_visualization,
+                    name,
                 };
                 let tree_horizontal_slice = MaybeTreeHorizontalSlice::from(
                     if let Ok(()) = tree_horizontal_slice.truncate(max_width) {

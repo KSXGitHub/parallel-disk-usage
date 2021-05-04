@@ -58,7 +58,7 @@ impl Width for TreeSkeletalComponentVisualization {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TreeHorizontalSlice<Name: Width> {
     pub(super) ancestor_relative_positions: Vec<ChildPosition>,
-    pub(super) skeleton: TreeSkeletalComponentVisualization,
+    pub(super) skeletal_component_visualization: TreeSkeletalComponentVisualization,
     pub(super) name: Name,
 }
 
@@ -75,7 +75,7 @@ impl<Name: Width> TreeHorizontalSlice<Name> {
 
     #[inline]
     fn required_width(&self) -> usize {
-        self.indent_width() + self.skeleton.width()
+        self.indent_width() + self.skeletal_component_visualization.width()
     }
 
     #[inline]
@@ -123,7 +123,7 @@ impl<Name: Width> Display for TreeHorizontalSlice<Name> {
             formatter,
             "{}{}{}",
             self.indent(),
-            self.skeleton,
+            self.skeletal_component_visualization,
             &self.name,
         )
     }
