@@ -22,10 +22,10 @@ where
             Data: Size,
             Act: FnMut(&Tree<Name, Data>),
         {
+            act(tree);
             if remaining_depth == 0 {
                 return;
             }
-            act(tree);
             let next_remaining_depth = remaining_depth - 1;
             for child in &tree.children {
                 traverse(child, act, next_remaining_depth);
@@ -52,10 +52,10 @@ where
             Data: Size,
             Act: FnMut(&Tree<Name, Data>),
         {
+            act(tree);
             if remaining_depth == 0 {
                 return;
             }
-            act(tree);
             let next_remaining_depth = remaining_depth - 1;
             for child in &tree.children {
                 traverse(child, act, next_remaining_depth);
@@ -98,10 +98,10 @@ where
             Data: Size,
             Act: FnMut(&Tree<Name, Data>, Param),
         {
+            act(tree, param);
             if param.remaining_depth == 0 {
                 return;
             }
-            act(tree, param);
             let sibling_count = tree.children.len();
             let depth = param.depth + 1;
             let remaining_depth = param.remaining_depth - 1;
@@ -131,10 +131,10 @@ where
                     remaining_depth,
                 } = param;
                 debug_assert_op!(sibling_count > node_index);
-                let parenthood = if remaining_depth > 1 {
-                    Parenthood::from_node(tree)
-                } else {
+                let parenthood = if remaining_depth == 0 {
                     Parenthood::Childless
+                } else {
+                    Parenthood::from_node(tree)
                 };
                 let skeleton = TreeSkeletalComponent {
                     child_position: ChildPosition::from_index(node_index, sibling_count),
@@ -180,12 +180,12 @@ where
             Data: Size,
             Act: FnMut(&Tree<Name, Data>, u64, u64, u64) -> u64,
         {
-            if remaining_depth == 0 {
-                return;
-            }
             let next_lv1_value = act(tree, lv1_value, lv2_value, lv3_value);
             let next_lv2_value = lv1_value;
             let next_lv3_value = lv2_value;
+            if remaining_depth == 0 {
+                return;
+            }
             let next_remaining_depth = remaining_depth - 1;
             for child in &tree.children {
                 traverse(
