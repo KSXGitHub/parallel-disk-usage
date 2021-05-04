@@ -173,18 +173,18 @@ where
         padded_column_iter
     }
 
-    fn visualize_bars(self, width: u64) -> Vec<ProportionBar> {
+    fn visualize_bars(self, width: usize) -> Vec<ProportionBar> {
         #[derive(Debug, Clone, Copy)]
         enum Values {
             Level0,
-            Level1(u64),
-            Level2(u64, u64),
-            Level3(u64, u64, u64),
-            Level4(u64, u64, u64, u64),
+            Level1(usize),
+            Level2(usize, usize),
+            Level3(usize, usize, usize),
+            Level4(usize, usize, usize, usize),
         }
 
         impl Values {
-            fn add(self, x: u64) -> Self {
+            fn add(self, x: usize) -> Self {
                 use Values::*;
                 match self {
                     Level0 => Level1(x),
@@ -195,7 +195,7 @@ where
                 }
             }
 
-            fn vec4(self, z: u64) -> (u64, u64, u64, u64) {
+            fn vec4(self, z: usize) -> (usize, usize, usize, usize) {
                 #![allow(clippy::many_single_char_names)]
                 use Values::*;
                 match self {
@@ -215,7 +215,7 @@ where
             remaining_depth: usize,
         ) where
             Data: Size,
-            Act: FnMut(&Tree<Name, Data>, Values) -> u64,
+            Act: FnMut(&Tree<Name, Data>, Values) -> usize,
         {
             let next_value = act(tree, values);
             let next_values = values.add(next_value);
@@ -236,7 +236,7 @@ where
             &mut |tree, values| {
                 let current = tree.data.into();
                 debug_assert_op!(current <= total);
-                let lv0_value = rounded_div::u64(current * width, total);
+                let lv0_value = rounded_div::u64(current * (width as u64), total) as usize;
                 let (lv4_value, lv3_value, lv2_value, lv1_value) = values.vec4(lv0_value);
                 debug_assert_op!(lv0_value <= lv1_value);
                 debug_assert_op!(lv1_value <= lv2_value);
@@ -254,11 +254,11 @@ where
                     width
                 );
                 bars.push(ProportionBar {
-                    level0: lv0_visible as usize,
-                    level1: lv1_visible as usize,
-                    level2: lv2_visible as usize,
-                    level3: lv3_visible as usize,
-                    level4: lv4_visible as usize,
+                    level0: lv0_visible,
+                    level1: lv1_visible,
+                    level2: lv2_visible,
+                    level3: lv3_visible,
+                    level4: lv4_visible,
                 });
                 lv0_value
             },
@@ -290,7 +290,7 @@ where
             return self.visualize();
         }
         let bar_width = self.max_width - min_width;
-        let bars = self.visualize_bars(bar_width as u64);
+        let bars = self.visualize_bars(bar_width);
         debug_assert_op_expr!(bars.len(), ==, size_column.len());
         debug_assert_op_expr!(bars.len(), ==, percentage_column.len());
         debug_assert_op_expr!(bars.len(), ==, tree_column.len());
