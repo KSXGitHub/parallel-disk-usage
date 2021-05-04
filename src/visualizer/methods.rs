@@ -180,6 +180,7 @@ where
             Level1(u64),
             Level2(u64, u64),
             Level3(u64, u64, u64),
+            Level4(u64, u64, u64, u64),
         }
 
         impl Values {
@@ -189,17 +190,20 @@ where
                     Level0 => Level1(x),
                     Level1(a) => Level2(a, x),
                     Level2(a, b) => Level3(a, b, x),
+                    Level3(a, b, c) => Level4(a, b, c, x),
                     _ => self,
                 }
             }
 
-            fn vec3(self, z: u64) -> (u64, u64, u64) {
+            fn vec4(self, z: u64) -> (u64, u64, u64, u64) {
+                #![allow(clippy::many_single_char_names)]
                 use Values::*;
                 match self {
-                    Level0 => (z, z, z),
-                    Level1(a) => (a, z, z),
-                    Level2(a, b) => (a, b, z),
-                    Level3(a, b, c) => (a, b, c),
+                    Level0 => (z, z, z, z),
+                    Level1(a) => (a, z, z, z),
+                    Level2(a, b) => (a, b, z, z),
+                    Level3(a, b, c) => (a, b, c, z),
+                    Level4(a, b, c, d) => (a, b, c, d),
                 }
             }
         }
@@ -233,16 +237,17 @@ where
                 let current = tree.data.into();
                 debug_assert_op!(current <= total);
                 let lv0_value = rounded_div::u64(current * width, total);
-                let (lv3_value, lv2_value, lv1_value) = values.vec3(lv0_value);
+                let (lv4_value, lv3_value, lv2_value, lv1_value) = values.vec4(lv0_value);
                 debug_assert_op!(lv0_value <= lv1_value);
                 debug_assert_op!(lv1_value <= lv2_value);
                 debug_assert_op!(lv2_value <= lv3_value);
-                debug_assert_op!(lv3_value <= width);
+                debug_assert_op!(lv3_value <= lv4_value);
+                debug_assert_op!(lv4_value <= width);
                 let lv0_visible = lv0_value;
                 let lv1_visible = lv1_value - lv0_value;
                 let lv2_visible = lv2_value - lv1_value;
                 let lv3_visible = lv3_value - lv2_value;
-                let lv4_visible = width - lv3_value;
+                let lv4_visible = lv4_value - lv3_value;
                 debug_assert_op_expr!(
                     lv0_visible + lv1_visible + lv2_visible + lv3_visible + lv4_visible,
                     ==,
