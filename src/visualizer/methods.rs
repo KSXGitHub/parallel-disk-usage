@@ -242,9 +242,9 @@ where
                 let lv1_visible = lv1_value - lv0_value;
                 let lv2_visible = lv2_value - lv1_value;
                 let lv3_visible = lv3_value - lv2_value;
-                let empty_spaces = width - lv3_value;
+                let lv4_visible = width - lv3_value;
                 debug_assert_op_expr!(
-                    lv0_visible + lv1_visible + lv2_visible + lv3_visible + empty_spaces,
+                    lv0_visible + lv1_visible + lv2_visible + lv3_visible + lv4_visible,
                     ==,
                     width
                 );
@@ -253,7 +253,7 @@ where
                     level1: lv1_visible as usize,
                     level2: lv2_visible as usize,
                     level3: lv3_visible as usize,
-                    spaces: empty_spaces as usize,
+                    level4: lv4_visible as usize,
                 });
                 lv0_value
             },

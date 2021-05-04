@@ -16,7 +16,7 @@ make_const!(LEVEL0_BLOCK = '█');
 make_const!(LEVEL1_BLOCK = '▓');
 make_const!(LEVEL2_BLOCK = '▒');
 make_const!(LEVEL3_BLOCK = '░');
-make_const!(SPACE_BLOCK = ' ');
+make_const!(LEVEL4_BLOCK = ' ');
 
 /// Proportion bar.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, From, Into)]
@@ -25,7 +25,7 @@ pub struct ProportionBar {
     pub level1: usize,
     pub level2: usize,
     pub level3: usize,
-    pub spaces: usize,
+    pub level4: usize,
 }
 
 impl ProportionBar {
@@ -45,8 +45,8 @@ impl ProportionBar {
         repeat(LEVEL3_BLOCK, self.level3)
     }
 
-    pub fn display_spaces(self) -> impl Display {
-        repeat(SPACE_BLOCK, self.spaces)
+    pub fn display_level4(self) -> impl Display {
+        repeat(LEVEL4_BLOCK, self.level4)
     }
 }
 
@@ -54,8 +54,8 @@ impl Display for ProportionBar {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> Result<(), Error> {
         write!(
             formatter,
-            "{spaces}{level3}{level2}{level1}{level0}",
-            spaces = self.display_spaces(),
+            "{level4}{level3}{level2}{level1}{level0}",
+            level4 = self.display_level4(),
             level3 = self.display_level3(),
             level2 = self.display_level2(),
             level1 = self.display_level1(),
