@@ -174,33 +174,53 @@ where
     }
 
     fn visualize_bars(self, width: u64) -> Vec<ProportionBar> {
+        #[derive(Debug, Clone, Copy)]
+        enum Values {
+            Level0,
+            Level1(u64),
+            Level2(u64, u64),
+            Level3(u64, u64, u64),
+        }
+
+        impl Values {
+            fn add(self, x: u64) -> Self {
+                use Values::*;
+                match self {
+                    Level0 => Level1(x),
+                    Level1(a) => Level2(a, x),
+                    Level2(a, b) => Level3(a, b, x),
+                    _ => self,
+                }
+            }
+
+            fn vec3(self, z: u64) -> (u64, u64, u64) {
+                use Values::*;
+                match self {
+                    Level0 => (z, z, z),
+                    Level1(a) => (a, z, z),
+                    Level2(a, b) => (a, b, z),
+                    Level3(a, b, c) => (a, b, c),
+                }
+            }
+        }
+
         fn traverse<Name, Data, Act>(
             tree: &Tree<Name, Data>,
             act: &mut Act,
-            lv1_value: u64,
-            lv2_value: u64,
-            lv3_value: u64,
+            values: Values,
             remaining_depth: usize,
         ) where
             Data: Size,
-            Act: FnMut(&Tree<Name, Data>, u64, u64, u64) -> u64,
+            Act: FnMut(&Tree<Name, Data>, Values) -> u64,
         {
-            let next_lv1_value = act(tree, lv1_value, lv2_value, lv3_value);
-            let next_lv2_value = lv1_value;
-            let next_lv3_value = lv2_value;
+            let next_value = act(tree, values);
+            let next_values = values.add(next_value);
             if remaining_depth == 0 {
                 return;
             }
             let next_remaining_depth = remaining_depth - 1;
             for child in &tree.children {
-                traverse(
-                    child,
-                    act,
-                    next_lv1_value,
-                    next_lv2_value,
-                    next_lv3_value,
-                    next_remaining_depth,
-                );
+                traverse(child, act, next_values, next_remaining_depth);
             }
         }
 
@@ -209,10 +229,11 @@ where
 
         traverse(
             self.tree,
-            &mut |tree, lv1_value, lv2_value, lv3_value| {
+            &mut |tree, values| {
                 let current = tree.data.into();
                 debug_assert_op!(current <= total);
                 let lv0_value = rounded_div::u64(current * width, total);
+                let (lv3_value, lv2_value, lv1_value) = values.vec3(lv0_value);
                 debug_assert_op!(lv0_value <= lv1_value);
                 debug_assert_op!(lv1_value <= lv2_value);
                 debug_assert_op!(lv2_value <= lv3_value);
@@ -236,9 +257,7 @@ where
                 });
                 lv0_value
             },
-            width,
-            width,
-            width,
+            Values::Level0,
             self.max_depth,
         );
 
