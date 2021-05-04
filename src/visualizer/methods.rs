@@ -16,7 +16,7 @@ where
     Name: Display,
     Data: Size + Into<u64>,
 {
-    fn visualize_sizes(&self, max_depth: usize) -> PaddedColumnIter<String, char, AlignRight> {
+    fn visualize_sizes(&self) -> PaddedColumnIter<String, char, AlignRight> {
         fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, remaining_depth: usize)
         where
             Data: Size,
@@ -40,13 +40,13 @@ where
                 let value = node.data.display(self.measurement_system).to_string();
                 iter.push_back(value);
             },
-            max_depth,
+            self.max_depth,
         );
 
         iter
     }
 
-    fn visualize_percentage(&self, max_depth: usize) -> Vec<String> {
+    fn visualize_percentage(&self) -> Vec<String> {
         fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, remaining_depth: usize)
         where
             Data: Size,
@@ -74,7 +74,7 @@ where
                 let percentage = format!("{}%", percentage);
                 result.push(percentage);
             },
-            max_depth,
+            self.max_depth,
         );
 
         result
@@ -83,7 +83,6 @@ where
     fn visualize_tree(
         &self,
         max_width: usize,
-        max_depth: usize,
     ) -> PaddedColumnIter<MaybeTreeHorizontalSlice<String>, char, AlignLeft> {
         #[derive(Clone)]
         struct Param {
@@ -166,7 +165,7 @@ where
             Param {
                 node_index: 0,
                 sibling_count: 1,
-                remaining_depth: max_depth,
+                remaining_depth: self.max_depth,
                 ancestor_relative_positions: Vec::new(),
             },
         );
@@ -174,7 +173,7 @@ where
         padded_column_iter
     }
 
-    fn visualize_bars(&self, width: u64, max_depth: usize) -> Vec<ProportionBar> {
+    fn visualize_bars(&self, width: u64) -> Vec<ProportionBar> {
         fn traverse<Name, Data, Act>(
             tree: &Tree<Name, Data>,
             act: &mut Act,
@@ -240,7 +239,7 @@ where
             width,
             width,
             width,
-            max_depth,
+            self.max_depth,
         );
 
         bars
@@ -248,26 +247,26 @@ where
 
     /// Create ASCII visualization of the [tree](Tree), such visualization is meant to be
     /// printed to a terminal screen.
-    pub fn visualize(mut self, max_depth: usize) -> Vec<String> {
-        let size_column = self.visualize_sizes(max_depth);
-        let percentage_column = self.visualize_percentage(max_depth);
+    pub fn visualize(mut self) -> Vec<String> {
+        let size_column = self.visualize_sizes();
+        let percentage_column = self.visualize_percentage();
         let percentage_column_max_width = "100%".len();
         let border_cols = 3; // 4 columns, 3 borders, each border has a width of 1.
         let min_width = size_column.total_width() + percentage_column_max_width + border_cols;
         if self.max_width <= min_width {
             let extra_cols = 3; // make space for tree_column to minimize second-time re-rendering.
             self.max_width = min_width + extra_cols;
-            return self.visualize(max_depth);
+            return self.visualize();
         }
         let tree_max_width = self.max_width - min_width;
-        let tree_column = self.visualize_tree(tree_max_width, max_depth);
+        let tree_column = self.visualize_tree(tree_max_width);
         let min_width = min_width + tree_column.total_width();
         if self.max_width <= min_width {
             self.max_width = min_width + 1;
-            return self.visualize(max_depth);
+            return self.visualize();
         }
         let bar_width = self.max_width - min_width;
-        let bars = self.visualize_bars(bar_width as u64, max_depth);
+        let bars = self.visualize_bars(bar_width as u64);
         debug_assert_op_expr!(bars.len(), ==, size_column.len());
         debug_assert_op_expr!(bars.len(), ==, percentage_column.len());
         debug_assert_op_expr!(bars.len(), ==, tree_column.len());

@@ -31,6 +31,8 @@ where
     pub direction: Direction,
     /// Maximum number of characters/blocks can be placed in a line.
     pub max_width: usize,
+    /// Maximum number of levels that should be visualized.
+    pub max_depth: usize,
 }
 
 mod methods;
