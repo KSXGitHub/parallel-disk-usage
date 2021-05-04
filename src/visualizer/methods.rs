@@ -1,12 +1,25 @@
 use super::{
-    ChildPosition, MaybeTreeHorizontalSlice, Parenthood, ProportionBar, TreeHorizontalSlice,
-    TreeSkeletalComponent, Visualizer,
+    ChildPosition, Parenthood, ProportionBar, TreeHorizontalSlice, TreeSkeletalComponent,
+    Visualizer,
 };
 use crate::{size::Size, tree::Tree};
 use assert_cmp::{debug_assert_op, debug_assert_op_expr};
 use itertools::izip;
-use std::fmt::Display;
-use zero_copy_pads::{align_right, AlignLeft, AlignRight, PaddedColumnIter};
+use std::{cmp::max, fmt::Display};
+use zero_copy_pads::{align_left, align_right, AlignRight, PaddedColumnIter, Width};
+
+#[derive(Default)]
+struct TreeColumn {
+    list: Vec<Option<TreeHorizontalSlice<String>>>,
+    max_width: usize,
+}
+
+impl TreeColumn {
+    #[inline]
+    fn len(&self) -> usize {
+        self.list.len()
+    }
+}
 
 // NOTE: The 4 methods below, despite sharing the same structure, cannot be unified due to
 //       them relying on each other's `PaddedColumnIter::total_width`.
@@ -80,10 +93,7 @@ where
         result
     }
 
-    fn visualize_tree(
-        self,
-        max_width: usize,
-    ) -> PaddedColumnIter<MaybeTreeHorizontalSlice<String>, char, AlignLeft> {
+    fn visualize_tree(self, max_width: usize) -> TreeColumn {
         #[derive(Clone)]
         struct Param {
             node_index: usize,
@@ -122,7 +132,7 @@ where
             }
         }
 
-        let mut padded_column_iter = PaddedColumnIter::new(' ', AlignLeft);
+        let mut tree_column = TreeColumn::default();
 
         traverse(
             self.tree,
@@ -152,14 +162,17 @@ where
                     skeletal_component_visualization,
                     name,
                 };
-                let tree_horizontal_slice = MaybeTreeHorizontalSlice::from(
+                let tree_horizontal_slice =
                     if let Ok(()) = tree_horizontal_slice.truncate(max_width) {
                         Some(tree_horizontal_slice)
                     } else {
                         None
-                    },
-                );
-                padded_column_iter.push_back(tree_horizontal_slice);
+                    };
+                if let Some(tree_horizontal_slice) = &tree_horizontal_slice {
+                    tree_column.max_width =
+                        max(tree_column.max_width, tree_horizontal_slice.width());
+                }
+                tree_column.list.push(tree_horizontal_slice);
                 child_position
             },
             Param {
@@ -170,7 +183,7 @@ where
             },
         );
 
-        padded_column_iter
+        tree_column
     }
 
     fn visualize_bars(self, width: usize) -> Vec<ProportionBar> {
@@ -284,7 +297,7 @@ where
         }
         let tree_max_width = self.max_width - min_width;
         let tree_column = self.visualize_tree(tree_max_width);
-        let min_width = min_width + tree_column.total_width();
+        let min_width = min_width + tree_column.max_width;
         if self.max_width <= min_width {
             self.max_width = min_width + 1;
             return self.visualize();
@@ -294,16 +307,15 @@ where
         debug_assert_op_expr!(bars.len(), ==, size_column.len());
         debug_assert_op_expr!(bars.len(), ==, percentage_column.len());
         debug_assert_op_expr!(bars.len(), ==, tree_column.len());
+        let tree_column_max_width = tree_column.max_width;
         izip!(
             size_column,
             percentage_column.into_iter(),
-            tree_column.into_iter(),
+            tree_column.list.into_iter(),
             bars.into_iter(),
         )
         .filter_map(|(size, percentage, tree_horizontal_slice, bar)| {
-            if let Some(tree_horizontal_slice) =
-                TreeHorizontalSlice::resolve_padded_maybe(tree_horizontal_slice)
-            {
+            if let Some(tree_horizontal_slice) = tree_horizontal_slice {
                 Some((size, percentage, tree_horizontal_slice, bar))
             } else {
                 None
@@ -313,7 +325,7 @@ where
             format!(
                 "{size} {tree}│{bar}│{ratio}",
                 size = size,
-                tree = tree_horizontal_slice,
+                tree = align_left(tree_horizontal_slice, tree_column_max_width),
                 bar = bar,
                 ratio = align_right(percentage, percentage_column_max_width),
             )

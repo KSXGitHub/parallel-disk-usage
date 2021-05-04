@@ -1,9 +1,9 @@
 use super::{ChildPosition, Direction, Parenthood};
-use derive_more::{AsMut, AsRef, Deref, DerefMut, Display, From, Into};
+use derive_more::{AsRef, Deref, Display, Into};
 use fmt_iter::FmtIter;
 use pipe_trait::Pipe;
 use std::fmt::{Display, Error, Formatter};
-use zero_copy_pads::{ExcessHandler, PaddedValue, Width};
+use zero_copy_pads::Width;
 
 /// Determine 3 characters to use as skeletal component that connect a node
 /// to the rest of the tree.
@@ -88,33 +88,6 @@ impl<Name: Width> TreeHorizontalSlice<Name> {
             })
             .pipe(FmtIter::from)
     }
-
-    #[inline]
-    pub(super) fn resolve_padded_maybe<PadBlock, HandleExcess, Pad>(
-        source: PaddedValue<MaybeTreeHorizontalSlice<Name>, PadBlock, HandleExcess, Pad>,
-    ) -> Option<PaddedValue<Self, PadBlock, HandleExcess, Pad>>
-    where
-        PadBlock: Display,
-        HandleExcess:
-            ExcessHandler<MaybeTreeHorizontalSlice<Name>, PadBlock> + ExcessHandler<Self, PadBlock>,
-        Pad: zero_copy_pads::Pad<MaybeTreeHorizontalSlice<Name>, PadBlock>
-            + zero_copy_pads::Pad<Self, PadBlock>,
-    {
-        let PaddedValue {
-            value,
-            pad_block,
-            total_width,
-            pad,
-            handle_excess,
-        } = source;
-        value.0.map(|value| PaddedValue {
-            value,
-            pad_block,
-            total_width,
-            pad,
-            handle_excess,
-        })
-    }
 }
 
 impl<Name: Width> Display for TreeHorizontalSlice<Name> {
@@ -155,31 +128,6 @@ impl TreeHorizontalSlice<String> {
 
         self.name.truncate(max_width - min_width);
         self.name += "...";
-        Ok(())
-    }
-}
-
-/// [`Option`] of [`TreeHorizontalSlice`] that can be inserted into
-/// [`PaddedColumnIter`](zero_copy_pads::PaddedColumnIter).
-#[derive(Debug, Clone, PartialEq, Eq, AsRef, Deref, AsMut, DerefMut, From, Into)]
-pub struct MaybeTreeHorizontalSlice<Name: Width>(Option<TreeHorizontalSlice<Name>>);
-
-impl<Name: Width> Width for MaybeTreeHorizontalSlice<Name> {
-    fn width(&self) -> usize {
-        if let Some(content) = self.as_ref() {
-            content.width()
-        } else {
-            0
-        }
-    }
-}
-
-impl<Name: Width> Display for MaybeTreeHorizontalSlice<Name> {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> Result<(), Error> {
-        if let Some(content) = self.as_ref() {
-            content.fmt(formatter)?;
-        }
-
         Ok(())
     }
 }
