@@ -1,6 +1,7 @@
 use super::{ChildPosition, Direction, Parenthood};
 use derive_more::{AsMut, AsRef, Deref, DerefMut, Display, From, Into};
-use fmt_iter::repeat;
+use fmt_iter::FmtIter;
+use pipe_trait::Pipe;
 use std::fmt::{Display, Error, Formatter};
 use zero_copy_pads::{ExcessHandler, PaddedValue, Width};
 
@@ -54,17 +55,22 @@ impl Width for TreeSkeletalComponentVisualization {
 }
 
 /// Horizontal slice of a tree of the height of exactly 1 line of text.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TreeHorizontalSlice<Name: Width> {
-    pub(super) depth: usize,
+    pub(super) ancestor_relative_positions: Vec<ChildPosition>,
     pub(super) skeleton: TreeSkeletalComponentVisualization,
     pub(super) name: Name,
 }
 
 impl<Name: Width> TreeHorizontalSlice<Name> {
     #[inline]
+    fn depth(&self) -> usize {
+        self.ancestor_relative_positions.len()
+    }
+
+    #[inline]
     fn indent_width(&self) -> usize {
-        self.depth * 2
+        self.depth() * 2
     }
 
     #[inline]
@@ -73,8 +79,14 @@ impl<Name: Width> TreeHorizontalSlice<Name> {
     }
 
     #[inline]
-    fn indent(&self) -> impl Display {
-        repeat(' ', self.indent_width())
+    fn indent(&self) -> impl Display + '_ {
+        self.ancestor_relative_positions
+            .iter()
+            .map(|position| match position {
+                ChildPosition::Init => "│ ",
+                ChildPosition::Last => "  ",
+            })
+            .pipe(FmtIter::from)
     }
 
     #[inline]
@@ -149,7 +161,7 @@ impl TreeHorizontalSlice<String> {
 
 /// [`Option`] of [`TreeHorizontalSlice`] that can be inserted into
 /// [`PaddedColumnIter`](zero_copy_pads::PaddedColumnIter).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, AsRef, Deref, AsMut, DerefMut, From, Into)]
+#[derive(Debug, Clone, PartialEq, Eq, AsRef, Deref, AsMut, DerefMut, From, Into)]
 pub struct MaybeTreeHorizontalSlice<Name: Width>(Option<TreeHorizontalSlice<Name>>);
 
 impl<Name: Width> Width for MaybeTreeHorizontalSlice<Name> {

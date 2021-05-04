@@ -85,26 +85,30 @@ where
         max_width: usize,
         max_depth: usize,
     ) -> PaddedColumnIter<MaybeTreeHorizontalSlice<String>, char, AlignLeft> {
-        #[derive(Clone, Copy)]
+        #[derive(Clone)]
         struct Param {
             node_index: usize,
             sibling_count: usize,
-            depth: usize,
             remaining_depth: usize,
+            ancestor_relative_positions: Vec<ChildPosition>,
         }
 
         fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, param: Param)
         where
             Data: Size,
-            Act: FnMut(&Tree<Name, Data>, Param),
+            Act: FnMut(&Tree<Name, Data>, Param) -> ChildPosition,
         {
-            act(tree, param);
+            let parent_relative_position = act(tree, param.clone());
             if param.remaining_depth == 0 {
                 return;
             }
             let sibling_count = tree.children.len();
-            let depth = param.depth + 1;
             let remaining_depth = param.remaining_depth - 1;
+            let ancestor_relative_positions = || {
+                let mut result = param.ancestor_relative_positions.clone();
+                result.push(parent_relative_position);
+                result
+            };
             for (node_index, child) in tree.children.iter().enumerate() {
                 traverse(
                     child,
@@ -112,8 +116,8 @@ where
                     Param {
                         node_index,
                         sibling_count,
-                        depth,
                         remaining_depth,
+                        ancestor_relative_positions: ancestor_relative_positions(),
                     },
                 );
             }
@@ -127,26 +131,27 @@ where
                 let Param {
                     node_index,
                     sibling_count,
-                    depth,
                     remaining_depth,
+                    ancestor_relative_positions,
                 } = param;
                 debug_assert_op!(sibling_count > node_index);
+                let child_position = ChildPosition::from_index(node_index, sibling_count);
                 let parenthood = if remaining_depth == 0 {
                     Parenthood::Childless
                 } else {
                     Parenthood::from_node(tree)
                 };
                 let skeleton = TreeSkeletalComponent {
-                    child_position: ChildPosition::from_index(node_index, sibling_count),
                     direction: self.direction,
+                    child_position,
                     parenthood,
                 }
                 .visualize();
                 let name = tree.name.to_string();
                 let mut tree_horizontal_slice = TreeHorizontalSlice {
-                    depth,
                     skeleton,
                     name,
+                    ancestor_relative_positions,
                 };
                 let tree_horizontal_slice = MaybeTreeHorizontalSlice::from(
                     if let Ok(()) = tree_horizontal_slice.truncate(max_width) {
@@ -156,12 +161,13 @@ where
                     },
                 );
                 padded_column_iter.push_back(tree_horizontal_slice);
+                child_position
             },
             Param {
                 node_index: 0,
                 sibling_count: 1,
-                depth: 0,
                 remaining_depth: max_depth,
+                ancestor_relative_positions: Vec::new(),
             },
         );
 
