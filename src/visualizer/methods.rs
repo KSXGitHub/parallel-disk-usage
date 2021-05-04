@@ -90,24 +90,21 @@ where
             index: usize,
             count: usize,
             depth: usize,
+            remaining_depth: usize,
         }
 
-        fn traverse<Name, Data, Act>(
-            tree: &Tree<Name, Data>,
-            act: &mut Act,
-            param: Param,
-            remaining_depth: usize,
-        ) where
+        fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, param: Param)
+        where
             Data: Size,
             Act: FnMut(&Tree<Name, Data>, Param),
         {
-            if remaining_depth == 0 {
+            if param.remaining_depth == 0 {
                 return;
             }
             act(tree, param);
             let count = tree.children.len();
             let depth = param.depth + 1;
-            let next_remaining_depth = remaining_depth - 1;
+            let remaining_depth = param.remaining_depth - 1;
             for (index, child) in tree.children.iter().enumerate() {
                 traverse(
                     child,
@@ -116,8 +113,8 @@ where
                         index,
                         count,
                         depth,
+                        remaining_depth,
                     },
-                    next_remaining_depth,
                 );
             }
         }
@@ -131,12 +128,18 @@ where
                     index,
                     count,
                     depth,
+                    remaining_depth,
                 } = param;
                 debug_assert_op!(count > index);
+                let parenthood = if remaining_depth > 1 {
+                    Parenthood::from_node(tree)
+                } else {
+                    Parenthood::Childless
+                };
                 let skeleton = TreeSkeletalComponent {
                     child_position: ChildPosition::from_index(index, count),
                     direction: self.direction,
-                    parenthood: Parenthood::from_node(tree),
+                    parenthood,
                 }
                 .visualize();
                 let name = tree.name.to_string();
@@ -158,8 +161,8 @@ where
                 index: 0,
                 count: 1,
                 depth: 0,
+                remaining_depth: max_depth,
             },
-            max_depth,
         );
 
         padded_column_iter
