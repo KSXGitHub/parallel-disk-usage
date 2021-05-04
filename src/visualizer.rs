@@ -18,13 +18,13 @@ use std::fmt::Display;
 
 /// Visualize a [`Tree`].
 #[derive(Debug)]
-pub struct Visualizer<Name, Data>
+pub struct Visualizer<'a, Name, Data>
 where
     Name: Display,
     Data: Size,
 {
     /// The tree to visualize.
-    pub tree: Tree<Name, Data>,
+    pub tree: &'a Tree<Name, Data>,
     /// The units used to display `tree.data`.
     pub measurement_system: MeasurementSystem,
     /// The direction of the visualization of the tree.
@@ -33,6 +33,23 @@ where
     pub max_width: usize,
     /// Maximum number of levels that should be visualized.
     pub max_depth: usize,
+}
+
+impl<'a, Name, Data> Clone for Visualizer<'a, Name, Data>
+where
+    Name: Display,
+    Data: Size,
+{
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<'a, Name, Data> Copy for Visualizer<'a, Name, Data>
+where
+    Name: Display,
+    Data: Size,
+{
 }
 
 mod methods;

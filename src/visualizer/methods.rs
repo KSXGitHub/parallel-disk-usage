@@ -11,12 +11,12 @@ use zero_copy_pads::{align_right, AlignLeft, AlignRight, PaddedColumnIter};
 // NOTE: The 4 methods below, despite sharing the same structure, cannot be unified due to
 //       them relying on each other's `PaddedColumnIter::total_width`.
 
-impl<Name, Data> Visualizer<Name, Data>
+impl<'a, Name, Data> Visualizer<'a, Name, Data>
 where
     Name: Display,
     Data: Size + Into<u64>,
 {
-    fn visualize_sizes(&self) -> PaddedColumnIter<String, char, AlignRight> {
+    fn visualize_sizes(self) -> PaddedColumnIter<String, char, AlignRight> {
         fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, remaining_depth: usize)
         where
             Data: Size,
@@ -35,7 +35,7 @@ where
         let mut iter = PaddedColumnIter::new(' ', AlignRight);
 
         traverse(
-            &self.tree,
+            self.tree,
             &mut |node| {
                 let value = node.data.display(self.measurement_system).to_string();
                 iter.push_back(value);
@@ -46,7 +46,7 @@ where
         iter
     }
 
-    fn visualize_percentage(&self) -> Vec<String> {
+    fn visualize_percentage(self) -> Vec<String> {
         fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, remaining_depth: usize)
         where
             Data: Size,
@@ -66,7 +66,7 @@ where
         let mut result = Vec::new();
 
         traverse(
-            &self.tree,
+            self.tree,
             &mut |node| {
                 let current = node.data.into();
                 debug_assert_op!(current <= total);
@@ -81,7 +81,7 @@ where
     }
 
     fn visualize_tree(
-        &self,
+        self,
         max_width: usize,
     ) -> PaddedColumnIter<MaybeTreeHorizontalSlice<String>, char, AlignLeft> {
         #[derive(Clone)]
@@ -125,7 +125,7 @@ where
         let mut padded_column_iter = PaddedColumnIter::new(' ', AlignLeft);
 
         traverse(
-            &self.tree,
+            self.tree,
             &mut |tree, param| {
                 let Param {
                     node_index,
@@ -173,7 +173,7 @@ where
         padded_column_iter
     }
 
-    fn visualize_bars(&self, width: u64) -> Vec<ProportionBar> {
+    fn visualize_bars(self, width: u64) -> Vec<ProportionBar> {
         fn traverse<Name, Data, Act>(
             tree: &Tree<Name, Data>,
             act: &mut Act,
@@ -208,7 +208,7 @@ where
         let mut bars = Vec::new();
 
         traverse(
-            &self.tree,
+            self.tree,
             &mut |tree, lv1_value, lv2_value, lv3_value| {
                 let current = tree.data.into();
                 debug_assert_op!(current <= total);
