@@ -248,23 +248,25 @@ where
 
     /// Create ASCII visualization of the [tree](Tree), such visualization is meant to be
     /// printed to a terminal screen.
-    pub fn visualize(&self, width: usize, max_depth: usize) -> Vec<String> {
+    pub fn visualize(mut self, max_depth: usize) -> Vec<String> {
         let size_column = self.visualize_sizes(max_depth);
         let percentage_column = self.visualize_percentage(max_depth);
         let percentage_column_max_width = "100%".len();
         let border_cols = 3; // 4 columns, 3 borders, each border has a width of 1.
         let min_width = size_column.total_width() + percentage_column_max_width + border_cols;
-        if width <= min_width {
+        if self.max_width <= min_width {
             let extra_cols = 3; // make space for tree_column to minimize second-time re-rendering.
-            return self.visualize(min_width + extra_cols, max_depth);
+            self.max_width = min_width + extra_cols;
+            return self.visualize(max_depth);
         }
-        let tree_max_width = width - min_width;
+        let tree_max_width = self.max_width - min_width;
         let tree_column = self.visualize_tree(tree_max_width, max_depth);
         let min_width = min_width + tree_column.total_width();
-        if width <= min_width {
-            return self.visualize(min_width + 1, max_depth);
+        if self.max_width <= min_width {
+            self.max_width = min_width + 1;
+            return self.visualize(max_depth);
         }
-        let bar_width = width - min_width;
+        let bar_width = self.max_width - min_width;
         let bars = self.visualize_bars(bar_width as u64, max_depth);
         debug_assert_op_expr!(bars.len(), ==, size_column.len());
         debug_assert_op_expr!(bars.len(), ==, percentage_column.len());

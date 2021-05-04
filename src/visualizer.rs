@@ -30,7 +30,7 @@ where
     /// The direction of the visualization of the tree.
     pub direction: Direction,
     /// Maximum number of characters/blocks can be placed in a line.
-    pub max_width: u16,
+    pub max_width: usize,
 }
 
 mod methods;
