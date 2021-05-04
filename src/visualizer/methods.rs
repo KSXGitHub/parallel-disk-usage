@@ -87,8 +87,8 @@ where
     ) -> PaddedColumnIter<MaybeTreeHorizontalSlice<String>, char, AlignLeft> {
         #[derive(Clone, Copy)]
         struct Param {
-            index: usize,
-            count: usize,
+            node_index: usize,
+            sibling_count: usize,
             depth: usize,
             remaining_depth: usize,
         }
@@ -102,16 +102,16 @@ where
                 return;
             }
             act(tree, param);
-            let count = tree.children.len();
+            let sibling_count = tree.children.len();
             let depth = param.depth + 1;
             let remaining_depth = param.remaining_depth - 1;
-            for (index, child) in tree.children.iter().enumerate() {
+            for (node_index, child) in tree.children.iter().enumerate() {
                 traverse(
                     child,
                     act,
                     Param {
-                        index,
-                        count,
+                        node_index,
+                        sibling_count,
                         depth,
                         remaining_depth,
                     },
@@ -125,19 +125,19 @@ where
             &self.tree,
             &mut |tree, param| {
                 let Param {
-                    index,
-                    count,
+                    node_index,
+                    sibling_count,
                     depth,
                     remaining_depth,
                 } = param;
-                debug_assert_op!(count > index);
+                debug_assert_op!(sibling_count > node_index);
                 let parenthood = if remaining_depth > 1 {
                     Parenthood::from_node(tree)
                 } else {
                     Parenthood::Childless
                 };
                 let skeleton = TreeSkeletalComponent {
-                    child_position: ChildPosition::from_index(index, count),
+                    child_position: ChildPosition::from_index(node_index, sibling_count),
                     direction: self.direction,
                     parenthood,
                 }
@@ -158,8 +158,8 @@ where
                 padded_column_iter.push_back(tree_horizontal_slice);
             },
             Param {
-                index: 0,
-                count: 1,
+                node_index: 0,
+                sibling_count: 1,
                 depth: 0,
                 remaining_depth: max_depth,
             },
