@@ -12,9 +12,19 @@ pub struct Tree<Name, Data: Size> {
 }
 
 impl<Name, Data: Size> Tree<Name, Data> {
+    /// Extract name
+    pub fn name(&self) -> &Name {
+        &self.name
+    }
+
     /// Extract total disk usage
-    fn data(&self) -> Data {
+    pub fn data(&self) -> Data {
         self.data
+    }
+
+    /// Extract children
+    pub fn children(&self) -> &Vec<Self> {
+        &self.children
     }
 
     /// Create a tree from a collection of children.

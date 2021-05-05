@@ -88,7 +88,7 @@ where
         data,
         mut children,
     } = tree;
-    children.sort_by(|left, right| left.name.cmp(&right.name));
+    children.sort_by(|left, right| left.name().cmp(right.name()));
     let children = children.into_iter().map(sanitize_tree).collect();
     Tree {
         name,

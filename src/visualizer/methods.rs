@@ -40,7 +40,7 @@ where
                 return;
             }
             let next_remaining_depth = remaining_depth - 1;
-            for child in &tree.children {
+            for child in tree.children() {
                 traverse(child, act, next_remaining_depth);
             }
         }
@@ -50,7 +50,7 @@ where
         traverse(
             self.tree,
             &mut |node| {
-                let value = node.data.display(self.measurement_system).to_string();
+                let value = node.data().display(self.measurement_system).to_string();
                 iter.push_back(value);
             },
             self.max_depth,
@@ -70,18 +70,18 @@ where
                 return;
             }
             let next_remaining_depth = remaining_depth - 1;
-            for child in &tree.children {
+            for child in tree.children() {
                 traverse(child, act, next_remaining_depth);
             }
         }
 
-        let total = self.tree.data.into();
+        let total = self.tree.data().into();
         let mut result = Vec::new();
 
         traverse(
             self.tree,
             &mut |node| {
-                let current = node.data.into();
+                let current = node.data().into();
                 debug_assert_op!(current <= total);
                 let percentage = rounded_div::u64(current * 100, total);
                 let percentage = format!("{}%", percentage);
@@ -111,14 +111,14 @@ where
             if param.remaining_depth == 0 {
                 return;
             }
-            let sibling_count = tree.children.len();
+            let sibling_count = tree.children().len();
             let remaining_depth = param.remaining_depth - 1;
             let ancestor_relative_positions = || {
                 let mut result = param.ancestor_relative_positions.clone();
                 result.push(parent_relative_position);
                 result
             };
-            for (node_index, child) in tree.children.iter().enumerate() {
+            for (node_index, child) in tree.children().iter().enumerate() {
                 traverse(
                     child,
                     act,
@@ -156,7 +156,7 @@ where
                     parenthood,
                 }
                 .visualize();
-                let name = tree.name.to_string();
+                let name = tree.name().to_string();
                 let mut tree_horizontal_slice = TreeHorizontalSlice {
                     ancestor_relative_positions,
                     skeletal_component_visualization,
@@ -236,18 +236,18 @@ where
                 return;
             }
             let next_remaining_depth = remaining_depth - 1;
-            for child in &tree.children {
+            for child in tree.children() {
                 traverse(child, act, next_values, next_remaining_depth);
             }
         }
 
-        let total = self.tree.data.into();
+        let total = self.tree.data().into();
         let mut bars = Vec::new();
 
         traverse(
             self.tree,
             &mut |tree, values| {
-                let current = tree.data.into();
+                let current = tree.data().into();
                 debug_assert_op!(current <= total);
                 let lv0_value = rounded_div::u64(current * (width as u64), total) as usize;
                 let (lv4_value, lv3_value, lv2_value, lv1_value) = values.vec4(lv0_value);

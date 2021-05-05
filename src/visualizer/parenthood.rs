@@ -12,7 +12,7 @@ pub enum Parenthood {
 impl Parenthood {
     /// Deduce parenthood of a node.
     pub fn from_node<Name, Data: Size>(node: &Tree<Name, Data>) -> Self {
-        if node.children.is_empty() {
+        if node.children().is_empty() {
             Parenthood::Childless
         } else {
             Parenthood::Parent
