@@ -37,6 +37,57 @@ macro_rules! test_case {
     };
 }
 
+fn typical_tree<Data>(size_per_dir: Data, file_size_factor: u64) -> Tree<&'static str, Data>
+where
+    Data: Size + Ord + From<u64> + Send,
+{
+    let dir = Tree::<&'static str, Data>::fixed_size_dir_constructor(size_per_dir);
+    let file =
+        |name: &'static str, size: u64| Tree::file(name, Data::from(size * file_size_factor));
+    dir(
+        "root",
+        vec![
+            file("foo", 2530),
+            file("bar", 52),
+            dir(
+                "hello",
+                vec![dir("world", vec![file("hello", 45), file("world", 54)])],
+            ),
+            dir("empty dir", vec![]),
+            dir(
+                "directory with a really long name",
+                vec![dir(
+                    "subdirectory with a really long name",
+                    vec![file("file with a really long name", 475)],
+                )],
+            ),
+        ],
+    )
+    .into_par_sorted(|left, right| left.data().cmp(&right.data()).reverse())
+}
+
+test_case! {
+    typical_bottom_up_binary where
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        max_depth = 10,
+        max_width = 150,
+        direction = BottomUp,
+        measurement_system = Binary,
+        expected = text_block_fnl! {
+            " 52B   ┌──bar                                   │                                                                                          │  0%"
+            "  2K   ├──foo                                   │                                                                                  ████████│  9%"
+            "  4K   ├──empty dir                             │                                                                             █████████████│ 15%"
+            " 45B   │   ┌──hello                             │                                                               ░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒│  0%"
+            " 54B   │   ├──world                             │                                                               ░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒│  0%"
+            "  4K   │ ┌─┴world                               │                                                               ░░░░░░░░░░░░░██████████████│ 15%"
+            "  8K   ├─┴hello                                 │                                                               ███████████████████████████│ 30%"
+            "475B   │   ┌──file with a really long name      │                                                              ░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒██│  2%"
+            "  4K   │ ┌─┴subdirectory with a really long name│                                                              ░░░░░░░░░░░░░███████████████│ 16%"
+            "  8K   ├─┴directory with a really long name     │                                                              ████████████████████████████│ 31%"
+            " 27K ┌─┴root                                    │██████████████████████████████████████████████████████████████████████████████████████████│100%"
+        },
+}
+
 fn nested_tree<Data: Size>(
     dir_names: &[&'static str],
     size_per_dir: Data,
