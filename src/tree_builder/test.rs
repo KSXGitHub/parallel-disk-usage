@@ -1,6 +1,7 @@
 use crate::{
     size::Bytes,
-    tree_builder::{Info, Tree, TreeBuilder},
+    tree::{Tree, TreeReflection},
+    tree_builder::{Info, TreeBuilder},
 };
 use build_fs_tree::{dir, file, FileSystemTree};
 use derive_more::From;
@@ -62,27 +63,27 @@ impl SampleTree {
 
 #[test]
 fn flat() {
-    let actual = SampleTree::create_sample().tree("flat");
-    let expected = Tree {
+    let actual = SampleTree::create_sample().tree("flat").into_reflection();
+    let expected = TreeReflection {
         name: "flat".to_string(),
         data: len("") + len("a") + len("ab") + len("abc") + SAMPLE_DIR_SIZE,
         children: vec![
-            Tree {
+            TreeReflection {
                 name: "0".to_string(),
                 data: len(""),
                 children: Vec::new(),
             },
-            Tree {
+            TreeReflection {
                 name: "1".to_string(),
                 data: len("a"),
                 children: Vec::new(),
             },
-            Tree {
+            TreeReflection {
                 name: "2".to_string(),
                 data: len("ab"),
                 children: Vec::new(),
             },
-            Tree {
+            TreeReflection {
                 name: "3".to_string(),
                 data: len("abc"),
                 children: Vec::new(),
@@ -94,14 +95,14 @@ fn flat() {
 
 #[test]
 fn nested() {
-    let actual = SampleTree::create_sample().tree("nested");
-    let expected = Tree {
+    let actual = SampleTree::create_sample().tree("nested").into_reflection();
+    let expected = TreeReflection {
         name: "nested".to_string(),
         data: len("abcdef") + SAMPLE_DIR_SIZE + SAMPLE_DIR_SIZE,
-        children: vec![Tree {
+        children: vec![TreeReflection {
             name: "0".to_string(),
             data: len("abcdef") + SAMPLE_DIR_SIZE,
-            children: vec![Tree {
+            children: vec![TreeReflection {
                 name: "1".to_string(),
                 data: len("abcdef"),
                 children: Vec::new(),
@@ -113,8 +114,10 @@ fn nested() {
 
 #[test]
 fn empty_dir() {
-    let actual = SampleTree::create_sample().tree("empty-dir");
-    let expected = Tree {
+    let actual = SampleTree::create_sample()
+        .tree("empty-dir")
+        .into_reflection();
+    let expected = TreeReflection {
         name: "empty-dir".to_string(),
         data: SAMPLE_DIR_SIZE,
         children: Vec::new(),
