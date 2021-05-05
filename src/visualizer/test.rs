@@ -30,6 +30,8 @@ macro_rules! test_case {
             .to_string();
             let expected = $expected;
             eprintln!("\nACTUAL:\n{}\n", &actual);
+            let actual: Vec<_> = actual.split('\n').collect();
+            let expected: Vec<_> = expected.split('\n').collect();
             assert_eq!(actual, expected);
         }
     };
