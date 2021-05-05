@@ -60,7 +60,7 @@ where
                 join_path,
                 post_process_children,
             })
-            .map(Into::<Self>::into)
+            .map(Self::from)
             .collect();
 
         post_process_children(&mut children);
