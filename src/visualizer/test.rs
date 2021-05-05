@@ -5,7 +5,12 @@ use crate::{
     tree::Tree,
 };
 use pretty_assertions::assert_eq;
+use std::cmp::Ordering;
 use text_block_macros::text_block_fnl;
+
+fn order_tree<Name, Data: Size>(left: &Tree<Name, Data>, right: &Tree<Name, Data>) -> Ordering {
+    left.data().cmp(&right.data()).reverse()
+}
 
 macro_rules! test_case {
     (
@@ -63,7 +68,7 @@ where
             ),
         ],
     )
-    .into_par_sorted(|left, right| left.data().cmp(&right.data()).reverse())
+    .into_par_sorted(order_tree)
 }
 
 test_case! {
