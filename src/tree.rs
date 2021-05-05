@@ -1,4 +1,6 @@
 use super::size::Size;
+use rayon::prelude::*;
+use std::cmp::Ordering;
 
 /// Disk usage data of a filesystem tree.
 #[derive(Debug, PartialEq, Eq)]
@@ -54,6 +56,29 @@ impl<Name, Data: Size> Tree<Name, Data> {
     /// Create reflection.
     pub fn into_reflection(self) -> TreeReflection<Name, Data> {
         self.into()
+    }
+
+    /// Sort all descendants recursively, in parallel.
+    pub fn par_sort_by(&mut self, compare: impl Fn(&Self, &Self) -> Ordering + Copy + Sync)
+    where
+        Self: Send,
+    {
+        self.children
+            .par_iter_mut()
+            .for_each(|child| child.par_sort_by(compare));
+        self.children.sort_by(compare);
+    }
+
+    /// Process the tree via [`par_sort_by`](Self::par_sort_by) method.
+    pub fn into_par_sorted(
+        mut self,
+        compare: impl Fn(&Self, &Self) -> Ordering + Copy + Sync,
+    ) -> Self
+    where
+        Self: Send,
+    {
+        self.par_sort_by(compare);
+        self
     }
 }
 
