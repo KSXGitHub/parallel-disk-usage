@@ -52,7 +52,7 @@ fn nested_tree<Data: Size>(
 }
 
 test_case! {
-    nested where
+    nested_bottom_up_binary where
         tree = nested_tree::<Bytes>(
             &["a", "b", "c", "d", "e", "f"],
             4096.into(),
