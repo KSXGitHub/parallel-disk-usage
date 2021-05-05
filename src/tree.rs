@@ -43,6 +43,14 @@ impl<Name, Data: Size> Tree<Name, Data> {
         }
     }
 
+    /// Create a directory constructor of fixed inode size.
+    pub fn fixed_size_dir_constructor(inode_size: Data) -> impl Fn(Name, Vec<Self>) -> Self
+    where
+        Data: Copy,
+    {
+        move |name, children| Tree::dir(name, inode_size, children)
+    }
+
     /// Create reflection.
     pub fn into_reflection(self) -> TreeReflection<Name, Data> {
         self.into()
