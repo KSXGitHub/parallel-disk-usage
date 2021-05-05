@@ -7,6 +7,34 @@ use crate::{
 use pretty_assertions::assert_eq;
 use text_block_macros::text_block_fnl;
 
+macro_rules! test_case {
+    (
+        $name:ident where
+        tree = $tree:expr,
+        max_depth = $max_depth:expr,
+        max_width = $max_width:expr,
+        direction = $direction:ident,
+        measurement_system = $measurement_system:ident,
+        expected = $expected:expr,
+    ) => {
+        #[test]
+        fn $name() {
+            let tree = $tree;
+            let actual = Visualizer {
+                tree: &tree,
+                max_depth: $max_depth,
+                max_width: $max_width,
+                direction: Direction::$direction,
+                measurement_system: MeasurementSystem::$measurement_system,
+            }
+            .to_string();
+            let expected = $expected;
+            eprintln!("\nACTUAL:\n{}\n", &actual);
+            assert_eq!(actual, expected);
+        }
+    };
+}
+
 fn nested_tree<Data: Size>(
     dir_names: &[&'static str],
     size_per_dir: Data,
@@ -21,31 +49,25 @@ fn nested_tree<Data: Size>(
     }
 }
 
-#[test]
-fn nested() {
-    let tree = nested_tree::<Bytes>(
-        &["a", "b", "c", "d", "e", "f"],
-        4096.into(),
-        "z",
-        1024.into(),
-    );
-    let actual = Visualizer {
-        tree: &tree,
-        direction: Direction::BottomUp,
-        max_depth: 10,
-        max_width: 150,
-        measurement_system: MeasurementSystem::Binary,
-    }
-    .to_string();
-    let expected = text_block_fnl! {
-        " 1K             ┌──z│                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████│  4%"
-        " 5K           ┌─┴f  │                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓████████████████████████│ 20%"
-        " 9K         ┌─┴e    │                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓██████████████████████████████████████████│ 36%"
-        "13K       ┌─┴d      │                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒█████████████████████████████████████████████████████████████│ 52%"
-        "17K     ┌─┴c        │                   ░░░░░░░░░░░░░░░░░░░████████████████████████████████████████████████████████████████████████████████│ 68%"
-        "21K   ┌─┴b          │                   ███████████████████████████████████████████████████████████████████████████████████████████████████│ 84%"
-        "25K ┌─┴a            │██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████│100%"
-    };
-    eprintln!("\nACTUAL:\n{}\n", &actual);
-    assert_eq!(actual, expected);
+test_case! {
+    nested where
+        tree = nested_tree::<Bytes>(
+            &["a", "b", "c", "d", "e", "f"],
+            4096.into(),
+            "z",
+            1024.into(),
+        ),
+        max_depth = 10,
+        max_width = 150,
+        direction = BottomUp,
+        measurement_system = Binary,
+        expected = text_block_fnl! {
+            " 1K             ┌──z│                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████│  4%"
+            " 5K           ┌─┴f  │                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓████████████████████████│ 20%"
+            " 9K         ┌─┴e    │                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓██████████████████████████████████████████│ 36%"
+            "13K       ┌─┴d      │                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒█████████████████████████████████████████████████████████████│ 52%"
+            "17K     ┌─┴c        │                   ░░░░░░░░░░░░░░░░░░░████████████████████████████████████████████████████████████████████████████████│ 68%"
+            "21K   ┌─┴b          │                   ███████████████████████████████████████████████████████████████████████████████████████████████████│ 84%"
+            "25K ┌─┴a            │██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████│100%"
+        },
 }
