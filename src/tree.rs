@@ -27,26 +27,14 @@ impl<Name, Data: Size> Tree<Name, Data> {
         &self.children
     }
 
-    /// Create a tree from a collection of children.
-    ///
-    /// Total disk usage of the subtrees will be assigned to `data`,
-    /// this `data` does not include the size of the folder itself,
-    /// use [`Self::add_dir_size`] to include it.
-    pub fn from_children(name: Name, children: Vec<Self>) -> Self {
-        let data = children.iter().map(Tree::data).sum();
+    /// Create a tree representation of a directory.
+    pub fn dir(name: Name, inode_size: Data, children: Vec<Self>) -> Self {
+        let data = inode_size + children.iter().map(Tree::data).sum();
         Tree {
             name,
             data,
             children,
         }
-    }
-
-    /// Add missing directory size.
-    ///
-    /// This function is to be called after [`Self::from_children`].
-    pub fn add_dir_size(mut self, dir_size: Data) -> Self {
-        self.data += dir_size;
-        self
     }
 
     /// Create a tree representation of a file.

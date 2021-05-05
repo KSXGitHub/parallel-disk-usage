@@ -55,7 +55,7 @@ where
             .map(Into::<Self>::into)
             .collect();
 
-        Tree::from_children(name, children).add_dir_size(data)
+        Tree::dir(name, data, children)
     }
 }
 

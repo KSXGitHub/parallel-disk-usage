@@ -15,7 +15,7 @@ fn nested_tree<Data: Size>(
 ) -> Tree<&'static str, Data> {
     if let Some((head, tail)) = dir_names.split_first() {
         let child = nested_tree(tail, size_per_dir, file_name, file_size);
-        Tree::from_children(*head, vec![child]).add_dir_size(size_per_dir)
+        Tree::dir(*head, size_per_dir, vec![child])
     } else {
         Tree::file(file_name, file_size)
     }
