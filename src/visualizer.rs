@@ -35,3 +35,6 @@ where
 mod copy;
 mod display;
 mod methods;
+
+#[cfg(test)]
+mod test;
