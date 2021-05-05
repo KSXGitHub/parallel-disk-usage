@@ -57,6 +57,7 @@ impl SampleTree {
                 }
             },
             join_path: |prefix, name| format!("{}{}{}", prefix, SAMPLE_SEPARATOR, name),
+            post_process_children: |_| {},
         })
     }
 }

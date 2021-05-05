@@ -51,6 +51,7 @@ fn progress_reports() {
             |error| panic!("Unexpected call to report_error: {:?}", error),
         ),
         root: workspace.join("nested"),
+        post_process_children,
     });
     macro_rules! scanned_total {
         ($(,)?) => {
