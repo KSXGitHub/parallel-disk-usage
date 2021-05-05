@@ -5,7 +5,10 @@ use super::{
 use crate::{size::Size, tree::Tree};
 use assert_cmp::{debug_assert_op, debug_assert_op_expr};
 use itertools::izip;
-use std::{cmp::max, fmt::Display};
+use std::{
+    cmp::{max, min},
+    fmt::Display,
+};
 use zero_copy_pads::{align_left, align_right, AlignRight, PaddedColumnIter, Width};
 
 #[derive(Default)]
@@ -295,7 +298,7 @@ where
             self.max_width = min_width + extra_cols;
             return self.visualize();
         }
-        let tree_max_width = self.max_width - min_width;
+        let tree_max_width = min(self.max_width - min_width, self.max_width / 3);
         let tree_column = self.visualize_tree(tree_max_width);
         let min_width = min_width + tree_column.max_width;
         if self.max_width <= min_width {
