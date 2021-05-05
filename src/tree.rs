@@ -38,4 +38,13 @@ impl<Name, Data: Size> Tree<Name, Data> {
         self.data += dir_size;
         self
     }
+
+    /// Create a tree representation of a file.
+    pub fn file(name: Name, data: Data) -> Self {
+        Tree {
+            name,
+            data,
+            children: Vec::with_capacity(0),
+        }
+    }
 }
