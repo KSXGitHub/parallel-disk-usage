@@ -33,4 +33,5 @@ where
 }
 
 mod copy;
+mod display;
 mod methods;
