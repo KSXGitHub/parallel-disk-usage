@@ -10,6 +10,7 @@ use dirt::{
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use rayon::prelude::*;
 use std::{
     env::temp_dir,
     ffi::OsString,
@@ -89,6 +90,7 @@ pub fn sanitize_tree_reflection<Name, Data>(
 where
     Name: Ord,
     Data: Size,
+    TreeReflection<Name, Data>: Send,
 {
     let TreeReflection {
         name,
@@ -96,7 +98,10 @@ where
         mut children,
     } = tree_reflection;
     children.sort_by(|left, right| left.name.cmp(&right.name));
-    let children = children.into_iter().map(sanitize_tree_reflection).collect();
+    let children = children
+        .into_par_iter()
+        .map(sanitize_tree_reflection)
+        .collect();
     TreeReflection {
         name,
         data,
