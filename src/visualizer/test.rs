@@ -116,6 +116,23 @@ test_case! {
 }
 
 test_case! {
+    typical_bottom_up_binary_even_shorter_max_width where
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        max_depth = 10,
+        max_width = 50,
+        direction = BottomUp,
+        measurement_system = Binary,
+        expected = text_block_fnl! {
+            " 52B   ┌──bar  │                       │  0%"
+            "  2K   ├──foo  │                     ██│  9%"
+            "  4K   ├──em...│                    ███│ 15%"
+            "  8K   ├──hello│                ███████│ 30%"
+            "  8K   ├──di...│                ███████│ 31%"
+            " 27K ┌─┴root   │███████████████████████│100%"
+        },
+}
+
+test_case! {
     typical_bottom_up_binary_tebi_scale where
         tree = typical_tree::<Bytes>(4096.into(), 1 << 40),
         max_depth = 10,
@@ -290,6 +307,44 @@ test_case! {
             "13K     ┌─┴grandchild direct...│           ░░░░░░░░░░░███████████████████████████████████│ 62%"
             "17K   ┌─┴child directory wit...│           ██████████████████████████████████████████████│ 81%"
             "21K ┌─┴directory with a long...│█████████████████████████████████████████████████████████│100%"
+        },
+}
+
+test_case! {
+    nested_bottom_up_binary_many_names_short_max_width where
+        tree = nested_tree::<Bytes>(
+            &[
+                "a",
+                "ab",
+                "abc",
+                "abcd",
+                "abcde",
+                "abcdef",
+                "abcdefg",
+                "abcdefgh",
+                "abcdefghi",
+                "abcdefghij",
+                "abcdefghijk",
+                "abcdefghijkl",
+            ],
+            4096.into(),
+            "xyz",
+            1024.into(),
+        ),
+        max_depth = 10,
+        max_width = 90,
+        direction = BottomUp,
+        measurement_system = Binary,
+        expected = text_block_fnl! {
+            "17K                 ┌──ab...│    ░░░░▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████████████████│ 35%"
+            "21K               ┌─┴abcd...│    ░░░░▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████████████████████│ 43%"
+            "25K             ┌─┴abcdefg  │    ░░░░▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓██████████████████████████│ 51%"
+            "29K           ┌─┴abcdef     │    ░░░░▒▒▒▒▓▓▓▓▓▓▓▓██████████████████████████████│ 59%"
+            "33K         ┌─┴abcde        │    ░░░░▒▒▒▒▓▓▓▓██████████████████████████████████│ 67%"
+            "37K       ┌─┴abcd           │    ░░░░▒▒▒▒██████████████████████████████████████│ 76%"
+            "41K     ┌─┴abc              │    ░░░░██████████████████████████████████████████│ 84%"
+            "45K   ┌─┴ab                 │    ██████████████████████████████████████████████│ 92%"
+            "49K ┌─┴a                    │██████████████████████████████████████████████████│100%"
         },
 }
 

@@ -100,25 +100,35 @@ where
         #[derive(Clone)]
         struct Param {
             node_index: usize,
+            parent_column_index: Option<usize>,
             sibling_count: usize,
             remaining_depth: usize,
             ancestor_relative_positions: Vec<ChildPosition>,
         }
 
+        struct ActResult {
+            relative_position: ChildPosition,
+            column_index: usize,
+        }
+
         fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, param: Param)
         where
             Data: Size,
-            Act: FnMut(&Tree<Name, Data>, Param) -> ChildPosition,
+            Act: FnMut(&Tree<Name, Data>, Param) -> ActResult,
         {
-            let parent_relative_position = act(tree, param.clone());
+            let ActResult {
+                relative_position,
+                column_index,
+            } = act(tree, param.clone());
             if param.remaining_depth == 0 {
                 return;
             }
+            let parent_column_index = Some(column_index);
             let sibling_count = tree.children().len();
             let remaining_depth = param.remaining_depth - 1;
             let ancestor_relative_positions = || {
                 let mut result = param.ancestor_relative_positions.clone();
-                result.push(parent_relative_position);
+                result.push(relative_position);
                 result
             };
             for (node_index, child) in tree.children().iter().enumerate() {
@@ -127,6 +137,7 @@ where
                     act,
                     Param {
                         node_index,
+                        parent_column_index,
                         sibling_count,
                         remaining_depth,
                         ancestor_relative_positions: ancestor_relative_positions(),
@@ -142,6 +153,7 @@ where
             &mut |tree, param| {
                 let Param {
                     node_index,
+                    parent_column_index,
                     sibling_count,
                     remaining_depth,
                     ancestor_relative_positions,
@@ -168,17 +180,31 @@ where
                     if let Ok(()) = tree_horizontal_slice.truncate(max_width) {
                         Some(tree_horizontal_slice)
                     } else {
+                        // if the name of the node was truncated so hard, it disappeared completely,
+                        // then the parent of the truncated node should be childless.
+                        if let Some(parent) = parent_column_index.and_then(|parent_column_index| {
+                            tree_column.list[parent_column_index].as_mut()
+                        }) {
+                            parent.skeletal_component.parenthood = Parenthood::Childless;
+                        }
+
+                        // the `visualize` method would filter out `None` values, i.e. disappear.
                         None
                     };
                 if let Some(tree_horizontal_slice) = &tree_horizontal_slice {
                     tree_column.max_width =
                         max(tree_column.max_width, tree_horizontal_slice.width());
                 }
+                let column_index = tree_column.list.len();
                 tree_column.list.push(tree_horizontal_slice);
-                child_position
+                ActResult {
+                    relative_position: child_position,
+                    column_index,
+                }
             },
             Param {
                 node_index: 0,
+                parent_column_index: None,
                 sibling_count: 1,
                 remaining_depth: self.max_depth,
                 ancestor_relative_positions: Vec::new(),
