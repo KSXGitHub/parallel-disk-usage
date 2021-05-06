@@ -138,7 +138,7 @@ test_case! {
 }
 
 test_case! {
-    typical_bottom_up_binary_tebi_scale_in_metric where
+    typical_bottom_up_metric_tebi_scale where
         tree = typical_tree::<Bytes>(4096.into(), 1 << 40),
         max_depth = 10,
         max_width = 150,
