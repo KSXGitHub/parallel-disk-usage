@@ -153,16 +153,15 @@ where
                 } else {
                     Parenthood::from_node(tree)
                 };
-                let skeletal_component_visualization = TreeSkeletalComponent {
+                let skeletal_component = TreeSkeletalComponent {
                     direction: self.direction,
                     child_position,
                     parenthood,
-                }
-                .visualize();
+                };
                 let name = tree.name().to_string();
                 let mut tree_horizontal_slice = TreeHorizontalSlice {
                     ancestor_relative_positions,
-                    skeletal_component_visualization,
+                    skeletal_component,
                     name,
                 };
                 let tree_horizontal_slice =
