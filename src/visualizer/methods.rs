@@ -241,7 +241,7 @@ where
                     tree_column.max_width =
                         max(tree_column.max_width, tree_horizontal_slice.width());
                 }
-                let column_index = tree_column.list.len();
+                let column_index = tree_column.len();
                 tree_column.list.push(tree_horizontal_slice);
                 ActResult {
                     relative_position: child_position,
