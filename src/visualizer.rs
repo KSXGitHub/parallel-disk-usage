@@ -8,7 +8,7 @@ pub use child_position::ChildPosition;
 pub use direction::Direction;
 pub use parenthood::Parenthood;
 pub use proportion_bar::{ProportionBar, ProportionBarBlock};
-pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent, TreeSkeletalComponentVisualization};
+pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
 
 use super::{measurement_system::MeasurementSystem, size::Size, tree::Tree};
 use std::fmt::Display;
