@@ -115,6 +115,50 @@ test_case! {
         },
 }
 
+test_case! {
+    typical_bottom_up_binary_tebi_scale where
+        tree = typical_tree::<Bytes>(4096.into(), 1 << 40),
+        max_depth = 10,
+        max_width = 150,
+        direction = BottomUp,
+        measurement_system = Binary,
+        expected = text_block_fnl! {
+            "  4K   ┌──empty dir                             │                                                                                          │  0%"
+            " 52T   ├──bar                                   │                                                                                         █│  2%"
+            " 45T   │   ┌──hello                             │                                                                                       ▒▒█│  1%"
+            " 54T   │   ├──world                             │                                                                                       ▒██│  2%"
+            " 99T   │ ┌─┴world                               │                                                                                       ███│  3%"
+            " 99T   ├─┴hello                                 │                                                                                       ███│  3%"
+            "475T   │   ┌──file with a really long name      │                                                                            ██████████████│ 15%"
+            "475T   │ ┌─┴subdirectory with a really long name│                                                                            ██████████████│ 15%"
+            "475T   ├─┴directory with a really long name     │                                                                            ██████████████│ 15%"
+            "  2P   ├──foo                                   │                  ████████████████████████████████████████████████████████████████████████│ 80%"
+            "  3P ┌─┴root                                    │██████████████████████████████████████████████████████████████████████████████████████████│100%"
+        },
+}
+
+test_case! {
+    typical_bottom_up_binary_tebi_scale_in_metric where
+        tree = typical_tree::<Bytes>(4096.into(), 1 << 40),
+        max_depth = 10,
+        max_width = 150,
+        direction = BottomUp,
+        measurement_system = Metric,
+        expected = text_block_fnl! {
+            "  4K   ┌──empty dir                             │                                                                                          │  0%"
+            " 57T   ├──bar                                   │                                                                                         █│  2%"
+            " 49T   │   ┌──hello                             │                                                                                       ▒▒█│  1%"
+            " 59T   │   ├──world                             │                                                                                       ▒██│  2%"
+            "109T   │ ┌─┴world                               │                                                                                       ███│  3%"
+            "109T   ├─┴hello                                 │                                                                                       ███│  3%"
+            "522T   │   ┌──file with a really long name      │                                                                            ██████████████│ 15%"
+            "522T   │ ┌─┴subdirectory with a really long name│                                                                            ██████████████│ 15%"
+            "522T   ├─┴directory with a really long name     │                                                                            ██████████████│ 15%"
+            "  3P   ├──foo                                   │                  ████████████████████████████████████████████████████████████████████████│ 80%"
+            "  3P ┌─┴root                                    │██████████████████████████████████████████████████████████████████████████████████████████│100%"
+        },
+}
+
 fn nested_tree<Data: Size>(
     dir_names: &[&'static str],
     size_per_dir: Data,
