@@ -93,6 +93,28 @@ test_case! {
         },
 }
 
+test_case! {
+    typical_bottom_up_binary_short_max_width where
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        max_depth = 10,
+        max_width = 90,
+        direction = BottomUp,
+        measurement_system = Binary,
+        expected = text_block_fnl! {
+            " 52B   ┌──bar                │                                                 │  0%"
+            "  2K   ├──foo                │                                             ████│  9%"
+            "  4K   ├──empty dir          │                                          ███████│ 15%"
+            " 45B   │   ┌──hello          │                                  ░░░░░░░░▒▒▒▒▒▒▒│  0%"
+            " 54B   │   ├──world          │                                  ░░░░░░░░▒▒▒▒▒▒▒│  0%"
+            "  4K   │ ┌─┴world            │                                  ░░░░░░░░███████│ 15%"
+            "  8K   ├─┴hello              │                                  ███████████████│ 30%"
+            "475B   │   ┌──file with a ...│                                  ░░░░░░░▒▒▒▒▒▒▒█│  2%"
+            "  4K   │ ┌─┴subdirectory w...│                                  ░░░░░░░████████│ 16%"
+            "  8K   ├─┴directory with a...│                                  ███████████████│ 31%"
+            " 27K ┌─┴root                 │█████████████████████████████████████████████████│100%"
+        },
+}
+
 fn nested_tree<Data: Size>(
     dir_names: &[&'static str],
     size_per_dir: Data,
