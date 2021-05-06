@@ -266,6 +266,34 @@ test_case! {
 }
 
 test_case! {
+    nested_bottom_up_binary_long_names_short_max_width where
+        tree = nested_tree::<Bytes>(
+            &[
+                "directory with a long name",
+                "child directory with a long name",
+                "grandchild directory with a long name",
+                "great-grandchild directory with a long name",
+                "great-great-grandchild directory with a long name",
+            ],
+            4096.into(),
+            "file with a long name",
+            1024.into(),
+        ),
+        max_depth = 10,
+        max_width = 100,
+        direction = BottomUp,
+        measurement_system = Binary,
+        expected = text_block_fnl! {
+            " 1K           ┌──file with a...│           ░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓███│  5%"
+            " 5K         ┌─┴great-great-g...│           ░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓██████████████│ 24%"
+            " 9K       ┌─┴great-grandchil...│           ░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒████████████████████████│ 43%"
+            "13K     ┌─┴grandchild direct...│           ░░░░░░░░░░░███████████████████████████████████│ 62%"
+            "17K   ┌─┴child directory wit...│           ██████████████████████████████████████████████│ 81%"
+            "21K ┌─┴directory with a long...│█████████████████████████████████████████████████████████│100%"
+        },
+}
+
+test_case! {
     nested_bottom_up_binary_tebi_scale where
         tree = nested_tree::<Bytes>(
             &["a", "b", "c", "d", "e", "f"],
