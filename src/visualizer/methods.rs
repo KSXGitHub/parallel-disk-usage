@@ -7,6 +7,7 @@ use assert_cmp::{debug_assert_op, debug_assert_op_expr};
 use itertools::izip;
 use std::{
     cmp::{max, min},
+    collections::HashMap,
     fmt::Display,
 };
 use zero_copy_pads::{align_left, align_right, AlignRight, PaddedColumnIter, Width};
@@ -106,21 +107,35 @@ where
             ancestor_relative_positions: Vec<ChildPosition>,
         }
 
+        struct Record {
+            child_counts: HashMap<usize, usize>,
+        }
+
         struct ActResult {
             relative_position: ChildPosition,
             column_index: usize,
         }
 
-        fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, param: Param)
-        where
+        fn traverse<Name, Data, OnReachBottom, Act>(
+            tree: &Tree<Name, Data>,
+            on_reach_bottom: &mut OnReachBottom,
+            act: &mut Act,
+            param: Param,
+            record: &mut Record,
+        ) where
             Data: Size,
-            Act: FnMut(&Tree<Name, Data>, Param) -> ActResult,
+            OnReachBottom: FnMut(Param, &mut Record),
+            Act: FnMut(&Tree<Name, Data>, Param, &mut Record) -> ActResult,
         {
             let ActResult {
                 relative_position,
                 column_index,
-            } = act(tree, param.clone());
+            } = act(tree, param.clone(), record);
+            record
+                .child_counts
+                .insert(column_index, tree.children().len());
             if param.remaining_depth == 0 {
+                on_reach_bottom(param, record);
                 return;
             }
             let parent_column_index = Some(column_index);
@@ -134,6 +149,7 @@ where
             for (node_index, child) in tree.children().iter().enumerate() {
                 traverse(
                     child,
+                    on_reach_bottom,
                     act,
                     Param {
                         node_index,
@@ -142,6 +158,7 @@ where
                         remaining_depth,
                         ancestor_relative_positions: ancestor_relative_positions(),
                     },
+                    record,
                 );
             }
         }
@@ -150,7 +167,18 @@ where
 
         traverse(
             self.tree,
-            &mut |tree, param| {
+            &mut |param, record| {
+                let Param {
+                    parent_column_index,
+                    ..
+                } = param;
+                if let Some(count) = parent_column_index.and_then(|parent_column_index| {
+                    record.child_counts.get_mut(&parent_column_index)
+                }) {
+                    *count = 0;
+                }
+            },
+            &mut |tree, param, record| {
                 let Param {
                     node_index,
                     parent_column_index,
@@ -176,21 +204,39 @@ where
                     skeletal_component,
                     name,
                 };
-                let tree_horizontal_slice =
-                    if let Ok(()) = tree_horizontal_slice.truncate(max_width) {
-                        Some(tree_horizontal_slice)
-                    } else {
+                let tree_horizontal_slice = match (
+                    tree_horizontal_slice.truncate(max_width),
+                    parent_column_index,
+                ) {
+                    (Ok(()), _) => Some(tree_horizontal_slice),
+
+                    (Err(_), Some(parent_column_index)) => {
                         // if the name of the node was truncated so hard, it disappeared completely,
                         // then the parent of the truncated node should be childless.
-                        if let Some(parent) = parent_column_index.and_then(|parent_column_index| {
-                            tree_column.list[parent_column_index].as_mut()
-                        }) {
-                            parent.skeletal_component.parenthood = Parenthood::Childless;
+                        match (
+                            tree_column.list[parent_column_index].as_mut(),
+                            record.child_counts.get_mut(&parent_column_index),
+                        ) {
+                            (Some(parent), Some(count)) => {
+                                if *count == 0 || *count == 1 {
+                                    *count = 0;
+                                    parent.skeletal_component.parenthood = Parenthood::Childless;
+                                } else {
+                                    *count -= 1;
+                                }
+                            }
+                            (_, Some(count)) => {
+                                *count -= 1;
+                            }
+                            _ => {}
                         }
 
                         // the `visualize` method would filter out `None` values, i.e. disappear.
                         None
-                    };
+                    }
+
+                    (Err(_), None) => None,
+                };
                 if let Some(tree_horizontal_slice) = &tree_horizontal_slice {
                     tree_column.max_width =
                         max(tree_column.max_width, tree_horizontal_slice.width());
@@ -208,6 +254,9 @@ where
                 sibling_count: 1,
                 remaining_depth: self.max_depth,
                 ancestor_relative_positions: Vec::new(),
+            },
+            &mut Record {
+                child_counts: HashMap::new(),
             },
         );
 
