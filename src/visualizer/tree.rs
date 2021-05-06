@@ -48,6 +48,12 @@ impl Display for TreeSkeletalComponent {
     }
 }
 
+impl Width for TreeSkeletalComponent {
+    fn width(&self) -> usize {
+        self.visualize().width()
+    }
+}
+
 impl Width for TreeSkeletalComponentVisualization {
     fn width(&self) -> usize {
         self.len()
@@ -75,7 +81,7 @@ impl<Name: Width> TreeHorizontalSlice<Name> {
 
     #[inline]
     fn required_width(&self) -> usize {
-        self.indent_width() + self.skeletal_component.visualize().width()
+        self.indent_width() + self.skeletal_component.width()
     }
 
     #[inline]
@@ -96,7 +102,7 @@ impl<Name: Width> Display for TreeHorizontalSlice<Name> {
             formatter,
             "{}{}{}",
             self.indent(),
-            self.skeletal_component.visualize(),
+            self.skeletal_component,
             &self.name,
         )
     }
