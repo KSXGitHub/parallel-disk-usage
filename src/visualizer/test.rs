@@ -14,6 +14,7 @@ fn order_tree<Name, Data: Size>(left: &Tree<Name, Data>, right: &Tree<Name, Data
 
 macro_rules! test_case {
     (
+        $(#[$attributes:meta])*
         $name:ident where
         tree = $tree:expr,
         max_depth = $max_depth:expr,
@@ -22,6 +23,7 @@ macro_rules! test_case {
         measurement_system = $measurement_system:ident,
         expected = $expected:expr,
     ) => {
+        $(#[$attributes])*
         #[test]
         fn $name() {
             let tree = $tree;
