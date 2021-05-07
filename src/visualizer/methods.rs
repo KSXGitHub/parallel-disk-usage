@@ -4,409 +4,427 @@ use super::{
 };
 use crate::{size::Size, tree::Tree};
 use assert_cmp::{debug_assert_op, debug_assert_op_expr};
-use itertools::izip;
+use derive_more::{Deref, DerefMut};
+use smart_default::SmartDefault;
 use std::{
     cmp::{max, min},
-    collections::HashMap,
+    collections::{HashSet, LinkedList},
     fmt::Display,
+    num::NonZeroUsize,
 };
-use zero_copy_pads::{align_left, align_right, AlignRight, PaddedColumnIter, Width};
+use zero_copy_pads::{align_left, align_right, Width};
 
-#[derive(Default)]
-struct TreeColumn {
-    list: Vec<Option<TreeHorizontalSlice<String>>>,
-    max_width: usize,
+const PERCENTAGE_COLUMN_MAX_WIDTH: usize = "100%".len();
+const BORDER_COLUMNS: usize = 3; // 4 columns, 3 borders, each border has a width of 1.
+
+#[derive(SmartDefault, Deref, DerefMut)]
+struct Table<Row, ColumnWidth: Default> {
+    #[deref]
+    #[deref_mut]
+    data: LinkedList<Row>,
+    column_width: ColumnWidth,
 }
 
-impl TreeColumn {
+#[derive(Clone, Copy)]
+struct NodeInfo<Name, NodeData> {
+    name: Name,
+    node_data: NodeData,
+    row_index: usize,
+    sibling_count: NonZeroUsize,
+    index_as_child: usize,
+    children_count: usize,
+    remaining_depth: usize,
+}
+
+#[derive(Deref, DerefMut)]
+struct InitialRow<Name, NodeData> {
+    #[deref]
+    #[deref_mut]
+    node_info: NodeInfo<Name, NodeData>,
+    ancestors: Vec<NodeInfo<Name, NodeData>>,
+    preceding_sibling: Option<NodeInfo<Name, NodeData>>,
+    size: String,
+    percentage: String,
+}
+
+#[derive(Default, Clone, Copy)]
+struct InitialColumnWidth {
+    size: usize,
+}
+
+impl InitialColumnWidth {
     #[inline]
-    fn len(&self) -> usize {
-        self.list.len()
+    const fn total_max_width(self) -> usize {
+        self.size + PERCENTAGE_COLUMN_MAX_WIDTH + BORDER_COLUMNS
     }
 }
 
-// NOTE: The 4 methods below, despite sharing the same structure, cannot be unified due to
-//       them relying on each other's `PaddedColumnIter::total_width`.
+type InitialTable<Name, NodeData> = Table<InitialRow<Name, NodeData>, InitialColumnWidth>;
+fn render_initial<Name, Data>(visualizer: Visualizer<Name, Data>) -> InitialTable<&'_ Name, Data>
+where
+    Name: Display,
+    Data: Size + Into<u64>,
+{
+    #[derive(Clone)]
+    struct Param<Name, NodeData> {
+        remaining_depth: usize,
+        index_as_child: usize,
+        ancestors: Vec<NodeInfo<Name, NodeData>>,
+        preceding_sibling: Option<NodeInfo<Name, NodeData>>,
+    }
+
+    struct ActResult<Name, NodeData> {
+        node_info: NodeInfo<Name, NodeData>,
+    }
+
+    struct TraverseResult<Name, NodeData> {
+        node_info: NodeInfo<Name, NodeData>,
+    }
+
+    fn traverse<'a, Name, Data, Act>(
+        tree: &'a Tree<Name, Data>,
+        act: &mut Act,
+        param: Param<&'a Name, Data>,
+    ) -> Option<TraverseResult<&'a Name, Data>>
+    where
+        Data: Size,
+        Act: FnMut(&'a Tree<Name, Data>, Param<&'a Name, Data>) -> ActResult<&'a Name, Data>,
+    {
+        if param.remaining_depth == 0 {
+            return None;
+        }
+        let ActResult { node_info } = act(tree, param.clone());
+        let remaining_depth = param.remaining_depth - 1;
+        let mut preceding_sibling = None;
+        for (index_as_child, child) in tree.children().iter().enumerate() {
+            let mut ancestors = Vec::with_capacity(param.ancestors.len() + 1);
+            ancestors.clone_from(&param.ancestors);
+            ancestors.push(node_info);
+            let traverse_result = traverse(
+                child,
+                act,
+                Param {
+                    remaining_depth,
+                    index_as_child,
+                    ancestors,
+                    preceding_sibling,
+                },
+            );
+            preceding_sibling = traverse_result.map(|x| x.node_info);
+        }
+        Some(TraverseResult { node_info })
+    }
+
+    let mut initial_table = InitialTable::default();
+    let total_fs_size = visualizer.tree.data().into();
+
+    traverse(
+        visualizer.tree,
+        &mut |node, param| {
+            let Param {
+                index_as_child,
+                ancestors,
+                remaining_depth,
+                preceding_sibling,
+            } = param;
+            let name = node.name();
+            let node_data = node.data();
+            let row_index = initial_table.len();
+            let children_count = node.children().len();
+            let fs_size = node.data().into();
+            let percentage = rounded_div::u64(fs_size * 100, total_fs_size);
+            let percentage = format!("{}%", percentage);
+            let size = node
+                .data()
+                .display(visualizer.measurement_system)
+                .to_string();
+            let sibling_count = ancestors
+                .last()
+                .map(|parent| parent.children_count)
+                .unwrap_or(1);
+            debug_assert_op!(sibling_count != 0);
+            debug_assert_op!(index_as_child < sibling_count);
+            let sibling_count = unsafe { NonZeroUsize::new_unchecked(sibling_count) };
+            let node_info = NodeInfo {
+                name,
+                node_data,
+                row_index,
+                sibling_count,
+                index_as_child,
+                children_count,
+                remaining_depth,
+            };
+
+            initial_table.column_width.size = max(initial_table.column_width.size, size.len());
+
+            initial_table.push_back(InitialRow {
+                node_info,
+                ancestors,
+                preceding_sibling,
+                percentage,
+                size,
+            });
+
+            ActResult { node_info }
+        },
+        Param {
+            remaining_depth: visualizer.max_depth,
+            index_as_child: 0,
+            ancestors: Vec::with_capacity(0),
+            preceding_sibling: None,
+        },
+    );
+
+    initial_table
+}
+
+#[derive(Deref, DerefMut)]
+struct TreeRow<Name, NodeData> {
+    #[deref]
+    #[deref_mut]
+    initial: InitialRow<Name, NodeData>,
+    tree: TreeHorizontalSlice<String>,
+}
+
+#[derive(Default, Clone, Copy, Deref, DerefMut)]
+struct TreeColumnWidth {
+    #[deref]
+    #[deref_mut]
+    initial: InitialColumnWidth,
+    tree: usize,
+}
+
+impl TreeColumnWidth {
+    #[inline]
+    const fn total_max_width(self) -> usize {
+        self.initial.total_max_width() + self.tree
+    }
+}
+
+type TreeTable<Name, NodeData> = Table<TreeRow<Name, NodeData>, TreeColumnWidth>;
+fn render_tree<'a, Name, Data>(
+    visualizer: Visualizer<'a, Name, Data>,
+    initial_table: InitialTable<&'a Name, Data>,
+    max_width: usize,
+) -> TreeTable<&'a Name, Data>
+where
+    Name: Display,
+    Data: Size + Into<u64>,
+{
+    let InitialTable {
+        data: initial_data,
+        column_width: initial_column_width,
+    } = initial_table;
+    let initial_data_len = initial_data.len();
+    let mut tree_column_width = TreeColumnWidth {
+        initial: initial_column_width,
+        tree: 0,
+    };
+    let mut excluded_row_indices = HashSet::with_capacity(initial_data_len);
+    let mut intermediate_table: Vec<_> = initial_data
+        .into_iter()
+        .map(|initial| {
+            let child_position =
+                ChildPosition::from_index(initial.index_as_child, initial.sibling_count);
+            let parenthood = if initial.remaining_depth == 0 {
+                Parenthood::Childless
+            } else {
+                Parenthood::from_children_count(initial.children_count)
+            };
+            let skeletal_component = TreeSkeletalComponent {
+                child_position,
+                parenthood,
+                direction: visualizer.direction,
+            };
+            let ancestor_relative_positions = initial
+                .ancestors
+                .iter()
+                .map(|node_info| {
+                    ChildPosition::from_index(node_info.index_as_child, node_info.sibling_count)
+                })
+                .collect();
+            let mut tree = TreeHorizontalSlice {
+                ancestor_relative_positions,
+                skeletal_component,
+                name: initial.name.to_string(),
+            };
+            if let Ok(()) = tree.truncate(max_width) {
+                tree_column_width.tree = max(tree_column_width.tree, tree.width());
+            } else {
+                excluded_row_indices.insert(initial.row_index);
+            }
+            TreeRow { tree, initial }
+        })
+        .collect();
+
+    debug_assert_op_expr!(intermediate_table.len(), ==, initial_data_len);
+    if cfg!(debug_assertions) {
+        intermediate_table
+            .iter()
+            .map(|row| row.row_index)
+            .enumerate()
+            .for_each(|(expected_row_index, actual_row_index)| {
+                debug_assert_op!(actual_row_index == expected_row_index)
+            });
+    }
+
+    for removal_row_index in excluded_row_indices.iter().copied() {
+        // mark more nodes as childless
+        let parent_row_index = intermediate_table[removal_row_index]
+            .ancestors
+            .last()
+            .map(|parent_info| parent_info.row_index);
+        if let Some(parent_row_index) = parent_row_index {
+            let parent_row = &mut intermediate_table[parent_row_index];
+            if parent_row.children_count == 0 || parent_row.children_count == 1 {
+                parent_row.children_count = 0;
+                parent_row.tree.skeletal_component.parenthood = Parenthood::Childless;
+            } else {
+                parent_row.children_count -= 1;
+            }
+        }
+
+        // mark more nodes as last amongst siblings
+        let preceding_sibling_row_index = intermediate_table[removal_row_index]
+            .preceding_sibling
+            .map(|node_info| node_info.row_index);
+        if let Some(preceding_sibling_row_index) = preceding_sibling_row_index {
+            let target = &mut intermediate_table[preceding_sibling_row_index]
+                .tree
+                .skeletal_component
+                .child_position;
+            *target = ChildPosition::Last;
+        }
+    }
+
+    let tree_data: LinkedList<_> = intermediate_table
+        .into_iter()
+        .filter(|row| !excluded_row_indices.contains(&row.row_index))
+        .collect();
+
+    TreeTable {
+        data: tree_data,
+        column_width: tree_column_width,
+    }
+}
+
+#[derive(Deref, DerefMut)]
+struct BarRow<Name, NodeData> {
+    #[deref]
+    #[deref_mut]
+    tree: TreeRow<Name, NodeData>,
+    bar: ProportionBar,
+}
+
+#[derive(Default, Clone, Copy, Deref, DerefMut)]
+struct BarColumnWidth {
+    #[deref]
+    #[deref_mut]
+    tree: TreeColumnWidth,
+}
+
+fn render_bars<'a, Name, Data>(
+    tree_table: TreeTable<&'a Name, Data>,
+    total: u64,
+    width: usize,
+) -> LinkedList<BarRow<&'a Name, Data>>
+where
+    Name: Display,
+    Data: Size + Into<u64> + 'a,
+{
+    tree_table
+        .data
+        .into_iter()
+        .map(|tree| {
+            let mut ancestor_iter = tree.ancestors.iter();
+            let lv4_option = ancestor_iter.next();
+            let lv3_option = ancestor_iter.next();
+            let lv2_option = ancestor_iter.next();
+            let lv1_option = ancestor_iter.next();
+            drop(ancestor_iter);
+
+            let get_value = |node_info: &NodeInfo<&Name, Data>| {
+                let node_data = node_info.node_data.into();
+                rounded_div::u64(node_data * (width as u64), total) as usize
+            };
+
+            let lv0_value = get_value(&tree.node_info);
+            let lv1_value = lv1_option.map(get_value).unwrap_or(lv0_value);
+            let lv2_value = lv2_option.map(get_value).unwrap_or(lv1_value);
+            let lv3_value = lv3_option.map(get_value).unwrap_or(lv2_value);
+            let lv4_value = lv4_option.map(get_value).unwrap_or(lv3_value);
+            debug_assert_op!(lv0_value <= lv1_value);
+            debug_assert_op!(lv1_value <= lv2_value);
+            debug_assert_op!(lv2_value <= lv3_value);
+            debug_assert_op!(lv3_value <= lv4_value);
+            debug_assert_op!(lv4_value == width);
+
+            let lv0_visible = lv0_value;
+            let lv1_visible = lv1_value - lv0_value;
+            let lv2_visible = lv2_value - lv1_value;
+            let lv3_visible = lv3_value - lv2_value;
+            let lv4_visible = lv4_value - lv3_value;
+            debug_assert_op_expr!(
+                lv0_visible + lv1_visible + lv2_visible + lv3_visible + lv4_visible,
+                ==,
+                width
+            );
+
+            let bar = ProportionBar {
+                level0: lv0_visible,
+                level1: lv1_visible,
+                level2: lv2_visible,
+                level3: lv3_visible,
+                level4: lv4_visible,
+            };
+            BarRow { tree, bar }
+        })
+        .collect()
+}
 
 impl<'a, Name, Data> Visualizer<'a, Name, Data>
 where
     Name: Display,
     Data: Size + Into<u64>,
 {
-    fn visualize_sizes(self) -> PaddedColumnIter<String, char, AlignRight> {
-        fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, remaining_depth: usize)
-        where
-            Data: Size,
-            Act: FnMut(&Tree<Name, Data>),
-        {
-            act(tree);
-            if remaining_depth == 0 {
-                return;
-            }
-            let next_remaining_depth = remaining_depth - 1;
-            for child in tree.children() {
-                traverse(child, act, next_remaining_depth);
-            }
-        }
-
-        let mut iter = PaddedColumnIter::new(' ', AlignRight);
-
-        traverse(
-            self.tree,
-            &mut |node| {
-                let value = node.data().display(self.measurement_system).to_string();
-                iter.push_back(value);
-            },
-            self.max_depth,
-        );
-
-        iter
-    }
-
-    fn visualize_percentage(self) -> Vec<String> {
-        fn traverse<Name, Data, Act>(tree: &Tree<Name, Data>, act: &mut Act, remaining_depth: usize)
-        where
-            Data: Size,
-            Act: FnMut(&Tree<Name, Data>),
-        {
-            act(tree);
-            if remaining_depth == 0 {
-                return;
-            }
-            let next_remaining_depth = remaining_depth - 1;
-            for child in tree.children() {
-                traverse(child, act, next_remaining_depth);
-            }
-        }
-
-        let total = self.tree.data().into();
-        let mut result = Vec::new();
-
-        traverse(
-            self.tree,
-            &mut |node| {
-                let current = node.data().into();
-                debug_assert_op!(current <= total);
-                let percentage = rounded_div::u64(current * 100, total);
-                let percentage = format!("{}%", percentage);
-                result.push(percentage);
-            },
-            self.max_depth,
-        );
-
-        result
-    }
-
-    fn visualize_tree(self, max_width: usize) -> TreeColumn {
-        #[derive(Clone)]
-        struct Param {
-            node_index: usize,
-            parent_column_index: Option<usize>,
-            sibling_count: usize,
-            remaining_depth: usize,
-            ancestor_relative_positions: Vec<ChildPosition>,
-        }
-
-        struct Record {
-            child_counts: HashMap<usize, usize>,
-        }
-
-        struct ActResult {
-            relative_position: ChildPosition,
-            column_index: usize,
-        }
-
-        fn traverse<Name, Data, OnReachBottom, Act>(
-            tree: &Tree<Name, Data>,
-            on_reach_bottom: &mut OnReachBottom,
-            act: &mut Act,
-            param: Param,
-            record: &mut Record,
-        ) where
-            Data: Size,
-            OnReachBottom: FnMut(Param, &mut Record),
-            Act: FnMut(&Tree<Name, Data>, Param, &mut Record) -> ActResult,
-        {
-            let ActResult {
-                relative_position,
-                column_index,
-            } = act(tree, param.clone(), record);
-            record
-                .child_counts
-                .insert(column_index, tree.children().len());
-            if param.remaining_depth == 0 {
-                on_reach_bottom(param, record);
-                return;
-            }
-            let parent_column_index = Some(column_index);
-            let sibling_count = tree.children().len();
-            let remaining_depth = param.remaining_depth - 1;
-            let ancestor_relative_positions = || {
-                let mut result = param.ancestor_relative_positions.clone();
-                result.push(relative_position);
-                result
-            };
-            for (node_index, child) in tree.children().iter().enumerate() {
-                traverse(
-                    child,
-                    on_reach_bottom,
-                    act,
-                    Param {
-                        node_index,
-                        parent_column_index,
-                        sibling_count,
-                        remaining_depth,
-                        ancestor_relative_positions: ancestor_relative_positions(),
-                    },
-                    record,
-                );
-            }
-        }
-
-        let mut tree_column = TreeColumn::default();
-
-        traverse(
-            self.tree,
-            &mut |param, record| {
-                let Param {
-                    parent_column_index,
-                    ..
-                } = param;
-                if let Some(count) = parent_column_index.and_then(|parent_column_index| {
-                    record.child_counts.get_mut(&parent_column_index)
-                }) {
-                    *count = 0;
-                }
-            },
-            &mut |tree, param, record| {
-                let Param {
-                    node_index,
-                    parent_column_index,
-                    sibling_count,
-                    remaining_depth,
-                    ancestor_relative_positions,
-                } = param;
-                debug_assert_op!(sibling_count > node_index);
-                let child_position = ChildPosition::from_index(node_index, sibling_count);
-                let parenthood = if remaining_depth == 0 {
-                    Parenthood::Childless
-                } else {
-                    Parenthood::from_node(tree)
-                };
-                let skeletal_component = TreeSkeletalComponent {
-                    direction: self.direction,
-                    child_position,
-                    parenthood,
-                };
-                let name = tree.name().to_string();
-                let mut tree_horizontal_slice = TreeHorizontalSlice {
-                    ancestor_relative_positions,
-                    skeletal_component,
-                    name,
-                };
-                let tree_horizontal_slice = match (
-                    tree_horizontal_slice.truncate(max_width),
-                    parent_column_index,
-                ) {
-                    (Ok(()), _) => Some(tree_horizontal_slice),
-
-                    (Err(_), Some(parent_column_index)) => {
-                        // if the name of the node was truncated so hard, it disappeared completely,
-                        // then the parent of the truncated node should be childless.
-                        match (
-                            tree_column.list[parent_column_index].as_mut(),
-                            record.child_counts.get_mut(&parent_column_index),
-                        ) {
-                            (Some(parent), Some(count)) => {
-                                if *count == 0 || *count == 1 {
-                                    *count = 0;
-                                    parent.skeletal_component.parenthood = Parenthood::Childless;
-                                } else {
-                                    *count -= 1;
-                                }
-                            }
-                            (_, Some(count)) => {
-                                *count -= 1;
-                            }
-                            _ => {}
-                        }
-
-                        // the `visualize` method would filter out `None` values, i.e. disappear.
-                        None
-                    }
-
-                    (Err(_), None) => None,
-                };
-                if let Some(tree_horizontal_slice) = &tree_horizontal_slice {
-                    tree_column.max_width =
-                        max(tree_column.max_width, tree_horizontal_slice.width());
-                }
-                let column_index = tree_column.len();
-                tree_column.list.push(tree_horizontal_slice);
-                ActResult {
-                    relative_position: child_position,
-                    column_index,
-                }
-            },
-            Param {
-                node_index: 0,
-                parent_column_index: None,
-                sibling_count: 1,
-                remaining_depth: self.max_depth,
-                ancestor_relative_positions: Vec::new(),
-            },
-            &mut Record {
-                child_counts: HashMap::new(),
-            },
-        );
-
-        tree_column
-    }
-
-    fn visualize_bars(self, width: usize) -> Vec<ProportionBar> {
-        #[derive(Debug, Clone, Copy)]
-        enum Values {
-            Level0,
-            Level1(usize),
-            Level2(usize, usize),
-            Level3(usize, usize, usize),
-            Level4(usize, usize, usize, usize),
-        }
-
-        impl Values {
-            fn add(self, x: usize) -> Self {
-                use Values::*;
-                match self {
-                    Level0 => Level1(x),
-                    Level1(a) => Level2(a, x),
-                    Level2(a, b) => Level3(a, b, x),
-                    Level3(a, b, c) => Level4(a, b, c, x),
-                    _ => self,
-                }
-            }
-
-            fn vec4(self, z: usize) -> (usize, usize, usize, usize) {
-                #![allow(clippy::many_single_char_names)]
-                use Values::*;
-                match self {
-                    Level0 => (z, z, z, z),
-                    Level1(a) => (a, z, z, z),
-                    Level2(a, b) => (a, b, z, z),
-                    Level3(a, b, c) => (a, b, c, z),
-                    Level4(a, b, c, d) => (a, b, c, d),
-                }
-            }
-        }
-
-        fn traverse<Name, Data, Act>(
-            tree: &Tree<Name, Data>,
-            act: &mut Act,
-            values: Values,
-            remaining_depth: usize,
-        ) where
-            Data: Size,
-            Act: FnMut(&Tree<Name, Data>, Values) -> usize,
-        {
-            let next_value = act(tree, values);
-            let next_values = values.add(next_value);
-            if remaining_depth == 0 {
-                return;
-            }
-            let next_remaining_depth = remaining_depth - 1;
-            for child in tree.children() {
-                traverse(child, act, next_values, next_remaining_depth);
-            }
-        }
-
-        let total = self.tree.data().into();
-        let mut bars = Vec::new();
-
-        traverse(
-            self.tree,
-            &mut |tree, values| {
-                let current = tree.data().into();
-                debug_assert_op!(current <= total);
-                let lv0_value = rounded_div::u64(current * (width as u64), total) as usize;
-                let (lv4_value, lv3_value, lv2_value, lv1_value) = values.vec4(lv0_value);
-                debug_assert_op!(lv0_value <= lv1_value);
-                debug_assert_op!(lv1_value <= lv2_value);
-                debug_assert_op!(lv2_value <= lv3_value);
-                debug_assert_op!(lv3_value <= lv4_value);
-                debug_assert_op!(lv4_value <= width);
-                let lv0_visible = lv0_value;
-                let lv1_visible = lv1_value - lv0_value;
-                let lv2_visible = lv2_value - lv1_value;
-                let lv3_visible = lv3_value - lv2_value;
-                let lv4_visible = lv4_value - lv3_value;
-                debug_assert_op_expr!(
-                    lv0_visible + lv1_visible + lv2_visible + lv3_visible + lv4_visible,
-                    ==,
-                    width
-                );
-                bars.push(ProportionBar {
-                    level0: lv0_visible,
-                    level1: lv1_visible,
-                    level2: lv2_visible,
-                    level3: lv3_visible,
-                    level4: lv4_visible,
-                });
-                lv0_value
-            },
-            Values::Level0,
-            self.max_depth,
-        );
-
-        bars
-    }
-
     /// Create ASCII visualization of the [tree](Tree), such visualization is meant to be
     /// printed to a terminal screen.
     pub fn visualize(mut self) -> Vec<String> {
-        let size_column = self.visualize_sizes();
-        let percentage_column = self.visualize_percentage();
-        let percentage_column_max_width = "100%".len();
-        let border_cols = 3; // 4 columns, 3 borders, each border has a width of 1.
-        let min_width = size_column.total_width() + percentage_column_max_width + border_cols;
+        let initial_table = render_initial(self);
+
+        let min_width = initial_table.column_width.total_max_width();
         if self.max_width <= min_width {
             let extra_cols = 3; // make space for tree_column to minimize second-time re-rendering.
             self.max_width = min_width + extra_cols;
             return self.visualize();
         }
+
         let tree_max_width = min(self.max_width - min_width, self.max_width / 3);
-        let tree_column = self.visualize_tree(tree_max_width);
-        let min_width = min_width + tree_column.max_width;
+        let tree_table = render_tree(self, initial_table, tree_max_width);
+
+        let min_width = tree_table.column_width.total_max_width();
         if self.max_width <= min_width {
             self.max_width = min_width + 1;
             return self.visualize();
         }
+
+        let size_width = tree_table.column_width.size;
+        let tree_width = tree_table.column_width.tree;
+
         let bar_width = self.max_width - min_width;
-        let bars = self.visualize_bars(bar_width);
-        debug_assert_op_expr!(bars.len(), ==, size_column.len());
-        debug_assert_op_expr!(bars.len(), ==, percentage_column.len());
-        debug_assert_op_expr!(bars.len(), ==, tree_column.len());
-        let tree_column_max_width = tree_column.max_width;
-        izip!(
-            size_column,
-            percentage_column.into_iter(),
-            tree_column.list.into_iter(),
-            bars.into_iter(),
-        )
-        .filter_map(|(size, percentage, tree_horizontal_slice, bar)| {
-            if let Some(tree_horizontal_slice) = tree_horizontal_slice {
-                Some((size, percentage, tree_horizontal_slice, bar))
-            } else {
-                None
-            }
-        })
-        .map(|(size, percentage, tree_horizontal_slice, bar)| {
-            format!(
-                "{size} {tree}│{bar}│{ratio}",
-                size = size,
-                tree = align_left(tree_horizontal_slice, tree_column_max_width),
-                bar = bar,
-                ratio = align_right(percentage, percentage_column_max_width),
-            )
-        })
-        .collect()
+        let bar_table = render_bars(tree_table, self.tree.data().into(), bar_width);
+
+        bar_table
+            .into_iter()
+            .map(|row| {
+                format!(
+                    "{size} {tree}│{bar}│{ratio}",
+                    size = align_right(&row.size, size_width),
+                    tree = align_left(&row.tree.tree, tree_width),
+                    bar = &row.bar,
+                    ratio = align_right(&row.percentage, PERCENTAGE_COLUMN_MAX_WIDTH),
+                )
+            })
+            .collect()
     }
 }

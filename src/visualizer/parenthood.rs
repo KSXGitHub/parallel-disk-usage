@@ -1,5 +1,3 @@
-use crate::{size::Size, tree::Tree};
-
 /// Whether a node in a tree has children.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Parenthood {
@@ -10,9 +8,9 @@ pub enum Parenthood {
 }
 
 impl Parenthood {
-    /// Deduce parenthood of a node.
-    pub fn from_node<Name, Data: Size>(node: &Tree<Name, Data>) -> Self {
-        if node.children().is_empty() {
+    /// Deduce parenthood from the number of children.
+    pub const fn from_children_count(children_count: usize) -> Self {
+        if children_count == 0 {
             Parenthood::Childless
         } else {
             Parenthood::Parent
