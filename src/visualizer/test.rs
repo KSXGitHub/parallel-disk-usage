@@ -372,3 +372,278 @@ test_case! {
             "25T ┌─┴a            │██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████│100%"
         },
 }
+
+fn big_tree_with_long_names<Data>() -> Tree<&'static str, Data>
+where
+    Data: Size + Ord + From<u64> + Send,
+{
+    let dir = Tree::<&'static str, Data>::fixed_size_dir_constructor(4069.into());
+    let file = |name: &'static str, size: u64| Tree::file(name, Data::from(size));
+    let mut short_file_names = [
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r",
+        "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+        "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+    ]
+    .iter();
+    let mut short_file = || {
+        let name = short_file_names.next().expect("access short file name");
+        file(name, 750)
+    };
+    dir(
+        "root",
+        vec![
+            dir(
+                "sub 1",
+                vec![
+                    file("first file with a long name", 999),
+                    dir(
+                        "sub 1.1",
+                        vec![
+                            file("second file with a long name", 7766),
+                            short_file(),
+                            short_file(),
+                            dir(
+                                "first sub directory with a long name",
+                                vec![file("abc", 123), file("def", 456), short_file()],
+                            ),
+                            dir(
+                                "second sub directory with a long name",
+                                vec![
+                                    file("abcdefghi", 1234),
+                                    file("ihgfedbca", 4321),
+                                    file("abc abc abc", 1212),
+                                    file("third file with a long name", 4545),
+                                    short_file(),
+                                    short_file(),
+                                    short_file(),
+                                ],
+                            ),
+                        ],
+                    ),
+                    dir(
+                        "sub 1.2",
+                        vec![
+                            short_file(),
+                            dir(
+                                "third sub directory with a long name",
+                                vec![dir(
+                                    "forth sub directory with a long name",
+                                    vec![file("forth file with a long name", 3647), short_file()],
+                                )],
+                            ),
+                            dir(
+                                "fifth sub directory with a long name",
+                                vec![
+                                    short_file(),
+                                    short_file(),
+                                    dir(
+                                        "sixth sub directory with a long name",
+                                        vec![
+                                            file("fifth file with a long name", 364),
+                                            short_file(),
+                                            short_file(),
+                                            short_file(),
+                                        ],
+                                    ),
+                                ],
+                            ),
+                            dir(
+                                "sixth sub directory with a long name",
+                                vec![
+                                    short_file(),
+                                    dir(
+                                        "seventh sub directory with a long name",
+                                        vec![
+                                            file("sixth file with a long name", 6565),
+                                            file("seventh file with a long name", 555),
+                                            short_file(),
+                                        ],
+                                    ),
+                                    dir(
+                                        "eighth sub directory with a long name",
+                                        vec![
+                                            file("eighth file with a long name", 444),
+                                            short_file(),
+                                            short_file(),
+                                            short_file(),
+                                        ],
+                                    ),
+                                    file("ninth file with a long name", 777),
+                                ],
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+            dir(
+                "sub 2",
+                vec![
+                    dir(
+                        "sub 2.1",
+                        vec![
+                            short_file(),
+                            dir(
+                                "ninth sub directory with a long name",
+                                vec![
+                                    file("tenth file with a long name", 88888),
+                                    short_file(),
+                                    short_file(),
+                                    dir(
+                                        "tenth sub directory with a long name",
+                                        vec![
+                                            file("eleventh file with a long name", 44444),
+                                            short_file(),
+                                            short_file(),
+                                            short_file(),
+                                        ],
+                                    ),
+                                ],
+                            ),
+                        ],
+                    ),
+                    dir(
+                        "sub 2.2",
+                        vec![
+                            short_file(),
+                            dir(
+                                "eleventh sub directory with a long name",
+                                vec![
+                                    file("twelfth file with a long name", 453),
+                                    file("thirteenth file with a long name", 352),
+                                    short_file(),
+                                    dir(
+                                        "twelfth sub directory with a long name",
+                                        vec![
+                                            file("fourteenth file with a long name", 128),
+                                            short_file(),
+                                        ],
+                                    ),
+                                    dir(
+                                        "thirteenth sub directory with a long name",
+                                        vec![
+                                            file("fifteenth file with a long name", 128),
+                                            file("sixteenth file with a long name", 256),
+                                            file("seventeenth file with a long name", 512),
+                                            short_file(),
+                                        ],
+                                    ),
+                                ],
+                            ),
+                            dir(
+                                "fourteenth sub directory with a long name",
+                                vec![
+                                    file("eighteenth file with a long name", 542),
+                                    file("eighty-first file with a long name", 357),
+                                    short_file(),
+                                    short_file(),
+                                    short_file(),
+                                    dir(
+                                        "twelfth sub directory with a long name",
+                                        vec![
+                                            file("eighty-second file with a long name", 222),
+                                            short_file(),
+                                            short_file(),
+                                        ],
+                                    ),
+                                    dir(
+                                        "fifteenth sub directory with a long name",
+                                        vec![
+                                            file("eighty-third file with a long name", 333),
+                                            file("eighty-fourth file with a long name", 344),
+                                            file("eighty-seventh file with a long name", 444),
+                                            short_file(),
+                                        ],
+                                    ),
+                                ],
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+    .into_par_sorted(order_tree)
+}
+
+test_case! {
+    big_tree_with_long_names_short_max_width where
+        tree = big_tree_with_long_names::<Bytes>(),
+        max_depth = 100,
+        max_width = 67,
+        direction = BottomUp,
+        measurement_system = Binary,
+        expected = text_block_fnl! {
+            "999B     ┌──first ...│                       ░░░░░░░░░░░│  0%"
+            "750B     │ ┌──b      │                       ░░░░░░░▒▒▒▒│  0%"
+            "750B     │ ├──a      │                       ░░░░░░░▒▒▒▒│  0%"
+            "123B     │ │ ┌──abc  │                       ░░░░░░░▒▒▒▓│  0%"
+            "456B     │ │ ├──def  │                       ░░░░░░░▒▒▒▓│  0%"
+            "750B     │ │ ├──c    │                       ░░░░░░░▒▒▒▓│  0%"
+            "  5K     │ ├─┴firs...│                       ░░░░░░░▒▒▒█│  2%"
+            "  8K     │ ├──seco...│                       ░░░░░░░▒▒▒█│  3%"
+            "750B     │ │ ┌──f    │                       ░░░░░░░▒▒▓▓│  0%"
+            "750B     │ │ ├──e    │                       ░░░░░░░▒▒▓▓│  0%"
+            "750B     │ │ ├──d    │                       ░░░░░░░▒▒▓▓│  0%"
+            "  1K     │ │ ├──ab...│                       ░░░░░░░▒▒▓▓│  0%"
+            "  1K     │ │ ├──ab...│                       ░░░░░░░▒▒▓▓│  0%"
+            "  4K     │ │ ├──ih...│                       ░░░░░░░▒▒▓█│  1%"
+            "  4K     │ │ ├──th...│                       ░░░░░░░▒▒▓█│  2%"
+            " 17K     │ ├─┴seco...│                       ░░░░░░░▒▒██│  6%"
+            " 36K     ├─┴sub 1.1  │                       ░░░░░░░████│ 12%"
+            "750B     │ ┌──g      │                       ░░░░░▒▒▒▒▒▒│  0%"
+            "750B     │ │ ┌──j    │                       ░░░░░▒▒▒▒▒▓│  0%"
+            "750B     │ │ ├──i    │                       ░░░░░▒▒▒▒▒▓│  0%"
+            "750B     │ │ │ ┌──m  │                       ░░░░░▒▒▒▒▒▓│  0%"
+            "750B     │ │ │ ├──l  │                       ░░░░░▒▒▒▒▒▓│  0%"
+            "750B     │ │ │ ├──k  │                       ░░░░░▒▒▒▒▒▓│  0%"
+            "  7K     │ │ ├─┴si...│                       ░░░░░▒▒▒▒▒█│  2%"
+            " 12K     │ ├─┴fift...│                       ░░░░░▒▒▒▒▒█│  4%"
+            "750B     │ │   ┌──h  │                       ░░░░░▒▒▒▒▒▓│  0%"
+            "  8K     │ │ ┌─┴fo...│                       ░░░░░▒▒▒▒▒█│  3%"
+            " 12K     │ ├─┴thir...│                       ░░░░░▒▒▒▒▒█│  4%"
+            "750B     │ │ ┌──n    │                       ░░░░░▒▒▒▓▓▓│  0%"
+            "777B     │ │ ├──ni...│                       ░░░░░▒▒▒▓▓▓│  0%"
+            "750B     │ │ │ ┌──r  │                       ░░░░░▒▒▒▓▓▓│  0%"
+            "750B     │ │ │ ├──q  │                       ░░░░░▒▒▒▓▓▓│  0%"
+            "750B     │ │ │ ├──p  │                       ░░░░░▒▒▒▓▓▓│  0%"
+            "  7K     │ │ ├─┴ei...│                       ░░░░░▒▒▒▓▓█│  2%"
+            "750B     │ │ │ ┌──o  │                       ░░░░░▒▒▒▓▓▓│  0%"
+            " 12K     │ │ ├─┴se...│                       ░░░░░▒▒▒▓▓█│  4%"
+            " 24K     │ ├─┴sixt...│                       ░░░░░▒▒▒███│  8%"
+            " 53K     ├─┴sub 1.2  │                       ░░░░░██████│ 18%"
+            " 93K   ┌─┴sub 1      │                       ███████████│ 32%"
+            "750B   │   ┌──y      │            ░░░░░░░░░░░░░░░░░▒▒▒▒▒│  0%"
+            "352B   │   │ ┌──th...│            ░░░░░░░░░░░░░░░░░▒▒▒▓▓│  0%"
+            "453B   │   │ ├──tw...│            ░░░░░░░░░░░░░░░░░▒▒▒▓▓│  0%"
+            "750B   │   │ ├──z    │            ░░░░░░░░░░░░░░░░░▒▒▒▓▓│  0%"
+            "750B   │   │ │ ┌──A  │            ░░░░░░░░░░░░░░░░░▒▒▒▓▓│  0%"
+            "  5K   │   │ ├─┴tw...│            ░░░░░░░░░░░░░░░░░▒▒▒▓█│  2%"
+            "750B   │   │ │ ┌──B  │            ░░░░░░░░░░░░░░░░░▒▒▒▓▓│  0%"
+            "  6K   │   │ ├─┴th...│            ░░░░░░░░░░░░░░░░░▒▒▒▓█│  2%"
+            " 16K   │   ├─┴elev...│            ░░░░░░░░░░░░░░░░░▒▒▒██│  6%"
+            "357B   │   │ ┌──ei...│            ░░░░░░░░░░░░░░░░░▒▒▒▓▓│  0%"
+            "542B   │   │ ├──ei...│            ░░░░░░░░░░░░░░░░░▒▒▒▓▓│  0%"
+            "750B   │   │ ├──E    │            ░░░░░░░░░░░░░░░░░▒▒▒▓▓│  0%"
+            "750B   │   │ ├──D    │            ░░░░░░░░░░░░░░░░░▒▒▒▓▓│  0%"
+            "750B   │   │ ├──C    │            ░░░░░░░░░░░░░░░░░▒▒▒▓▓│  0%"
+            "750B   │   │ │ ┌──G  │            ░░░░░░░░░░░░░░░░░▒▒▒▓▓│  0%"
+            "750B   │   │ │ ├──F  │            ░░░░░░░░░░░░░░░░░▒▒▒▓▓│  0%"
+            "  6K   │   │ ├─┴tw...│            ░░░░░░░░░░░░░░░░░▒▒▒▓█│  2%"
+            "750B   │   │ │ ┌──H  │            ░░░░░░░░░░░░░░░░░▒▒▒▓▓│  0%"
+            "  6K   │   │ ├─┴fi...│            ░░░░░░░░░░░░░░░░░▒▒▒▓█│  2%"
+            " 19K   │   ├─┴four...│            ░░░░░░░░░░░░░░░░░▒▒▒██│  6%"
+            " 39K   │ ┌─┴sub 2.2  │            ░░░░░░░░░░░░░░░░░█████│ 14%"
+            "750B   │ │ ┌──s      │            ░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒│  0%"
+            "750B   │ │ │ ┌──u    │            ░░░░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│  0%"
+            "750B   │ │ │ ├──t    │            ░░░░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│  0%"
+            "750B   │ │ │ │ ┌──x  │            ░░░░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│  0%"
+            "750B   │ │ │ │ ├──w  │            ░░░░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│  0%"
+            "750B   │ │ │ │ ├──v  │            ░░░░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│  0%"
+            " 50K   │ │ │ ├─┴te...│            ░░░░░▓▓▓▓▓▓▓▓▓▓▓██████│ 17%"
+            " 87K   │ │ │ ├──te...│            ░░░░░▓▓▓▓▓▓▓██████████│ 30%"
+            "142K   │ │ ├─┴nint...│            ░░░░░█████████████████│ 49%"
+            "147K   │ ├─┴sub 2.1  │            ░░░░░█████████████████│ 51%"
+            "190K   ├─┴sub 2      │            ██████████████████████│ 66%"
+            "287K ┌─┴root         │██████████████████████████████████│100%"
+        },
+}
