@@ -49,13 +49,13 @@ struct InitialRow<Name, NodeData> {
 
 #[derive(Default, Clone, Copy)]
 struct InitialColumnWidth {
-    size: usize,
+    size_column_width: usize,
 }
 
 impl InitialColumnWidth {
     #[inline]
     const fn total_max_width(self) -> usize {
-        self.size + PERCENTAGE_COLUMN_MAX_WIDTH + BORDER_COLUMNS
+        self.size_column_width + PERCENTAGE_COLUMN_MAX_WIDTH + BORDER_COLUMNS
     }
 }
 
@@ -155,7 +155,8 @@ where
                 remaining_depth,
             };
 
-            initial_table.column_width.size = max(initial_table.column_width.size, size.len());
+            initial_table.column_width.size_column_width =
+                max(initial_table.column_width.size_column_width, size.len());
 
             initial_table.push_back(InitialRow {
                 node_info,
@@ -182,22 +183,22 @@ where
 struct TreeRow<Name, NodeData> {
     #[deref]
     #[deref_mut]
-    initial: InitialRow<Name, NodeData>,
-    tree: TreeHorizontalSlice<String>,
+    initial_row: InitialRow<Name, NodeData>,
+    tree_horizontal_slice: TreeHorizontalSlice<String>,
 }
 
 #[derive(Default, Clone, Copy, Deref, DerefMut)]
 struct TreeColumnWidth {
     #[deref]
     #[deref_mut]
-    initial: InitialColumnWidth,
-    tree: usize,
+    initial_column_width: InitialColumnWidth,
+    tree_column_width: usize,
 }
 
 impl TreeColumnWidth {
     #[inline]
     const fn total_max_width(self) -> usize {
-        self.initial.total_max_width() + self.tree
+        self.initial_column_width.total_max_width() + self.tree_column_width
     }
 }
 
@@ -217,43 +218,49 @@ where
     } = initial_table;
     let initial_data_len = initial_data.len();
     let mut tree_column_width = TreeColumnWidth {
-        initial: initial_column_width,
-        tree: 0,
+        initial_column_width,
+        tree_column_width: 0,
     };
     let mut excluded_row_indices = HashSet::with_capacity(initial_data_len);
     let mut intermediate_table: Vec<_> = initial_data
         .into_iter()
-        .map(|initial| {
+        .map(|initial_row| {
             let child_position =
-                ChildPosition::from_index(initial.index_as_child, initial.sibling_count);
-            let parenthood = if initial.remaining_depth == 0 {
+                ChildPosition::from_index(initial_row.index_as_child, initial_row.sibling_count);
+            let parenthood = if initial_row.remaining_depth == 0 {
                 Parenthood::Childless
             } else {
-                Parenthood::from_children_count(initial.children_count)
+                Parenthood::from_children_count(initial_row.children_count)
             };
             let skeletal_component = TreeSkeletalComponent {
                 child_position,
                 parenthood,
                 direction: visualizer.direction,
             };
-            let ancestor_relative_positions = initial
+            let ancestor_relative_positions = initial_row
                 .ancestors
                 .iter()
                 .map(|node_info| {
                     ChildPosition::from_index(node_info.index_as_child, node_info.sibling_count)
                 })
                 .collect();
-            let mut tree = TreeHorizontalSlice {
+            let mut tree_horizontal_slice = TreeHorizontalSlice {
                 ancestor_relative_positions,
                 skeletal_component,
-                name: initial.name.to_string(),
+                name: initial_row.name.to_string(),
             };
-            if let Ok(()) = tree.truncate(max_width) {
-                tree_column_width.tree = max(tree_column_width.tree, tree.width());
+            if let Ok(()) = tree_horizontal_slice.truncate(max_width) {
+                tree_column_width.tree_column_width = max(
+                    tree_column_width.tree_column_width,
+                    tree_horizontal_slice.width(),
+                );
             } else {
-                excluded_row_indices.insert(initial.row_index);
+                excluded_row_indices.insert(initial_row.row_index);
             }
-            TreeRow { tree, initial }
+            TreeRow {
+                tree_horizontal_slice,
+                initial_row,
+            }
         })
         .collect();
 
@@ -278,7 +285,10 @@ where
             let parent_row = &mut intermediate_table[parent_row_index];
             if parent_row.children_count == 0 || parent_row.children_count == 1 {
                 parent_row.children_count = 0;
-                parent_row.tree.skeletal_component.parenthood = Parenthood::Childless;
+                parent_row
+                    .tree_horizontal_slice
+                    .skeletal_component
+                    .parenthood = Parenthood::Childless;
             } else {
                 parent_row.children_count -= 1;
             }
@@ -290,7 +300,7 @@ where
             .map(|node_info| node_info.row_index);
         if let Some(preceding_sibling_row_index) = preceding_sibling_row_index {
             let target = &mut intermediate_table[preceding_sibling_row_index]
-                .tree
+                .tree_horizontal_slice
                 .skeletal_component
                 .child_position;
             *target = ChildPosition::Last;
@@ -312,15 +322,15 @@ where
 struct BarRow<Name, NodeData> {
     #[deref]
     #[deref_mut]
-    tree: TreeRow<Name, NodeData>,
-    bar: ProportionBar,
+    tree_row: TreeRow<Name, NodeData>,
+    proportion_bar: ProportionBar,
 }
 
 #[derive(Default, Clone, Copy, Deref, DerefMut)]
 struct BarColumnWidth {
     #[deref]
     #[deref_mut]
-    tree: TreeColumnWidth,
+    tree_column_width: TreeColumnWidth,
 }
 
 fn render_bars<'a, Name, Data>(
@@ -335,8 +345,8 @@ where
     tree_table
         .data
         .into_iter()
-        .map(|tree| {
-            let mut ancestor_iter = tree.ancestors.iter();
+        .map(|tree_row| {
+            let mut ancestor_iter = tree_row.ancestors.iter();
             let lv4_option = ancestor_iter.next();
             let lv3_option = ancestor_iter.next();
             let lv2_option = ancestor_iter.next();
@@ -348,7 +358,7 @@ where
                 rounded_div::u64(node_data * (width as u64), total) as usize
             };
 
-            let lv0_value = get_value(&tree.node_info);
+            let lv0_value = get_value(&tree_row.node_info);
             let lv1_value = lv1_option.map(get_value).unwrap_or(lv0_value);
             let lv2_value = lv2_option.map(get_value).unwrap_or(lv1_value);
             let lv3_value = lv3_option.map(get_value).unwrap_or(lv2_value);
@@ -370,14 +380,17 @@ where
                 width
             );
 
-            let bar = ProportionBar {
+            let proportion_bar = ProportionBar {
                 level0: lv0_visible,
                 level1: lv1_visible,
                 level2: lv2_visible,
                 level3: lv3_visible,
                 level4: lv4_visible,
             };
-            BarRow { tree, bar }
+            BarRow {
+                tree_row,
+                proportion_bar,
+            }
         })
         .collect()
 }
@@ -408,8 +421,8 @@ where
             return self.visualize();
         }
 
-        let size_width = tree_table.column_width.size;
-        let tree_width = tree_table.column_width.tree;
+        let size_width = tree_table.column_width.size_column_width;
+        let tree_width = tree_table.column_width.tree_column_width;
 
         let bar_width = self.max_width - min_width;
         let bar_table = render_bars(tree_table, self.tree.data().into(), bar_width);
@@ -420,8 +433,8 @@ where
                 format!(
                     "{size} {tree}│{bar}│{ratio}",
                     size = align_right(&row.size, size_width),
-                    tree = align_left(&row.tree.tree, tree_width),
-                    bar = &row.bar,
+                    tree = align_left(&row.tree_horizontal_slice, tree_width),
+                    bar = &row.proportion_bar,
                     ratio = align_right(&row.percentage, PERCENTAGE_COLUMN_MAX_WIDTH),
                 )
             })
