@@ -275,9 +275,9 @@ where
             });
     }
 
-    for removal_row_index in excluded_row_indices.iter().copied() {
+    for excluded_row_index in excluded_row_indices.iter().copied() {
         // mark more nodes as childless
-        let parent_row_index = intermediate_table[removal_row_index]
+        let parent_row_index = intermediate_table[excluded_row_index]
             .ancestors
             .last()
             .map(|parent_info| parent_info.row_index);
@@ -295,7 +295,7 @@ where
         }
 
         // mark more nodes as last amongst siblings
-        let preceding_sibling_row_index = intermediate_table[removal_row_index]
+        let preceding_sibling_row_index = intermediate_table[excluded_row_index]
             .preceding_sibling
             .map(|node_info| node_info.row_index);
         if let Some(preceding_sibling_row_index) = preceding_sibling_row_index {
