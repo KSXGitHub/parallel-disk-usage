@@ -472,7 +472,7 @@ test_case! {
 }
 
 test_case! {
-    long_and_short_names_short_max_width where
+    remaining_siblings_properly_connect_when_some_amongst_them_disappear where
         tree = long_and_short_names::<Blocks>(),
         max_depth = 10,
         max_width = 50,
@@ -500,7 +500,7 @@ test_case! {
 }
 
 test_case! {
-    long_and_short_names_even_shorter_max_width where
+    children_of_disappeared_nodes_also_disappear where
         tree = long_and_short_names::<Blocks>(),
         max_depth = 10,
         max_width = 44,
