@@ -147,10 +147,7 @@ where
                 .data()
                 .display(visualizer.measurement_system)
                 .to_string();
-            let sibling_count = ancestors
-                .last()
-                .map(|parent| parent.children_count)
-                .unwrap_or(1);
+            let sibling_count = ancestors.last().map_or(1, |parent| parent.children_count);
             debug_assert_op!(sibling_count != 0);
             debug_assert_op!(index_as_child < sibling_count);
             let sibling_count = unsafe { NonZeroUsize::new_unchecked(sibling_count) };
@@ -337,8 +334,7 @@ where
         {
             let is_sibling = |row: &&TreeRow<&Name, Data>| {
                 row.parent()
-                    .map(|parent| parent.row_index == parent_row_index)
-                    .unwrap_or(false)
+                    .map_or(false, |parent| parent.row_index == parent_row_index)
             };
             let is_excluded =
                 |row: &TreeRow<&Name, Data>| excluded_row_indices.contains(&row.row_index);
@@ -404,11 +400,7 @@ where
 
             macro_rules! ancestor_value {
                 ($index:expr, $fallback:expr) => {
-                    tree_row
-                        .ancestors
-                        .get($index)
-                        .map(get_value)
-                        .unwrap_or($fallback)
+                    tree_row.ancestors.get($index).map_or($fallback, get_value)
                 };
             }
 

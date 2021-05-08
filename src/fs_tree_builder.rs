@@ -63,8 +63,7 @@ where
         TreeBuilder::<PathBuf, OsString, Data, _, _, PostProcessChildren> {
             name: root
                 .file_name()
-                .map(OsString::from)
-                .unwrap_or_else(|| OsString::from(".")),
+                .map_or_else(|| OsString::from("."), OsString::from),
 
             path: root,
 
