@@ -48,6 +48,13 @@ struct InitialRow<Name, NodeData> {
     percentage: String,
 }
 
+impl<Name, NodeData> InitialRow<Name, NodeData> {
+    #[inline]
+    fn parent(&self) -> Option<&'_ NodeInfo<Name, NodeData>> {
+        self.ancestors.last()
+    }
+}
+
 #[derive(Default, Clone, Copy)]
 struct InitialColumnWidth {
     size_column_width: usize,
@@ -280,8 +287,7 @@ where
         // mark more nodes as childless
         let parent_row_index = intermediate_table
             .index(excluded_row_index)
-            .ancestors
-            .last()
+            .parent()
             .map(|parent_info| parent_info.row_index);
         if let Some(parent_row_index) = parent_row_index {
             let parent_row = &mut intermediate_table[parent_row_index];
@@ -305,8 +311,7 @@ where
             (preceding_sibling_row_index, parent_row_index)
         {
             let is_sibling = |row: &&TreeRow<&Name, Data>| {
-                row.ancestors
-                    .last()
+                row.parent()
                     .map(|parent| parent.row_index == parent_row_index)
                     .unwrap_or(false)
             };
