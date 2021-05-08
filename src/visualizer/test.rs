@@ -306,7 +306,7 @@ test_case! {
 }
 
 test_case! {
-    nested_bottom_up_binary_blocks where
+    nested_bottom_up_blocks where
         tree = nested_tree::<Blocks>(
             &["a", "b", "c", "d", "e", "f"],
             8.into(),
