@@ -563,6 +563,54 @@ test_case! {
         },
 }
 
+test_case! {
+    remaining_siblings_properly_connect_when_some_amongst_them_disappear_top_down where
+        tree = long_and_short_names::<Blocks>(),
+        max_depth = 10,
+        max_width = 50,
+        direction = TopDown,
+        measurement_system = Binary,
+        expected = text_block_fnl! {
+            "81 └─┬root   │█████████████████████████│100%"
+            "19   ├─┬di...│                   ██████│ 23%"
+            " 3   │ ├──b  │                   ░░░░░█│  4%"
+            " 1   │ └──a  │                   ░░░░░░│  1%"
+            "18   ├─┬d    │                   ██████│ 22%"
+            " 3   │ ├──b  │                   ░░░░░█│  4%"
+            " 1   │ └──a  │                   ░░░░░░│  1%"
+            "17   ├─┬di...│                    █████│ 21%"
+            " 3   │ ├──b  │                    ░░░░█│  4%"
+            " 1   │ └──a  │                    ░░░░░│  1%"
+            "16   ├─┬c    │                    █████│ 20%"
+            " 3   │ ├──b  │                    ░░░░█│  4%"
+            " 1   │ └──a  │                    ░░░░░│  1%"
+            " 4   ├──fi...│                        █│  5%"
+            " 3   ├──b    │                        █│  4%"
+            " 2   ├──fi...│                        █│  2%"
+            " 1   └──a    │                         │  1%"
+        },
+}
+
+test_case! {
+    children_of_disappeared_nodes_also_disappear_top_down where
+        tree = long_and_short_names::<Blocks>(),
+        max_depth = 10,
+        max_width = 44,
+        direction = TopDown,
+        measurement_system = Binary,
+        expected = text_block_fnl! {
+            "81 └─┬root │█████████████████████│100%"
+            "18   ├─┬d  │                █████│ 22%"
+            " 3   │ ├──b│                ░░░░█│  4%"
+            " 1   │ └──a│                ░░░░░│  1%"
+            "16   ├─┬c  │                 ████│ 20%"
+            " 3   │ ├──b│                 ░░░█│  4%"
+            " 1   │ └──a│                 ░░░░│  1%"
+            " 3   ├──b  │                    █│  4%"
+            " 1   └──a  │                     │  1%"
+        },
+}
+
 fn big_tree_with_long_names<Data>() -> Tree<&'static str, Data>
 where
     Data: Size + Ord + From<u64> + Send,
