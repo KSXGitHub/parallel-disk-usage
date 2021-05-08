@@ -354,10 +354,8 @@ where
         }
     }
 
-    let tree_data: LinkedList<_> = intermediate_table
-        .into_iter()
-        .filter(|row| !excluded_row_indices.contains(&row.row_index))
-        .collect();
+    let is_included = |row: &TreeRow<&Name, Data>| !excluded_row_indices.contains(&row.row_index);
+    let tree_data: LinkedList<_> = intermediate_table.into_iter().filter(is_included).collect();
 
     TreeTable {
         data: tree_data,
