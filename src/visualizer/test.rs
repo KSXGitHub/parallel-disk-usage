@@ -96,7 +96,7 @@ test_case! {
 }
 
 test_case! {
-    typical_bottom_up_binary_short_max_width where
+    typical_short_max_width where
         tree = typical_tree::<Bytes>(4096.into(), 1),
         max_depth = 10,
         max_width = 90,
@@ -118,7 +118,7 @@ test_case! {
 }
 
 test_case! {
-    typical_bottom_up_binary_even_shorter_max_width where
+    typical_even_shorter_max_width where
         tree = typical_tree::<Bytes>(4096.into(), 1),
         max_depth = 10,
         max_width = 50,
@@ -135,7 +135,7 @@ test_case! {
 }
 
 test_case! {
-    typical_bottom_up_binary_tebi_scale where
+    typical_binary_tebi_scale where
         tree = typical_tree::<Bytes>(4096.into(), 1 << 40),
         max_depth = 10,
         max_width = 150,
@@ -157,7 +157,7 @@ test_case! {
 }
 
 test_case! {
-    typical_bottom_up_metric_tebi_scale where
+    typical_metric_tebi_scale where
         tree = typical_tree::<Bytes>(4096.into(), 1 << 40),
         max_depth = 10,
         max_width = 150,
