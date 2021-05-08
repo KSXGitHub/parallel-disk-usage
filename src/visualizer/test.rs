@@ -96,6 +96,50 @@ test_case! {
 }
 
 test_case! {
+    typical_bottom_up_metric where
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        max_depth = 10,
+        max_width = 150,
+        direction = BottomUp,
+        measurement_system = Metric,
+        expected = text_block_fnl! {
+            " 52B   ┌──bar                                   │                                                                                          │  0%"
+            "  3K   ├──foo                                   │                                                                                  ████████│  9%"
+            "  4K   ├──empty dir                             │                                                                             █████████████│ 15%"
+            " 45B   │   ┌──hello                             │                                                               ░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒│  0%"
+            " 54B   │   ├──world                             │                                                               ░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒│  0%"
+            "  4K   │ ┌─┴world                               │                                                               ░░░░░░░░░░░░░██████████████│ 15%"
+            "  8K   ├─┴hello                                 │                                                               ███████████████████████████│ 30%"
+            "475B   │   ┌──file with a really long name      │                                                              ░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒██│  2%"
+            "  5K   │ ┌─┴subdirectory with a really long name│                                                              ░░░░░░░░░░░░░███████████████│ 16%"
+            "  9K   ├─┴directory with a really long name     │                                                              ████████████████████████████│ 31%"
+            " 28K ┌─┴root                                    │██████████████████████████████████████████████████████████████████████████████████████████│100%"
+        },
+}
+
+test_case! {
+    typical_top_down_binary where
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        max_depth = 10,
+        max_width = 150,
+        direction = TopDown,
+        measurement_system = Binary,
+        expected = text_block_fnl! {
+            " 27K └─┬root                                    │██████████████████████████████████████████████████████████████████████████████████████████│100%"
+            "  8K   ├─┬directory with a really long name     │                                                              ████████████████████████████│ 31%"
+            "  4K   │ └─┬subdirectory with a really long name│                                                              ░░░░░░░░░░░░░███████████████│ 16%"
+            "475B   │   └──file with a really long name      │                                                              ░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒██│  2%"
+            "  8K   ├─┬hello                                 │                                                               ███████████████████████████│ 30%"
+            "  4K   │ └─┬world                               │                                                               ░░░░░░░░░░░░░██████████████│ 15%"
+            " 54B   │   ├──world                             │                                                               ░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒│  0%"
+            " 45B   │   └──hello                             │                                                               ░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒│  0%"
+            "  4K   ├──empty dir                             │                                                                             █████████████│ 15%"
+            "  2K   ├──foo                                   │                                                                                  ████████│  9%"
+            " 52B   └──bar                                   │                                                                                          │  0%"
+        },
+}
+
+test_case! {
     typical_short_max_width where
         tree = typical_tree::<Bytes>(4096.into(), 1),
         max_depth = 10,
