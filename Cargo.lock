@@ -49,9 +49,9 @@ checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
 
 [[package]]
 name = "build-fs-tree"
-version = "0.2.4"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "371db1daa00155264023867554806c56b87dcfe741c94e81cfea2f0fc95d1539"
+checksum = "cb6679085ccbbeb09f24d2dc2a9b9fb9b7817abc58a4287caa1d63864bfc8ece"
 dependencies = [
  "derive_more",
  "pipe-trait 0.3.2",
@@ -625,9 +625,9 @@ dependencies = [
 
 [[package]]
 name = "text-block-macros"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3729d26ad7b50bf7a0efbde7312b7f18160b844a1ea5775b795ec8fe05299970"
+checksum = "7f8b59b4da1c1717deaf1de80f0179a9d8b4ac91c986d5fd9f4a8ff177b84049"
 
 [[package]]
 name = "textwrap"
