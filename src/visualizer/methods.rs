@@ -346,23 +346,26 @@ where
         .data
         .into_iter()
         .map(|tree_row| {
-            let mut ancestor_iter = tree_row.ancestors.iter();
-            let lv4_option = ancestor_iter.next();
-            let lv3_option = ancestor_iter.next();
-            let lv2_option = ancestor_iter.next();
-            let lv1_option = ancestor_iter.next();
-            drop(ancestor_iter);
-
             let get_value = |node_info: &NodeInfo<&Name, Data>| {
                 let node_data = node_info.node_data.into();
                 rounded_div::u64(node_data * (width as u64), total) as usize
             };
 
+            macro_rules! ancestor_value {
+                ($index:expr, $fallback:expr) => {
+                    tree_row
+                        .ancestors
+                        .get($index)
+                        .map(get_value)
+                        .unwrap_or($fallback)
+                };
+            }
+
             let lv0_value = get_value(&tree_row.node_info);
-            let lv1_value = lv1_option.map(get_value).unwrap_or(lv0_value);
-            let lv2_value = lv2_option.map(get_value).unwrap_or(lv1_value);
-            let lv3_value = lv3_option.map(get_value).unwrap_or(lv2_value);
-            let lv4_value = lv4_option.map(get_value).unwrap_or(lv3_value);
+            let lv1_value = ancestor_value!(3, lv0_value);
+            let lv2_value = ancestor_value!(2, lv1_value);
+            let lv3_value = ancestor_value!(1, lv2_value);
+            let lv4_value = ancestor_value!(0, lv3_value);
             debug_assert_op!(lv0_value <= lv1_value);
             debug_assert_op!(lv1_value <= lv2_value);
             debug_assert_op!(lv2_value <= lv3_value);
