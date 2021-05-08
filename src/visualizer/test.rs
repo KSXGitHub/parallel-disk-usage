@@ -373,6 +373,92 @@ test_case! {
         },
 }
 
+fn long_and_short_names<Data>() -> Tree<&'static str, Data>
+where
+    Data: Size + Ord + From<u64> + Send,
+{
+    let dir = Tree::<&'static str, Data>::fixed_size_dir_constructor(1.into());
+    let file = |name: &'static str, size: u64| Tree::file(name, Data::from(size));
+    dir(
+        "root",
+        vec![
+            file("a", 1),
+            file("file with a long name 1", 2),
+            file("b", 3),
+            file("file with a long name 2", 4),
+            dir(
+                "c",
+                vec![
+                    file("a", 1),
+                    file("file with a long name 1", 2),
+                    file("b", 3),
+                    file("file with a long name 2", 4),
+                    file("weight", 5),
+                ],
+            ),
+            dir(
+                "directory with a long name 1",
+                vec![
+                    file("a", 1),
+                    file("file with a long name 1", 2),
+                    file("b", 3),
+                    file("file with a long name 2", 4),
+                    file("weight", 6),
+                ],
+            ),
+            dir(
+                "d",
+                vec![
+                    file("a", 1),
+                    file("file with a long name 1", 2),
+                    file("b", 3),
+                    file("file with a long name 2", 4),
+                    file("weight", 7),
+                ],
+            ),
+            dir(
+                "directory with a long name 2",
+                vec![
+                    file("a", 1),
+                    file("file with a long name 1", 2),
+                    file("b", 3),
+                    file("file with a long name 2", 4),
+                    file("weight", 8),
+                ],
+            ),
+        ],
+    )
+    .into_par_sorted(order_tree)
+}
+
+test_case! {
+    long_and_short_names_short_max_width where
+        tree = long_and_short_names::<Blocks>(),
+        max_depth = 10,
+        max_width = 50,
+        direction = BottomUp,
+        measurement_system = Binary,
+        expected = text_block_fnl! {
+            " 1   ┌──a    │                         │  1%"
+            " 2   ├──fi...│                        █│  2%"
+            " 3   ├──b    │                        █│  4%"
+            " 4   ├──fi...│                        █│  5%"
+            " 1   │ ┌──a  │                    ░░░░░│  1%"
+            " 3   │ ├──b  │                    ░░░░█│  4%"
+            "16   ├─┴c    │                    █████│ 20%"
+            " 1   │ ┌──a  │                    ░░░░░│  1%"
+            " 3   │ ├──b  │                    ░░░░█│  4%"
+            "17   ├─┴di...│                    █████│ 21%"
+            " 1   │ ┌──a  │                   ░░░░░░│  1%"
+            " 3   │ ├──b  │                   ░░░░░█│  4%"
+            "18   ├─┴d    │                   ██████│ 22%"
+            " 1   │ ┌──a  │                   ░░░░░░│  1%"
+            " 3   │ ├──b  │                   ░░░░░█│  4%"
+            "19   ├─┴di...│                   ██████│ 23%"
+            "81 ┌─┴root   │█████████████████████████│100%"
+        },
+}
+
 fn big_tree_with_long_names<Data>() -> Tree<&'static str, Data>
 where
     Data: Size + Ord + From<u64> + Send,
