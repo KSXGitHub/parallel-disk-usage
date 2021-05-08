@@ -11,6 +11,7 @@ use std::{
     collections::{HashSet, LinkedList},
     fmt::Display,
     num::NonZeroUsize,
+    ops::{Index, IndexMut},
 };
 use zero_copy_pads::{align_left, align_right, Width};
 
@@ -277,7 +278,8 @@ where
 
     for excluded_row_index in excluded_row_indices.iter().copied() {
         // mark more nodes as childless
-        let parent_row_index = intermediate_table[excluded_row_index]
+        let parent_row_index = intermediate_table
+            .index(excluded_row_index)
             .ancestors
             .last()
             .map(|parent_info| parent_info.row_index);
@@ -295,7 +297,8 @@ where
         }
 
         // mark more nodes as last amongst siblings
-        let preceding_sibling_row_index = intermediate_table[excluded_row_index]
+        let preceding_sibling_row_index = intermediate_table
+            .index(excluded_row_index)
             .preceding_sibling
             .map(|node_info| node_info.row_index);
         if let (Some(preceding_sibling_row_index), Some(parent_row_index)) =
@@ -309,12 +312,14 @@ where
             };
             let is_excluded =
                 |row: &TreeRow<&Name, Data>| excluded_row_indices.contains(&row.row_index);
-            let following_siblings_are_all_excluded = intermediate_table[excluded_row_index..]
+            let following_siblings_are_all_excluded = intermediate_table
+                .index(excluded_row_index..)
                 .iter()
                 .filter(is_sibling)
                 .all(is_excluded);
             if following_siblings_are_all_excluded {
-                let target = &mut intermediate_table[preceding_sibling_row_index]
+                let target = &mut intermediate_table
+                    .index_mut(preceding_sibling_row_index)
                     .tree_horizontal_slice
                     .skeletal_component
                     .child_position;
