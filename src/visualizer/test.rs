@@ -432,6 +432,46 @@ where
 }
 
 test_case! {
+    long_and_short_names_sufficient_max_width where
+        tree = long_and_short_names::<Blocks>(),
+        max_depth = 10,
+        max_width = 150,
+        direction = BottomUp,
+        measurement_system = Binary,
+        expected = text_block_fnl! {
+            " 1   ┌──a                           │                                                                                                     █│  1%"
+            " 2   ├──file with a long name 1     │                                                                                                   ███│  2%"
+            " 3   ├──b                           │                                                                                                  ████│  4%"
+            " 4   ├──file with a long name 2     │                                                                                                 █████│  5%"
+            " 1   │ ┌──a                         │                                                                                  ░░░░░░░░░░░░░░░░░░░█│  1%"
+            " 2   │ ├──file with a long name 1   │                                                                                  ░░░░░░░░░░░░░░░░░███│  2%"
+            " 3   │ ├──b                         │                                                                                  ░░░░░░░░░░░░░░░░████│  4%"
+            " 4   │ ├──file with a long name 2   │                                                                                  ░░░░░░░░░░░░░░░█████│  5%"
+            " 5   │ ├──weight                    │                                                                                  ░░░░░░░░░░░░░░██████│  6%"
+            "16   ├─┴c                           │                                                                                  ████████████████████│ 20%"
+            " 1   │ ┌──a                         │                                                                                 ░░░░░░░░░░░░░░░░░░░░█│  1%"
+            " 2   │ ├──file with a long name 1   │                                                                                 ░░░░░░░░░░░░░░░░░░███│  2%"
+            " 3   │ ├──b                         │                                                                                 ░░░░░░░░░░░░░░░░░████│  4%"
+            " 4   │ ├──file with a long name 2   │                                                                                 ░░░░░░░░░░░░░░░░█████│  5%"
+            " 6   │ ├──weight                    │                                                                                 ░░░░░░░░░░░░░████████│  7%"
+            "17   ├─┴directory with a long name 1│                                                                                 █████████████████████│ 21%"
+            " 1   │ ┌──a                         │                                                                               ░░░░░░░░░░░░░░░░░░░░░░█│  1%"
+            " 2   │ ├──file with a long name 1   │                                                                               ░░░░░░░░░░░░░░░░░░░░███│  2%"
+            " 3   │ ├──b                         │                                                                               ░░░░░░░░░░░░░░░░░░░████│  4%"
+            " 4   │ ├──file with a long name 2   │                                                                               ░░░░░░░░░░░░░░░░░░█████│  5%"
+            " 7   │ ├──weight                    │                                                                               ░░░░░░░░░░░░░░█████████│  9%"
+            "18   ├─┴d                           │                                                                               ███████████████████████│ 22%"
+            " 1   │ ┌──a                         │                                                                              ░░░░░░░░░░░░░░░░░░░░░░░█│  1%"
+            " 2   │ ├──file with a long name 1   │                                                                              ░░░░░░░░░░░░░░░░░░░░░███│  2%"
+            " 3   │ ├──b                         │                                                                              ░░░░░░░░░░░░░░░░░░░░████│  4%"
+            " 4   │ ├──file with a long name 2   │                                                                              ░░░░░░░░░░░░░░░░░░░█████│  5%"
+            " 8   │ ├──weight                    │                                                                              ░░░░░░░░░░░░░░██████████│ 10%"
+            "19   ├─┴directory with a long name 2│                                                                              ████████████████████████│ 23%"
+            "81 ┌─┴root                          │██████████████████████████████████████████████████████████████████████████████████████████████████████│100%"
+        },
+}
+
+test_case! {
     long_and_short_names_short_max_width where
         tree = long_and_short_names::<Blocks>(),
         max_depth = 10,
