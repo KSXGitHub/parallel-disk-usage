@@ -459,6 +459,26 @@ test_case! {
         },
 }
 
+test_case! {
+    long_and_short_names_even_shorter_max_width where
+        tree = long_and_short_names::<Blocks>(),
+        max_depth = 10,
+        max_width = 44,
+        direction = BottomUp,
+        measurement_system = Binary,
+        expected = text_block_fnl! {
+            " 1   ┌──a  │                     │  1%"
+            " 3   ├──b  │                    █│  4%"
+            " 1   │ ┌──a│                 ░░░░│  1%"
+            " 3   │ ├──b│                 ░░░█│  4%"
+            "16   ├─┴c  │                 ████│ 20%"
+            " 1   │ ┌──a│                ░░░░░│  1%"
+            " 3   │ ├──b│                ░░░░█│  4%"
+            "18   ├─┴d  │                █████│ 22%"
+            "81 ┌─┴root │█████████████████████│100%"
+        },
+}
+
 fn big_tree_with_long_names<Data>() -> Tree<&'static str, Data>
 where
     Data: Size + Ord + From<u64> + Send,

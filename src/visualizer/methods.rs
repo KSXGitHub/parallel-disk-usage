@@ -5,6 +5,7 @@ use super::{
 use crate::{size::Size, tree::Tree};
 use assert_cmp::{debug_assert_op, debug_assert_op_expr};
 use derive_more::{Deref, DerefMut};
+use pipe_trait::Pipe;
 use smart_default::SmartDefault;
 use std::{
     cmp::{max, min},
@@ -281,6 +282,30 @@ where
             .for_each(|(expected_row_index, actual_row_index)| {
                 debug_assert_op!(actual_row_index == expected_row_index)
             });
+    }
+
+    // mark children of excluded nodes as excluded
+    loop {
+        let excluded_count = excluded_row_indices.len();
+        let mut children_of_excluded = LinkedList::<usize>::new();
+
+        for excluded_row_index in excluded_row_indices.iter().copied() {
+            let is_child = |row: &&TreeRow<&Name, Data>| {
+                row.parent()
+                    .map_or(false, |node_info| node_info.row_index == excluded_row_index)
+            };
+            intermediate_table
+                .index(excluded_row_index..)
+                .iter()
+                .filter(is_child)
+                .map(|row| row.row_index)
+                .pipe(|iter| children_of_excluded.extend(iter));
+        }
+
+        excluded_row_indices.extend(children_of_excluded);
+        if excluded_row_indices.len() == excluded_count {
+            break;
+        }
     }
 
     for excluded_row_index in excluded_row_indices.iter().copied() {
