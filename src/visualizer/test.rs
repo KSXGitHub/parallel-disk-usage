@@ -139,7 +139,7 @@ test_case! {
     typical_short_max_width where
         tree = typical_tree::<BinaryBytes>(4096.into(), 1),
         max_depth = 10,
-        column_width_distribution = total 90,
+        column_width_distribution = components 30 49,
         direction = BottomUp,
         expected = text_block_fnl! {
             " 52B   ┌──bar                │                                                 │  0%"
@@ -160,7 +160,7 @@ test_case! {
     typical_even_shorter_max_width where
         tree = typical_tree::<BinaryBytes>(4096.into(), 1),
         max_depth = 10,
-        column_width_distribution = total 50,
+        column_width_distribution = components 16 23,
         direction = BottomUp,
         expected = text_block_fnl! {
             " 52B   ┌──bar  │                       │  0%"
