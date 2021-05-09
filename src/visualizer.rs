@@ -1,10 +1,12 @@
 pub mod child_position;
+pub mod column_width_distribution;
 pub mod direction;
 pub mod parenthood;
 pub mod proportion_bar;
 pub mod tree;
 
 pub use child_position::ChildPosition;
+pub use column_width_distribution::ColumnWidthDistribution;
 pub use direction::Direction;
 pub use parenthood::Parenthood;
 pub use proportion_bar::{ProportionBar, ProportionBarBlock};
@@ -24,8 +26,8 @@ where
     pub tree: &'a Tree<Name, Data>,
     /// The direction of the visualization of the tree.
     pub direction: Direction,
-    /// Maximum number of characters/blocks can be placed in a line.
-    pub max_width: usize,
+    /// Distribution and maximum number of characters/blocks can be placed in a line.
+    pub column_width_distribution: ColumnWidthDistribution,
     /// Maximum number of levels that should be visualized.
     pub max_depth: usize,
 }

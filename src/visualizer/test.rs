@@ -1,4 +1,4 @@
-use super::{Direction, Visualizer};
+use super::{ColumnWidthDistribution, Direction, Visualizer};
 use crate::{
     size::{BinaryBytes, Blocks, MetricBytes, Size},
     tree::Tree,
@@ -17,7 +17,7 @@ macro_rules! test_case {
         $name:ident where
         tree = $tree:expr,
         max_depth = $max_depth:expr,
-        max_width = $max_width:expr,
+        column_width_distribution = $column_width_function:ident $($column_width_arguments:literal)+,
         direction = $direction:ident,
         expected = $expected:expr,
     ) => {
@@ -25,10 +25,12 @@ macro_rules! test_case {
         #[test]
         fn $name() {
             let tree = $tree;
+            let column_width_distribution =
+                ColumnWidthDistribution::$column_width_function($($column_width_arguments),+);
             let actual = Visualizer {
                 tree: &tree,
                 max_depth: $max_depth,
-                max_width: $max_width,
+                column_width_distribution,
                 direction: Direction::$direction,
             }
             .to_string();
@@ -74,7 +76,7 @@ test_case! {
     typical_bottom_up_binary where
         tree = typical_tree::<BinaryBytes>(4096.into(), 1),
         max_depth = 10,
-        max_width = 150,
+        column_width_distribution = total 150,
         direction = BottomUp,
         expected = text_block_fnl! {
             " 52B   ┌──bar                                   │                                                                                          │  0%"
@@ -95,7 +97,7 @@ test_case! {
     typical_bottom_up_metric where
         tree = typical_tree::<MetricBytes>(4096.into(), 1),
         max_depth = 10,
-        max_width = 150,
+        column_width_distribution = total 150,
         direction = BottomUp,
         expected = text_block_fnl! {
             " 52B   ┌──bar                                   │                                                                                          │  0%"
@@ -116,7 +118,7 @@ test_case! {
     typical_top_down_binary where
         tree = typical_tree::<BinaryBytes>(4096.into(), 1),
         max_depth = 10,
-        max_width = 150,
+        column_width_distribution = total 150,
         direction = TopDown,
         expected = text_block_fnl! {
             " 27K └─┬root                                    │██████████████████████████████████████████████████████████████████████████████████████████│100%"
@@ -137,7 +139,7 @@ test_case! {
     typical_short_max_width where
         tree = typical_tree::<BinaryBytes>(4096.into(), 1),
         max_depth = 10,
-        max_width = 90,
+        column_width_distribution = total 90,
         direction = BottomUp,
         expected = text_block_fnl! {
             " 52B   ┌──bar                │                                                 │  0%"
@@ -158,7 +160,7 @@ test_case! {
     typical_even_shorter_max_width where
         tree = typical_tree::<BinaryBytes>(4096.into(), 1),
         max_depth = 10,
-        max_width = 50,
+        column_width_distribution = total 50,
         direction = BottomUp,
         expected = text_block_fnl! {
             " 52B   ┌──bar  │                       │  0%"
@@ -174,7 +176,7 @@ test_case! {
     typical_binary_tebi_scale where
         tree = typical_tree::<BinaryBytes>(4096.into(), 1 << 40),
         max_depth = 10,
-        max_width = 150,
+        column_width_distribution = total 150,
         direction = BottomUp,
         expected = text_block_fnl! {
             "  4K   ┌──empty dir                             │                                                                                          │  0%"
@@ -195,7 +197,7 @@ test_case! {
     typical_metric_tebi_scale where
         tree = typical_tree::<MetricBytes>(4096.into(), 1 << 40),
         max_depth = 10,
-        max_width = 150,
+        column_width_distribution = total 150,
         direction = BottomUp,
         expected = text_block_fnl! {
             "  4K   ┌──empty dir                             │                                                                                          │  0%"
@@ -235,7 +237,7 @@ test_case! {
             1024.into(),
         ),
         max_depth = 10,
-        max_width = 150,
+        column_width_distribution = total 150,
         direction = BottomUp,
         expected = text_block_fnl! {
             " 1K             ┌──z│                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████│  4%"
@@ -257,7 +259,7 @@ test_case! {
             1024.into(),
         ),
         max_depth = 10,
-        max_width = 150,
+        column_width_distribution = total 150,
         direction = BottomUp,
         expected = text_block_fnl! {
             " 1K             ┌──z│                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████│  4%"
@@ -279,7 +281,7 @@ test_case! {
             1024.into(),
         ),
         max_depth = 10,
-        max_width = 150,
+        column_width_distribution = total 150,
         direction = TopDown,
         expected = text_block_fnl! {
             "25K └─┬a            │██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████│100%"
@@ -301,7 +303,7 @@ test_case! {
             2.into(),
         ),
         max_depth = 10,
-        max_width = 150,
+        column_width_distribution = total 150,
         direction = BottomUp,
         expected = text_block_fnl! {
             " 2             ┌──z│                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████│  4%"
@@ -329,7 +331,7 @@ test_case! {
             1024.into(),
         ),
         max_depth = 10,
-        max_width = 100,
+        column_width_distribution = total 100,
         direction = BottomUp,
         expected = text_block_fnl! {
             " 1K           ┌──file with a...│           ░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓███│  5%"
@@ -363,7 +365,7 @@ test_case! {
             1024.into(),
         ),
         max_depth = 10,
-        max_width = 90,
+        column_width_distribution = total 90,
         direction = BottomUp,
         expected = text_block_fnl! {
             "17K                 ┌──ab...│    ░░░░▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████████████████│ 35%"
@@ -387,7 +389,7 @@ test_case! {
             (1 << 40).into(),
         ),
         max_depth = 10,
-        max_width = 150,
+        column_width_distribution = total 150,
         direction = BottomUp,
         expected = text_block_fnl! {
             " 1T             ┌──z│                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████│  4%"
@@ -462,7 +464,7 @@ test_case! {
     long_and_short_names_sufficient_max_width where
         tree = long_and_short_names::<Blocks>(),
         max_depth = 10,
-        max_width = 150,
+        column_width_distribution = total 150,
         direction = BottomUp,
         expected = text_block_fnl! {
             " 1   ┌──a                           │                                                                                                     █│  1%"
@@ -501,7 +503,7 @@ test_case! {
     remaining_siblings_properly_connect_when_some_amongst_them_disappear where
         tree = long_and_short_names::<Blocks>(),
         max_depth = 10,
-        max_width = 50,
+        column_width_distribution = total 50,
         direction = BottomUp,
         expected = text_block_fnl! {
             " 1   ┌──a    │                         │  1%"
@@ -528,7 +530,7 @@ test_case! {
     children_of_disappeared_nodes_also_disappear where
         tree = long_and_short_names::<Blocks>(),
         max_depth = 10,
-        max_width = 44,
+        column_width_distribution = total 44,
         direction = BottomUp,
         expected = text_block_fnl! {
             " 1   ┌──a  │                     │  1%"
@@ -547,7 +549,7 @@ test_case! {
     remaining_siblings_properly_connect_when_some_amongst_them_disappear_top_down where
         tree = long_and_short_names::<Blocks>(),
         max_depth = 10,
-        max_width = 50,
+        column_width_distribution = total 50,
         direction = TopDown,
         expected = text_block_fnl! {
             "81 └─┬root   │█████████████████████████│100%"
@@ -574,7 +576,7 @@ test_case! {
     children_of_disappeared_nodes_also_disappear_top_down where
         tree = long_and_short_names::<Blocks>(),
         max_depth = 10,
-        max_width = 44,
+        column_width_distribution = total 44,
         direction = TopDown,
         expected = text_block_fnl! {
             "81 └─┬root │█████████████████████│100%"
@@ -785,7 +787,7 @@ test_case! {
     big_tree_with_long_names_short_max_width where
         tree = big_tree_with_long_names::<BinaryBytes>(),
         max_depth = 100,
-        max_width = 67,
+        column_width_distribution = total 67,
         direction = BottomUp,
         expected = text_block_fnl! {
             "999B     ┌──first ...│                       ░░░░░░░░░░░│  0%"
