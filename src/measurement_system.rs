@@ -12,8 +12,8 @@ pub trait MeasurementSystem: Debug + Default + Clone + Copy {
     const SCALE_BASE: u64;
 
     /// Get scale in number.
-    fn scale(exp: usize) -> u64 {
-        Self::SCALE_BASE.pow(exp as u32)
+    fn scale(exp: u32) -> u64 {
+        Self::SCALE_BASE.pow(exp)
     }
 
     /// Parse a value according to the prefixing rule.
