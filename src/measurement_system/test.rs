@@ -5,7 +5,7 @@ macro_rules! test_case {
     ($name:ident -> $value:literal in $system:ident == $expected:literal) => {
         #[test]
         fn $name() {
-            assert_eq!($system.parse_value($value).to_string(), $expected);
+            assert_eq!($system::parse_value($value).to_string(), $expected);
         }
     };
 }

@@ -11,22 +11,16 @@ pub trait MeasurementSystem: Debug + Default + Clone + Copy {
     /// Multiplication factor of metric system
     const SCALE_BASE: u64;
 
-    /// Get multiplication factor in number.
-    #[inline]
-    fn scale_base(self) -> u64 {
-        Self::SCALE_BASE
-    }
-
     /// Get scale in number.
-    fn scale(self, exp: usize) -> u64 {
-        self.scale_base().pow(exp as u32)
+    fn scale(exp: usize) -> u64 {
+        Self::SCALE_BASE.pow(exp as u32)
     }
 
     /// Parse a value according to the prefixing rule.
-    fn parse_value(self, value: u64) -> ParsedValue {
+    fn parse_value(value: u64) -> ParsedValue {
         macro_rules! check {
             ($exp:literal => $unit:literal) => {{
-                let scale = self.scale($exp);
+                let scale = Self::scale($exp);
                 if value >= scale {
                     return ParsedValue {
                         coefficient: rounded_div::u64(value, scale),

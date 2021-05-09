@@ -91,14 +91,14 @@ newtype!(
     #[doc = "Number of bytes (display in metric units)."]
     MetricBytes = u64;
     display -> ParsedValue = |bytes| {
-        Metric.parse_value(bytes.inner())
+        Metric::parse_value(bytes.inner())
     };
 );
 newtype!(
     #[doc = "Number of bytes (display in binary units)."]
     BinaryBytes = u64;
     display -> ParsedValue = |bytes| {
-        Binary.parse_value(bytes.inner())
+        Binary::parse_value(bytes.inner())
     };
 );
 newtype!(
