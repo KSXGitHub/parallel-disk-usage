@@ -456,6 +456,15 @@ where
                     return self.visualize();
                 }
 
+                if max_width <= MIN_BAR_WIDTH + PERCENTAGE_COLUMN_MAX_WIDTH + BORDER_COLUMNS {
+                    let extra_cols = 3; // make space for tree_column to minimize second-time re-rendering.
+                    self.column_width_distribution = ColumnWidthDistribution::components(
+                        min_width,
+                        MIN_BAR_WIDTH + PERCENTAGE_COLUMN_MAX_WIDTH + BORDER_COLUMNS + extra_cols,
+                    );
+                    return self.visualize();
+                }
+
                 let tree_max_width = min(
                     max_width - min_width,
                     max_width - MIN_BAR_WIDTH - PERCENTAGE_COLUMN_MAX_WIDTH - BORDER_COLUMNS,
