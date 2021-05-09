@@ -451,14 +451,14 @@ where
 
         let (tree_table, bar_width) = match self.column_width_distribution {
             ColumnWidthDistribution::Total { max_width } => {
+                let extra_cols = 3; // make space for tree_column to minimize second-time re-rendering.
+
                 if max_width <= min_width {
-                    let extra_cols = 3; // make space for tree_column to minimize second-time re-rendering.
                     self.column_width_distribution.set(min_width, extra_cols);
                     return self.visualize();
                 }
 
                 if max_width <= MIN_OVERALL_WIDTH {
-                    let extra_cols = 3; // make space for tree_column to minimize second-time re-rendering.
                     self.column_width_distribution = ColumnWidthDistribution::components(
                         min_width,
                         MIN_OVERALL_WIDTH + extra_cols,
