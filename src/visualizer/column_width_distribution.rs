@@ -38,18 +38,7 @@ impl ColumnWidthDistribution {
         }
     }
 
-    pub(super) fn set(&mut self, new_tree_column_max_width: usize, new_bar_column_width: usize) {
-        match self {
-            ColumnWidthDistribution::Total { max_width } => {
-                *max_width = new_tree_column_max_width + new_bar_column_width;
-            }
-            ColumnWidthDistribution::Components {
-                tree_column_max_width,
-                bar_column_width: bar_column_max_width,
-            } => {
-                *tree_column_max_width = new_tree_column_max_width;
-                *bar_column_max_width = new_bar_column_width;
-            }
-        }
+    pub(super) fn set_components(&mut self, tree_column_max_width: usize, bar_column_width: usize) {
+        *self = Self::components(tree_column_max_width, bar_column_width);
     }
 }

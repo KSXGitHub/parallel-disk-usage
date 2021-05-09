@@ -454,15 +454,14 @@ where
                 let extra_cols = 3; // make space for tree_column to minimize second-time re-rendering.
 
                 if max_width <= min_width {
-                    self.column_width_distribution.set(min_width, extra_cols);
+                    self.column_width_distribution
+                        .set_components(min_width, extra_cols);
                     return self.visualize();
                 }
 
                 if max_width <= MIN_OVERALL_WIDTH {
-                    self.column_width_distribution = ColumnWidthDistribution::components(
-                        min_width,
-                        MIN_OVERALL_WIDTH + extra_cols,
-                    );
+                    self.column_width_distribution
+                        .set_components(min_width, MIN_OVERALL_WIDTH + extra_cols);
                     return self.visualize();
                 }
 
@@ -471,7 +470,7 @@ where
 
                 let min_width = tree_table.column_width.total_max_width();
                 if max_width <= min_width {
-                    self.column_width_distribution.set(min_width, 1);
+                    self.column_width_distribution.set_components(min_width, 1);
                     return self.visualize();
                 }
 
@@ -485,7 +484,8 @@ where
                 bar_column_width,
             } => {
                 if bar_column_width < 1 {
-                    self.column_width_distribution.set(tree_column_max_width, 1);
+                    self.column_width_distribution
+                        .set_components(tree_column_max_width, 1);
                     return self.visualize();
                 }
 
