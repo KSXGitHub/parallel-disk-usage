@@ -136,7 +136,7 @@ test_case! {
 }
 
 test_case! {
-    typical_short_max_width where
+    typical_narrow_tree_column where
         tree = typical_tree::<BinaryBytes>(4096.into(), 1),
         max_depth = 10,
         column_width_distribution = components 24 49,
@@ -318,7 +318,7 @@ test_case! {
 }
 
 test_case! {
-    nested_bottom_up_binary_long_names_short_max_width where
+    nested_bottom_up_binary_long_names_narrow_tree_column where
         tree = nested_tree::<BinaryBytes>(
             &[
                 "directory with a long name",
@@ -345,7 +345,7 @@ test_case! {
 }
 
 test_case! {
-    nested_bottom_up_binary_many_names_short_max_width where
+    nested_bottom_up_binary_many_names_narrow_tree_column where
         tree = nested_tree::<BinaryBytes>(
             &[
                 "a",
@@ -462,7 +462,7 @@ where
 }
 
 test_case! {
-    long_and_short_names_sufficient_max_width where
+    long_and_short_names_fit_tree_column where
         tree = long_and_short_names::<Blocks>(),
         max_depth = 10,
         column_width_distribution = components 33 102,
@@ -785,7 +785,7 @@ where
 }
 
 test_case! {
-    big_tree_with_long_names_short_max_width where
+    big_tree_with_long_names_narrow_tree_column where
         tree = big_tree_with_long_names::<BinaryBytes>(),
         max_depth = 100,
         column_width_distribution = components 16 34,
