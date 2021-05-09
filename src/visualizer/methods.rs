@@ -143,10 +143,7 @@ where
             let fs_size = node.data().into();
             let percentage = rounded_div::u64(fs_size * 100, total_fs_size);
             let percentage = format!("{}%", percentage);
-            let size = node
-                .data()
-                .display(visualizer.measurement_system)
-                .to_string();
+            let size = node.data().to_string();
             let sibling_count = ancestors.last().map_or(1, |parent| parent.children_count);
             debug_assert_op!(sibling_count != 0);
             debug_assert_op!(index_as_child < sibling_count);

@@ -16,14 +16,20 @@ use std::os::unix::prelude::MetadataExt;
 
 /// Infers size from a [`Metadata`].
 pub type SizeGetter<Size> = fn(&Metadata) -> Size;
-/// Returns `metadata.len()`.
-pub const GET_APPARENT_SIZE: SizeGetter<Bytes> = |metadata| metadata.len().into();
-/// Returns `metadata.blksize()` (POSIX only).
-#[cfg(unix)]
-pub const GET_BLOCK_SIZE: SizeGetter<Bytes> = |metadata| metadata.blksize().into();
 /// Returns `metadata.blocks()` (POSIX only).
 #[cfg(unix)]
 pub const GET_BLOCK_COUNT: SizeGetter<Blocks> = |metadata| metadata.blocks().into();
+
+/// Returns `metadata.len()`.
+pub fn apparent_size_getter<Data: Bytes>() -> SizeGetter<Data> {
+    |metadata| metadata.len().into()
+}
+
+/// Returns `metadata.blksize()` (POSIX only).
+#[cfg(unix)]
+pub fn block_size_getter<Data: Bytes>() -> SizeGetter<Data> {
+    |metadata| metadata.blksize().into()
+}
 
 /// Build a [`Tree`] from a directory tree using [`From`] or [`Into`].
 #[derive(Debug)]

@@ -1,7 +1,7 @@
 use super::measurement_system::{MeasurementSystem, ParsedValue};
 use derive_more::{Add, AddAssign, From, Into, Sum};
 use std::{
-    fmt::{Debug, Display},
+    fmt::{Debug, Display, Error, Formatter},
     iter::Sum,
     ops::{Add, AddAssign, Mul, MulAssign},
 };
@@ -19,13 +19,14 @@ pub trait Size:
     + Add<Output = Self>
     + AddAssign
     + Sum
+    + Display
 {
     /// Underlying type
     type Inner: From<Self> + Into<Self> + Mul<Self, Output = Self>;
     /// Return type of [`display`](Size::display).
     type Display: Display;
     /// Display the disk usage in a measurement system.
-    fn display(self, measurement_system: MeasurementSystem) -> Self::Display;
+    fn display(self) -> Self::Display;
 }
 
 macro_rules! newtype {
@@ -52,9 +53,15 @@ macro_rules! newtype {
         impl Size for $name {
             type Inner = $inner;
             type Display = $display_type;
-            fn display(self, measurement_system: MeasurementSystem) -> Self::Display {
-                let display: fn(Self, MeasurementSystem) -> Self::Display = $display_impl;
-                display(self, measurement_system)
+            fn display(self) -> Self::Display {
+                let display: fn(Self) -> Self::Display = $display_impl;
+                display(self)
+            }
+        }
+
+        impl Display for $name {
+            fn fmt(&self, formatter: &mut Formatter<'_>) -> Result<(), Error> {
+                write!(formatter, "{}", self.display())
             }
         }
 
@@ -81,14 +88,37 @@ macro_rules! newtype {
 }
 
 newtype!(
-    #[doc = "Number of bytes."]
-    Bytes = u64;
-    display -> ParsedValue = |bytes, measurement_system| {
-        measurement_system.parse_value(bytes.inner())
+    #[doc = "Number of bytes (display in metric units)."]
+    MetricBytes = u64;
+    display -> ParsedValue = |bytes| {
+        MeasurementSystem::Metric.parse_value(bytes.inner())
+    };
+);
+newtype!(
+    #[doc = "Number of bytes (display in binary units)."]
+    BinaryBytes = u64;
+    display -> ParsedValue = |bytes| {
+        MeasurementSystem::Binary.parse_value(bytes.inner())
     };
 );
 newtype!(
     #[doc = "Number of blocks."]
     Blocks = u64;
-    display -> u64 = |blocks, _| blocks.inner();
+    display -> u64 = |blocks| blocks.inner();
 );
+
+/// Number of bytes
+pub trait Bytes: Size<Inner = u64> + From<u64> + Into<u64> {
+    /// Set displaying unit to metric system.
+    fn into_metric_bytes(self) -> MetricBytes {
+        self.into().into()
+    }
+
+    /// Set displaying unit to binary system.
+    fn into_binary_bytes(self) -> BinaryBytes {
+        self.into().into()
+    }
+}
+
+impl Bytes for MetricBytes {}
+impl Bytes for BinaryBytes {}

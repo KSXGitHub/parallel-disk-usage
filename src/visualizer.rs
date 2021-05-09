@@ -10,7 +10,7 @@ pub use parenthood::Parenthood;
 pub use proportion_bar::{ProportionBar, ProportionBarBlock};
 pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
 
-use super::{measurement_system::MeasurementSystem, size::Size, tree::Tree};
+use super::{size::Size, tree::Tree};
 use std::fmt::Display;
 
 /// Visualize a [`Tree`].
@@ -22,8 +22,6 @@ where
 {
     /// The tree to visualize.
     pub tree: &'a Tree<Name, Data>,
-    /// The units used to display `tree.data`.
-    pub measurement_system: MeasurementSystem,
     /// The direction of the visualization of the tree.
     pub direction: Direction,
     /// Maximum number of characters/blocks can be placed in a line.

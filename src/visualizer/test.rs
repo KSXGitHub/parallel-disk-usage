@@ -1,7 +1,6 @@
 use super::{Direction, Visualizer};
 use crate::{
-    measurement_system::MeasurementSystem,
-    size::{Blocks, Bytes, Size},
+    size::{BinaryBytes, Blocks, MetricBytes, Size},
     tree::Tree,
 };
 use pretty_assertions::assert_eq;
@@ -20,7 +19,6 @@ macro_rules! test_case {
         max_depth = $max_depth:expr,
         max_width = $max_width:expr,
         direction = $direction:ident,
-        measurement_system = $measurement_system:ident,
         expected = $expected:expr,
     ) => {
         $(#[$attributes])*
@@ -32,7 +30,6 @@ macro_rules! test_case {
                 max_depth: $max_depth,
                 max_width: $max_width,
                 direction: Direction::$direction,
-                measurement_system: MeasurementSystem::$measurement_system,
             }
             .to_string();
             let expected = $expected;
@@ -75,11 +72,10 @@ where
 
 test_case! {
     typical_bottom_up_binary where
-        tree = typical_tree::<Bytes>(4096.into(), 1),
+        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
         max_depth = 10,
         max_width = 150,
         direction = BottomUp,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             " 52B   ┌──bar                                   │                                                                                          │  0%"
             "  2K   ├──foo                                   │                                                                                  ████████│  9%"
@@ -97,11 +93,10 @@ test_case! {
 
 test_case! {
     typical_bottom_up_metric where
-        tree = typical_tree::<Bytes>(4096.into(), 1),
+        tree = typical_tree::<MetricBytes>(4096.into(), 1),
         max_depth = 10,
         max_width = 150,
         direction = BottomUp,
-        measurement_system = Metric,
         expected = text_block_fnl! {
             " 52B   ┌──bar                                   │                                                                                          │  0%"
             "  3K   ├──foo                                   │                                                                                  ████████│  9%"
@@ -119,11 +114,10 @@ test_case! {
 
 test_case! {
     typical_top_down_binary where
-        tree = typical_tree::<Bytes>(4096.into(), 1),
+        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
         max_depth = 10,
         max_width = 150,
         direction = TopDown,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             " 27K └─┬root                                    │██████████████████████████████████████████████████████████████████████████████████████████│100%"
             "  8K   ├─┬directory with a really long name     │                                                              ████████████████████████████│ 31%"
@@ -141,11 +135,10 @@ test_case! {
 
 test_case! {
     typical_short_max_width where
-        tree = typical_tree::<Bytes>(4096.into(), 1),
+        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
         max_depth = 10,
         max_width = 90,
         direction = BottomUp,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             " 52B   ┌──bar                │                                                 │  0%"
             "  2K   ├──foo                │                                             ████│  9%"
@@ -163,11 +156,10 @@ test_case! {
 
 test_case! {
     typical_even_shorter_max_width where
-        tree = typical_tree::<Bytes>(4096.into(), 1),
+        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
         max_depth = 10,
         max_width = 50,
         direction = BottomUp,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             " 52B   ┌──bar  │                       │  0%"
             "  2K   ├──foo  │                     ██│  9%"
@@ -180,11 +172,10 @@ test_case! {
 
 test_case! {
     typical_binary_tebi_scale where
-        tree = typical_tree::<Bytes>(4096.into(), 1 << 40),
+        tree = typical_tree::<BinaryBytes>(4096.into(), 1 << 40),
         max_depth = 10,
         max_width = 150,
         direction = BottomUp,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             "  4K   ┌──empty dir                             │                                                                                          │  0%"
             " 52T   ├──bar                                   │                                                                                         █│  2%"
@@ -202,11 +193,10 @@ test_case! {
 
 test_case! {
     typical_metric_tebi_scale where
-        tree = typical_tree::<Bytes>(4096.into(), 1 << 40),
+        tree = typical_tree::<MetricBytes>(4096.into(), 1 << 40),
         max_depth = 10,
         max_width = 150,
         direction = BottomUp,
-        measurement_system = Metric,
         expected = text_block_fnl! {
             "  4K   ┌──empty dir                             │                                                                                          │  0%"
             " 57T   ├──bar                                   │                                                                                         █│  2%"
@@ -238,7 +228,7 @@ fn nested_tree<Data: Size>(
 
 test_case! {
     nested_bottom_up_binary where
-        tree = nested_tree::<Bytes>(
+        tree = nested_tree::<BinaryBytes>(
             &["a", "b", "c", "d", "e", "f"],
             4096.into(),
             "z",
@@ -247,7 +237,6 @@ test_case! {
         max_depth = 10,
         max_width = 150,
         direction = BottomUp,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             " 1K             ┌──z│                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████│  4%"
             " 5K           ┌─┴f  │                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓████████████████████████│ 20%"
@@ -261,7 +250,7 @@ test_case! {
 
 test_case! {
     nested_bottom_up_metric where
-        tree = nested_tree::<Bytes>(
+        tree = nested_tree::<MetricBytes>(
             &["a", "b", "c", "d", "e", "f"],
             4096.into(),
             "z",
@@ -270,7 +259,6 @@ test_case! {
         max_depth = 10,
         max_width = 150,
         direction = BottomUp,
-        measurement_system = Metric,
         expected = text_block_fnl! {
             " 1K             ┌──z│                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████│  4%"
             " 5K           ┌─┴f  │                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓████████████████████████│ 20%"
@@ -284,7 +272,7 @@ test_case! {
 
 test_case! {
     nested_top_down_binary where
-        tree = nested_tree::<Bytes>(
+        tree = nested_tree::<BinaryBytes>(
             &["a", "b", "c", "d", "e", "f"],
             4096.into(),
             "z",
@@ -293,7 +281,6 @@ test_case! {
         max_depth = 10,
         max_width = 150,
         direction = TopDown,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             "25K └─┬a            │██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████│100%"
             "21K   └─┬b          │                   ███████████████████████████████████████████████████████████████████████████████████████████████████│ 84%"
@@ -316,7 +303,6 @@ test_case! {
         max_depth = 10,
         max_width = 150,
         direction = BottomUp,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             " 2             ┌──z│                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████│  4%"
             "10           ┌─┴f  │                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓████████████████████████│ 20%"
@@ -330,7 +316,7 @@ test_case! {
 
 test_case! {
     nested_bottom_up_binary_long_names_short_max_width where
-        tree = nested_tree::<Bytes>(
+        tree = nested_tree::<BinaryBytes>(
             &[
                 "directory with a long name",
                 "child directory with a long name",
@@ -345,7 +331,6 @@ test_case! {
         max_depth = 10,
         max_width = 100,
         direction = BottomUp,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             " 1K           ┌──file with a...│           ░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓███│  5%"
             " 5K         ┌─┴great-great-g...│           ░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓██████████████│ 24%"
@@ -358,7 +343,7 @@ test_case! {
 
 test_case! {
     nested_bottom_up_binary_many_names_short_max_width where
-        tree = nested_tree::<Bytes>(
+        tree = nested_tree::<BinaryBytes>(
             &[
                 "a",
                 "ab",
@@ -380,7 +365,6 @@ test_case! {
         max_depth = 10,
         max_width = 90,
         direction = BottomUp,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             "17K                 ┌──ab...│    ░░░░▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████████████████│ 35%"
             "21K               ┌─┴abcd...│    ░░░░▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████████████████████│ 43%"
@@ -396,7 +380,7 @@ test_case! {
 
 test_case! {
     nested_bottom_up_binary_tebi_scale where
-        tree = nested_tree::<Bytes>(
+        tree = nested_tree::<BinaryBytes>(
             &["a", "b", "c", "d", "e", "f"],
             (4 << 40).into(),
             "z",
@@ -405,7 +389,6 @@ test_case! {
         max_depth = 10,
         max_width = 150,
         direction = BottomUp,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             " 1T             ┌──z│                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████│  4%"
             " 5T           ┌─┴f  │                   ░░░░░░░░░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓████████████████████████│ 20%"
@@ -481,7 +464,6 @@ test_case! {
         max_depth = 10,
         max_width = 150,
         direction = BottomUp,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             " 1   ┌──a                           │                                                                                                     █│  1%"
             " 2   ├──file with a long name 1     │                                                                                                   ███│  2%"
@@ -521,7 +503,6 @@ test_case! {
         max_depth = 10,
         max_width = 50,
         direction = BottomUp,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             " 1   ┌──a    │                         │  1%"
             " 2   ├──fi...│                        █│  2%"
@@ -549,7 +530,6 @@ test_case! {
         max_depth = 10,
         max_width = 44,
         direction = BottomUp,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             " 1   ┌──a  │                     │  1%"
             " 3   ├──b  │                    █│  4%"
@@ -569,7 +549,6 @@ test_case! {
         max_depth = 10,
         max_width = 50,
         direction = TopDown,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             "81 └─┬root   │█████████████████████████│100%"
             "19   ├─┬di...│                   ██████│ 23%"
@@ -597,7 +576,6 @@ test_case! {
         max_depth = 10,
         max_width = 44,
         direction = TopDown,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             "81 └─┬root │█████████████████████│100%"
             "18   ├─┬d  │                █████│ 22%"
@@ -805,11 +783,10 @@ where
 
 test_case! {
     big_tree_with_long_names_short_max_width where
-        tree = big_tree_with_long_names::<Bytes>(),
+        tree = big_tree_with_long_names::<BinaryBytes>(),
         max_depth = 100,
         max_width = 67,
         direction = BottomUp,
-        measurement_system = Binary,
         expected = text_block_fnl! {
             "999B     ┌──first ...│                       ░░░░░░░░░░░│  0%"
             "750B     │ ┌──b      │                       ░░░░░░░▒▒▒▒│  0%"

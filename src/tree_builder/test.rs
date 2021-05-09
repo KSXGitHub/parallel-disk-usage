@@ -1,5 +1,5 @@
 use crate::{
-    size::Bytes,
+    size::MetricBytes,
     tree::{Tree, TreeReflection},
     tree_builder::{Info, TreeBuilder},
 };
@@ -7,10 +7,10 @@ use build_fs_tree::{dir, file, FileSystemTree};
 use derive_more::From;
 use pretty_assertions::assert_eq;
 
-type SampleData = Bytes;
+type SampleData = MetricBytes;
 type SampleName = String;
 const SAMPLE_SEPARATOR: char = '/';
-const SAMPLE_DIR_SIZE: SampleData = Bytes::new(5);
+const SAMPLE_DIR_SIZE: SampleData = MetricBytes::new(5);
 
 #[derive(Debug, From)]
 struct SampleTree(FileSystemTree<String, &'static str>);
