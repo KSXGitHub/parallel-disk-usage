@@ -38,17 +38,6 @@ impl ColumnWidthDistribution {
         }
     }
 
-    /// Deduce maximum number of characters/blocks can be placed in a line.
-    pub const fn max_width(self) -> usize {
-        match self {
-            Total { max_width } => max_width,
-            Components {
-                tree_column_max_width,
-                bar_column_width,
-            } => tree_column_max_width + bar_column_width,
-        }
-    }
-
     pub(super) fn set(&mut self, new_tree_column_max_width: usize, new_bar_column_width: usize) {
         match self {
             ColumnWidthDistribution::Total { max_width } => {

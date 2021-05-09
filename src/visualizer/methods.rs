@@ -444,44 +444,48 @@ where
     /// Create ASCII visualization of the [tree](Tree), such visualization is meant to be
     /// printed to a terminal screen.
     pub fn visualize(mut self) -> Vec<String> {
-        let max_width = self.column_width_distribution.max_width();
         let initial_table = render_initial(self);
-
         let min_width = initial_table.column_width.total_max_width();
-        if max_width <= min_width {
-            let extra_cols = 3; // make space for tree_column to minimize second-time re-rendering.
-            self.column_width_distribution.set(min_width, extra_cols);
-            return self.visualize();
-        }
 
-        let tree_max_width = match self.column_width_distribution {
+        let (tree_table, bar_width) = match self.column_width_distribution {
             ColumnWidthDistribution::Total { max_width } => {
-                min(max_width - min_width, max_width / 3)
+                if max_width <= min_width {
+                    let extra_cols = 3; // make space for tree_column to minimize second-time re-rendering.
+                    self.column_width_distribution.set(min_width, extra_cols);
+                    return self.visualize();
+                }
+
+                let tree_max_width = min(max_width - min_width, max_width / 3);
+                let tree_table = render_tree(self, initial_table, tree_max_width);
+
+                let min_width = tree_table.column_width.total_max_width();
+                if max_width <= min_width {
+                    self.column_width_distribution.set(min_width, 1);
+                    return self.visualize();
+                }
+
+                let bar_width = max_width - min_width;
+
+                (tree_table, bar_width)
             }
+
             ColumnWidthDistribution::Components {
                 tree_column_max_width,
-                ..
-            } => tree_column_max_width,
+                bar_column_width,
+            } => {
+                if bar_column_width < 1 {
+                    self.column_width_distribution.set(tree_column_max_width, 1);
+                    return self.visualize();
+                }
+
+                let tree_table = render_tree(self, initial_table, tree_column_max_width);
+
+                (tree_table, bar_column_width)
+            }
         };
-
-        let tree_table = render_tree(self, initial_table, tree_max_width);
-
-        let min_width = tree_table.column_width.total_max_width();
-        if max_width <= min_width {
-            self.column_width_distribution.set(min_width, 1);
-            return self.visualize();
-        }
 
         let size_width = tree_table.column_width.size_column_width;
         let tree_width = tree_table.column_width.tree_column_width;
-
-        let bar_width = match self.column_width_distribution {
-            ColumnWidthDistribution::Total { .. } => max_width - min_width,
-            ColumnWidthDistribution::Components {
-                bar_column_width: bar_column_max_width,
-                ..
-            } => bar_column_max_width,
-        };
 
         let bar_table = render_bars(tree_table, self.tree.data().into(), bar_width);
 
