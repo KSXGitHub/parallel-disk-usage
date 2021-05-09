@@ -54,12 +54,6 @@ impl Width for TreeSkeletalComponent {
     }
 }
 
-impl Width for TreeSkeletalComponentVisualization {
-    fn width(&self) -> usize {
-        self.len()
-    }
-}
-
 /// Horizontal slice of a tree of the height of exactly 1 line of text.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TreeHorizontalSlice<Name: Width> {
