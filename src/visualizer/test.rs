@@ -592,6 +592,46 @@ test_case! {
         },
 }
 
+fn tree_with_a_file_of_extremely_long_name<Data>() -> Tree<&'static str, Data>
+where
+    Data: Size + Ord + From<u64> + Send,
+{
+    let dir = Tree::<&'static str, Data>::fixed_size_dir_constructor(4069.into());
+    let file = |name: &'static str, size: u64| Tree::file(name, Data::from(size));
+    dir(
+        "root",
+        vec![file(
+            "file with a very super extraordinary extremely long name",
+            4069,
+        )],
+    )
+    .into_par_sorted(order_tree)
+}
+
+test_case! {
+    width_of_tree_column_is_prioritized_before_bar_column where
+        tree = tree_with_a_file_of_extremely_long_name::<MetricBytes>(),
+        max_depth = 10,
+        column_width_distribution = total 85,
+        direction = BottomUp,
+        expected = text_block_fnl! {
+            "4K   ┌──file with a very super extraordinary extremely long name│       ████████│ 50%"
+            "8K ┌─┴root                                                      │███████████████│100%"
+        },
+}
+
+test_case! {
+    bar_column_has_a_minimum_width where
+        tree = tree_with_a_file_of_extremely_long_name::<MetricBytes>(),
+        max_depth = 10,
+        column_width_distribution = total 50,
+        direction = BottomUp,
+        expected = text_block_fnl! {
+            "4K   ┌──file with a very super ex...│    ████│ 50%"
+            "8K ┌─┴root                          │████████│100%"
+        },
+}
+
 fn big_tree_with_long_names<Data>() -> Tree<&'static str, Data>
 where
     Data: Size + Ord + From<u64> + Send,

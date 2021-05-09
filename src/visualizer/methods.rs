@@ -18,6 +18,7 @@ use zero_copy_pads::{align_left, align_right, Width};
 
 const PERCENTAGE_COLUMN_MAX_WIDTH: usize = "100%".len();
 const BORDER_COLUMNS: usize = 3; // 4 columns, 3 borders, each border has a width of 1.
+const MIN_BAR_WIDTH: usize = 10;
 
 #[derive(SmartDefault, Deref, DerefMut)]
 struct Table<Row, ColumnWidth: Default> {
@@ -455,7 +456,10 @@ where
                     return self.visualize();
                 }
 
-                let tree_max_width = min(max_width - min_width, max_width / 3);
+                let tree_max_width = min(
+                    max_width - min_width,
+                    max_width - MIN_BAR_WIDTH - PERCENTAGE_COLUMN_MAX_WIDTH - BORDER_COLUMNS,
+                );
                 let tree_table = render_tree(self, initial_table, tree_max_width);
 
                 let min_width = tree_table.column_width.total_max_width();
