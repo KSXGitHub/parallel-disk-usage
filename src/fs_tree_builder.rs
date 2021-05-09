@@ -18,20 +18,23 @@ use std::os::unix::prelude::MetadataExt;
 pub type SizeGetter<Size> = fn(&Metadata) -> Size;
 
 /// Returns `metadata.len()`.
-pub fn apparent_size_getter<Data: Bytes>() -> SizeGetter<Data> {
-    |metadata| metadata.len().into()
+#[inline]
+pub fn get_apparent_size<Data: Bytes>(metadata: &Metadata) -> Data {
+    metadata.len().into()
 }
 
 /// Returns `metadata.blksize()` (POSIX only).
 #[cfg(unix)]
-pub fn block_size_getter<Data: Bytes>() -> SizeGetter<Data> {
-    |metadata| metadata.blksize().into()
+#[inline]
+pub fn get_block_size<Data: Bytes>(metadata: &Metadata) -> Data {
+    metadata.blksize().into()
 }
 
 /// Returns `metadata.blocks()` (POSIX only).
 #[cfg(unix)]
-pub fn block_count_getter() -> SizeGetter<Blocks> {
-    |metadata| metadata.blocks().into()
+#[inline]
+pub fn get_block_count(metadata: &Metadata) -> Blocks {
+    metadata.blocks().into()
 }
 
 /// Build a [`Tree`] from a directory tree using [`From`] or [`Into`].
