@@ -1,4 +1,4 @@
-use super::MeasurementSystem::*;
+use super::{Binary, MeasurementSystem, Metric};
 use pretty_assertions::assert_eq;
 
 macro_rules! test_case {

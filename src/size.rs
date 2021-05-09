@@ -1,4 +1,4 @@
-use super::measurement_system::{MeasurementSystem, ParsedValue};
+use super::measurement_system::{Binary, MeasurementSystem, Metric, ParsedValue};
 use derive_more::{Add, AddAssign, From, Into, Sum};
 use std::{
     fmt::{Debug, Display, Error, Formatter},
@@ -91,14 +91,14 @@ newtype!(
     #[doc = "Number of bytes (display in metric units)."]
     MetricBytes = u64;
     display -> ParsedValue = |bytes| {
-        MeasurementSystem::Metric.parse_value(bytes.inner())
+        Metric.parse_value(bytes.inner())
     };
 );
 newtype!(
     #[doc = "Number of bytes (display in binary units)."]
     BinaryBytes = u64;
     display -> ParsedValue = |bytes| {
-        MeasurementSystem::Binary.parse_value(bytes.inner())
+        Binary.parse_value(bytes.inner())
     };
 );
 newtype!(
