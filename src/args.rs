@@ -22,7 +22,7 @@ use text_block_macros::text_block;
 )]
 pub struct Args {
     /// List of files and/or directories.
-    #[structopt(name = "files", about = "List of files and/or directories.")]
+    #[structopt(name = "files")]
     pub files: Vec<PathBuf>,
 
     /// The direction of the tree.
