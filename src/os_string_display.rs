@@ -9,7 +9,20 @@ use std::{
 /// If the inner string can be converted to UTF-8, displays the UTF-8.
 /// Otherwise, displays its [`Debug`] form.
 #[derive(
-    Debug, Default, Clone, Copy, PartialEq, Eq, AsMut, AsRef, Deref, DerefMut, From, FromStr,
+    Debug,
+    Default,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    AsMut,
+    AsRef,
+    Deref,
+    DerefMut,
+    From,
+    FromStr,
 )]
 pub struct OsStringDisplay<Inner = OsString>(pub Inner)
 where
