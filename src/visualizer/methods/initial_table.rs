@@ -109,7 +109,8 @@ where
             let name = node.name();
             let node_data = node.data();
             let row_index = initial_table.len();
-            let children_count = if remaining_depth > 1 {
+            debug_assert_op!(remaining_depth > 0);
+            let children_count = if remaining_depth != 1 {
                 node.children().len()
             } else {
                 0
