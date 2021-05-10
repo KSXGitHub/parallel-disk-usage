@@ -295,6 +295,48 @@ test_case! {
         },
 }
 
+test_case! {
+    typical_empty_files where
+        tree = typical_tree::<BinaryBytes>(4096.into(), 0),
+        max_depth = 10,
+        column_width_distribution = total 90,
+        direction = BottomUp,
+        expected = text_block_fnl! {
+            " 0B   ┌──bar                                   │                                     │  0%"
+            " 0B   ├──foo                                   │                                     │  0%"
+            " 4K   ├──empty dir                             │                               ██████│ 17%"
+            " 0B   │   ┌──file with a really long name      │                         ░░░░░░▒▒▒▒▒▒│  0%"
+            " 4K   │ ┌─┴subdirectory with a really long name│                         ░░░░░░██████│ 17%"
+            " 8K   ├─┴directory with a really long name     │                         ████████████│ 33%"
+            " 0B   │   ┌──world                             │                         ░░░░░░▒▒▒▒▒▒│  0%"
+            " 0B   │   ├──hello                             │                         ░░░░░░▒▒▒▒▒▒│  0%"
+            " 4K   │ ┌─┴world                               │                         ░░░░░░██████│ 17%"
+            " 8K   ├─┴hello                                 │                         ████████████│ 33%"
+            "24K ┌─┴root                                    │█████████████████████████████████████│100%"
+        },
+}
+
+test_case! {
+    typical_empty_files_zero_sized_inodes where
+        tree = typical_tree::<BinaryBytes>(0.into(), 0),
+        max_depth = 10,
+        column_width_distribution = total 90,
+        direction = BottomUp,
+        expected = text_block_fnl! {
+            "0B       ┌──file with a really long name      │                                      │  0%"
+            "0B     ┌─┴subdirectory with a really long name│                                      │  0%"
+            "0B   ┌─┴directory with a really long name     │                                      │  0%"
+            "0B   ├──empty dir                             │                                      │  0%"
+            "0B   │   ┌──world                             │                                      │  0%"
+            "0B   │   ├──hello                             │                                      │  0%"
+            "0B   │ ┌─┴world                               │                                      │  0%"
+            "0B   ├─┴hello                                 │                                      │  0%"
+            "0B   ├──bar                                   │                                      │  0%"
+            "0B   ├──foo                                   │                                      │  0%"
+            "0B ┌─┴root                                    │                                      │  0%"
+        },
+}
+
 fn nested_tree<Data: Size>(
     dir_names: &[&'static str],
     size_per_dir: Data,
@@ -480,6 +522,46 @@ test_case! {
             "17T     ┌─┴c        │          ░░░░░░░░░░████████████████████████████████████████████│ 68%"
             "21T   ┌─┴b          │          ██████████████████████████████████████████████████████│ 84%"
             "25T ┌─┴a            │████████████████████████████████████████████████████████████████│100%"
+        },
+}
+
+fn empty_dir<Data>(inode_size: Data) -> Tree<&'static str, Data>
+where
+    Data: Size + Ord + From<u64> + Send,
+{
+    Tree::dir("empty directory", inode_size, Vec::new()).into_par_sorted(order_tree)
+}
+
+test_case! {
+    empty_dir_non_zero_inode where
+        tree = empty_dir::<MetricBytes>(4069.into()),
+        max_depth = 10,
+        column_width_distribution = total 90,
+        direction = BottomUp,
+        expected = text_block_fnl! {
+            "4K ┌──empty directory│███████████████████████████████████████████████████████████████│100%"
+        },
+}
+
+test_case! {
+    empty_dir_zero_sized_inode where
+        tree = empty_dir::<MetricBytes>(0.into()),
+        max_depth = 10,
+        column_width_distribution = total 90,
+        direction = BottomUp,
+        expected = text_block_fnl! {
+            "0B ┌──empty directory│                                                               │  0%"
+        },
+}
+
+test_case! {
+    empty_file where
+        tree = Tree::file("empty file", MetricBytes::from(0)),
+        max_depth = 10,
+        column_width_distribution = total 90,
+        direction = BottomUp,
+        expected = text_block_fnl! {
+            "0B ┌──empty file│                                                                    │  0%"
         },
 }
 

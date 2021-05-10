@@ -34,6 +34,9 @@ where
         .map(|tree_row| {
             let get_value = |node_info: &NodeInfo<&Name, Data>| {
                 let node_data = node_info.node_data.into();
+                if total == 0 {
+                    return 0;
+                }
                 rounded_div::u64(node_data * (width as u64), total) as usize
             };
 
@@ -52,18 +55,22 @@ where
             debug_assert_op!(lv1_value <= lv2_value);
             debug_assert_op!(lv2_value <= lv3_value);
             debug_assert_op!(lv3_value <= lv4_value);
-            debug_assert_op!(lv4_value == width);
+            if lv4_value != 0 {
+                debug_assert_op!(lv4_value == width);
+            }
 
             let lv0_visible = lv0_value;
             let lv1_visible = lv1_value - lv0_value;
             let lv2_visible = lv2_value - lv1_value;
             let lv3_visible = lv3_value - lv2_value;
-            let lv4_visible = lv4_value - lv3_value;
-            debug_assert_op_expr!(
-                lv0_visible + lv1_visible + lv2_visible + lv3_visible + lv4_visible,
-                ==,
-                width
-            );
+            let lv4_visible = width - lv3_value;
+            if lv4_value != 0 {
+                debug_assert_op_expr!(
+                    lv0_visible + lv1_visible + lv2_visible + lv3_visible + lv4_visible,
+                    ==,
+                    width
+                );
+            }
 
             let proportion_bar = ProportionBar {
                 level0: lv0_visible,

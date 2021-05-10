@@ -116,8 +116,12 @@ where
                 0
             };
             let fs_size = node.data().into();
-            let percentage = rounded_div::u64(fs_size * 100, total_fs_size);
-            let percentage = format!("{}%", percentage);
+            let percentage = if total_fs_size == 0 {
+                "0%".to_string()
+            } else {
+                let percentage = rounded_div::u64(fs_size * 100, total_fs_size);
+                format!("{}%", percentage)
+            };
             let size = node.data().to_string();
             let sibling_count = ancestors.last().map_or(1, |parent| parent.children_count);
             debug_assert_op!(sibling_count != 0);
