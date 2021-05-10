@@ -188,6 +188,72 @@ test_case! {
 }
 
 test_case! {
+    typical_sufficient_depth where
+        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
+        max_depth = 4,
+        column_width_distribution = total 90,
+        direction = BottomUp,
+        expected = text_block_fnl! {
+            " 52B   ┌──bar                                   │                                    │  0%"
+            "  2K   ├──foo                                   │                                 ███│  9%"
+            "  4K   ├──empty dir                             │                               █████│ 15%"
+            " 45B   │   ┌──hello                             │                         ░░░░░░▒▒▒▒▒│  0%"
+            " 54B   │   ├──world                             │                         ░░░░░░▒▒▒▒▒│  0%"
+            "  4K   │ ┌─┴world                               │                         ░░░░░░█████│ 15%"
+            "  8K   ├─┴hello                                 │                         ███████████│ 30%"
+            "475B   │   ┌──file with a really long name      │                         ░░░░░▒▒▒▒▒█│  2%"
+            "  4K   │ ┌─┴subdirectory with a really long name│                         ░░░░░██████│ 16%"
+            "  8K   ├─┴directory with a really long name     │                         ███████████│ 31%"
+            " 27K ┌─┴root                                    │████████████████████████████████████│100%"
+        },
+}
+
+test_case! {
+    typical_shallow where
+        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
+        max_depth = 3,
+        column_width_distribution = total 90,
+        direction = BottomUp,
+        expected = text_block_fnl! {
+            "52B   ┌──bar                                   │                                     │  0%"
+            " 2K   ├──foo                                   │                                  ███│  9%"
+            " 4K   ├──empty dir                             │                                █████│ 15%"
+            " 4K   │ ┌──world                               │                          ░░░░░██████│ 15%"
+            " 8K   ├─┴hello                                 │                          ███████████│ 30%"
+            " 4K   │ ┌──subdirectory with a really long name│                         ░░░░░░██████│ 16%"
+            " 8K   ├─┴directory with a really long name     │                         ████████████│ 31%"
+            "27K ┌─┴root                                    │█████████████████████████████████████│100%"
+        },
+}
+
+test_case! {
+    typical_flat where
+        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
+        max_depth = 2,
+        column_width_distribution = total 90,
+        direction = BottomUp,
+        expected = text_block_fnl! {
+            "52B   ┌──bar                              │                                          │  0%"
+            " 2K   ├──foo                              │                                      ████│  9%"
+            " 4K   ├──empty dir                        │                                    ██████│ 15%"
+            " 8K   ├──hello                            │                             █████████████│ 30%"
+            " 8K   ├──directory with a really long name│                             █████████████│ 31%"
+            "27K ┌─┴root                               │██████████████████████████████████████████│100%"
+        },
+}
+
+test_case! {
+    typical_root_only where
+        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
+        max_depth = 1,
+        column_width_distribution = total 90,
+        direction = BottomUp,
+        expected = text_block_fnl! {
+            "27K ┌──root│█████████████████████████████████████████████████████████████████████████│100%"
+        },
+}
+
+test_case! {
     typical_binary_tebi_scale where
         tree = typical_tree::<BinaryBytes>(4096.into(), 1 << 40),
         max_depth = 10,
@@ -917,5 +983,23 @@ test_case! {
             "147K   │ ├─┴sub 2.1  │            ░░░░░█████████████████│ 51%"
             "190K   ├─┴sub 2      │            ██████████████████████│ 66%"
             "287K ┌─┴root         │██████████████████████████████████│100%"
+        },
+}
+
+test_case! {
+    big_tree_with_long_names_shallow where
+        tree = big_tree_with_long_names::<BinaryBytes>(),
+        max_depth = 3,
+        column_width_distribution = total 90,
+        direction = BottomUp,
+        expected = text_block_fnl! {
+            "999B     ┌──first file with a long name│                              ░░░░░░░░░░░░░░░│  0%"
+            " 36K     ├──sub 1.1                    │                              ░░░░░░░░░██████│ 12%"
+            " 53K     ├──sub 1.2                    │                              ░░░░░░░████████│ 18%"
+            " 93K   ┌─┴sub 1                        │                              ███████████████│ 32%"
+            " 39K   │ ┌──sub 2.2                    │               ░░░░░░░░░░░░░░░░░░░░░░░░██████│ 14%"
+            "147K   │ ├──sub 2.1                    │               ░░░░░░░███████████████████████│ 51%"
+            "190K   ├─┴sub 2                        │               ██████████████████████████████│ 66%"
+            "287K ┌─┴root                           │█████████████████████████████████████████████│100%"
         },
 }
