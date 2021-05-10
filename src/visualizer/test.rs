@@ -4,7 +4,7 @@ use crate::{
     tree::Tree,
 };
 use pretty_assertions::assert_eq;
-use std::cmp::Ordering;
+use std::{cmp::Ordering, num::NonZeroUsize};
 use text_block_macros::text_block_fnl;
 use zero_copy_pads::Width;
 
@@ -28,9 +28,10 @@ macro_rules! test_case {
             let tree = $tree;
             let column_width_distribution =
                 ColumnWidthDistribution::$column_width_function($($column_width_arguments),+);
+            let max_depth = NonZeroUsize::new($max_depth).expect("non-zero max_depth");
             let actual = Visualizer {
                 tree: &tree,
-                max_depth: $max_depth,
+                max_depth,
                 column_width_distribution,
                 direction: Direction::$direction,
             }

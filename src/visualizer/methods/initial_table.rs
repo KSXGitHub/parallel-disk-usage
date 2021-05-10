@@ -146,7 +146,7 @@ where
             ActResult { node_info }
         },
         Param {
-            remaining_depth: visualizer.max_depth,
+            remaining_depth: visualizer.max_depth.get(),
             index_as_child: 0,
             ancestors: Vec::with_capacity(0),
             preceding_sibling: None,

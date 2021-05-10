@@ -13,7 +13,7 @@ pub use proportion_bar::{ProportionBar, ProportionBarBlock};
 pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
 
 use super::{size::Size, tree::Tree};
-use std::fmt::Display;
+use std::{fmt::Display, num::NonZeroUsize};
 
 /// Visualize a [`Tree`].
 #[derive(Debug)]
@@ -29,7 +29,7 @@ where
     /// Distribution and maximum number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
     /// Maximum number of levels that should be visualized.
-    pub max_depth: usize,
+    pub max_depth: NonZeroUsize,
 }
 
 mod copy;
