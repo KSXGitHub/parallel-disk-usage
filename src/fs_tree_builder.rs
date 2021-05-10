@@ -1,4 +1,5 @@
 use super::{
+    os_string_display::OsStringDisplay,
     reporter::{error_report::Operation::*, ErrorReport, Event, Reporter},
     size::Size,
     tree::Tree,
@@ -6,7 +7,6 @@ use super::{
 };
 use pipe_trait::Pipe;
 use std::{
-    ffi::OsString,
     fs::{read_dir, symlink_metadata, Metadata},
     path::PathBuf,
 };
@@ -18,7 +18,7 @@ where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
     Report: Reporter<Data> + Sync,
-    PostProcessChildren: Fn(&mut Vec<Tree<OsString, Data>>) + Copy + Send + Sync,
+    PostProcessChildren: Fn(&mut Vec<Tree<OsStringDisplay, Data>>) + Copy + Send + Sync,
 {
     /// Root of the directory tree.
     pub root: PathBuf,
@@ -31,12 +31,12 @@ where
 }
 
 impl<Data, GetData, Report, PostProcessChildren>
-    From<FsTreeBuilder<Data, GetData, Report, PostProcessChildren>> for Tree<OsString, Data>
+    From<FsTreeBuilder<Data, GetData, Report, PostProcessChildren>> for Tree<OsStringDisplay, Data>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
     Report: Reporter<Data> + Sync,
-    PostProcessChildren: Fn(&mut Vec<Tree<OsString, Data>>) + Copy + Send + Sync,
+    PostProcessChildren: Fn(&mut Vec<Tree<OsStringDisplay, Data>>) + Copy + Send + Sync,
 {
     fn from(builder: FsTreeBuilder<Data, GetData, Report, PostProcessChildren>) -> Self {
         let FsTreeBuilder {
@@ -46,10 +46,11 @@ where
             post_process_children,
         } = builder;
 
-        TreeBuilder::<PathBuf, OsString, Data, _, _, PostProcessChildren> {
-            name: root
-                .file_name()
-                .map_or_else(|| OsString::from("."), OsString::from),
+        TreeBuilder::<PathBuf, OsStringDisplay, Data, _, _, PostProcessChildren> {
+            name: root.file_name().map_or_else(
+                || ".".pipe(OsStringDisplay::os_string_from),
+                OsStringDisplay::os_string_from,
+            ),
 
             path: root,
 
@@ -93,7 +94,7 @@ where
                             }));
                             None
                         }
-                        Ok(entry) => entry.file_name().pipe(OsString::from).pipe(Some),
+                        Ok(entry) => entry.file_name().pipe(OsStringDisplay::from).pipe(Some),
                     })
                     .collect()
                 } else {
@@ -108,7 +109,7 @@ where
                 Info { data, children }
             },
 
-            join_path: |prefix, name| prefix.join(name),
+            join_path: |prefix, name| prefix.join(&name.0),
 
             post_process_children,
         }

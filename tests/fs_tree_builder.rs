@@ -4,6 +4,7 @@ pub use _utils::*;
 
 use dirt::{
     fs_tree_builder::FsTreeBuilder,
+    os_string_display::OsStringDisplay,
     reporter::{ProgressAndErrorReporter, ProgressReport},
     size::MetricBytes,
     tree::Tree,
@@ -11,7 +12,7 @@ use dirt::{
 use maplit::btreeset;
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use std::{collections::BTreeSet, ffi::OsString, fs::metadata, sync::Mutex};
+use std::{collections::BTreeSet, fs::metadata, sync::Mutex};
 
 #[cfg(unix)]
 use dirt::size::Blocks;
@@ -42,7 +43,7 @@ fn blocks_as_blocks() {
 fn progress_reports() {
     let workspace = SampleWorkspace::default();
     let reports = Mutex::new(BTreeSet::new());
-    Tree::<OsString, MetricBytes>::from(FsTreeBuilder {
+    Tree::<OsStringDisplay, MetricBytes>::from(FsTreeBuilder {
         get_data: |metadata| metadata.len().into(),
         reporter: ProgressAndErrorReporter::new(
             |progress| {

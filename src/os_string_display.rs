@@ -45,6 +45,14 @@ where
     }
 }
 
+impl OsStringDisplay {
+    /// Create an [`OsStringDisplay`] of [`OsString`].
+    #[inline]
+    pub fn os_string_from(source: impl Into<OsString>) -> Self {
+        source.into().into()
+    }
+}
+
 impl<Inner> AsRef<OsStr> for OsStringDisplay<Inner>
 where
     Inner: AsRef<OsStr> + Debug,
