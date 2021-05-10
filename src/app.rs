@@ -17,8 +17,6 @@ impl App {
 
     /// Run the application.
     pub fn run(self) {
-        let Args { files } = self.args;
-
-        dbg!(files);
+        dbg!(self.args);
     }
 }
