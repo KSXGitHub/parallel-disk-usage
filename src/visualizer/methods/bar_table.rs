@@ -66,6 +66,7 @@ where
             {
                 let actual_lv4_value = ancestor_value!(0, lv3_value);
                 if actual_lv4_value != 0 {
+                    debug_assert_op!(actual_lv4_value == width);
                     debug_assert_op_expr!(
                         lv0_visible + lv1_visible + lv2_visible + lv3_visible + lv4_visible,
                         ==,
