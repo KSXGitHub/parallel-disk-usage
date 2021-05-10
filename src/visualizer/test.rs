@@ -30,9 +30,9 @@ macro_rules! test_case {
                 ColumnWidthDistribution::$column_width_function($($column_width_arguments),+);
             let max_depth = NonZeroUsize::new($max_depth).expect("non-zero max_depth");
             let actual = Visualizer {
-                tree: &tree,
                 max_depth,
                 column_width_distribution,
+                tree: &tree,
                 direction: Direction::$direction,
             }
             .to_string();
