@@ -6,6 +6,7 @@ use crate::{
 use pretty_assertions::assert_eq;
 use std::cmp::Ordering;
 use text_block_macros::text_block_fnl;
+use zero_copy_pads::Width;
 
 fn order_tree<Name, Data: Size>(left: &Tree<Name, Data>, right: &Tree<Name, Data>) -> Ordering {
     left.data().cmp(&right.data()).reverse()
@@ -36,9 +37,26 @@ macro_rules! test_case {
             .to_string();
             let expected = $expected;
             eprintln!("\nACTUAL:\n{}\n", &actual);
-            let actual: Vec<_> = actual.split('\n').collect();
-            let expected: Vec<_> = expected.split('\n').collect();
-            assert_eq!(actual, expected);
+
+            let actual_lines: Vec<_> = actual.split('\n').collect();
+            let expected_lines: Vec<_> = expected.split('\n').collect();
+            assert_eq!(actual_lines, expected_lines);
+
+            if let ColumnWidthDistribution::Total { max_width } = column_width_distribution {
+                let actual_line_widths: Vec<_> = actual
+                    .split('\n')
+                    .map(|line| line.width())
+                    .collect();
+                let expected_line_widths: Vec<_> = expected
+                    .split('\n')
+                    .map(|_| max_width)
+                    .collect();
+                assert_eq!(
+                    actual_line_widths[0..actual_line_widths.len() - 1],
+                    expected_line_widths[0..expected_line_widths.len() - 1],
+                );
+                assert_eq!(actual_line_widths.last(), Some(&0));
+            }
         }
     };
 }
