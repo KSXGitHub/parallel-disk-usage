@@ -145,7 +145,8 @@ where
             .map(|parent_info| parent_info.row_index);
         if let Some(parent_row_index) = parent_row_index {
             let parent_row = &mut intermediate_table[parent_row_index];
-            if parent_row.children_count == 0 || parent_row.children_count == 1 {
+            debug_assert_op_expr!(parent_row.children_count, >, 0);
+            if parent_row.children_count == 1 {
                 parent_row.children_count = 0;
                 parent_row
                     .tree_horizontal_slice
