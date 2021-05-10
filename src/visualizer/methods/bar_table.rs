@@ -50,26 +50,28 @@ where
             let lv1_value = ancestor_value!(3, lv0_value);
             let lv2_value = ancestor_value!(2, lv1_value);
             let lv3_value = ancestor_value!(1, lv2_value);
-            let lv4_value = ancestor_value!(0, lv3_value);
+            let lv4_value = width;
             debug_assert_op!(lv0_value <= lv1_value);
             debug_assert_op!(lv1_value <= lv2_value);
             debug_assert_op!(lv2_value <= lv3_value);
             debug_assert_op!(lv3_value <= lv4_value);
-            if lv4_value != 0 {
-                debug_assert_op!(lv4_value == width);
-            }
 
             let lv0_visible = lv0_value;
             let lv1_visible = lv1_value - lv0_value;
             let lv2_visible = lv2_value - lv1_value;
             let lv3_visible = lv3_value - lv2_value;
-            let lv4_visible = width - lv3_value;
-            if lv4_value != 0 {
-                debug_assert_op_expr!(
-                    lv0_visible + lv1_visible + lv2_visible + lv3_visible + lv4_visible,
-                    ==,
-                    width
-                );
+            let lv4_visible = lv4_value - lv3_value;
+
+            #[cfg(debug_assertions)]
+            {
+                let actual_lv4_value = ancestor_value!(0, lv3_value);
+                if actual_lv4_value != 0 {
+                    debug_assert_op_expr!(
+                        lv0_visible + lv1_visible + lv2_visible + lv3_visible + lv4_visible,
+                        ==,
+                        width
+                    );
+                }
             }
 
             let proportion_bar = ProportionBar {
