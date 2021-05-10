@@ -109,7 +109,11 @@ where
             let name = node.name();
             let node_data = node.data();
             let row_index = initial_table.len();
-            let children_count = node.children().len();
+            let children_count = if remaining_depth > 1 {
+                node.children().len()
+            } else {
+                0
+            };
             let fs_size = node.data().into();
             let percentage = rounded_div::u64(fs_size * 100, total_fs_size);
             let percentage = format!("{}%", percentage);
