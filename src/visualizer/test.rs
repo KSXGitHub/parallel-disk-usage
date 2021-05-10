@@ -38,24 +38,20 @@ macro_rules! test_case {
             let expected = $expected;
             eprintln!("\nACTUAL:\n{}\n", &actual);
 
-            let actual_lines: Vec<_> = actual.split('\n').collect();
-            let expected_lines: Vec<_> = expected.split('\n').collect();
+            let actual_lines: Vec<_> = actual.lines().collect();
+            let expected_lines: Vec<_> = expected.lines().collect();
             assert_eq!(actual_lines, expected_lines);
 
             if let ColumnWidthDistribution::Total { max_width } = column_width_distribution {
                 let actual_line_widths: Vec<_> = actual
-                    .split('\n')
+                    .lines()
                     .map(|line| line.width())
                     .collect();
                 let expected_line_widths: Vec<_> = expected
-                    .split('\n')
+                    .lines()
                     .map(|_| max_width)
                     .collect();
-                assert_eq!(
-                    actual_line_widths[0..actual_line_widths.len() - 1],
-                    expected_line_widths[0..expected_line_widths.len() - 1],
-                );
-                assert_eq!(actual_line_widths.last(), Some(&0));
+                assert_eq!(actual_line_widths, expected_line_widths);
             }
         }
     };
