@@ -16,22 +16,35 @@ use std::os::unix::prelude::MetadataExt;
 
 /// Infers size from a [`Metadata`].
 pub type SizeGetter<Size> = fn(&Metadata) -> Size;
-/// Returns `metadata.len()`.
-pub const GET_APPARENT_SIZE: SizeGetter<Bytes> = |metadata| metadata.len().into();
-/// Returns `metadata.blksize()` (POSIX only).
+
+/// Returns [`metadata.len()`](Metadata::len).
+#[inline]
+pub fn get_apparent_size<Data: Bytes>(metadata: &Metadata) -> Data {
+    metadata.len().into()
+}
+
+/// Returns [`metadata.blksize()`](Metadata::blksize) (POSIX only).
 #[cfg(unix)]
-pub const GET_BLOCK_SIZE: SizeGetter<Bytes> = |metadata| metadata.blksize().into();
-/// Returns `metadata.blocks()` (POSIX only).
+#[inline]
+pub fn get_block_size<Data: Bytes>(metadata: &Metadata) -> Data {
+    metadata.blksize().into()
+}
+
+/// Returns [`metadata.blocks()`](Metadata::blocks) (POSIX only).
 #[cfg(unix)]
-pub const GET_BLOCK_COUNT: SizeGetter<Blocks> = |metadata| metadata.blocks().into();
+#[inline]
+pub fn get_block_count(metadata: &Metadata) -> Blocks {
+    metadata.blocks().into()
+}
 
 /// Build a [`Tree`] from a directory tree using [`From`] or [`Into`].
 #[derive(Debug)]
-pub struct FsTreeBuilder<Data, GetData, Report>
+pub struct FsTreeBuilder<Data, GetData, Report, PostProcessChildren>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
     Report: Reporter<Data> + Sync,
+    PostProcessChildren: Fn(&mut Vec<Tree<OsString, Data>>) + Copy + Send + Sync,
 {
     /// Root of the directory tree.
     pub root: PathBuf,
@@ -39,26 +52,30 @@ where
     pub get_data: GetData,
     /// Reports progress to external system.
     pub reporter: Report,
+    /// Processes lists of children after forming.
+    pub post_process_children: PostProcessChildren,
 }
 
-impl<Data, GetData, Report> From<FsTreeBuilder<Data, GetData, Report>> for Tree<OsString, Data>
+impl<Data, GetData, Report, PostProcessChildren>
+    From<FsTreeBuilder<Data, GetData, Report, PostProcessChildren>> for Tree<OsString, Data>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
     Report: Reporter<Data> + Sync,
+    PostProcessChildren: Fn(&mut Vec<Tree<OsString, Data>>) + Copy + Send + Sync,
 {
-    fn from(builder: FsTreeBuilder<Data, GetData, Report>) -> Self {
+    fn from(builder: FsTreeBuilder<Data, GetData, Report, PostProcessChildren>) -> Self {
         let FsTreeBuilder {
             root,
             get_data,
             reporter,
+            post_process_children,
         } = builder;
 
-        TreeBuilder::<PathBuf, OsString, Data, _, _> {
+        TreeBuilder::<PathBuf, OsString, Data, _, _, PostProcessChildren> {
             name: root
                 .file_name()
-                .map(OsString::from)
-                .unwrap_or_else(|| OsString::from(".")),
+                .map_or_else(|| OsString::from("."), OsString::from),
 
             path: root,
 
@@ -118,6 +135,8 @@ where
             },
 
             join_path: |prefix, name| prefix.join(name),
+
+            post_process_children,
         }
         .into()
     }

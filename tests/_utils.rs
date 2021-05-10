@@ -1,10 +1,16 @@
 #![cfg(test)]
 use build_fs_tree::{dir, file, Build, MergeableFileSystemTree};
 use derive_more::{AsRef, Deref};
-use dirt::{fs_tree_builder::FsTreeBuilder, reporter::ErrorOnlyReporter, size::Size, tree::Tree};
+use dirt::{
+    fs_tree_builder::FsTreeBuilder,
+    reporter::ErrorOnlyReporter,
+    size::Size,
+    tree::{Tree, TreeReflection},
+};
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use rayon::prelude::*;
 use std::{
     env::temp_dir,
     ffi::OsString,
@@ -74,27 +80,43 @@ impl Default for SampleWorkspace {
     }
 }
 
-/// Make the snapshot of a [`Tree`] testable.
+/// Make the snapshot of a [`TreeReflection`] testable.
 ///
 /// The real filesystem is often messy, causing `children` to mess up its order.
 /// This function makes the order of `children` deterministic by reordering them recursively.
-pub fn sanitize_tree<Name, Data>(tree: Tree<Name, Data>) -> Tree<Name, Data>
+pub fn sanitize_tree_reflection<Name, Data>(
+    tree_reflection: TreeReflection<Name, Data>,
+) -> TreeReflection<Name, Data>
 where
     Name: Ord,
     Data: Size,
+    TreeReflection<Name, Data>: Send,
 {
-    let Tree {
+    let TreeReflection {
         name,
         data,
         mut children,
-    } = tree;
+    } = tree_reflection;
     children.sort_by(|left, right| left.name.cmp(&right.name));
-    let children = children.into_iter().map(sanitize_tree).collect();
-    Tree {
+    let children = children
+        .into_par_iter()
+        .map(sanitize_tree_reflection)
+        .collect();
+    TreeReflection {
         name,
         data,
         children,
     }
+}
+
+/// Pass this function to the `post_process_children` field of [`FsTreeBuilder`]
+/// to sanitize the tree.
+pub fn post_process_children<Name, Data>(children: &mut Vec<Tree<Name, Data>>)
+where
+    Name: Ord,
+    Data: Size,
+{
+    children.sort_by(|left, right| left.name().cmp(right.name()));
 }
 
 /// Test the result of tree builder on the sample workspace.
@@ -127,33 +149,34 @@ where
                 panic!("Unexpected call to report_error: {:?}", error)
             }),
             root: root.join(suffix),
+            post_process_children,
         }
         .pipe(Tree::<OsString, Data>::from)
-        .pipe(sanitize_tree)
+        .into_reflection()
     };
 
     assert_eq!(
         measure("flat"),
-        sanitize_tree(Tree {
+        sanitize_tree_reflection(TreeReflection {
             name: "flat".into(),
             data: suffix_size!("flat", "flat/0", "flat/1", "flat/2", "flat/3"),
             children: vec![
-                Tree {
+                TreeReflection {
                     name: "0".into(),
                     data: suffix_size("flat/0"),
                     children: Vec::new(),
                 },
-                Tree {
+                TreeReflection {
                     name: "1".into(),
                     data: suffix_size("flat/1"),
                     children: Vec::new(),
                 },
-                Tree {
+                TreeReflection {
                     name: "2".into(),
                     data: suffix_size("flat/2"),
                     children: Vec::new(),
                 },
-                Tree {
+                TreeReflection {
                     name: "3".into(),
                     data: suffix_size("flat/3"),
                     children: Vec::new(),
@@ -164,13 +187,13 @@ where
 
     assert_eq!(
         measure("nested"),
-        sanitize_tree(Tree {
+        sanitize_tree_reflection(TreeReflection {
             name: "nested".into(),
             data: suffix_size!("nested", "nested/0", "nested/0/1"),
-            children: vec![Tree {
+            children: vec![TreeReflection {
                 name: "0".into(),
                 data: suffix_size!("nested/0", "nested/0/1"),
-                children: vec![Tree {
+                children: vec![TreeReflection {
                     name: "1".into(),
                     data: suffix_size!("nested/0/1"),
                     children: Vec::new(),
@@ -181,7 +204,7 @@ where
 
     assert_eq!(
         measure("empty-dir"),
-        sanitize_tree(Tree {
+        sanitize_tree_reflection(TreeReflection {
             name: "empty-dir".into(),
             data: suffix_size!("empty-dir"),
             children: Vec::new(),

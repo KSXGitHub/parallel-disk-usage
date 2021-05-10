@@ -7,13 +7,14 @@ use rayon::prelude::*;
 
 /// Collection of functions and starting points in order to build a [`Tree`] with [`From`] or [`Into`].
 #[derive(Debug)]
-pub struct TreeBuilder<Path, Name, Data, GetInfo, JoinPath>
+pub struct TreeBuilder<Path, Name, Data, GetInfo, JoinPath, PostProcessChildren>
 where
     Path: Send + Sync,
     Name: Send + Sync,
     Data: Size + Send,
     GetInfo: Fn(&Path) -> Info<Name, Data> + Copy + Send + Sync,
     JoinPath: Fn(&Path, &Name) -> Path + Copy + Send + Sync,
+    PostProcessChildren: Fn(&mut Vec<Tree<Name, Data>>) + Copy + Send + Sync,
 {
     /// Path to the root.
     pub path: Path,
@@ -23,39 +24,48 @@ where
     pub get_info: GetInfo,
     /// Function to join parent's `path` with a child's name to make the child's `name`.
     pub join_path: JoinPath,
+    /// Function to process each list of children after forming.
+    pub post_process_children: PostProcessChildren,
 }
 
-impl<Path, Name, Data, GetInfo, JoinPath> From<TreeBuilder<Path, Name, Data, GetInfo, JoinPath>>
-    for Tree<Name, Data>
+impl<Path, Name, Data, GetInfo, JoinPath, PostProcessChildren>
+    From<TreeBuilder<Path, Name, Data, GetInfo, JoinPath, PostProcessChildren>> for Tree<Name, Data>
 where
     Path: Send + Sync,
     Name: Send + Sync,
     Data: Size + Send,
     GetInfo: Fn(&Path) -> Info<Name, Data> + Copy + Send + Sync,
     JoinPath: Fn(&Path, &Name) -> Path + Copy + Send + Sync,
+    PostProcessChildren: Fn(&mut Vec<Tree<Name, Data>>) + Copy + Send + Sync,
 {
-    fn from(builder: TreeBuilder<Path, Name, Data, GetInfo, JoinPath>) -> Self {
+    fn from(
+        builder: TreeBuilder<Path, Name, Data, GetInfo, JoinPath, PostProcessChildren>,
+    ) -> Self {
         let TreeBuilder {
             path,
             name,
             get_info,
             join_path,
+            post_process_children,
         } = builder;
 
         let Info { data, children } = get_info(&path);
 
-        let children: Vec<_> = children
+        let mut children: Vec<_> = children
             .into_par_iter()
             .map(|name| TreeBuilder {
                 path: join_path(&path, &name),
                 name,
                 get_info,
                 join_path,
+                post_process_children,
             })
-            .map(Into::<Self>::into)
+            .map(Self::from)
             .collect();
 
-        Tree::from_children(name, children).add_dir_size(data)
+        post_process_children(&mut children);
+
+        Tree::dir(name, data, children)
     }
 }
 
