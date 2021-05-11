@@ -17,3 +17,13 @@ pub trait Reporter<Data: Size> {
     /// Handle report event.
     fn report(&self, event: Event<Data>);
 }
+
+impl<Data, Target> Reporter<Data> for &Target
+where
+    Data: Size,
+    Target: Reporter<Data>,
+{
+    fn report(&self, event: Event<Data>) {
+        Target::report(*self, event)
+    }
+}
