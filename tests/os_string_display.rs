@@ -1,4 +1,6 @@
-use super::OsStringDisplay;
+#![cfg(test)]
+#![cfg(unix)]
+use dirt::os_string_display::OsStringDisplay;
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use std::{ffi::OsString, os::unix::ffi::OsStringExt, path::PathBuf};

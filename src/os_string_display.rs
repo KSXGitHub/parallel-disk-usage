@@ -75,7 +75,3 @@ where
         }
     }
 }
-
-#[cfg(test)]
-#[cfg(unix)]
-mod test;
