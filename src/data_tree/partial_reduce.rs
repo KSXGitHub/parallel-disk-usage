@@ -27,18 +27,18 @@ pub struct PredicateParam<'a, Name, Data: Size> {
     pub parent_name: &'a Name,
 }
 
-impl<Name, Data: Size> DataTree<Name, Data> {
+impl<Name, Data> DataTree<Name, Data>
+where
+    Self: Send,
+    Name: Send + Sync,
+    Data: Size + Send + Sync,
+{
     /// Reduce some children into one, recursively.
     pub fn par_partial_reduce(
         self,
         name_reduced: impl Fn(NameReducedParam<Name, Data>) -> Name + Copy + Send + Sync,
         predicate: impl Fn(PredicateParam<Name, Data>) -> bool + Copy + Send + Sync,
-    ) -> Self
-    where
-        Self: Send,
-        Name: Send + Sync,
-        Data: Send + Sync,
-    {
+    ) -> Self {
         if self.children().len() < 3 {
             return self;
         }
