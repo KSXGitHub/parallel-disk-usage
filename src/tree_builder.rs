@@ -69,6 +69,3 @@ where
         DataTree::dir(name, data, children)
     }
 }
-
-#[cfg(test)]
-mod test;

@@ -1,10 +1,10 @@
-use crate::{
+use build_fs_tree::{dir, file, FileSystemTree};
+use derive_more::From;
+use dirt::{
     data_tree::{DataTree, DataTreeReflection},
     size::MetricBytes,
     tree_builder::{Info, TreeBuilder},
 };
-use build_fs_tree::{dir, file, FileSystemTree};
-use derive_more::From;
 use pretty_assertions::assert_eq;
 
 type SampleData = MetricBytes;
