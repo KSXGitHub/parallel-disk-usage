@@ -1,7 +1,5 @@
-pub mod direction;
 pub mod quantity;
 
-pub use direction::*;
 pub use quantity::*;
 
 use std::{num::NonZeroUsize, path::PathBuf};
@@ -25,9 +23,9 @@ pub struct Args {
     #[structopt(name = "files")]
     pub files: Vec<PathBuf>,
 
-    /// The direction of the tree.
-    #[structopt(long, possible_values = DIRECTION_VALUES, default_value = Direction::default_value())]
-    pub direction: Direction,
+    /// Print the tree top-down instead of bottom-up.
+    #[structopt(long)]
+    pub top_down: bool,
 
     /// Aspect of the files/directories to be measured.
     #[structopt(long, possible_values = QUANTITY_VALUES, default_value = Quantity::default_value())]

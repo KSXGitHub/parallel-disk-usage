@@ -9,7 +9,7 @@ use crate::{
     reporter::{ErrorOnlyReporter, ErrorReport},
     size::MetricBytes,
     size_getters::get_apparent_size,
-    visualizer::ColumnWidthDistribution,
+    visualizer::{ColumnWidthDistribution, Direction},
 };
 use structopt_utilities::StructOptUtils;
 
@@ -46,10 +46,10 @@ impl App {
                 total_width: Some(total_width),
                 column_width: None,
                 files,
-                direction,
+                top_down,
                 max_depth,
             } => Sub {
-                direction: direction.into(),
+                direction: Direction::from_top_down(top_down),
                 column_width_distribution: ColumnWidthDistribution::total(total_width),
                 get_data: get_apparent_size::<MetricBytes>,
                 post_process_children: |children: &mut Vec<
