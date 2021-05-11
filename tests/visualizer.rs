@@ -1,8 +1,8 @@
 #![cfg(test)]
 use dirt::{
-    visualizer::{ColumnWidthDistribution, Direction, Visualizer},
     data_tree::DataTree,
     size::{BinaryBytes, Blocks, MetricBytes, Size},
+    visualizer::{ColumnWidthDistribution, Direction, Visualizer},
 };
 use pretty_assertions::assert_eq;
 use std::{cmp::Ordering, num::NonZeroUsize};
