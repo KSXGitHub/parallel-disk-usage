@@ -10,10 +10,7 @@ pub mod size_getters;
 pub mod tree_builder;
 pub mod visualizer;
 
-pub use app::App;
-pub use args::Args;
-
 /// The main program.
 pub fn main() {
-    App::from_env().run()
+    app::App::from_env().run()
 }
