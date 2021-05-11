@@ -43,14 +43,14 @@ macro_rules! test_case {
             let expected_lines: Vec<_> = expected.lines().collect();
             assert_eq!(actual_lines, expected_lines);
 
-            if let ColumnWidthDistribution::Total { max_width } = column_width_distribution {
+            if let ColumnWidthDistribution::Total { width } = column_width_distribution {
                 let actual_line_widths: Vec<_> = actual
                     .lines()
                     .map(|line| line.width())
                     .collect();
                 let expected_line_widths: Vec<_> = expected
                     .lines()
-                    .map(|_| max_width)
+                    .map(|_| width)
                     .collect();
                 assert_eq!(actual_line_widths, expected_line_widths);
             }

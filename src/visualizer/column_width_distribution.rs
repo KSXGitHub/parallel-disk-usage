@@ -5,7 +5,7 @@ pub enum ColumnWidthDistribution {
     /// Specify maximum number of characters/blocks can be placed in a line.
     Total {
         /// Maximum number of characters/blocks can be placed in a line.
-        max_width: usize,
+        width: usize,
     },
     /// Specify maximum number of characters/blocks can be placed in a line
     /// for each individual component of the visualization.
@@ -24,8 +24,8 @@ pub use ColumnWidthDistribution::*;
 impl ColumnWidthDistribution {
     /// Specify maximum number of characters/blocks can be placed in a line.
     #[inline]
-    pub const fn total(max_width: usize) -> Self {
-        Total { max_width }
+    pub const fn total(width: usize) -> Self {
+        Total { width }
     }
 
     /// Specify maximum number of characters/blocks can be placed in a line

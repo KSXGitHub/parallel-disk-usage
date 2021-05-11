@@ -29,31 +29,31 @@ where
         let min_width = initial_table.column_width.total_max_width();
 
         let (tree_table, bar_width) = match self.column_width_distribution {
-            ColumnWidthDistribution::Total { max_width } => {
+            ColumnWidthDistribution::Total { width } => {
                 let extra_cols = 3; // make space for tree_column to minimize second-time re-rendering.
 
-                if max_width <= min_width {
+                if width <= min_width {
                     self.column_width_distribution
                         .set_components(min_width, extra_cols);
                     return self.visualize();
                 }
 
-                if max_width <= MIN_OVERALL_WIDTH {
+                if width <= MIN_OVERALL_WIDTH {
                     self.column_width_distribution
                         .set_components(min_width, MIN_OVERALL_WIDTH + extra_cols);
                     return self.visualize();
                 }
 
-                let tree_max_width = min(max_width - min_width, max_width - MIN_OVERALL_WIDTH);
+                let tree_max_width = min(width - min_width, width - MIN_OVERALL_WIDTH);
                 let tree_table = render_tree(self, initial_table, tree_max_width);
 
                 let min_width = tree_table.column_width.total_max_width();
-                if max_width <= min_width {
+                if width <= min_width {
                     self.column_width_distribution.set_components(min_width, 1);
                     return self.visualize();
                 }
 
-                let bar_width = max_width - min_width;
+                let bar_width = width - min_width;
 
                 (tree_table, bar_width)
             }
