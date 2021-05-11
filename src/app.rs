@@ -67,7 +67,6 @@ impl App {
             // TODO: customize error reporting (reporter)
             // TODO: customize sorting (post_process_children)
             // TODO: hide items whose size are too small in comparison to total
-
             args => {
                 dbg!(args);
                 panic!("Invalid combination of arguments")
