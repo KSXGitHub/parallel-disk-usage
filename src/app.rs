@@ -1,3 +1,7 @@
+pub mod sub;
+
+pub use sub::Sub;
+
 use super::Args;
 use structopt_utilities::StructOptUtils;
 
