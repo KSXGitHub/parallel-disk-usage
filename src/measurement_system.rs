@@ -70,6 +70,3 @@ variant! {
     #[doc = "Use the binary system"]
     Binary = BINARY_SCALE_BASE;
 }
-
-#[cfg(test)]
-mod test;

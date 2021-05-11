@@ -1,4 +1,5 @@
-use super::{Binary, MeasurementSystem, Metric};
+#[cfg(test)]
+use dirt::measurement_system::{Binary, MeasurementSystem, Metric};
 use pretty_assertions::assert_eq;
 
 macro_rules! test_case {
