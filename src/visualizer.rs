@@ -26,7 +26,7 @@ where
     pub tree: &'a Tree<Name, Data>,
     /// The direction of the visualization of the tree.
     pub direction: Direction,
-    /// Distribution and maximum number of characters/blocks can be placed in a line.
+    /// Distribution and total number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
     /// Maximum number of levels that should be visualized.
     pub max_depth: NonZeroUsize,

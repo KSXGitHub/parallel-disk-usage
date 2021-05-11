@@ -20,7 +20,7 @@ where
     pub files: Vec<PathBuf>,
     /// The direction of the visualization.
     pub direction: Direction,
-    /// Distribution and maximum number of characters/blocks can be placed in a line
+    /// Distribution and number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
     /// Maximum number of levels that should be visualized.
     pub max_depth: NonZeroUsize,
