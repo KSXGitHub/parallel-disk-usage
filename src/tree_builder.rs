@@ -5,7 +5,7 @@ pub use info::Info;
 use super::{data_tree::DataTree, size::Size};
 use rayon::prelude::*;
 
-/// Collection of functions and starting points in order to build a [`Tree`] with [`From`] or [`Into`].
+/// Collection of functions and starting points in order to build a [`DataTree`] with [`From`] or [`Into`].
 #[derive(Debug)]
 pub struct TreeBuilder<Path, Name, Data, GetInfo, JoinPath, PostProcessChildren>
 where

@@ -22,8 +22,8 @@ where
     Name: Display,
     Data: Size + Into<u64>,
 {
-    /// Create ASCII visualization of the [tree](Tree), such visualization is meant to be
-    /// printed to a terminal screen.
+    /// Create ASCII visualization of the [tree](crate::data_tree::DataTree), such visualization
+    /// is meant to be printed to a terminal screen.
     pub fn visualize(mut self) -> Vec<String> {
         let initial_table = render_initial(self);
         let min_width = initial_table.column_width.total_max_width();

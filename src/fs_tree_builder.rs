@@ -11,7 +11,7 @@ use std::{
     path::PathBuf,
 };
 
-/// Build a [`Tree`] from a directory tree using [`From`] or [`Into`].
+/// Build a [`DataTree`] from a directory tree using [`From`] or [`Into`].
 #[derive(Debug)]
 pub struct FsTreeBuilder<Data, GetData, Report, PostProcessChildren>
 where

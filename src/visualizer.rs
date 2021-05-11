@@ -15,7 +15,7 @@ pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
 use super::{data_tree::DataTree, size::Size};
 use std::{fmt::Display, num::NonZeroUsize};
 
-/// Visualize a [`Tree`].
+/// Visualize a [`DataTree`].
 #[derive(Debug)]
 pub struct Visualizer<'a, Name, Data>
 where

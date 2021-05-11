@@ -1,6 +1,6 @@
 use std::num::NonZeroUsize;
 
-/// Whether an item in [`children`](crate::tree::Tree) is the last.
+/// Whether an item in [`children`](crate::data_tree::DataTree::children) is the last.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ChildPosition {
     /// The item is not the last child.
