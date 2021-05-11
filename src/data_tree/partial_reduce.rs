@@ -96,7 +96,7 @@ where
         self.par_partial_reduce(name_reduced, |param| {
             let minimal = param.parent_data.into() as f32 * minimal_ratio;
             let actual = param.child.data().into() as f32;
-            actual >= minimal
+            minimal >= actual
         })
     }
 }
