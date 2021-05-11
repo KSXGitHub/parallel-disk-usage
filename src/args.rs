@@ -38,7 +38,7 @@ pub struct Args {
     pub binary_units: bool,
 
     /// Maximum depth to display the data (must be greater than 0).
-    #[structopt(long, default_value = "10")]
+    #[structopt(long, default_value = "4")]
     pub max_depth: NonZeroUsize,
 
     /// Width of the visualization.

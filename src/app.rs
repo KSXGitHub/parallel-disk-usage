@@ -2,7 +2,15 @@ pub mod sub;
 
 pub use sub::Sub;
 
-use super::Args;
+use crate::{
+    args::{Args, Quantity},
+    os_string_display::OsStringDisplay,
+    reporter::{ErrorOnlyReporter, ErrorReport},
+    size::MetricBytes,
+    size_getters::get_apparent_size,
+    tree::Tree,
+    visualizer::ColumnWidthDistribution,
+};
 use structopt_utilities::StructOptUtils;
 
 /// The main application.
@@ -21,6 +29,49 @@ impl App {
 
     /// Run the application.
     pub fn run(self) {
-        dbg!(self.args);
+        // DYNAMIC DISPATCH POLICY:
+        //
+        // Errors rarely occur, therefore, using dynamic dispatch to report errors have an acceptable
+        // impact on performance.
+        //
+        // The other operations which are invoked frequently should not utilize dynamic dispatch.
+
+        // TODO: use flag to customize this.
+        let report_error: fn(ErrorReport) = |_| {};
+
+        match self.args {
+            Args {
+                quantity: Quantity::ApparentSize,
+                binary_units: false,
+                total_width: Some(total_width),
+                column_width: None,
+                files,
+                direction,
+                max_depth,
+            } => Sub {
+                direction: direction.into(),
+                column_width_distribution: ColumnWidthDistribution::total(total_width),
+                get_data: get_apparent_size::<MetricBytes>,
+                post_process_children: |children: &mut Vec<Tree<OsStringDisplay, MetricBytes>>| {
+                    children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+                },
+                reporter: &ErrorOnlyReporter { report_error },
+                files,
+                max_depth,
+            }
+            .run(),
+
+            // TODO: fill the rest
+            // TODO: automatically deduce total_width from terminal size
+            // TODO: customize progress reporting (reporter)
+            // TODO: customize error reporting (reporter)
+            // TODO: customize sorting (post_process_children)
+            // TODO: hide items whose size are too small in comparison to total
+
+            args => {
+                dbg!(args);
+                panic!("Invalid combination of arguments")
+            }
+        }
     }
 }
