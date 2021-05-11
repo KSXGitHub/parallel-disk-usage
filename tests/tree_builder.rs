@@ -1,3 +1,4 @@
+#![cfg(test)]
 use build_fs_tree::{dir, file, FileSystemTree};
 use derive_more::From;
 use dirt::{
