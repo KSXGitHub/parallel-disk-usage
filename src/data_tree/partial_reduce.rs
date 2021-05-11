@@ -83,4 +83,20 @@ where
             children,
         }
     }
+
+    /// Recursively reduce children whose data are under certain ratio.
+    pub fn par_partial_reduce_insignificant_data(
+        self,
+        minimal_ratio: f32,
+        name_reduced: impl Fn(NameReducedParam<Name, Data>) -> Name + Copy + Send + Sync,
+    ) -> Self
+    where
+        Data: Into<u64>,
+    {
+        self.par_partial_reduce(name_reduced, |param| {
+            let minimal = param.parent_data.into() as f32 * minimal_ratio;
+            let actual = param.child.data().into() as f32;
+            actual >= minimal
+        })
+    }
 }
