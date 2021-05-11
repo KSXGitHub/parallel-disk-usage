@@ -1,5 +1,6 @@
-use super::{ColumnWidthDistribution, Direction, Visualizer};
-use crate::{
+#![cfg(test)]
+use dirt::{
+    visualizer::{ColumnWidthDistribution, Direction, Visualizer},
     data_tree::DataTree,
     size::{BinaryBytes, Blocks, MetricBytes, Size},
 };
