@@ -12,7 +12,7 @@ pub use parenthood::Parenthood;
 pub use proportion_bar::{ProportionBar, ProportionBarBlock};
 pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
 
-use super::{size::Size, tree::Tree};
+use super::{data_tree::DataTree, size::Size};
 use std::{fmt::Display, num::NonZeroUsize};
 
 /// Visualize a [`Tree`].
@@ -23,7 +23,7 @@ where
     Data: Size,
 {
     /// The tree to visualize.
-    pub tree: &'a Tree<Name, Data>,
+    pub data_tree: &'a DataTree<Name, Data>,
     /// The direction of the visualization of the tree.
     pub direction: Direction,
     /// Distribution and total number of characters/blocks can be placed in a line.

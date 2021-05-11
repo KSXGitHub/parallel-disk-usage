@@ -4,13 +4,13 @@ use std::cmp::Ordering;
 
 /// Disk usage data of a filesystem tree.
 #[derive(Debug, PartialEq, Eq)]
-pub struct Tree<Name, Data: Size> {
+pub struct DataTree<Name, Data: Size> {
     name: Name,
     data: Data,
     children: Vec<Self>,
 }
 
-impl<Name, Data: Size> Tree<Name, Data> {
+impl<Name, Data: Size> DataTree<Name, Data> {
     /// Extract name
     pub fn name(&self) -> &Name {
         &self.name
@@ -28,8 +28,8 @@ impl<Name, Data: Size> Tree<Name, Data> {
 
     /// Create a tree representation of a directory.
     pub fn dir(name: Name, inode_size: Data, children: Vec<Self>) -> Self {
-        let data = inode_size + children.iter().map(Tree::data).sum();
-        Tree {
+        let data = inode_size + children.iter().map(DataTree::data).sum();
+        DataTree {
             name,
             data,
             children,
@@ -38,7 +38,7 @@ impl<Name, Data: Size> Tree<Name, Data> {
 
     /// Create a tree representation of a file.
     pub fn file(name: Name, data: Data) -> Self {
-        Tree {
+        DataTree {
             name,
             data,
             children: Vec::with_capacity(0),
@@ -50,11 +50,11 @@ impl<Name, Data: Size> Tree<Name, Data> {
     where
         Data: Copy,
     {
-        move |name, children| Tree::dir(name, inode_size, children)
+        move |name, children| DataTree::dir(name, inode_size, children)
     }
 
     /// Create reflection.
-    pub fn into_reflection(self) -> TreeReflection<Name, Data> {
+    pub fn into_reflection(self) -> DataTreeReflection<Name, Data> {
         self.into()
     }
 
@@ -82,12 +82,12 @@ impl<Name, Data: Size> Tree<Name, Data> {
     }
 }
 
-/// Reflection of [`Tree`] used for testing purposes.
+/// Reflection of [`DataTree`] used for testing purposes.
 ///
 /// Unlike `Tree` where the fields are all private, the fields of `TreeReflection`
 /// are all public to allow construction in tests.
 #[derive(Debug, PartialEq, Eq)]
-pub struct TreeReflection<Name, Data: Size> {
+pub struct DataTreeReflection<Name, Data: Size> {
     /// Name of the tree.
     pub name: Name,
     /// Disk usage of a file or total disk usage of a folder.
@@ -96,15 +96,15 @@ pub struct TreeReflection<Name, Data: Size> {
     pub children: Vec<Self>,
 }
 
-impl<Name, Data: Size> From<Tree<Name, Data>> for TreeReflection<Name, Data> {
-    fn from(source: Tree<Name, Data>) -> Self {
-        let Tree {
+impl<Name, Data: Size> From<DataTree<Name, Data>> for DataTreeReflection<Name, Data> {
+    fn from(source: DataTree<Name, Data>) -> Self {
+        let DataTree {
             name,
             data,
             children,
         } = source;
-        let children: Vec<_> = children.into_iter().map(TreeReflection::from).collect();
-        TreeReflection {
+        let children: Vec<_> = children.into_iter().map(DataTreeReflection::from).collect();
+        DataTreeReflection {
             name,
             data,
             children,

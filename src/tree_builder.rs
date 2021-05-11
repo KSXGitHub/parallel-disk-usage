@@ -2,7 +2,7 @@ pub mod info;
 
 pub use info::Info;
 
-use super::{size::Size, tree::Tree};
+use super::{data_tree::DataTree, size::Size};
 use rayon::prelude::*;
 
 /// Collection of functions and starting points in order to build a [`Tree`] with [`From`] or [`Into`].
@@ -14,7 +14,7 @@ where
     Data: Size + Send,
     GetInfo: Fn(&Path) -> Info<Name, Data> + Copy + Send + Sync,
     JoinPath: Fn(&Path, &Name) -> Path + Copy + Send + Sync,
-    PostProcessChildren: Fn(&mut Vec<Tree<Name, Data>>) + Copy + Send + Sync,
+    PostProcessChildren: Fn(&mut Vec<DataTree<Name, Data>>) + Copy + Send + Sync,
 {
     /// Path to the root.
     pub path: Path,
@@ -29,14 +29,15 @@ where
 }
 
 impl<Path, Name, Data, GetInfo, JoinPath, PostProcessChildren>
-    From<TreeBuilder<Path, Name, Data, GetInfo, JoinPath, PostProcessChildren>> for Tree<Name, Data>
+    From<TreeBuilder<Path, Name, Data, GetInfo, JoinPath, PostProcessChildren>>
+    for DataTree<Name, Data>
 where
     Path: Send + Sync,
     Name: Send + Sync,
     Data: Size + Send,
     GetInfo: Fn(&Path) -> Info<Name, Data> + Copy + Send + Sync,
     JoinPath: Fn(&Path, &Name) -> Path + Copy + Send + Sync,
-    PostProcessChildren: Fn(&mut Vec<Tree<Name, Data>>) + Copy + Send + Sync,
+    PostProcessChildren: Fn(&mut Vec<DataTree<Name, Data>>) + Copy + Send + Sync,
 {
     fn from(
         builder: TreeBuilder<Path, Name, Data, GetInfo, JoinPath, PostProcessChildren>,
@@ -65,7 +66,7 @@ where
 
         post_process_children(&mut children);
 
-        Tree::dir(name, data, children)
+        DataTree::dir(name, data, children)
     }
 }
 

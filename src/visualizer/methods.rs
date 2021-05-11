@@ -77,7 +77,7 @@ where
         let size_width = tree_table.column_width.size_column_width;
         let tree_width = tree_table.column_width.tree_column_width;
 
-        let bar_table = render_bars(tree_table, self.tree.data().into(), bar_width);
+        let bar_table = render_bars(tree_table, self.data_tree.data().into(), bar_width);
 
         bar_table
             .into_iter()

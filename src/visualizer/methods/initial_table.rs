@@ -1,5 +1,5 @@
 use super::{NodeInfo, Table, BORDER_COLUMNS, PERCENTAGE_COLUMN_MAX_WIDTH};
-use crate::{size::Size, tree::Tree, visualizer::Visualizer};
+use crate::{data_tree::DataTree, size::Size, visualizer::Visualizer};
 use assert_cmp::debug_assert_op;
 use derive_more::{Deref, DerefMut};
 use std::{cmp::max, fmt::Display, num::NonZeroUsize};
@@ -61,13 +61,13 @@ where
     }
 
     fn traverse<'a, Name, Data, Act>(
-        tree: &'a Tree<Name, Data>,
+        tree: &'a DataTree<Name, Data>,
         act: &mut Act,
         param: Param<&'a Name, Data>,
     ) -> Option<TraverseResult<&'a Name, Data>>
     where
         Data: Size,
-        Act: FnMut(&'a Tree<Name, Data>, Param<&'a Name, Data>) -> ActResult<&'a Name, Data>,
+        Act: FnMut(&'a DataTree<Name, Data>, Param<&'a Name, Data>) -> ActResult<&'a Name, Data>,
     {
         if param.remaining_depth == 0 {
             return None;
@@ -95,10 +95,10 @@ where
     }
 
     let mut initial_table = InitialTable::default();
-    let total_fs_size = visualizer.tree.data().into();
+    let total_fs_size = visualizer.data_tree.data().into();
 
     traverse(
-        visualizer.tree,
+        visualizer.data_tree,
         &mut |node, param| {
             let Param {
                 index_as_child,

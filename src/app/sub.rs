@@ -1,9 +1,9 @@
 use crate::{
+    data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     os_string_display::OsStringDisplay,
     reporter::Reporter,
     size::Size,
-    tree::Tree,
     visualizer::{ColumnWidthDistribution, Direction, Visualizer},
 };
 use std::{fs::Metadata, iter::once, num::NonZeroUsize, path::PathBuf};
@@ -14,7 +14,7 @@ where
     Data: Size + Into<u64> + Send + Sync,
     Report: Reporter<Data> + Copy + Sync,
     GetData: Fn(&Metadata) -> Data + Copy + Sync,
-    PostProcessChildren: Fn(&mut Vec<Tree<OsStringDisplay, Data>>) + Copy + Send + Sync,
+    PostProcessChildren: Fn(&mut Vec<DataTree<OsStringDisplay, Data>>) + Copy + Send + Sync,
 {
     /// List of files and/or directories.
     pub files: Vec<PathBuf>,
@@ -37,7 +37,7 @@ where
     Data: Size + Into<u64> + Send + Sync,
     Report: Reporter<Data> + Copy + Sync,
     GetData: Fn(&Metadata) -> Data + Copy + Sync,
-    PostProcessChildren: Fn(&mut Vec<Tree<OsStringDisplay, Data>>) + Copy + Send + Sync,
+    PostProcessChildren: Fn(&mut Vec<DataTree<OsStringDisplay, Data>>) + Copy + Send + Sync,
 {
     /// Run the sub program.
     pub fn run(self) {
@@ -53,7 +53,7 @@ where
 
         let mut iter = files
             .into_iter()
-            .map(|root| -> Tree<OsStringDisplay, Data> {
+            .map(|root| -> DataTree<OsStringDisplay, Data> {
                 FsTreeBuilder {
                     root,
                     get_data,
@@ -63,8 +63,8 @@ where
                 .into()
             });
 
-        let tree = if let Some(tree) = iter.next() {
-            tree
+        let data_tree = if let Some(data_tree) = iter.next() {
+            data_tree
         } else {
             return Sub {
                 files: vec![".".into()],
@@ -74,11 +74,11 @@ where
         };
 
         // ExactSizeIterator::is_empty is unstable
-        let tree = if iter.len() == 0 {
-            tree
+        let data_tree = if iter.len() == 0 {
+            data_tree
         } else {
-            let children: Vec<_> = once(tree).chain(iter).collect();
-            Tree::dir(
+            let children: Vec<_> = once(data_tree).chain(iter).collect();
+            DataTree::dir(
                 OsStringDisplay::os_string_from("..."),
                 Data::default(),
                 children,
@@ -86,7 +86,7 @@ where
         };
 
         let visualizer = Visualizer {
-            tree: &tree,
+            data_tree: &data_tree,
             direction,
             column_width_distribution,
             max_depth,

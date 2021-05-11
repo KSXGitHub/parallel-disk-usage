@@ -2,11 +2,11 @@
 use build_fs_tree::{dir, file, Build, MergeableFileSystemTree};
 use derive_more::{AsRef, Deref};
 use dirt::{
+    data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
     os_string_display::OsStringDisplay,
     reporter::ErrorOnlyReporter,
     size::Size,
-    tree::{Tree, TreeReflection},
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
@@ -85,14 +85,14 @@ impl Default for SampleWorkspace {
 /// The real filesystem is often messy, causing `children` to mess up its order.
 /// This function makes the order of `children` deterministic by reordering them recursively.
 pub fn sanitize_tree_reflection<Name, Data>(
-    tree_reflection: TreeReflection<Name, Data>,
-) -> TreeReflection<Name, Data>
+    tree_reflection: DataTreeReflection<Name, Data>,
+) -> DataTreeReflection<Name, Data>
 where
     Name: Ord,
     Data: Size,
-    TreeReflection<Name, Data>: Send,
+    DataTreeReflection<Name, Data>: Send,
 {
-    let TreeReflection {
+    let DataTreeReflection {
         name,
         data,
         mut children,
@@ -102,7 +102,7 @@ where
         .into_par_iter()
         .map(sanitize_tree_reflection)
         .collect();
-    TreeReflection {
+    DataTreeReflection {
         name,
         data,
         children,
@@ -111,7 +111,7 @@ where
 
 /// Pass this function to the `post_process_children` field of [`FsTreeBuilder`]
 /// to sanitize the tree.
-pub fn post_process_children<Name, Data>(children: &mut Vec<Tree<Name, Data>>)
+pub fn post_process_children<Name, Data>(children: &mut Vec<DataTree<Name, Data>>)
 where
     Name: Ord,
     Data: Size,
@@ -151,32 +151,32 @@ where
             root: root.join(suffix),
             post_process_children,
         }
-        .pipe(Tree::<OsStringDisplay, Data>::from)
+        .pipe(DataTree::<OsStringDisplay, Data>::from)
         .into_reflection()
     };
 
     assert_eq!(
         measure("flat"),
-        sanitize_tree_reflection(TreeReflection {
+        sanitize_tree_reflection(DataTreeReflection {
             name: OsStringDisplay::os_string_from("flat"),
             data: suffix_size!("flat", "flat/0", "flat/1", "flat/2", "flat/3"),
             children: vec![
-                TreeReflection {
+                DataTreeReflection {
                     name: OsStringDisplay::os_string_from("0"),
                     data: suffix_size("flat/0"),
                     children: Vec::new(),
                 },
-                TreeReflection {
+                DataTreeReflection {
                     name: OsStringDisplay::os_string_from("1"),
                     data: suffix_size("flat/1"),
                     children: Vec::new(),
                 },
-                TreeReflection {
+                DataTreeReflection {
                     name: OsStringDisplay::os_string_from("2"),
                     data: suffix_size("flat/2"),
                     children: Vec::new(),
                 },
-                TreeReflection {
+                DataTreeReflection {
                     name: OsStringDisplay::os_string_from("3"),
                     data: suffix_size("flat/3"),
                     children: Vec::new(),
@@ -187,13 +187,13 @@ where
 
     assert_eq!(
         measure("nested"),
-        sanitize_tree_reflection(TreeReflection {
+        sanitize_tree_reflection(DataTreeReflection {
             name: OsStringDisplay::os_string_from("nested"),
             data: suffix_size!("nested", "nested/0", "nested/0/1"),
-            children: vec![TreeReflection {
+            children: vec![DataTreeReflection {
                 name: OsStringDisplay::os_string_from("0"),
                 data: suffix_size!("nested/0", "nested/0/1"),
-                children: vec![TreeReflection {
+                children: vec![DataTreeReflection {
                     name: OsStringDisplay::os_string_from("1"),
                     data: suffix_size!("nested/0/1"),
                     children: Vec::new(),
@@ -204,7 +204,7 @@ where
 
     assert_eq!(
         measure("empty-dir"),
-        sanitize_tree_reflection(TreeReflection {
+        sanitize_tree_reflection(DataTreeReflection {
             name: OsStringDisplay::os_string_from("empty-dir"),
             data: suffix_size!("empty-dir"),
             children: Vec::new(),

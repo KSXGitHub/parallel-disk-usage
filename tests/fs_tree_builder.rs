@@ -3,11 +3,11 @@ pub mod _utils;
 pub use _utils::*;
 
 use dirt::{
+    data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     os_string_display::OsStringDisplay,
     reporter::{ProgressAndErrorReporter, ProgressReport},
     size::MetricBytes,
-    tree::Tree,
 };
 use maplit::btreeset;
 use pipe_trait::Pipe;
@@ -43,7 +43,7 @@ fn blocks_as_blocks() {
 fn progress_reports() {
     let workspace = SampleWorkspace::default();
     let reports = Mutex::new(BTreeSet::new());
-    Tree::<OsStringDisplay, MetricBytes>::from(FsTreeBuilder {
+    DataTree::<OsStringDisplay, MetricBytes>::from(FsTreeBuilder {
         get_data: |metadata| metadata.len().into(),
         reporter: ProgressAndErrorReporter::new(
             |progress| {

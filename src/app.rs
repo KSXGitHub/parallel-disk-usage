@@ -4,11 +4,11 @@ pub use sub::Sub;
 
 use crate::{
     args::{Args, Quantity},
+    data_tree::DataTree,
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
     size::MetricBytes,
     size_getters::get_apparent_size,
-    tree::Tree,
     visualizer::ColumnWidthDistribution,
 };
 use structopt_utilities::StructOptUtils;
@@ -52,7 +52,9 @@ impl App {
                 direction: direction.into(),
                 column_width_distribution: ColumnWidthDistribution::total(total_width),
                 get_data: get_apparent_size::<MetricBytes>,
-                post_process_children: |children: &mut Vec<Tree<OsStringDisplay, MetricBytes>>| {
+                post_process_children: |children: &mut Vec<
+                    DataTree<OsStringDisplay, MetricBytes>,
+                >| {
                     children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
                 },
                 reporter: &ErrorOnlyReporter { report_error },

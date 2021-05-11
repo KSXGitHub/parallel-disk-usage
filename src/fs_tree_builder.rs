@@ -1,8 +1,8 @@
 use super::{
+    data_tree::DataTree,
     os_string_display::OsStringDisplay,
     reporter::{error_report::Operation::*, ErrorReport, Event, Reporter},
     size::Size,
-    tree::Tree,
     tree_builder::{Info, TreeBuilder},
 };
 use pipe_trait::Pipe;
@@ -18,7 +18,7 @@ where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
     Report: Reporter<Data> + Sync,
-    PostProcessChildren: Fn(&mut Vec<Tree<OsStringDisplay, Data>>) + Copy + Send + Sync,
+    PostProcessChildren: Fn(&mut Vec<DataTree<OsStringDisplay, Data>>) + Copy + Send + Sync,
 {
     /// Root of the directory tree.
     pub root: PathBuf,
@@ -31,12 +31,13 @@ where
 }
 
 impl<Data, GetData, Report, PostProcessChildren>
-    From<FsTreeBuilder<Data, GetData, Report, PostProcessChildren>> for Tree<OsStringDisplay, Data>
+    From<FsTreeBuilder<Data, GetData, Report, PostProcessChildren>>
+    for DataTree<OsStringDisplay, Data>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
     Report: Reporter<Data> + Sync,
-    PostProcessChildren: Fn(&mut Vec<Tree<OsStringDisplay, Data>>) + Copy + Send + Sync,
+    PostProcessChildren: Fn(&mut Vec<DataTree<OsStringDisplay, Data>>) + Copy + Send + Sync,
 {
     fn from(builder: FsTreeBuilder<Data, GetData, Report, PostProcessChildren>) -> Self {
         let FsTreeBuilder {
