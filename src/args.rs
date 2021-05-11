@@ -29,7 +29,7 @@ pub struct Args {
     #[structopt(long, possible_values = DIRECTION_VALUES, default_value = Direction::default_value())]
     pub direction: Direction,
 
-    /// The direction of the tree.
+    /// Aspect of the files/directories to be measured.
     #[structopt(long, possible_values = QUANTITY_VALUES, default_value = Quantity::default_value())]
     pub quantity: Quantity,
 
