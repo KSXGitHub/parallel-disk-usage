@@ -1,3 +1,4 @@
+use super::NameReducedParam;
 use crate::{data_tree::DataTree, size::MetricBytes};
 use itertools::Itertools;
 use pretty_assertions::assert_eq;
@@ -17,6 +18,14 @@ fn file(name: &'static str, size: u64) -> SampleTree {
 
 fn order_tree(left: &SampleTree, right: &SampleTree) -> Ordering {
     left.name().cmp(right.name())
+}
+
+fn name_reduced(param: NameReducedParam<SampleName, MetricBytes>) -> SampleName {
+    param
+        .reduced_children
+        .iter()
+        .map(SampleTree::name)
+        .join(", ")
 }
 
 #[test]
@@ -71,13 +80,7 @@ fn typical_case() {
         ],
     )
     .into_par_sorted(order_tree)
-    .par_partial_reduce_insignificant_data(0.05, |param| {
-        param
-            .reduced_children
-            .iter()
-            .map(SampleTree::name)
-            .join(", ")
-    })
+    .par_partial_reduce_insignificant_data(0.05, name_reduced)
     .into_reflection();
     let expected = dir(
         "root",
