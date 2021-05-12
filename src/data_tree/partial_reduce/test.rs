@@ -40,6 +40,7 @@ fn typical_case() {
                 "directory of one small file",
                 vec![file("small file", 4321)],
             ),
+            dir("directory of one big file", vec![file("big file", 54321)]),
             dir(
                 "directory of multiple small files",
                 vec![
@@ -98,6 +99,7 @@ fn typical_case() {
                 ],
             ),
             file("directory of multiple small files", 4069 + 11 * 4321),
+            dir("directory of one big file", vec![file("big file", 54321)]),
             file(
                 "directory of one empty file, directory of one small file, empty directory",
                 4069 + (4069 + 4321) + 4069,
