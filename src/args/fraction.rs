@@ -41,7 +41,7 @@ impl TryFrom<f32> for Fraction {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Display)]
+#[derive(Debug, Clone, PartialEq, Eq, Display)]
 pub enum FromStrError {
     ParseFloatError(ParseFloatError),
     Conversion(ConversionError),
