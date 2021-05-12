@@ -93,6 +93,7 @@ where
         let minimal_ratio: f32 = minimal_ratio.into();
         let data_tree = if minimal_ratio > 0.0 {
             data_tree.par_partial_reduce_insignificant_data(minimal_ratio, |param| {
+                debug_assert!(!param.reduced_children.is_empty());
                 if param.reduced_children.len() == 1 {
                     param.reduced_children.first().unwrap().name().clone()
                 } else {
