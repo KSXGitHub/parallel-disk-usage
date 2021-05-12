@@ -47,6 +47,10 @@ where
             data,
             children,
         } = self;
+        #[cfg(debug_assertions)]
+        let sum_of = |children: &[Self]| children.iter().map(DataTree::data).sum::<Data>();
+        #[cfg(debug_assertions)]
+        let sum = sum_of(&children);
         let (reduced, unreduced): (Vec<_>, Vec<_>) = children.into_par_iter().partition(|child| {
             predicate(PredicateParam {
                 child,
@@ -77,11 +81,12 @@ where
             data: reduced_data,
             children: Vec::with_capacity(0),
         });
-        if cfg!(debug_assertions) {
+        #[cfg(debug_assertions)]
+        {
             debug_assert_op_expr!(
-                children.iter().map(DataTree::data).sum::<Data>(),
+                sum_of(&children),
                 ==,
-                data
+                sum
             );
         }
         DataTree {
