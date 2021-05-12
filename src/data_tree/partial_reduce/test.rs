@@ -1,6 +1,7 @@
 use crate::{data_tree::DataTree, size::MetricBytes};
 use itertools::Itertools;
 use pretty_assertions::assert_eq;
+use std::cmp::Ordering;
 
 type SampleName = String;
 type SampleData = MetricBytes;
@@ -12,6 +13,10 @@ fn dir<const INODE_SIZE: u64>(name: &'static str, children: Vec<SampleTree>) -> 
 
 fn file(name: &'static str, size: u64) -> SampleTree {
     SampleTree::file(name.to_string(), size.into())
+}
+
+fn order_tree(left: &SampleTree, right: &SampleTree) -> Ordering {
+    left.name().cmp(right.name())
 }
 
 #[test]
@@ -65,7 +70,7 @@ fn typical_case() {
             ),
         ],
     )
-    .into_par_sorted(|left, right| left.name().cmp(right.name()))
+    .into_par_sorted(order_tree)
     .par_partial_reduce_insignificant_data(0.05, |param| {
         param
             .reduced_children
