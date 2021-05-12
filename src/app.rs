@@ -48,6 +48,7 @@ impl App {
                 files,
                 top_down,
                 max_depth,
+                minimal_ratio,
             } => Sub {
                 direction: Direction::from_top_down(top_down),
                 column_width_distribution: ColumnWidthDistribution::total(total_width),

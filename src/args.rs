@@ -1,5 +1,7 @@
+pub mod fraction;
 pub mod quantity;
 
+pub use fraction::Fraction;
 pub use quantity::*;
 
 use std::{num::NonZeroUsize, path::PathBuf};
@@ -46,4 +48,8 @@ pub struct Args {
     /// Maximum widths of the tree column and width of the bar column.
     #[structopt(long, number_of_values = 2, value_names = &["tree-width", "bar-width"])]
     pub column_width: Option<Vec<usize>>,
+
+    /// Minimal size proportion required to appear.
+    #[structopt(long, default_value = "0.01")]
+    pub minimal_ratio: f32,
 }
