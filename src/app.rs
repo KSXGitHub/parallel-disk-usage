@@ -61,6 +61,7 @@ impl App {
                 reporter: &ErrorOnlyReporter { report_error },
                 files,
                 max_depth,
+                minimal_ratio,
             }
             .run(),
 

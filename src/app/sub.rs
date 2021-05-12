@@ -1,4 +1,6 @@
+use pipe_trait::Pipe;
 use crate::{
+    args::Fraction,
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     os_string_display::OsStringDisplay,
@@ -6,7 +8,7 @@ use crate::{
     size::Size,
     visualizer::{ColumnWidthDistribution, Direction, Visualizer},
 };
-use std::{fs::Metadata, iter::once, num::NonZeroUsize, path::PathBuf};
+use std::{ffi::OsString, fs::Metadata, iter::once, num::NonZeroUsize,  path::PathBuf};
 
 /// The sub program of the main application.
 pub struct Sub<Data, GetData, Report, PostProcessChildren>
@@ -30,6 +32,8 @@ where
     pub reporter: Report,
     /// Processes lists of children after forming.
     pub post_process_children: PostProcessChildren,
+    /// Minimal size proportion required to appear.
+    pub minimal_ratio: Fraction,
 }
 
 impl<Data, GetData, Report, PostProcessChildren> Sub<Data, GetData, Report, PostProcessChildren>
@@ -49,6 +53,7 @@ where
             get_data,
             reporter,
             post_process_children,
+            minimal_ratio,
         } = self;
 
         let mut iter = files
@@ -83,6 +88,19 @@ where
                 Data::default(),
                 children,
             )
+        };
+
+        let minimal_ratio: f32 = minimal_ratio.into();
+        let data_tree = if minimal_ratio > 0.0 {
+            data_tree.par_partial_reduce_insignificant_data(minimal_ratio, |param| {
+                if param.reduced_children.len() == 1 {
+                    param.reduced_children.first().unwrap().name().clone()
+                } else {
+                    "...".pipe(OsString::from).into()
+                }
+            })
+        } else {
+            data_tree
         };
 
         let visualizer = Visualizer {
