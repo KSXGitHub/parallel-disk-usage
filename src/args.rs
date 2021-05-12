@@ -2,7 +2,7 @@ pub mod fraction;
 pub mod quantity;
 
 pub use fraction::Fraction;
-pub use quantity::*;
+pub use quantity::{Quantity, QUANTITY_VALUES};
 
 use std::{num::NonZeroUsize, path::PathBuf};
 use structopt::StructOpt;
