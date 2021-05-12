@@ -65,6 +65,13 @@ where
                 children: Vec::with_capacity(0),
             };
         }
+        if reduced.is_empty() {
+            return DataTree {
+                name,
+                data,
+                children: unreduced,
+            };
+        }
         let mut children: Vec<_> = unreduced
             .into_par_iter()
             .map(|child| child.par_partial_reduce(name_reduced, predicate))
