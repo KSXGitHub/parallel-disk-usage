@@ -84,7 +84,7 @@ where
         } else {
             let children: Vec<_> = once(data_tree).chain(iter).collect();
             DataTree::dir(
-                OsStringDisplay::os_string_from("..."),
+                OsStringDisplay::os_string_from("(total)"),
                 Data::default(),
                 children,
             )
