@@ -1,4 +1,3 @@
-use pipe_trait::Pipe;
 use crate::{
     args::Fraction,
     data_tree::DataTree,
@@ -8,7 +7,8 @@ use crate::{
     size::Size,
     visualizer::{ColumnWidthDistribution, Direction, Visualizer},
 };
-use std::{ffi::OsString, fs::Metadata, iter::once, num::NonZeroUsize,  path::PathBuf};
+use pipe_trait::Pipe;
+use std::{ffi::OsString, fs::Metadata, iter::once, num::NonZeroUsize, path::PathBuf};
 
 /// The sub program of the main application.
 pub struct Sub<Data, GetData, Report, PostProcessChildren>
