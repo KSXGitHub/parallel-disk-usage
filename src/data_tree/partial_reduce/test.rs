@@ -109,3 +109,86 @@ fn typical_case() {
     .into_reflection();
     assert_eq!(actual, expected);
 }
+
+#[test]
+fn edge_cases() {
+    let dir = dir::<4069>;
+    let actual = dir(
+        "root",
+        vec![
+            dir(
+                "reduce half",
+                vec![
+                    file("!abc", 123),
+                    file("abc", 321),
+                    file("!def", 456),
+                    file("def", 654),
+                    file("!ghi", 789),
+                    file("ghi", 987),
+                ],
+            ),
+            dir(
+                "reduce all",
+                vec![file("!abc", 123), file("!def", 456), file("!ghi", 789)],
+            ),
+            dir(
+                "reduce none",
+                vec![file("abc", 321), file("def", 654), file("ghi", 987)],
+            ),
+            dir(
+                "reduce one",
+                vec![
+                    file("abc", 321),
+                    file("def", 654),
+                    file("!def", 456),
+                    file("ghi", 987),
+                ],
+            ),
+            dir(
+                "reduce all but one",
+                vec![
+                    file("!abc", 123),
+                    file("!def", 456),
+                    file("!ghi", 789),
+                    file("def", 654),
+                ],
+            ),
+        ],
+    )
+    .par_partial_reduce(name_reduced, |param| param.child.name().starts_with('!'))
+    .into_reflection();
+    let expected = dir(
+        "root",
+        vec![
+            dir(
+                "reduce half",
+                vec![
+                    file("abc", 321),
+                    file("def", 654),
+                    file("ghi", 987),
+                    file("!abc, !def, !ghi", 123 + 456 + 789),
+                ],
+            ),
+            file("reduce all", 4069 + 123 + 456 + 789),
+            dir(
+                "reduce none",
+                vec![file("abc", 321), file("def", 654), file("ghi", 987)],
+            ),
+            dir(
+                "reduce one",
+                vec![
+                    file("abc", 321),
+                    file("def", 654),
+                    file("ghi", 987),
+                    file("!def", 456),
+                ],
+            ),
+            dir(
+                "reduce all but one",
+                vec![file("def", 654), file("!abc, !def, !ghi", 123 + 456 + 789)],
+            ),
+        ],
+    )
+    .into_reflection();
+    assert_eq!(actual, expected);
+}
