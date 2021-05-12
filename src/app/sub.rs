@@ -97,7 +97,7 @@ where
                 if param.reduced_children.len() == 1 {
                     param.reduced_children.first().unwrap().name().clone()
                 } else {
-                    "...".pipe(OsString::from).into()
+                    "(⋅⋅⋅)".pipe(OsString::from).into()
                 }
             })
         } else {
