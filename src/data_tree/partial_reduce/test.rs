@@ -6,12 +6,19 @@ type SampleName = String;
 type SampleData = MetricBytes;
 type SampleTree = DataTree<SampleName, SampleData>;
 
+fn dir_constructor<const INODE_SIZE: u64>() -> fn(&'static str, Vec<SampleTree>) -> SampleTree {
+    |name: &'static str, children: Vec<SampleTree>| {
+        SampleTree::dir(name.to_string(), INODE_SIZE.into(), children)
+    }
+}
+
+fn file(name: &'static str, size: u64) -> SampleTree {
+    SampleTree::file(name.to_string(), size.into())
+}
+
 #[test]
 fn typical_case() {
-    let dir = |name: &'static str, children: Vec<SampleTree>| {
-        SampleTree::dir(name.to_string(), 4069.into(), children)
-    };
-    let file = |name: &'static str, size: u64| SampleTree::file(name.to_string(), size.into());
+    let dir = dir_constructor::<4069>();
     let actual = dir(
         "root",
         vec![
