@@ -65,17 +65,17 @@ where
                 children: Vec::with_capacity(0),
             };
         }
-        if reduced.is_empty() {
-            return DataTree {
-                name,
-                data,
-                children: unreduced,
-            };
-        }
         let mut children: Vec<_> = unreduced
             .into_par_iter()
             .map(|child| child.par_partial_reduce(name_reduced, predicate))
             .collect();
+        if reduced.is_empty() {
+            return DataTree {
+                name,
+                data,
+                children,
+            };
+        }
         let reduced_data = reduced.iter().map(|child| child.data()).sum();
         let reduced_name = name_reduced(NameReducedParam {
             reduced_children: &reduced,
