@@ -7,8 +7,7 @@ use crate::{
     size::Size,
     visualizer::{ColumnWidthDistribution, Direction, Visualizer},
 };
-use pipe_trait::Pipe;
-use std::{ffi::OsString, fs::Metadata, iter::once, num::NonZeroUsize, path::PathBuf};
+use std::{fs::Metadata, iter::once, num::NonZeroUsize, path::PathBuf};
 
 /// The sub program of the main application.
 pub struct Sub<Data, GetData, Report, PostProcessChildren>
