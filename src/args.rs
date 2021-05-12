@@ -51,5 +51,5 @@ pub struct Args {
 
     /// Minimal size proportion required to appear.
     #[structopt(long, default_value = "0.01")]
-    pub minimal_ratio: f32,
+    pub minimal_ratio: Fraction,
 }
