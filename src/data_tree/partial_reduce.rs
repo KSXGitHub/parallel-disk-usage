@@ -85,7 +85,7 @@ where
     }
 
     /// Recursively reduce children whose data are under certain ratio.
-    pub fn par_partial_reduce_insignificant_data(
+    pub(crate) fn par_partial_reduce_insignificant_data(
         self,
         minimal_ratio: f32,
         name_reduced: impl Fn(NameReducedParam<Name, Data>) -> Name + Copy + Send + Sync,
