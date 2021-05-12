@@ -1,4 +1,3 @@
-#![cfg(test)]
 use dirt::args::fraction::{ConversionError::*, Fraction, FromStrError::*};
 use pretty_assertions::assert_eq;
 

@@ -1,4 +1,3 @@
-#![cfg(test)]
 use dirt::{
     data_tree::DataTree,
     size::{BinaryBytes, Blocks, MetricBytes, Size},

@@ -1,4 +1,3 @@
-#![cfg(test)]
 use build_fs_tree::{dir, file, Build, MergeableFileSystemTree};
 use derive_more::{AsRef, Deref};
 use dirt::{

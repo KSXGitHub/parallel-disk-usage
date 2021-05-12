@@ -1,4 +1,3 @@
-#![cfg(test)]
 #![cfg(unix)]
 use dirt::os_string_display::OsStringDisplay;
 use pipe_trait::Pipe;
