@@ -72,7 +72,7 @@ where
         });
         if cfg!(debug_assertions) {
             debug_assert_op_expr!(
-                children.iter().map(|child| child.data()).sum::<Data>(),
+                children.iter().map(DataTree::data).sum::<Data>(),
                 ==,
                 data
             );
