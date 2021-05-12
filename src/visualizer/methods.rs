@@ -22,9 +22,9 @@ where
     Name: Display,
     Data: Size + Into<u64>,
 {
-    /// Create ASCII visualization of the [tree](crate::data_tree::DataTree), such visualization
-    /// is meant to be printed to a terminal screen.
-    pub fn visualize(mut self) -> Vec<String> {
+    /// Create ASCII rows that visualize of the [tree](crate::data_tree::DataTree), such rows
+    /// are meant to be printed to a terminal screen.
+    pub fn rows(mut self) -> Vec<String> {
         let initial_table = render_initial(self);
         let min_width = initial_table.column_width.total_max_width();
 
@@ -35,13 +35,13 @@ where
                 if width <= min_width {
                     self.column_width_distribution
                         .set_components(min_width, extra_cols);
-                    return self.visualize();
+                    return self.rows();
                 }
 
                 if width <= MIN_OVERALL_WIDTH {
                     self.column_width_distribution
                         .set_components(min_width, MIN_OVERALL_WIDTH + extra_cols);
-                    return self.visualize();
+                    return self.rows();
                 }
 
                 let tree_max_width = min(width - min_width, width - MIN_OVERALL_WIDTH);
@@ -50,7 +50,7 @@ where
                 let min_width = tree_table.column_width.total_max_width();
                 if width <= min_width {
                     self.column_width_distribution.set_components(min_width, 1);
-                    return self.visualize();
+                    return self.rows();
                 }
 
                 let bar_width = width - min_width;
@@ -65,7 +65,7 @@ where
                 if bar_column_width < 1 {
                     self.column_width_distribution
                         .set_components(tree_column_max_width, 1);
-                    return self.visualize();
+                    return self.rows();
                 }
 
                 let tree_table = render_tree(self, initial_table, tree_column_max_width);

@@ -10,8 +10,8 @@ where
     fn fmt(&self, formatter: &mut Formatter<'_>) -> Result<(), Error> {
         let write = |line: &String| writeln!(formatter, "{}", line);
         match self.direction {
-            BottomUp => self.visualize().iter().rev().try_for_each(write),
-            TopDown => self.visualize().iter().try_for_each(write),
+            BottomUp => self.rows().iter().rev().try_for_each(write),
+            TopDown => self.rows().iter().try_for_each(write),
         }
     }
 }
