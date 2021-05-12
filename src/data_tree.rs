@@ -17,4 +17,5 @@ pub struct DataTree<Name, Data: Size> {
 
 mod constructors;
 mod getters;
+mod retain;
 mod sort;
