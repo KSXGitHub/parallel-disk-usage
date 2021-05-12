@@ -20,4 +20,13 @@ where
         self.par_retain(predicate);
         self
     }
+
+    /// Recursively cull all descendants whose data are too small relative to root.
+    pub(crate) fn par_cull_insignificant_data(&mut self, minimal_ratio: f32)
+    where
+        Data: Into<u64>,
+    {
+        let minimal = self.data().into() as f32 * minimal_ratio;
+        self.par_retain(|descendant| descendant.data().into() as f32 >= minimal);
+    }
 }
