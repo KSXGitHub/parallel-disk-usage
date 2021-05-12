@@ -103,7 +103,7 @@ where
         }
     }
 
-    /// Recursively reduce children whose data are under certain ratio.
+    /// Recursively reduce descendants whose data are too small relative to root.
     pub(crate) fn par_partial_reduce_insignificant_data(
         self,
         minimal_ratio: f32,
@@ -112,8 +112,8 @@ where
     where
         Data: Into<u64>,
     {
+        let minimal = self.data().into() as f32 * minimal_ratio;
         self.par_partial_reduce(name_reduced, |param| {
-            let minimal = param.parent_data.into() as f32 * minimal_ratio;
             let actual = param.child.data().into() as f32;
             minimal >= actual
         })
