@@ -51,7 +51,6 @@ impl App {
                 minimal_ratio,
             } => Sub {
                 direction: Direction::from_top_down(top_down),
-                bytes_format,
                 column_width_distribution: ColumnWidthDistribution::total(total_width),
                 get_data: GET_APPARENT_SIZE,
                 post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {
@@ -59,6 +58,7 @@ impl App {
                 },
                 reporter: &ErrorOnlyReporter { report_error },
                 files,
+                bytes_format,
                 max_depth,
                 minimal_ratio,
             }
