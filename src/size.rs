@@ -1,4 +1,7 @@
-use super::measurement_system::{Binary, MeasurementSystem, Metric, ParsedValue};
+use super::{
+    bytes_display_format::BytesDisplayFormat,
+    measurement_system::{Binary, MeasurementSystem, Metric, ParsedValue},
+};
 use derive_more::{Add, AddAssign, Display, From, Into, Sum};
 use pipe_trait::Pipe;
 use std::{
@@ -82,17 +85,6 @@ macro_rules! newtype {
             }
         }
     };
-}
-
-/// The [`DisplayFormat`](Size::DisplayFormat) type of [`Bytes`].
-#[derive(Debug, Clone, Copy)]
-pub enum BytesDisplayFormat {
-    /// Display the value as-is.
-    PlainNumber,
-    /// Display the value with a unit suffix in [metric scale](Metric).
-    MetricUnits,
-    /// Display the value with a unit suffix in [binary scale](Binary).
-    BinaryUnits,
 }
 
 /// The [`DisplayOutput`](Size::DisplayOutput) type of [`Bytes`].

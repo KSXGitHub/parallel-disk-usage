@@ -1,6 +1,7 @@
 use dirt::{
+    bytes_display_format::BytesDisplayFormat::*,
     data_tree::DataTree,
-    size::{Blocks, Bytes, BytesDisplayFormat::*, Size},
+    size::{Blocks, Bytes, Size},
     visualizer::{ColumnWidthDistribution, Direction, Visualizer},
 };
 use pretty_assertions::assert_eq;

@@ -4,10 +4,11 @@ pub use sub::Sub;
 
 use crate::{
     args::{Args, Quantity},
+    bytes_display_format::BytesDisplayFormat,
     data_tree::DataTree,
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
-    size::{Bytes, BytesDisplayFormat},
+    size::Bytes,
     size_getters::GET_APPARENT_SIZE,
     visualizer::{ColumnWidthDistribution, Direction},
 };
