@@ -1,6 +1,6 @@
 use dirt::{
     data_tree::DataTree,
-    size::{BinaryBytes, Blocks, MetricBytes, Size},
+    size::{Blocks, Bytes, BytesDisplayFormat::*, Size},
     visualizer::{ColumnWidthDistribution, Direction, Visualizer},
 };
 use pretty_assertions::assert_eq;
@@ -20,6 +20,7 @@ macro_rules! test_case {
         $(#[$attributes:meta])*
         $name:ident where
         tree = $tree:expr,
+        data_display_format = $data_display_format:expr,
         max_depth = $max_depth:expr,
         column_width_distribution = $column_width_function:ident $($column_width_arguments:literal)+,
         direction = $direction:ident,
@@ -36,6 +37,7 @@ macro_rules! test_case {
                 max_depth,
                 column_width_distribution,
                 data_tree: &tree,
+                data_display_format: $data_display_format,
                 direction: Direction::$direction,
             }
             .to_string();
@@ -92,7 +94,8 @@ where
 
 test_case! {
     typical_bottom_up_binary where
-        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        data_display_format = BinaryUnits,
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -113,7 +116,8 @@ test_case! {
 
 test_case! {
     typical_bottom_up_metric where
-        tree = typical_tree::<MetricBytes>(4096.into(), 1),
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        data_display_format = MetricUnits,
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -134,7 +138,8 @@ test_case! {
 
 test_case! {
     typical_top_down_binary where
-        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        data_display_format = BinaryUnits,
         max_depth = 10,
         column_width_distribution = total 90,
         direction = TopDown,
@@ -155,7 +160,8 @@ test_case! {
 
 test_case! {
     typical_narrow_tree_column where
-        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        data_display_format = BinaryUnits,
         max_depth = 10,
         column_width_distribution = components 24 49,
         direction = BottomUp,
@@ -176,7 +182,8 @@ test_case! {
 
 test_case! {
     typical_even_shorter_max_width where
-        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        data_display_format = BinaryUnits,
         max_depth = 10,
         column_width_distribution = components 10 23,
         direction = BottomUp,
@@ -192,7 +199,8 @@ test_case! {
 
 test_case! {
     typical_sufficient_depth where
-        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        data_display_format = BinaryUnits,
         max_depth = 4,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -213,7 +221,8 @@ test_case! {
 
 test_case! {
     typical_shallow where
-        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        data_display_format = BinaryUnits,
         max_depth = 3,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -231,7 +240,8 @@ test_case! {
 
 test_case! {
     typical_flat where
-        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        data_display_format = BinaryUnits,
         max_depth = 2,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -247,7 +257,8 @@ test_case! {
 
 test_case! {
     typical_root_only where
-        tree = typical_tree::<BinaryBytes>(4096.into(), 1),
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        data_display_format = BinaryUnits,
         max_depth = 1,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -258,7 +269,8 @@ test_case! {
 
 test_case! {
     typical_binary_tebi_scale where
-        tree = typical_tree::<BinaryBytes>(4096.into(), 1 << 40),
+        tree = typical_tree::<Bytes>(4096.into(), 1 << 40),
+        data_display_format = BinaryUnits,
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -279,7 +291,8 @@ test_case! {
 
 test_case! {
     typical_metric_tebi_scale where
-        tree = typical_tree::<MetricBytes>(4096.into(), 1 << 40),
+        tree = typical_tree::<Bytes>(4096.into(), 1 << 40),
+        data_display_format = MetricUnits,
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -300,7 +313,8 @@ test_case! {
 
 test_case! {
     typical_empty_files where
-        tree = typical_tree::<BinaryBytes>(4096.into(), 0),
+        tree = typical_tree::<Bytes>(4096.into(), 0),
+        data_display_format = BinaryUnits,
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -321,7 +335,8 @@ test_case! {
 
 test_case! {
     typical_empty_files_zero_sized_inodes where
-        tree = typical_tree::<BinaryBytes>(0.into(), 0),
+        tree = typical_tree::<Bytes>(0.into(), 0),
+        data_display_format = BinaryUnits,
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -356,12 +371,13 @@ fn nested_tree<Data: Size>(
 
 test_case! {
     nested_bottom_up_binary where
-        tree = nested_tree::<BinaryBytes>(
+        tree = nested_tree::<Bytes>(
             &["a", "b", "c", "d", "e", "f"],
             4096.into(),
             "z",
             1024.into(),
         ),
+        data_display_format = BinaryUnits,
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -378,12 +394,13 @@ test_case! {
 
 test_case! {
     nested_bottom_up_metric where
-        tree = nested_tree::<MetricBytes>(
+        tree = nested_tree::<Bytes>(
             &["a", "b", "c", "d", "e", "f"],
             4096.into(),
             "z",
             1024.into(),
         ),
+        data_display_format = MetricUnits,
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -400,12 +417,13 @@ test_case! {
 
 test_case! {
     nested_top_down_binary where
-        tree = nested_tree::<BinaryBytes>(
+        tree = nested_tree::<Bytes>(
             &["a", "b", "c", "d", "e", "f"],
             4096.into(),
             "z",
             1024.into(),
         ),
+        data_display_format = BinaryUnits,
         max_depth = 10,
         column_width_distribution = total 90,
         direction = TopDown,
@@ -428,6 +446,7 @@ test_case! {
             "z",
             2.into(),
         ),
+        data_display_format = (),
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -444,7 +463,7 @@ test_case! {
 
 test_case! {
     nested_bottom_up_binary_long_names_narrow_tree_column where
-        tree = nested_tree::<BinaryBytes>(
+        tree = nested_tree::<Bytes>(
             &[
                 "directory with a long name",
                 "child directory with a long name",
@@ -456,6 +475,7 @@ test_case! {
             "file with a long name",
             1024.into(),
         ),
+        data_display_format = BinaryUnits,
         max_depth = 10,
         column_width_distribution = components 27 57,
         direction = BottomUp,
@@ -471,7 +491,7 @@ test_case! {
 
 test_case! {
     nested_bottom_up_binary_many_names_narrow_tree_column where
-        tree = nested_tree::<BinaryBytes>(
+        tree = nested_tree::<Bytes>(
             &[
                 "a",
                 "ab",
@@ -490,6 +510,7 @@ test_case! {
             "xyz",
             1024.into(),
         ),
+        data_display_format = BinaryUnits,
         max_depth = 10,
         column_width_distribution = components 24 50,
         direction = BottomUp,
@@ -508,12 +529,13 @@ test_case! {
 
 test_case! {
     nested_bottom_up_binary_tebi_scale where
-        tree = nested_tree::<BinaryBytes>(
+        tree = nested_tree::<Bytes>(
             &["a", "b", "c", "d", "e", "f"],
             (4 << 40).into(),
             "z",
             (1 << 40).into(),
         ),
+        data_display_format = BinaryUnits,
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -537,7 +559,8 @@ where
 
 test_case! {
     empty_dir_non_zero_inode where
-        tree = empty_dir::<MetricBytes>(4069.into()),
+        tree = empty_dir::<Bytes>(4069.into()),
+        data_display_format = MetricUnits,
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -548,7 +571,8 @@ test_case! {
 
 test_case! {
     empty_dir_zero_sized_inode where
-        tree = empty_dir::<MetricBytes>(0.into()),
+        tree = empty_dir::<Bytes>(0.into()),
+        data_display_format = MetricUnits,
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -559,7 +583,8 @@ test_case! {
 
 test_case! {
     empty_file where
-        tree = DataTree::file("empty file", MetricBytes::from(0)),
+        tree = DataTree::file("empty file", Bytes::from(0)),
+        data_display_format = MetricUnits,
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
@@ -629,6 +654,7 @@ where
 test_case! {
     long_and_short_names_fit_tree_column where
         tree = long_and_short_names::<Blocks>(),
+        data_display_format = (),
         max_depth = 10,
         column_width_distribution = components 33 25,
         direction = BottomUp,
@@ -668,6 +694,7 @@ test_case! {
 test_case! {
     remaining_siblings_properly_connect_when_some_amongst_them_disappear where
         tree = long_and_short_names::<Blocks>(),
+        data_display_format = (),
         max_depth = 10,
         column_width_distribution = components 10 25,
         direction = BottomUp,
@@ -695,6 +722,7 @@ test_case! {
 test_case! {
     children_of_disappeared_nodes_also_disappear where
         tree = long_and_short_names::<Blocks>(),
+        data_display_format = (),
         max_depth = 10,
         column_width_distribution = components 8 25,
         direction = BottomUp,
@@ -714,6 +742,7 @@ test_case! {
 test_case! {
     remaining_siblings_properly_connect_when_some_amongst_them_disappear_top_down where
         tree = long_and_short_names::<Blocks>(),
+        data_display_format = (),
         max_depth = 10,
         column_width_distribution = components 10 25,
         direction = TopDown,
@@ -741,6 +770,7 @@ test_case! {
 test_case! {
     children_of_disappeared_nodes_also_disappear_top_down where
         tree = long_and_short_names::<Blocks>(),
+        data_display_format = (),
         max_depth = 10,
         column_width_distribution = components 8 25,
         direction = TopDown,
@@ -775,7 +805,8 @@ where
 
 test_case! {
     width_of_tree_column_is_prioritized_before_bar_column where
-        tree = tree_with_a_file_of_extremely_long_name::<MetricBytes>(),
+        tree = tree_with_a_file_of_extremely_long_name::<Bytes>(),
+        data_display_format = MetricUnits,
         max_depth = 10,
         column_width_distribution = total 85,
         direction = BottomUp,
@@ -787,7 +818,8 @@ test_case! {
 
 test_case! {
     bar_column_has_a_minimum_width where
-        tree = tree_with_a_file_of_extremely_long_name::<MetricBytes>(),
+        tree = tree_with_a_file_of_extremely_long_name::<Bytes>(),
+        data_display_format = BinaryUnits,
         max_depth = 10,
         column_width_distribution = total 50,
         direction = BottomUp,
@@ -991,7 +1023,8 @@ where
 
 test_case! {
     big_tree_with_long_names_narrow_tree_column where
-        tree = big_tree_with_long_names::<BinaryBytes>(),
+        tree = big_tree_with_long_names::<Bytes>(),
+        data_display_format = BinaryUnits,
         max_depth = 100,
         column_width_distribution = components 16 34,
         direction = BottomUp,
@@ -1073,7 +1106,8 @@ test_case! {
 
 test_case! {
     big_tree_with_long_names_shallow where
-        tree = big_tree_with_long_names::<BinaryBytes>(),
+        tree = big_tree_with_long_names::<Bytes>(),
+        data_display_format = BinaryUnits,
         max_depth = 3,
         column_width_distribution = total 90,
         direction = BottomUp,

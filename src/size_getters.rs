@@ -9,14 +9,14 @@ pub type SizeGetter<Size> = fn(&Metadata) -> Size;
 
 /// Returns [`metadata.len()`](Metadata::len).
 #[inline]
-pub fn get_apparent_size<Data: Bytes>(metadata: &Metadata) -> Data {
+pub fn get_apparent_size(metadata: &Metadata) -> Bytes {
     metadata.len().into()
 }
 
 /// Returns [`metadata.blksize()`](Metadata::blksize) (POSIX only).
 #[cfg(unix)]
 #[inline]
-pub fn get_block_size<Data: Bytes>(metadata: &Metadata) -> Data {
+pub fn get_block_size(metadata: &Metadata) -> Bytes {
     metadata.blksize().into()
 }
 

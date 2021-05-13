@@ -6,7 +6,7 @@ use dirt::{
     fs_tree_builder::FsTreeBuilder,
     os_string_display::OsStringDisplay,
     reporter::{ProgressAndErrorReporter, ProgressReport},
-    size::MetricBytes,
+    size::Bytes,
 };
 use maplit::btreeset;
 use pipe_trait::Pipe;
@@ -21,14 +21,14 @@ use std::os::unix::fs::MetadataExt;
 #[test]
 fn len_as_bytes() {
     let workspace = SampleWorkspace::default();
-    test_sample_tree::<MetricBytes, _>(&workspace, |metadata| metadata.len());
+    test_sample_tree::<Bytes, _>(&workspace, |metadata| metadata.len());
 }
 
 #[cfg(unix)]
 #[test]
 fn blksize_as_bytes() {
     let workspace = SampleWorkspace::default();
-    test_sample_tree::<MetricBytes, _>(&workspace, |metadata| metadata.blksize());
+    test_sample_tree::<Bytes, _>(&workspace, |metadata| metadata.blksize());
 }
 
 #[cfg(unix)]
@@ -42,7 +42,7 @@ fn blocks_as_blocks() {
 fn progress_reports() {
     let workspace = SampleWorkspace::default();
     let reports = Mutex::new(BTreeSet::new());
-    DataTree::<OsStringDisplay, MetricBytes>::from(FsTreeBuilder {
+    DataTree::<OsStringDisplay, Bytes>::from(FsTreeBuilder {
         get_data: |metadata| metadata.len().into(),
         reporter: ProgressAndErrorReporter::new(
             |progress| {
@@ -55,7 +55,7 @@ fn progress_reports() {
     });
     macro_rules! scanned_total {
         ($(,)?) => {
-            MetricBytes::from(0)
+            Bytes::from(0)
         };
         ($suffix:expr $(,)?) => {
             workspace
@@ -64,7 +64,7 @@ fn progress_reports() {
                 .pipe(metadata)
                 .expect("get metadata")
                 .len()
-                .pipe(MetricBytes::from)
+                .pipe(Bytes::from)
         };
         ($head:expr, $($tail:expr),* $(,)?) => {
             scanned_total!($head) + scanned_total!($($tail),+)

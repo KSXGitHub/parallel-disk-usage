@@ -7,7 +7,7 @@ use crate::{
     data_tree::DataTree,
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
-    size::MetricBytes,
+    size::{Bytes, BytesDisplayFormat},
     size_getters::get_apparent_size,
     visualizer::{ColumnWidthDistribution, Direction},
 };
@@ -51,11 +51,10 @@ impl App {
                 minimal_ratio,
             } => Sub {
                 direction: Direction::from_top_down(top_down),
+                data_display_format: BytesDisplayFormat::MetricUnits, // TODO: use flag to customize this.
                 column_width_distribution: ColumnWidthDistribution::total(total_width),
-                get_data: get_apparent_size::<MetricBytes>,
-                post_process_children: |children: &mut Vec<
-                    DataTree<OsStringDisplay, MetricBytes>,
-                >| {
+                get_data: get_apparent_size,
+                post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {
                     children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
                 },
                 reporter: &ErrorOnlyReporter { report_error },

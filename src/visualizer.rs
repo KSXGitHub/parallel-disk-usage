@@ -24,6 +24,8 @@ where
 {
     /// The tree to visualize.
     pub data_tree: &'a DataTree<Name, Data>,
+    /// Format to be used to [`display`](Size::display) the data.
+    pub data_display_format: Data::DisplayFormat,
     /// The direction of the visualization of the tree.
     pub direction: Direction,
     /// Distribution and total number of characters/blocks can be placed in a line.

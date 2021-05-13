@@ -1,9 +1,9 @@
-use crate::{data_tree::DataTree, size::MetricBytes};
+use crate::{data_tree::DataTree, size::Bytes};
 use pretty_assertions::assert_eq;
 use std::{cmp::Ordering, ops::Not};
 
 type SampleName = String;
-type SampleData = MetricBytes;
+type SampleData = Bytes;
 type SampleTree = DataTree<SampleName, SampleData>;
 
 fn dir<const INODE_SIZE: u64>(name: &'static str, children: Vec<SampleTree>) -> SampleTree {
