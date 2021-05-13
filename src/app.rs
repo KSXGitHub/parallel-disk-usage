@@ -9,7 +9,7 @@ use crate::{
     reporter::{ErrorOnlyReporter, ErrorReport},
     size::Bytes,
     size_getters::GET_APPARENT_SIZE,
-    visualizer::{ColumnWidthDistribution, Direction},
+    visualizer::Direction,
 };
 use structopt_utilities::StructOptUtils;
 
@@ -36,22 +36,22 @@ impl App {
         //
         // The other operations which are invoked frequently should not utilize dynamic dispatch.
 
+        let column_width_distribution = self.args.column_width_distribution();
+
         // TODO: use flag to customize this.
         let report_error: fn(ErrorReport) = |_| {};
 
         match self.args {
             Args {
                 quantity: Quantity::ApparentSize,
-                total_width: Some(total_width),
-                column_width: None,
                 files,
                 bytes_format,
                 top_down,
                 max_depth,
                 minimal_ratio,
+                ..
             } => Sub {
                 direction: Direction::from_top_down(top_down),
-                column_width_distribution: ColumnWidthDistribution::total(total_width),
                 get_data: GET_APPARENT_SIZE,
                 post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {
                     children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
@@ -59,6 +59,7 @@ impl App {
                 reporter: &ErrorOnlyReporter { report_error },
                 files,
                 bytes_format,
+                column_width_distribution,
                 max_depth,
                 minimal_ratio,
             }

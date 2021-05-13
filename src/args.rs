@@ -4,7 +4,7 @@ pub mod quantity;
 pub use fraction::Fraction;
 pub use quantity::{Quantity, QUANTITY_VALUES};
 
-use crate::bytes_format::BytesFormat;
+use crate::{bytes_format::BytesFormat, visualizer::ColumnWidthDistribution};
 use std::{num::NonZeroUsize, path::PathBuf};
 use structopt::StructOpt;
 use strum::VariantNames;
@@ -54,4 +54,23 @@ pub struct Args {
     /// Minimal size proportion required to appear.
     #[structopt(long, default_value = "0.01")]
     pub minimal_ratio: Fraction,
+}
+
+impl Args {
+    /// Deduce [`ColumnWidthDistribution`] from `--total-width` or `--column-width`.
+    pub(crate) fn column_width_distribution(&self) -> ColumnWidthDistribution {
+        match (self.total_width, self.column_width.as_deref()) {
+            (None, None) => {
+                panic!("TODO: automatically deduce total_width from terminal size")
+            }
+            (Some(total_width), None) => ColumnWidthDistribution::total(total_width),
+            (None, Some([tree_width, bar_width])) => {
+                ColumnWidthDistribution::components(*tree_width, *bar_width)
+            }
+            (total_width, column_width) => {
+                dbg!(total_width, column_width);
+                panic!("Something goes wrong")
+            }
+        }
+    }
 }
