@@ -1,6 +1,6 @@
 use derive_more::Display;
 
-/// Return value of [`MeasurementSystem::parse`](super::MeasurementSystem::parse_value).
+/// Return value of [`Formatter::parse_value`](super::Formatter::parse_value).
 #[derive(Debug, Display, Clone, Copy)]
 #[display(fmt = "{}{}", coefficient, unit)]
 pub struct ParsedValue {
