@@ -39,10 +39,6 @@ pub struct Args {
     #[structopt(long, possible_values = QUANTITY_VALUES, default_value = Quantity::default_value())]
     pub quantity: Quantity,
 
-    /// Use binary units (KiB, MiB, GiB, etc.) instead of metric units (KB, MB, GB, etc.).
-    #[structopt(long)]
-    pub binary_units: bool,
-
     /// Maximum depth to display the data (must be greater than 0).
     #[structopt(long, default_value = "10")]
     pub max_depth: NonZeroUsize,

@@ -42,7 +42,6 @@ impl App {
         match self.args {
             Args {
                 quantity: Quantity::ApparentSize,
-                binary_units: false,
                 total_width: Some(total_width),
                 column_width: None,
                 files,
