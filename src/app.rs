@@ -8,7 +8,7 @@ use crate::{
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
     size::{Bytes, BytesDisplayFormat},
-    size_getters::get_apparent_size,
+    size_getters::GET_APPARENT_SIZE,
     visualizer::{ColumnWidthDistribution, Direction},
 };
 use structopt_utilities::StructOptUtils;
@@ -53,7 +53,7 @@ impl App {
                 direction: Direction::from_top_down(top_down),
                 data_display_format: BytesDisplayFormat::MetricUnits, // TODO: use flag to customize this.
                 column_width_distribution: ColumnWidthDistribution::total(total_width),
-                get_data: get_apparent_size,
+                get_data: GET_APPARENT_SIZE,
                 post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {
                     children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
                 },
