@@ -1,9 +1,5 @@
-use super::{
-    bytes_format::BytesFormat,
-    measurement_system::{Binary, MeasurementSystem, Metric, ParsedValue},
-};
-use derive_more::{Add, AddAssign, Display, From, Into, Sum};
-use pipe_trait::Pipe;
+use super::bytes_format::{self, BytesFormat};
+use derive_more::{Add, AddAssign, From, Into, Sum};
 use std::{
     fmt::{Debug, Display},
     iter::Sum,
@@ -87,29 +83,11 @@ macro_rules! newtype {
     };
 }
 
-/// The [`DisplayOutput`](Size::DisplayOutput) type of [`Bytes`].
-#[derive(Debug, Display, Clone, Copy)]
-pub enum BytesDisplayOutput {
-    /// Display the value as-is.
-    PlainNumber(u64),
-    /// Display the value with unit a suffix.
-    Units(ParsedValue),
-}
-
 newtype!(
     #[doc = "Number of bytes."]
     Bytes = u64;
-    display: (BytesFormat) -> BytesDisplayOutput = |bytes, format| {
-        let value = bytes.inner();
-        match format {
-            BytesFormat::PlainNumber => BytesDisplayOutput::PlainNumber(value),
-            BytesFormat::MetricUnits => {
-                value.pipe(Metric::parse_value).pipe(BytesDisplayOutput::Units)
-            }
-            BytesFormat::BinaryUnits => {
-                value.pipe(Binary::parse_value).pipe(BytesDisplayOutput::Units)
-            }
-        }
+    display: (BytesFormat) -> bytes_format::Output = |bytes, format| {
+        format.format(bytes.into())
     };
 );
 
