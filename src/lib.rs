@@ -14,3 +14,9 @@ pub mod visualizer;
 pub fn main() {
     app::App::from_env().run()
 }
+
+pub use structopt;
+pub use structopt::clap;
+pub use structopt_utilities;
+pub use strum;
+pub use zero_copy_pads;
