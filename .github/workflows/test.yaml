@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    name: Test (${matrix.profile.name}, ${matrix.os})
+    name: Test
 
     runs-on: ${{ matrix.os }}
 
@@ -54,7 +54,7 @@ jobs:
         run: cargo test --no-fail-fast ${{ matrix.profile.flag }}
 
   clippy_check:
-    name: Clippy (${matrix.profile.name}, ${matrix.os})
+    name: Clippy
 
     runs-on: ${{ matrix.os }}
 
