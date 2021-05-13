@@ -20,7 +20,7 @@ where
     /// List of files and/or directories.
     pub files: Vec<PathBuf>,
     /// Format to be used to [`display`](Size::display) the data.
-    pub data_display_format: Data::DisplayFormat,
+    pub bytes_format: Data::DisplayFormat,
     /// The direction of the visualization.
     pub direction: Direction,
     /// Distribution and number of characters/blocks can be placed in a line.
@@ -48,7 +48,7 @@ where
     pub fn run(self) {
         let Sub {
             files,
-            data_display_format,
+            bytes_format,
             direction,
             column_width_distribution,
             max_depth,
@@ -103,7 +103,7 @@ where
 
         let visualizer = Visualizer {
             data_tree: &data_tree,
-            data_display_format,
+            bytes_format,
             direction,
             column_width_distribution,
             max_depth,

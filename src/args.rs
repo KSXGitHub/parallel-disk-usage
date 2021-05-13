@@ -4,7 +4,7 @@ pub mod quantity;
 pub use fraction::Fraction;
 pub use quantity::{Quantity, QUANTITY_VALUES};
 
-use crate::bytes_display_format::BytesDisplayFormat;
+use crate::bytes_format::BytesFormat;
 use std::{num::NonZeroUsize, path::PathBuf};
 use structopt::StructOpt;
 use strum::VariantNames;
@@ -27,9 +27,9 @@ pub struct Args {
     #[structopt(name = "files")]
     pub files: Vec<PathBuf>,
 
-    /// How to display the items of size column.
-    #[structopt(long, possible_values = BytesDisplayFormat::VARIANTS, default_value = BytesDisplayFormat::default_value())]
-    pub size_format: BytesDisplayFormat,
+    /// How to display the numbers of bytes.
+    #[structopt(long, possible_values = BytesFormat::VARIANTS, default_value = BytesFormat::default_value())]
+    pub bytes_format: BytesFormat,
 
     /// Print the tree top-down instead of bottom-up.
     #[structopt(long)]

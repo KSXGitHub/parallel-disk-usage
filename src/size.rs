@@ -1,5 +1,5 @@
 use super::{
-    bytes_display_format::BytesDisplayFormat,
+    bytes_format::BytesFormat,
     measurement_system::{Binary, MeasurementSystem, Metric, ParsedValue},
 };
 use derive_more::{Add, AddAssign, Display, From, Into, Sum};
@@ -99,14 +99,14 @@ pub enum BytesDisplayOutput {
 newtype!(
     #[doc = "Number of bytes."]
     Bytes = u64;
-    display: (BytesDisplayFormat) -> BytesDisplayOutput = |bytes, format| {
+    display: (BytesFormat) -> BytesDisplayOutput = |bytes, format| {
         let value = bytes.inner();
         match format {
-            BytesDisplayFormat::PlainNumber => BytesDisplayOutput::PlainNumber(value),
-            BytesDisplayFormat::MetricUnits => {
+            BytesFormat::PlainNumber => BytesDisplayOutput::PlainNumber(value),
+            BytesFormat::MetricUnits => {
                 value.pipe(Metric::parse_value).pipe(BytesDisplayOutput::Units)
             }
-            BytesDisplayFormat::BinaryUnits => {
+            BytesFormat::BinaryUnits => {
                 value.pipe(Binary::parse_value).pipe(BytesDisplayOutput::Units)
             }
         }

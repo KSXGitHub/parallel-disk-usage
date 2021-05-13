@@ -46,13 +46,13 @@ impl App {
                 total_width: Some(total_width),
                 column_width: None,
                 files,
-                size_format,
+                bytes_format,
                 top_down,
                 max_depth,
                 minimal_ratio,
             } => Sub {
                 direction: Direction::from_top_down(top_down),
-                data_display_format: size_format,
+                bytes_format,
                 column_width_distribution: ColumnWidthDistribution::total(total_width),
                 get_data: GET_APPARENT_SIZE,
                 post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {

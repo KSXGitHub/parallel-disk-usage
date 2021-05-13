@@ -1,6 +1,6 @@
 pub mod app;
 pub mod args;
-pub mod bytes_display_format;
+pub mod bytes_format;
 pub mod data_tree;
 pub mod fs_tree_builder;
 pub mod measurement_system;
