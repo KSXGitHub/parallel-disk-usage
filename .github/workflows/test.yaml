@@ -124,3 +124,10 @@ jobs:
 
       - name: Check code formatting
         run: cargo fmt -- --check
+
+  cargo_deny:
+    name: Lint crate graph
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: EmbarkStudios/cargo-deny-action@v1.2.6
