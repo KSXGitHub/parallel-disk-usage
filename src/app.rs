@@ -4,7 +4,6 @@ pub use sub::Sub;
 
 use crate::{
     args::{Args, Quantity},
-    bytes_display_format::BytesDisplayFormat,
     data_tree::DataTree,
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
@@ -47,12 +46,13 @@ impl App {
                 total_width: Some(total_width),
                 column_width: None,
                 files,
+                size_format,
                 top_down,
                 max_depth,
                 minimal_ratio,
             } => Sub {
                 direction: Direction::from_top_down(top_down),
-                data_display_format: BytesDisplayFormat::MetricUnits, // TODO: use flag to customize this.
+                data_display_format: size_format,
                 column_width_distribution: ColumnWidthDistribution::total(total_width),
                 get_data: GET_APPARENT_SIZE,
                 post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {

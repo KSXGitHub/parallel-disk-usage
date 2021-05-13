@@ -4,8 +4,10 @@ pub mod quantity;
 pub use fraction::Fraction;
 pub use quantity::{Quantity, QUANTITY_VALUES};
 
+use crate::bytes_display_format::BytesDisplayFormat;
 use std::{num::NonZeroUsize, path::PathBuf};
 use structopt::StructOpt;
+use strum::VariantNames;
 use text_block_macros::text_block;
 
 /// The CLI arguments.
@@ -24,6 +26,10 @@ pub struct Args {
     /// List of files and/or directories.
     #[structopt(name = "files")]
     pub files: Vec<PathBuf>,
+
+    /// How to display the items of size column.
+    #[structopt(long, possible_values = BytesDisplayFormat::VARIANTS, default_value = BytesDisplayFormat::default_value())]
+    pub size_format: BytesDisplayFormat,
 
     /// Print the tree top-down instead of bottom-up.
     #[structopt(long)]
