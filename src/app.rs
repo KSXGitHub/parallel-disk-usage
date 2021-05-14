@@ -46,7 +46,7 @@ impl App {
             ErrorReport::TEXT
         };
 
-        fn create_error_only_reporter<Data: Size>(
+        fn error_only_reporter<Data: Size>(
             report_error: fn(ErrorReport),
         ) -> ErrorOnlyReporter<fn(ErrorReport)> {
             ErrorOnlyReporter { report_error }
@@ -54,7 +54,7 @@ impl App {
 
         // TODO: move the logics within this function to somewhere within crate::reporter
         #[allow(clippy::type_complexity)]
-        fn create_progress_and_error_reporter<Data: Size + Into<u64>>(
+        fn progress_and_error_reporter<Data: Size + Into<u64>>(
             report_error: fn(ErrorReport),
         ) -> ProgressAndErrorReporter<Data, fn(&ProgressReport<Data>), fn(ErrorReport)> {
             ProgressAndErrorReporter {
@@ -127,41 +127,41 @@ impl App {
         sub! {
             Bytes => |x| x;
             ApparentSize => GET_APPARENT_SIZE;
-            false => create_error_only_reporter;
+            false => error_only_reporter;
         }
 
         sub! {
             Bytes => |x| x;
             ApparentSize => GET_APPARENT_SIZE;
-            true => create_progress_and_error_reporter;
+            true => progress_and_error_reporter;
         }
 
         #[cfg(unix)]
         sub! {
             Bytes => |x| x;
             BlockSize => GET_BLOCK_SIZE;
-            false => create_error_only_reporter;
+            false => error_only_reporter;
         }
 
         #[cfg(unix)]
         sub! {
             Bytes => |x| x;
             BlockSize => GET_BLOCK_SIZE;
-            true => create_progress_and_error_reporter;
+            true => progress_and_error_reporter;
         }
 
         #[cfg(unix)]
         sub! {
             Blocks => |_| ();
             BlockCount => GET_BLOCK_COUNT;
-            false => create_error_only_reporter;
+            false => error_only_reporter;
         }
 
         #[cfg(unix)]
         sub! {
             Blocks => |_| ();
             BlockCount => GET_BLOCK_COUNT;
-            true => create_progress_and_error_reporter;
+            true => progress_and_error_reporter;
         }
 
         // TODO: fill the rest
