@@ -60,9 +60,9 @@ pub struct Args {
     #[structopt(long)]
     pub silent_errors: bool,
 
-    /// Prevent progress from reported.
+    /// Report progress being made at the expense of performance.
     #[structopt(long)]
-    pub silent_progress: bool,
+    pub progress: bool,
 }
 
 impl Args {

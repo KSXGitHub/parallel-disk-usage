@@ -81,10 +81,13 @@ impl App {
             }
         }
 
+        // TODO: re-implement progress reporting as time-based
+        // TODO: switch from --progress back to --silent-progress (i.e. progress is reported by default)
+
         match self.args {
             Args {
                 quantity: Quantity::ApparentSize,
-                silent_progress: true,
+                progress: false,
                 files,
                 bytes_format,
                 top_down,
@@ -108,7 +111,7 @@ impl App {
 
             Args {
                 quantity: Quantity::ApparentSize,
-                silent_progress: false,
+                progress: true,
                 files,
                 bytes_format,
                 top_down,
@@ -133,7 +136,7 @@ impl App {
             #[cfg(unix)]
             Args {
                 quantity: Quantity::BlockSize,
-                silent_progress: true,
+                progress: false,
                 files,
                 bytes_format,
                 top_down,
@@ -158,7 +161,7 @@ impl App {
             #[cfg(unix)]
             Args {
                 quantity: Quantity::BlockSize,
-                silent_progress: false,
+                progress: true,
                 files,
                 bytes_format,
                 top_down,
@@ -183,7 +186,7 @@ impl App {
             #[cfg(unix)]
             Args {
                 quantity: Quantity::BlockCount,
-                silent_progress: true,
+                progress: false,
                 files,
                 top_down,
                 max_depth,
@@ -207,7 +210,7 @@ impl App {
             #[cfg(unix)]
             Args {
                 quantity: Quantity::BlockCount,
-                silent_progress: false,
+                progress: true,
                 files,
                 top_down,
                 max_depth,
