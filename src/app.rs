@@ -48,17 +48,13 @@ impl App {
         };
 
         // TODO: move the logics within this function to somewhere within crate::reporter
-        fn create_progress_and_error_reporter<Data>(
+        #[allow(clippy::type_complexity)]
+        fn create_progress_and_error_reporter<Data: Size + Into<u64>>(
             report_error: fn(ErrorReport),
-            data_format: Data::DisplayFormat,
-        ) -> ProgressAndErrorReporter<Data, impl Fn(&ProgressReport<Data>) + Sync, fn(ErrorReport)>
-        where
-            Data: Size,
-            Data::DisplayFormat: Sync,
-        {
+        ) -> ProgressAndErrorReporter<Data, fn(&ProgressReport<Data>), fn(ErrorReport)> {
             ProgressAndErrorReporter {
                 progress: Default::default(),
-                report_progress: move |report| {
+                report_progress: |report| {
                     let ProgressReport {
                         known_items,
                         scanned_items,
@@ -69,7 +65,7 @@ impl App {
                         "\r(known {known}, scanned {scanned}, total {total}",
                         known = known_items,
                         scanned = scanned_items,
-                        total = scanned_total.display(data_format)
+                        total = (*scanned_total).into(),
                     );
                     if *errors != 0 {
                         eprint!(", erred {}", errors);
@@ -120,7 +116,7 @@ impl App {
                 post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {
                     children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
                 },
-                reporter: &create_progress_and_error_reporter(report_error, bytes_format),
+                reporter: &create_progress_and_error_reporter(report_error),
                 files,
                 bytes_format,
                 column_width_distribution,
@@ -170,7 +166,7 @@ impl App {
                 post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {
                     children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
                 },
-                reporter: &create_progress_and_error_reporter(report_error, bytes_format),
+                reporter: &create_progress_and_error_reporter(report_error),
                 files,
                 bytes_format,
                 column_width_distribution,
@@ -218,7 +214,7 @@ impl App {
                 post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Blocks>>| {
                     children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
                 },
-                reporter: &create_progress_and_error_reporter(report_error, ()),
+                reporter: &create_progress_and_error_reporter(report_error),
                 bytes_format: (),
                 files,
                 column_width_distribution,
