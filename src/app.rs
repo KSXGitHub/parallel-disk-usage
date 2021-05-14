@@ -41,7 +41,7 @@ impl App {
 
         let column_width_distribution = self.args.column_width_distribution();
 
-        let report_error = if self.args.silent_error {
+        let report_error = if self.args.silent_errors {
             ErrorReport::SILENT
         } else {
             ErrorReport::TEXT

@@ -58,7 +58,7 @@ pub struct Args {
 
     /// Whether to print filesystem error messages to stdout.
     #[structopt(long)]
-    pub silent_error: bool,
+    pub silent_errors: bool,
 }
 
 impl Args {
