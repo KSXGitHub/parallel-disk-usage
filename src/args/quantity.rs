@@ -1,4 +1,4 @@
-use strum::{AsRefStr, EnumString, EnumVariantNames, VariantNames};
+use strum::{AsRefStr, EnumString, EnumVariantNames};
 
 /// Quantity to be measured.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, AsRefStr, EnumString, EnumVariantNames)]
@@ -18,9 +18,6 @@ pub enum Quantity {
     #[strum(serialize = "blocks")]
     BlockCount,
 }
-
-/// Possible CLI values of [`Quantity`].
-pub const QUANTITY_VALUES: &[&str] = Quantity::VARIANTS;
 
 impl Quantity {
     pub(super) fn default_value() -> &'static str {

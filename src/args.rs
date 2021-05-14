@@ -2,7 +2,7 @@ pub mod fraction;
 pub mod quantity;
 
 pub use fraction::Fraction;
-pub use quantity::{Quantity, QUANTITY_VALUES};
+pub use quantity::Quantity;
 
 use crate::{bytes_format::BytesFormat, visualizer::ColumnWidthDistribution};
 use std::{num::NonZeroUsize, path::PathBuf};
@@ -37,7 +37,7 @@ pub struct Args {
     pub top_down: bool,
 
     /// Aspect of the files/directories to be measured.
-    #[structopt(long, possible_values = QUANTITY_VALUES, default_value = Quantity::default_value())]
+    #[structopt(long, possible_values = Quantity::VARIANTS, default_value = Quantity::default_value())]
     pub quantity: Quantity,
 
     /// Maximum depth to display the data (must be greater than 0).
