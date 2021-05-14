@@ -5,6 +5,7 @@ pub use sub::Sub;
 use crate::{
     args::{Args, Quantity},
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
+    runtime_error::RuntimeError,
     size::{Blocks, Bytes, Size},
     size_getters::GET_APPARENT_SIZE,
     visualizer::Direction,
@@ -30,7 +31,7 @@ impl App {
     }
 
     /// Run the application.
-    pub fn run(self) {
+    pub fn run(self) -> Result<(), RuntimeError> {
         // DYNAMIC DISPATCH POLICY:
         //
         // Errors rarely occur, therefore, using dynamic dispatch to report errors have an acceptable
@@ -38,7 +39,10 @@ impl App {
         //
         // The other operations which are invoked frequently should not utilize dynamic dispatch.
 
-        let column_width_distribution = self.args.column_width_distribution();
+        let column_width_distribution = self
+            .args
+            .column_width_distribution()
+            .expect("get column width distribution");
 
         let report_error = if self.args.silent_errors {
             ErrorReport::SILENT
@@ -170,5 +174,7 @@ impl App {
         // TODO: customize sorting (post_process_children)
         // TODO: hide items whose size are too small in comparison to total
         // TODO: convert all panics to Err
+        dbg!(self.args);
+        panic!("Invalid combination of arguments")
     }
 }

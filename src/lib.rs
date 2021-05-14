@@ -5,6 +5,7 @@ pub mod data_tree;
 pub mod fs_tree_builder;
 pub mod os_string_display;
 pub mod reporter;
+pub mod runtime_error;
 pub mod size;
 pub mod size_getters;
 pub mod tree_builder;
@@ -12,7 +13,9 @@ pub mod visualizer;
 
 /// The main program.
 pub fn main() {
-    app::App::from_env().run()
+    if let Err(error) = app::App::from_env().run() {
+        eprintln!("error: {}", error);
+    }
 }
 
 pub use structopt;

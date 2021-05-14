@@ -4,6 +4,7 @@ use crate::{
     fs_tree_builder::FsTreeBuilder,
     os_string_display::OsStringDisplay,
     reporter::Reporter,
+    runtime_error::RuntimeError,
     size::Size,
     visualizer::{ColumnWidthDistribution, Direction, Visualizer},
 };
@@ -45,7 +46,7 @@ where
     PostProcessChildren: Fn(&mut Vec<DataTree<OsStringDisplay, Data>>) + Copy + Send + Sync,
 {
     /// Run the sub program.
-    pub fn run(self) {
+    pub fn run(self) -> Result<(), RuntimeError> {
         let Sub {
             files,
             bytes_format,
@@ -110,5 +111,6 @@ where
         };
 
         println!("\r{}", visualizer);
+        Ok(())
     }
 }
