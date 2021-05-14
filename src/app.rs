@@ -11,6 +11,7 @@ use crate::{
     size_getters::GET_APPARENT_SIZE,
     visualizer::Direction,
 };
+use std::fmt::Write;
 use structopt_utilities::StructOptUtils;
 
 #[cfg(unix)]
@@ -61,16 +62,20 @@ impl App {
                         scanned_total,
                         errors,
                     } = report;
-                    eprint!(
+                    let mut text = String::new();
+                    write!(
+                        text,
                         "\r(known {known}, scanned {scanned}, total {total}",
                         known = known_items,
                         scanned = scanned_items,
                         total = (*scanned_total).into(),
-                    );
+                    )
+                    .unwrap();
                     if *errors != 0 {
-                        eprint!(", erred {}", errors);
+                        write!(text, ", erred {}", errors).unwrap();
                     }
-                    eprint!(")");
+                    write!(text, ")").unwrap();
+                    eprint!("{}", text);
                 },
                 report_error,
             }
