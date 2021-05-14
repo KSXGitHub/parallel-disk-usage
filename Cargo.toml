@@ -26,6 +26,7 @@ fmt-iter = "^0.2.1"
 itertools = "^0.10.0"
 assert-cmp = "^0.1.0"
 zero-copy-pads = "^0.2.0"
+terminal_size = "^0.1.16"
 
 [dependencies.strum]
 version = "^0.20.0"

@@ -116,7 +116,6 @@ impl App {
             .run(),
 
             // TODO: fill the rest
-            // TODO: automatically deduce total_width from terminal size
             // TODO: customize progress reporting (reporter)
             // TODO: customize error reporting (reporter)
             // TODO: customize sorting (post_process_children)

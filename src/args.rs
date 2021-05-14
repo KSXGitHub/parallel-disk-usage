@@ -8,6 +8,7 @@ use crate::{bytes_format::BytesFormat, visualizer::ColumnWidthDistribution};
 use std::{num::NonZeroUsize, path::PathBuf};
 use structopt::StructOpt;
 use strum::VariantNames;
+use terminal_size::{terminal_size, Width};
 use text_block_macros::text_block;
 
 /// The CLI arguments.
@@ -61,7 +62,8 @@ impl Args {
     pub(crate) fn column_width_distribution(&self) -> ColumnWidthDistribution {
         match (self.total_width, self.column_width.as_deref()) {
             (None, None) => {
-                panic!("TODO: automatically deduce total_width from terminal size")
+                let (Width(width), _) = terminal_size().expect("get terminal width");
+                ColumnWidthDistribution::total(width as usize)
             }
             (Some(total_width), None) => ColumnWidthDistribution::total(total_width),
             (None, Some([tree_width, bar_width])) => {

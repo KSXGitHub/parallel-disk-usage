@@ -247,6 +247,7 @@ dependencies = [
  "structopt",
  "structopt-utilities",
  "strum",
+ "terminal_size",
  "text-block-macros",
  "zero-copy-pads",
 ]
@@ -643,6 +644,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-xid",
+]
+
+[[package]]
+name = "terminal_size"
+version = "0.1.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "86ca8ced750734db02076f44132d802af0b33b09942331f4459dde8636fd2406"
+dependencies = [
+ "libc",
+ "winapi",
 ]
 
 [[package]]
