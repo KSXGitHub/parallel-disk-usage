@@ -8,10 +8,13 @@ use crate::{
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
     size::{Blocks, Bytes},
-    size_getters::{GET_APPARENT_SIZE, GET_BLOCK_COUNT, GET_BLOCK_SIZE},
+    size_getters::GET_APPARENT_SIZE,
     visualizer::Direction,
 };
 use structopt_utilities::StructOptUtils;
+
+#[cfg(unix)]
+use crate::size_getters::{GET_BLOCK_COUNT, GET_BLOCK_SIZE};
 
 /// The main application.
 pub struct App {
@@ -65,6 +68,7 @@ impl App {
             }
             .run(),
 
+            #[cfg(unix)]
             Args {
                 quantity: Quantity::BlockSize,
                 files,
@@ -88,6 +92,7 @@ impl App {
             }
             .run(),
 
+            #[cfg(unix)]
             Args {
                 quantity: Quantity::BlockCount,
                 files,
