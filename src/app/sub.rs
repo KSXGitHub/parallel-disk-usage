@@ -109,6 +109,6 @@ where
             max_depth,
         };
 
-        println!("{}", visualizer);
+        println!("\r{}", visualizer);
     }
 }

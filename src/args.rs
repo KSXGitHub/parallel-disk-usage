@@ -59,6 +59,10 @@ pub struct Args {
     /// Prevent filesystem error messages from appearing in stderr.
     #[structopt(long)]
     pub silent_errors: bool,
+
+    /// Prevent progress from reported.
+    #[structopt(long)]
+    pub silent_progress: bool,
 }
 
 impl Args {

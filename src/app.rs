@@ -6,8 +6,8 @@ use crate::{
     args::{Args, Quantity},
     data_tree::DataTree,
     os_string_display::OsStringDisplay,
-    reporter::{ErrorOnlyReporter, ErrorReport},
-    size::{Blocks, Bytes},
+    reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
+    size::{Blocks, Bytes, Size},
     size_getters::GET_APPARENT_SIZE,
     visualizer::Direction,
 };
@@ -47,9 +47,43 @@ impl App {
             ErrorReport::TEXT
         };
 
+        // TODO: move the logics within this function to somewhere within crate::reporter
+        fn create_progress_and_error_reporter<Data>(
+            report_error: fn(ErrorReport),
+            data_format: Data::DisplayFormat,
+        ) -> ProgressAndErrorReporter<Data, impl Fn(&ProgressReport<Data>) + Sync, fn(ErrorReport)>
+        where
+            Data: Size,
+            Data::DisplayFormat: Sync,
+        {
+            ProgressAndErrorReporter {
+                progress: Default::default(),
+                report_progress: move |report| {
+                    let ProgressReport {
+                        known_items,
+                        scanned_items,
+                        scanned_total,
+                        errors,
+                    } = report;
+                    eprint!(
+                        "\r(known {known}, scanned {scanned}, total {total}",
+                        known = known_items,
+                        scanned = scanned_items,
+                        total = scanned_total.display(data_format)
+                    );
+                    if *errors != 0 {
+                        eprint!(", erred {}", errors);
+                    }
+                    eprint!(")");
+                },
+                report_error,
+            }
+        }
+
         match self.args {
             Args {
                 quantity: Quantity::ApparentSize,
+                silent_progress: true,
                 files,
                 bytes_format,
                 top_down,
@@ -71,9 +105,34 @@ impl App {
             }
             .run(),
 
+            Args {
+                quantity: Quantity::ApparentSize,
+                silent_progress: false,
+                files,
+                bytes_format,
+                top_down,
+                max_depth,
+                minimal_ratio,
+                ..
+            } => Sub {
+                direction: Direction::from_top_down(top_down),
+                get_data: GET_APPARENT_SIZE,
+                post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {
+                    children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+                },
+                reporter: &create_progress_and_error_reporter(report_error, bytes_format),
+                files,
+                bytes_format,
+                column_width_distribution,
+                max_depth,
+                minimal_ratio,
+            }
+            .run(),
+
             #[cfg(unix)]
             Args {
                 quantity: Quantity::BlockSize,
+                silent_progress: true,
                 files,
                 bytes_format,
                 top_down,
@@ -97,7 +156,33 @@ impl App {
 
             #[cfg(unix)]
             Args {
+                quantity: Quantity::BlockSize,
+                silent_progress: false,
+                files,
+                bytes_format,
+                top_down,
+                max_depth,
+                minimal_ratio,
+                ..
+            } => Sub {
+                direction: Direction::from_top_down(top_down),
+                get_data: GET_BLOCK_SIZE,
+                post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {
+                    children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+                },
+                reporter: &create_progress_and_error_reporter(report_error, bytes_format),
+                files,
+                bytes_format,
+                column_width_distribution,
+                max_depth,
+                minimal_ratio,
+            }
+            .run(),
+
+            #[cfg(unix)]
+            Args {
                 quantity: Quantity::BlockCount,
+                silent_progress: true,
                 files,
                 top_down,
                 max_depth,
@@ -110,6 +195,30 @@ impl App {
                     children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
                 },
                 reporter: &ErrorOnlyReporter { report_error },
+                bytes_format: (),
+                files,
+                column_width_distribution,
+                max_depth,
+                minimal_ratio,
+            }
+            .run(),
+
+            #[cfg(unix)]
+            Args {
+                quantity: Quantity::BlockCount,
+                silent_progress: false,
+                files,
+                top_down,
+                max_depth,
+                minimal_ratio,
+                ..
+            } => Sub {
+                direction: Direction::from_top_down(top_down),
+                get_data: GET_BLOCK_COUNT,
+                post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Blocks>>| {
+                    children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+                },
+                reporter: &create_progress_and_error_reporter(report_error, ()),
                 bytes_format: (),
                 files,
                 column_width_distribution,
