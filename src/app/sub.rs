@@ -110,7 +110,8 @@ where
             max_depth,
         };
 
-        println!("\r{}", visualizer);
+        eprint!("\r"); // erase progress report.
+        println!("{}", visualizer);
         Ok(())
     }
 }
