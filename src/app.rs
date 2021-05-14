@@ -4,8 +4,6 @@ pub use sub::Sub;
 
 use crate::{
     args::{Args, Quantity},
-    data_tree::DataTree,
-    os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     size::{Blocks, Bytes, Size},
     size_getters::GET_APPARENT_SIZE,
@@ -48,6 +46,12 @@ impl App {
             ErrorReport::TEXT
         };
 
+        fn create_error_only_reporter<Data: Size>(
+            report_error: fn(ErrorReport),
+        ) -> ErrorOnlyReporter<fn(ErrorReport)> {
+            ErrorOnlyReporter { report_error }
+        }
+
         // TODO: move the logics within this function to somewhere within crate::reporter
         #[allow(clippy::type_complexity)]
         fn create_progress_and_error_reporter<Data: Size + Into<u64>>(
@@ -84,165 +88,87 @@ impl App {
         // TODO: re-implement progress reporting as time-based
         // TODO: switch from --progress back to --silent-progress (i.e. progress is reported by default)
 
-        match self.args {
-            Args {
-                quantity: Quantity::ApparentSize,
-                progress: false,
-                files,
-                bytes_format,
-                top_down,
-                max_depth,
-                minimal_ratio,
-                ..
-            } => Sub {
-                direction: Direction::from_top_down(top_down),
-                get_data: GET_APPARENT_SIZE,
-                post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {
-                    children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
-                },
-                reporter: &ErrorOnlyReporter { report_error },
-                files,
-                bytes_format,
-                column_width_distribution,
-                max_depth,
-                minimal_ratio,
-            }
-            .run(),
-
-            Args {
-                quantity: Quantity::ApparentSize,
-                progress: true,
-                files,
-                bytes_format,
-                top_down,
-                max_depth,
-                minimal_ratio,
-                ..
-            } => Sub {
-                direction: Direction::from_top_down(top_down),
-                get_data: GET_APPARENT_SIZE,
-                post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {
-                    children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
-                },
-                reporter: &create_progress_and_error_reporter(report_error),
-                files,
-                bytes_format,
-                column_width_distribution,
-                max_depth,
-                minimal_ratio,
-            }
-            .run(),
-
-            #[cfg(unix)]
-            Args {
-                quantity: Quantity::BlockSize,
-                progress: false,
-                files,
-                bytes_format,
-                top_down,
-                max_depth,
-                minimal_ratio,
-                ..
-            } => Sub {
-                direction: Direction::from_top_down(top_down),
-                get_data: GET_BLOCK_SIZE,
-                post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {
-                    children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
-                },
-                reporter: &ErrorOnlyReporter { report_error },
-                files,
-                bytes_format,
-                column_width_distribution,
-                max_depth,
-                minimal_ratio,
-            }
-            .run(),
-
-            #[cfg(unix)]
-            Args {
-                quantity: Quantity::BlockSize,
-                progress: true,
-                files,
-                bytes_format,
-                top_down,
-                max_depth,
-                minimal_ratio,
-                ..
-            } => Sub {
-                direction: Direction::from_top_down(top_down),
-                get_data: GET_BLOCK_SIZE,
-                post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {
-                    children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
-                },
-                reporter: &create_progress_and_error_reporter(report_error),
-                files,
-                bytes_format,
-                column_width_distribution,
-                max_depth,
-                minimal_ratio,
-            }
-            .run(),
-
-            #[cfg(unix)]
-            Args {
-                quantity: Quantity::BlockCount,
-                progress: false,
-                files,
-                top_down,
-                max_depth,
-                minimal_ratio,
-                ..
-            } => Sub {
-                direction: Direction::from_top_down(top_down),
-                get_data: GET_BLOCK_COUNT,
-                post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Blocks>>| {
-                    children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
-                },
-                reporter: &ErrorOnlyReporter { report_error },
-                bytes_format: (),
-                files,
-                column_width_distribution,
-                max_depth,
-                minimal_ratio,
-            }
-            .run(),
-
-            #[cfg(unix)]
-            Args {
-                quantity: Quantity::BlockCount,
-                progress: true,
-                files,
-                top_down,
-                max_depth,
-                minimal_ratio,
-                ..
-            } => Sub {
-                direction: Direction::from_top_down(top_down),
-                get_data: GET_BLOCK_COUNT,
-                post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Blocks>>| {
-                    children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
-                },
-                reporter: &create_progress_and_error_reporter(report_error),
-                bytes_format: (),
-                files,
-                column_width_distribution,
-                max_depth,
-                minimal_ratio,
-            }
-            .run(),
-
-            // TODO: fill the rest
-            // TODO: customize progress reporting (reporter)
-            // TODO: customize error reporting (reporter)
-            // TODO: customize sorting (post_process_children)
-            // TODO: hide items whose size are too small in comparison to total
-            // TODO: convert all panics to Err
-            // TODO: remove #[allow(unreachable_patterns)]
-            #[allow(unreachable_patterns)]
-            args => {
-                dbg!(args);
-                panic!("Invalid combination of arguments")
-            }
+        macro_rules! sub {
+            (
+                $data:ty => $format:expr;
+                $quantity:ident => $get_data:ident;
+                $progress:literal => $create_reporter:ident;
+            ) => {
+                if let Args {
+                    quantity: Quantity::$quantity,
+                    progress: $progress,
+                    files,
+                    bytes_format,
+                    top_down,
+                    max_depth,
+                    minimal_ratio,
+                    ..
+                } = self.args
+                {
+                    return Sub {
+                        direction: Direction::from_top_down(top_down),
+                        get_data: $get_data,
+                        post_process_children: |children| {
+                            children
+                                .sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+                        },
+                        reporter: &$create_reporter::<$data>(report_error),
+                        bytes_format: $format(bytes_format),
+                        files,
+                        column_width_distribution,
+                        max_depth,
+                        minimal_ratio,
+                    }
+                    .run();
+                }
+            };
         }
+
+        sub! {
+            Bytes => |x| x;
+            ApparentSize => GET_APPARENT_SIZE;
+            false => create_error_only_reporter;
+        }
+
+        sub! {
+            Bytes => |x| x;
+            ApparentSize => GET_APPARENT_SIZE;
+            true => create_progress_and_error_reporter;
+        }
+
+        #[cfg(unix)]
+        sub! {
+            Bytes => |x| x;
+            BlockSize => GET_BLOCK_SIZE;
+            false => create_error_only_reporter;
+        }
+
+        #[cfg(unix)]
+        sub! {
+            Bytes => |x| x;
+            BlockSize => GET_BLOCK_SIZE;
+            true => create_progress_and_error_reporter;
+        }
+
+        #[cfg(unix)]
+        sub! {
+            Blocks => |_| ();
+            BlockCount => GET_BLOCK_COUNT;
+            false => create_error_only_reporter;
+        }
+
+        #[cfg(unix)]
+        sub! {
+            Blocks => |_| ();
+            BlockCount => GET_BLOCK_COUNT;
+            true => create_progress_and_error_reporter;
+        }
+
+        // TODO: fill the rest
+        // TODO: customize progress reporting (reporter)
+        // TODO: customize error reporting (reporter)
+        // TODO: customize sorting (post_process_children)
+        // TODO: hide items whose size are too small in comparison to total
+        // TODO: convert all panics to Err
     }
 }
