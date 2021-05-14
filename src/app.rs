@@ -7,8 +7,8 @@ use crate::{
     data_tree::DataTree,
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
-    size::Bytes,
-    size_getters::GET_APPARENT_SIZE,
+    size::{Blocks, Bytes},
+    size_getters::{GET_APPARENT_SIZE, GET_BLOCK_COUNT, GET_BLOCK_SIZE},
     visualizer::Direction,
 };
 use structopt_utilities::StructOptUtils;
@@ -65,12 +65,59 @@ impl App {
             }
             .run(),
 
+            Args {
+                quantity: Quantity::BlockSize,
+                files,
+                bytes_format,
+                top_down,
+                max_depth,
+                minimal_ratio,
+                ..
+            } => Sub {
+                direction: Direction::from_top_down(top_down),
+                get_data: GET_BLOCK_SIZE,
+                post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Bytes>>| {
+                    children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+                },
+                reporter: &ErrorOnlyReporter { report_error },
+                files,
+                bytes_format,
+                column_width_distribution,
+                max_depth,
+                minimal_ratio,
+            }
+            .run(),
+
+            Args {
+                quantity: Quantity::BlockCount,
+                files,
+                top_down,
+                max_depth,
+                minimal_ratio,
+                ..
+            } => Sub {
+                direction: Direction::from_top_down(top_down),
+                get_data: GET_BLOCK_COUNT,
+                post_process_children: |children: &mut Vec<DataTree<OsStringDisplay, Blocks>>| {
+                    children.sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+                },
+                reporter: &ErrorOnlyReporter { report_error },
+                bytes_format: (),
+                files,
+                column_width_distribution,
+                max_depth,
+                minimal_ratio,
+            }
+            .run(),
+
             // TODO: fill the rest
             // TODO: automatically deduce total_width from terminal size
             // TODO: customize progress reporting (reporter)
             // TODO: customize error reporting (reporter)
             // TODO: customize sorting (post_process_children)
             // TODO: hide items whose size are too small in comparison to total
+            // TODO: remove #[allow(unreachable_patterns)]
+            #[allow(unreachable_patterns)]
             args => {
                 dbg!(args);
                 panic!("Invalid combination of arguments")
