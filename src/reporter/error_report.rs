@@ -16,11 +16,8 @@ pub struct ErrorReport<'a> {
 }
 
 impl<'a> ErrorReport<'a> {
-    pub(crate) const SILENT: fn(ErrorReport) = |report| report.silent();
-    pub(crate) const TEXT: fn(ErrorReport) = |report| report.text_report();
-
     /// Do nothing.
-    pub fn silent(self) {}
+    pub const SILENT: fn(ErrorReport) = |_| {};
 }
 
 mod text_report;

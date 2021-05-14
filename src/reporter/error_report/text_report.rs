@@ -3,9 +3,7 @@ use std::fmt::{Display, Error, Formatter};
 
 impl<'a> ErrorReport<'a> {
     /// Prints error message in form of a line of text to stderr.
-    pub fn text_report(self) {
-        eprint!("{}", TextReport(self));
-    }
+    pub const TEXT: fn(ErrorReport) = |report| eprint!("{}", TextReport(report));
 }
 
 /// Wrapper around [`ErrorReport`] that `impl`s [`Display`]
