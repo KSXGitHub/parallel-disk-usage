@@ -56,7 +56,7 @@ pub struct Args {
     #[structopt(long, default_value = "0.01")]
     pub minimal_ratio: Fraction,
 
-    /// Whether to print filesystem error messages to stdout.
+    /// Prevent filesystem error messages from appearing in stderr.
     #[structopt(long)]
     pub silent_errors: bool,
 }
