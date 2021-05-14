@@ -120,6 +120,7 @@ impl App {
             // TODO: customize error reporting (reporter)
             // TODO: customize sorting (post_process_children)
             // TODO: hide items whose size are too small in comparison to total
+            // TODO: convert all panics to Err
             // TODO: remove #[allow(unreachable_patterns)]
             #[allow(unreachable_patterns)]
             args => {
