@@ -3,14 +3,14 @@ use std::fmt::{Display, Error, Formatter};
 
 impl<'a> ErrorReport<'a> {
     /// Prints error message in form of a line of text to stderr.
-    pub fn text_report(&self) {
+    pub fn text_report(self) {
         eprint!("{}", TextReport(self));
     }
 }
 
 /// Wrapper around [`ErrorReport`] that `impl`s [`Display`]
 /// to make `ErrorReport::text_report` testable.
-struct TextReport<'a>(&'a ErrorReport<'a>);
+struct TextReport<'a>(ErrorReport<'a>);
 
 impl<'a> Display for TextReport<'a> {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> Result<(), Error> {
@@ -39,7 +39,7 @@ fn test() {
             "Something goes wrong (os error 420)",
         ),
     };
-    let actual = TextReport(&report).to_string();
+    let actual = TextReport(report).to_string();
     let expected =
         "\r[error] read_dir \"path/to/a/directory\": Something goes wrong (os error 420)\n";
     assert_eq!(actual, expected);

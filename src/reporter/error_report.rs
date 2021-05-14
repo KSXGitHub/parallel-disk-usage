@@ -20,7 +20,7 @@ impl<'a> ErrorReport<'a> {
     pub(crate) const TEXT: fn(ErrorReport) = |report| report.text_report();
 
     /// Do nothing.
-    pub fn silent(&self) {}
+    pub fn silent(self) {}
 }
 
 mod text_report;
