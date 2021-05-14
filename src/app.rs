@@ -41,8 +41,11 @@ impl App {
 
         let column_width_distribution = self.args.column_width_distribution();
 
-        // TODO: use flag to customize this.
-        let report_error: fn(ErrorReport) = |_| {};
+        let report_error = if self.args.silent_error {
+            ErrorReport::SILENT
+        } else {
+            ErrorReport::TEXT
+        };
 
         match self.args {
             Args {

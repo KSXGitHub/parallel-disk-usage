@@ -55,6 +55,10 @@ pub struct Args {
     /// Minimal size proportion required to appear.
     #[structopt(long, default_value = "0.01")]
     pub minimal_ratio: Fraction,
+
+    /// Whether to print filesystem error messages to stdout.
+    #[structopt(long)]
+    pub silent_error: bool,
 }
 
 impl Args {
