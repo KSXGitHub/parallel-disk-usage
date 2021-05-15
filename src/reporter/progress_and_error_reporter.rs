@@ -57,13 +57,7 @@ where
             progress_reporter_handle,
         }
     }
-}
 
-impl<Data, ReportError> ProgressAndErrorReporter<Data, ReportError>
-where
-    Data: Size + Send + Sync,
-    ReportError: Fn(ErrorReport) + Sync,
-{
     /// Stop the thread that reports progress.
     ///
     /// This function would be automatically invoked once the value is [dropped](Drop).
