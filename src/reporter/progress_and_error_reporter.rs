@@ -12,7 +12,7 @@ use std::{
 #[derive(Debug)]
 pub struct ProgressAndErrorReporter<Data, ReportError>
 where
-    Data: Size,
+    Data: Size + Send + Sync,
     ReportError: Fn(ErrorReport) + Sync,
 {
     /// Progress information.
@@ -61,7 +61,7 @@ where
 
 impl<Data, ReportError> ProgressAndErrorReporter<Data, ReportError>
 where
-    Data: Size,
+    Data: Size + Send + Sync,
     ReportError: Fn(ErrorReport) + Sync,
 {
     /// Stop the thread that reports progress.
@@ -75,7 +75,7 @@ where
 
 impl<Data, ReportError> Reporter<Data> for ProgressAndErrorReporter<Data, ReportError>
 where
-    Data: Size,
+    Data: Size + Send + Sync,
     ReportError: Fn(ErrorReport) + Sync,
 {
     fn report(&self, event: Event<Data>) {
@@ -112,7 +112,7 @@ where
 
 impl<Data, ReportError> Drop for ProgressAndErrorReporter<Data, ReportError>
 where
-    Data: Size,
+    Data: Size + Send + Sync,
     ReportError: Fn(ErrorReport) + Sync,
 {
     fn drop(&mut self) {
