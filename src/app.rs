@@ -93,7 +93,6 @@ impl App {
             )
         }
 
-        // TODO: re-implement progress reporting as time-based
         // TODO: switch from --progress back to --silent-progress (i.e. progress is reported by default)
 
         macro_rules! sub {
