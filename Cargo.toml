@@ -24,7 +24,7 @@ text-block-macros = "^0.1.1"
 rounded-div = "^0.1.2"
 fmt-iter = "^0.2.1"
 itertools = "^0.10.0"
-assert-cmp = "^0.1.0"
+assert-cmp = "^0.2.0"
 zero-copy-pads = "^0.2.0"
 terminal_size = "^0.1.16"
 
