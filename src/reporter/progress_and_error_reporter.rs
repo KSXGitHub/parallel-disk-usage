@@ -82,7 +82,7 @@ where
             ..
         } = self;
         macro_rules! handle_field {
-            ($($field:ident $operator:tt $addend:expr),+) => {
+            ($($field:ident $operator:tt $addend:expr;)+) => {
                 if let Some(progress) = progress.write().ok().as_mut().and_then(|x| x.as_mut()) {
                     $(progress.$field $operator $addend;)+
                 }
@@ -90,11 +90,16 @@ where
         }
         match event {
             ReceiveData(data) => {
-                handle_field!(items += 1, total += data);
+                handle_field! {
+                    items += 1;
+                    total += data;
+                }
             }
             EncounterError(error_report) => {
                 report_error(error_report);
-                handle_field!(errors += 1);
+                handle_field! {
+                    errors += 1;
+                }
             }
         }
     }
