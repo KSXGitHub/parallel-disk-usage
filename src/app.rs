@@ -10,7 +10,7 @@ use crate::{
     size_getters::GET_APPARENT_SIZE,
     visualizer::Direction,
 };
-use std::{fmt::Write, time::Duration};
+use std::time::Duration;
 use structopt_utilities::StructOptUtils;
 
 #[cfg(unix)]
@@ -59,7 +59,6 @@ impl App {
             ErrorOnlyReporter::new(report_error)
         }
 
-        // TODO: move the logics within this function to somewhere within crate::reporter
         fn progress_and_error_reporter<Data>(
             report_error: fn(ErrorReport),
         ) -> ProgressAndErrorReporter<Data, fn(ErrorReport)>
@@ -68,28 +67,7 @@ impl App {
             ProgressReport<Data>: Default + 'static,
         {
             ProgressAndErrorReporter::new(
-                |report: ProgressReport<Data>| {
-                    let ProgressReport {
-                        known_items,
-                        scanned_items,
-                        scanned_total,
-                        errors,
-                    } = report;
-                    let mut text = String::new();
-                    write!(
-                        text,
-                        "\r(known {known}, scanned {scanned}, total {total}",
-                        known = known_items,
-                        scanned = scanned_items,
-                        total = scanned_total.into(),
-                    )
-                    .unwrap();
-                    if errors != 0 {
-                        write!(text, ", erred {}", errors).unwrap();
-                    }
-                    write!(text, ")").unwrap();
-                    eprint!("{}", text);
-                },
+                ProgressReport::TEXT,
                 Duration::from_millis(100),
                 report_error,
             )
