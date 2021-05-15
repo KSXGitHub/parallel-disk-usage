@@ -93,9 +93,10 @@ where
             };
         }
         match event {
-            BeginScanning => handle_field!(known_items),
-            FinishScanning => handle_field!(scanned_items),
-            ReceiveData(data) => handle_field!(scanned_total += data),
+            ReceiveData(data) => {
+                handle_field!(items);
+                handle_field!(total += data);
+            }
             EncounterError(error_report) => {
                 report_error(error_report);
                 handle_field!(errors)

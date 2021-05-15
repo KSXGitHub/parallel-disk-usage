@@ -56,8 +56,6 @@ where
             path: root,
 
             get_info: |path| {
-                reporter.report(Event::BeginScanning);
-
                 let stats = match symlink_metadata(&path) {
                     Err(error) => {
                         reporter.report(Event::EncounterError(ErrorReport {
@@ -101,8 +99,6 @@ where
                 } else {
                     Vec::new()
                 };
-
-                reporter.report(Event::FinishScanning);
 
                 let data = get_data(&stats);
                 reporter.report(Event::ReceiveData(data));
