@@ -45,10 +45,12 @@ where
         let progress_thread = progress.clone();
         let progress_reporter_handle = spawn(move || loop {
             sleep(progress_report_interval);
-            if let Some(progress) = *progress_thread.read().expect("lock progress to report") {
-                report_progress(progress);
-            } else {
-                break;
+            if let Ok(progress) = progress_thread.read().as_deref() {
+                if let Some(progress) = *progress {
+                    report_progress(progress);
+                } else {
+                    break;
+                }
             }
         });
         ProgressAndErrorReporter {
@@ -80,13 +82,11 @@ where
             ..
         } = self;
         macro_rules! handle_field {
-            ($field:ident $operator:tt $addend:expr) => {{
-                let expect_message = concat!("lock progress to mutate", stringify!($field));
-                let mut progress = progress.write().expect(expect_message);
-                if let Some(progress) = progress.as_mut() {
+            ($field:ident $operator:tt $addend:expr) => {
+                if let Some(progress) = progress.write().ok().as_mut().and_then(|x| x.as_mut()) {
                     progress.$field $operator $addend;
                 }
-            }};
+            };
 
             ($field:ident) => {
                 handle_field!($field += 1);
