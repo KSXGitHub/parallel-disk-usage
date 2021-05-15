@@ -60,7 +60,6 @@ impl App {
         }
 
         // TODO: move the logics within this function to somewhere within crate::reporter
-        #[allow(clippy::type_complexity)]
         fn progress_and_error_reporter<Data>(
             report_error: fn(ErrorReport),
         ) -> ProgressAndErrorReporter<Data, fn(ErrorReport)>
