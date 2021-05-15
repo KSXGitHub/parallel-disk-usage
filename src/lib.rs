@@ -1,3 +1,5 @@
+#![deny(warnings)]
+
 pub mod app;
 pub mod args;
 pub mod bytes_format;
