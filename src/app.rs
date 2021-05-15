@@ -10,7 +10,7 @@ use crate::{
     size_getters::GET_APPARENT_SIZE,
     visualizer::Direction,
 };
-use std::fmt::Write;
+use std::{fmt::Write, time::Duration};
 use structopt_utilities::StructOptUtils;
 
 #[cfg(unix)]
@@ -58,11 +58,15 @@ impl App {
 
         // TODO: move the logics within this function to somewhere within crate::reporter
         #[allow(clippy::type_complexity)]
-        fn progress_and_error_reporter<Data: Size + Into<u64>>(
+        fn progress_and_error_reporter<Data>(
             report_error: fn(ErrorReport),
-        ) -> ProgressAndErrorReporter<Data, fn(&ProgressReport<Data>), fn(ErrorReport)> {
+        ) -> ProgressAndErrorReporter<Data, fn(ErrorReport)>
+        where
+            Data: Size + Into<u64> + Send + Sync,
+            ProgressReport<Data>: Default + 'static,
+        {
             ProgressAndErrorReporter::new(
-                |report| {
+                |report: ProgressReport<Data>| {
                     let ProgressReport {
                         known_items,
                         scanned_items,
@@ -75,15 +79,16 @@ impl App {
                         "\r(known {known}, scanned {scanned}, total {total}",
                         known = known_items,
                         scanned = scanned_items,
-                        total = (*scanned_total).into(),
+                        total = scanned_total.into(),
                     )
                     .unwrap();
-                    if *errors != 0 {
+                    if errors != 0 {
                         write!(text, ", erred {}", errors).unwrap();
                     }
                     write!(text, ")").unwrap();
                     eprint!("{}", text);
                 },
+                Duration::from_millis(100),
                 report_error,
             )
         }
