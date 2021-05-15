@@ -93,8 +93,6 @@ impl App {
             )
         }
 
-        // TODO: switch from --progress back to --silent-progress (i.e. progress is reported by default)
-
         macro_rules! sub {
             (
                 $data:ty => $format:expr;
