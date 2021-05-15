@@ -4,7 +4,7 @@ use super::{ErrorReport, Event, Reporter, Size};
 #[derive(Debug)]
 pub struct ErrorOnlyReporter<ReportError: Fn(ErrorReport)> {
     /// Report encountered errors.
-    pub report_error: ReportError,
+    report_error: ReportError,
 }
 
 impl<ReportError: Fn(ErrorReport)> ErrorOnlyReporter<ReportError> {

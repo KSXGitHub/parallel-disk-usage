@@ -53,7 +53,7 @@ impl App {
         fn error_only_reporter<Data: Size>(
             report_error: fn(ErrorReport),
         ) -> ErrorOnlyReporter<fn(ErrorReport)> {
-            ErrorOnlyReporter { report_error }
+            ErrorOnlyReporter::new(report_error)
         }
 
         // TODO: move the logics within this function to somewhere within crate::reporter
@@ -61,9 +61,8 @@ impl App {
         fn progress_and_error_reporter<Data: Size + Into<u64>>(
             report_error: fn(ErrorReport),
         ) -> ProgressAndErrorReporter<Data, fn(&ProgressReport<Data>), fn(ErrorReport)> {
-            ProgressAndErrorReporter {
-                progress: Default::default(),
-                report_progress: |report| {
+            ProgressAndErrorReporter::new(
+                |report| {
                     let ProgressReport {
                         known_items,
                         scanned_items,
@@ -86,7 +85,7 @@ impl App {
                     eprint!("{}", text);
                 },
                 report_error,
-            }
+            )
         }
 
         // TODO: re-implement progress reporting as time-based

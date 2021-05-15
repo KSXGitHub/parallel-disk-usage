@@ -13,11 +13,11 @@ where
     ReportError: Fn(ErrorReport) + Sync,
 {
     /// Progress information.
-    pub progress: Arc<RwLock<ProgressReport<Data>>>,
+    progress: Arc<RwLock<ProgressReport<Data>>>,
     /// Report progress information.
-    pub report_progress: ReportProgress,
+    report_progress: ReportProgress,
     /// Report encountered error.
-    pub report_error: ReportError,
+    report_error: ReportError,
 }
 
 impl<Data, ReportProgress, ReportError> ProgressAndErrorReporter<Data, ReportProgress, ReportError>
