@@ -1,6 +1,8 @@
-use super::size::{Blocks, Bytes};
+use super::size::Bytes;
 use std::fs::Metadata;
 
+#[cfg(unix)]
+use super::size::Blocks;
 #[cfg(unix)]
 use std::os::unix::prelude::MetadataExt;
 

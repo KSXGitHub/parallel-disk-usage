@@ -6,7 +6,7 @@ use crate::{
     args::{Args, Quantity},
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
-    size::{Blocks, Bytes, Size},
+    size::{Bytes, Size},
     size_getters::GET_APPARENT_SIZE,
     visualizer::Direction,
 };
@@ -14,7 +14,10 @@ use std::{fmt::Write, time::Duration};
 use structopt_utilities::StructOptUtils;
 
 #[cfg(unix)]
-use crate::size_getters::{GET_BLOCK_COUNT, GET_BLOCK_SIZE};
+use crate::{
+    size::Blocks,
+    size_getters::{GET_BLOCK_COUNT, GET_BLOCK_SIZE},
+};
 
 /// The main application.
 pub struct App {
