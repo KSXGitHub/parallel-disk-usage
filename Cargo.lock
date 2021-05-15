@@ -20,9 +20,9 @@ dependencies = [
 
 [[package]]
 name = "assert-cmp"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b5bf47999cb2d47405f3b3b194c7cc4dd7b5bb002fc9116bf3b5284e519c7f0"
+checksum = "e265fd63d6fdda6433b6c7d4614b47a281cc152c2987bbfe0f8b4538c4ee3b9e"
 
 [[package]]
 name = "atty"
