@@ -144,8 +144,8 @@ where
                 node_info,
                 ancestors,
                 preceding_sibling,
-                percentage,
                 size,
+                percentage,
             });
 
             ActResult { node_info }

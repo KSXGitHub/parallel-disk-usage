@@ -96,8 +96,8 @@ where
                 excluded_row_indices.insert(initial_row.row_index);
             }
             TreeRow {
-                tree_horizontal_slice,
                 initial_row,
+                tree_horizontal_slice,
             }
         })
         .collect();
