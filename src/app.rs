@@ -207,12 +207,6 @@ impl App {
             true => no_sort;
         }
 
-        // TODO: fill the rest
-        // TODO: customize progress reporting (reporter)
-        // TODO: customize error reporting (reporter)
-        // TODO: customize sorting (post_process_children)
-        // TODO: hide items whose size are too small in comparison to total
-        // TODO: convert all panics to Err
         dbg!(self.args);
         panic!("Invalid combination of arguments")
     }
