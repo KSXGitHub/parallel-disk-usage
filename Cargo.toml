@@ -1,16 +1,16 @@
 [package]
-name = "dirt"
+name = "parallel-disk-usage"
 version = "0.0.0"
 description = "Summarize disk usage of the set of files, recursively for directories"
 authors = ["khai96_ <hvksmr1996@gmail.com>"]
 edition = "2018"
 
 [lib]
-name = "dirt"
+name = "parallel_disk_usage"
 path = "src/lib.rs"
 
 [[bin]]
-name = "dirt"
+name = "pdu"
 path = "src/main.rs"
 
 [dependencies]

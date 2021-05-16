@@ -1,4 +1,4 @@
-use dirt::args::fraction::{ConversionError::*, Fraction, FromStrError::*};
+use parallel_disk_usage::args::fraction::{ConversionError::*, Fraction, FromStrError::*};
 use pretty_assertions::assert_eq;
 
 #[test]

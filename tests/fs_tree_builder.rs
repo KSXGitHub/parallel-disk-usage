@@ -1,10 +1,10 @@
 pub mod _utils;
 pub use _utils::*;
 
-use dirt::size::Bytes;
+use parallel_disk_usage::size::Bytes;
 
 #[cfg(unix)]
-use dirt::size::Blocks;
+use parallel_disk_usage::size::Blocks;
 #[cfg(unix)]
 use std::os::unix::fs::MetadataExt;
 

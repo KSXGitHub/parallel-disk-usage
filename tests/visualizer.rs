@@ -1,4 +1,4 @@
-use dirt::{
+use parallel_disk_usage::{
     bytes_format::BytesFormat::*,
     data_tree::DataTree,
     size::{Blocks, Bytes, Size},

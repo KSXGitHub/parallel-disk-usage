@@ -229,30 +229,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0e25ea47919b1560c4e3b7fe0aaab9becf5b84a10325ddf7db0f0ba5e1026499"
 
 [[package]]
-name = "dirt"
-version = "0.0.0"
-dependencies = [
- "assert-cmp",
- "build-fs-tree",
- "derive_more",
- "fmt-iter",
- "itertools",
- "maplit",
- "pipe-trait 0.3.2",
- "pretty_assertions",
- "rand",
- "rayon",
- "rounded-div",
- "smart-default",
- "structopt",
- "structopt-utilities",
- "strum",
- "terminal_size",
- "text-block-macros",
- "zero-copy-pads",
-]
-
-[[package]]
 name = "dtoa"
 version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -374,6 +350,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "53cdc5b785b7a58c5aad8216b3dfa114df64b0b06ae6e1501cef91df2fbdf8f9"
 dependencies = [
  "winapi",
+]
+
+[[package]]
+name = "parallel-disk-usage"
+version = "0.0.0"
+dependencies = [
+ "assert-cmp",
+ "build-fs-tree",
+ "derive_more",
+ "fmt-iter",
+ "itertools",
+ "maplit",
+ "pipe-trait 0.3.2",
+ "pretty_assertions",
+ "rand",
+ "rayon",
+ "rounded-div",
+ "smart-default",
+ "structopt",
+ "structopt-utilities",
+ "strum",
+ "terminal_size",
+ "text-block-macros",
+ "zero-copy-pads",
 ]
 
 [[package]]

@@ -1,3 +1,3 @@
 fn main() {
-    dirt::main()
+    parallel_disk_usage::main()
 }

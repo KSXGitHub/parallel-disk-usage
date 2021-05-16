@@ -1,4 +1,4 @@
-use dirt::bytes_format::BytesFormat;
+use parallel_disk_usage::bytes_format::BytesFormat;
 use pretty_assertions::assert_eq;
 
 macro_rules! test_case {

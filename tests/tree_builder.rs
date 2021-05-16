@@ -1,6 +1,6 @@
 use build_fs_tree::{dir, file, FileSystemTree};
 use derive_more::From;
-use dirt::{
+use parallel_disk_usage::{
     data_tree::{DataTree, DataTreeReflection},
     size::Bytes,
     tree_builder::{Info, TreeBuilder},
