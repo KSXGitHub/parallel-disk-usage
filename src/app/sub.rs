@@ -3,7 +3,7 @@ use crate::{
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     os_string_display::OsStringDisplay,
-    reporter::Reporter,
+    reporter::ParallelReporter,
     runtime_error::RuntimeError,
     size::Size,
     visualizer::{ColumnWidthDistribution, Direction, Visualizer},
@@ -14,7 +14,7 @@ use std::{fs::Metadata, iter::once, num::NonZeroUsize, path::PathBuf};
 pub struct Sub<Data, GetData, Report, PostProcessChildren>
 where
     Data: Size + Into<u64> + Send + Sync,
-    Report: Reporter<Data> + Copy + Sync,
+    Report: ParallelReporter<Data> + Sync,
     GetData: Fn(&Metadata) -> Data + Copy + Sync,
     PostProcessChildren: Fn(&mut Vec<DataTree<OsStringDisplay, Data>>) + Copy + Send + Sync,
 {
@@ -41,7 +41,7 @@ where
 impl<Data, GetData, Report, PostProcessChildren> Sub<Data, GetData, Report, PostProcessChildren>
 where
     Data: Size + Into<u64> + Send + Sync,
-    Report: Reporter<Data> + Copy + Sync,
+    Report: ParallelReporter<Data> + Sync,
     GetData: Fn(&Metadata) -> Data + Copy + Sync,
     PostProcessChildren: Fn(&mut Vec<DataTree<OsStringDisplay, Data>>) + Copy + Send + Sync,
 {
@@ -63,9 +63,9 @@ where
             .into_iter()
             .map(|root| -> DataTree<OsStringDisplay, Data> {
                 FsTreeBuilder {
+                    reporter: &reporter,
                     root,
                     get_data,
-                    reporter,
                     post_process_children,
                 }
                 .into()
@@ -76,6 +76,7 @@ where
         } else {
             return Sub {
                 files: vec![".".into()],
+                reporter,
                 ..self
             }
             .run();
@@ -92,6 +93,10 @@ where
                 children,
             )
         };
+
+        if reporter.destroy().is_err() {
+            eprintln!("[warning] Failed to destroy the thread that reports progress");
+        }
 
         let minimal_ratio: f32 = minimal_ratio.into();
         let data_tree = {

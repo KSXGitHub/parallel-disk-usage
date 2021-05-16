@@ -18,6 +18,14 @@ pub trait Reporter<Data: Size> {
     fn report(&self, event: Event<Data>);
 }
 
+/// Utilize threads to report progress.
+pub trait ParallelReporter<Data: Size>: Reporter<Data> {
+    /// Error type of the [`destroy`](Self::destroy) method.
+    type DestructionError;
+    /// Stop all threads.
+    fn destroy(self) -> Result<(), Self::DestructionError>;
+}
+
 impl<Data, Target> Reporter<Data> for &Target
 where
     Data: Size,

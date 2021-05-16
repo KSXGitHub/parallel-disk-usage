@@ -1,4 +1,4 @@
-use super::{ErrorReport, Event, Reporter, Size};
+use super::{ErrorReport, Event, ParallelReporter, Reporter, Size};
 
 /// Only report errors.
 #[derive(Debug)]
@@ -24,5 +24,16 @@ where
         if let Event::EncounterError(error_report) = event {
             report_error(error_report);
         }
+    }
+}
+
+impl<Data, ReportError> ParallelReporter<Data> for ErrorOnlyReporter<ReportError>
+where
+    Data: Size,
+    ReportError: Fn(ErrorReport),
+{
+    type DestructionError = (); // TODO: change this to `!` once it is stable.
+    fn destroy(self) -> Result<(), Self::DestructionError> {
+        Ok(())
     }
 }

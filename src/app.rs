@@ -97,7 +97,7 @@ impl App {
                             children
                                 .sort_by(|left, right| left.data().cmp(&right.data()).reverse());
                         },
-                        reporter: &$create_reporter::<$data>(report_error),
+                        reporter: $create_reporter::<$data>(report_error),
                         bytes_format: $format(bytes_format),
                         files,
                         column_width_distribution,

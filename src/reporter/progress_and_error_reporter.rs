@@ -1,6 +1,7 @@
-use super::{ErrorReport, Event, ProgressReport, Reporter, Size};
+use super::{ErrorReport, Event, ParallelReporter, ProgressReport, Reporter, Size};
 use pipe_trait::Pipe;
 use std::{
+    any::Any,
     sync::{Arc, RwLock},
     thread::{sleep, spawn, JoinHandle},
     time::Duration,
@@ -105,12 +106,14 @@ where
     }
 }
 
-impl<Data, ReportError> Drop for ProgressAndErrorReporter<Data, ReportError>
+impl<Data, ReportError> ParallelReporter<Data> for ProgressAndErrorReporter<Data, ReportError>
 where
     Data: Size + Send + Sync,
     ReportError: Fn(ErrorReport) + Sync,
 {
-    fn drop(&mut self) {
+    type DestructionError = Box<dyn Any + Send + 'static>;
+    fn destroy(self) -> Result<(), Self::DestructionError> {
         self.stop_progress_reporter();
+        self.progress_reporter_handle.join()
     }
 }
