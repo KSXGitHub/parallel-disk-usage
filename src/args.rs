@@ -58,6 +58,10 @@ pub struct Args {
     #[structopt(long, default_value = "0.01")]
     pub minimal_ratio: Fraction,
 
+    /// Preserve order of entries.
+    #[structopt(long)]
+    pub no_sort: bool,
+
     /// Prevent filesystem error messages from appearing in stderr.
     #[structopt(long)]
     pub silent_errors: bool,
