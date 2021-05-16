@@ -8,32 +8,32 @@ pub static GLOBAL_STATUS_BOARD: StatusBoard = StatusBoard::new();
 /// Control all status indicators in stderr.
 #[derive(Debug)]
 pub struct StatusBoard {
-    line_len: AtomicUsize,
+    line_width: AtomicUsize,
 }
 
 impl StatusBoard {
     /// Create a new [`StatusBoard`].
     const fn new() -> Self {
         StatusBoard {
-            line_len: AtomicUsize::new(0),
+            line_width: AtomicUsize::new(0),
         }
     }
 
-    /// Get the length of the current line.
-    fn get_line_len(&self) -> usize {
-        self.line_len.load(Ordering::Relaxed)
+    /// Get the number of characters of the current line.
+    fn get_line_width(&self) -> usize {
+        self.line_width.load(Ordering::Relaxed)
     }
 
-    /// Set the length of the current line.
-    fn set_line_len(&self, value: usize) {
-        self.line_len.store(value, Ordering::Relaxed);
+    /// Set the number of characters of the current line.
+    fn set_line_width(&self, value: usize) {
+        self.line_width.store(value, Ordering::Relaxed);
     }
 
     /// Clear the line that the cursor is pointing to.
-    pub fn clear_line(&self, new_line_len: usize) {
-        let empty_line = repeat(' ', self.get_line_len());
+    pub fn clear_line(&self, new_line_width: usize) {
+        let empty_line = repeat(' ', self.get_line_width());
         eprint!("\r{}\r", empty_line);
-        self.set_line_len(new_line_len);
+        self.set_line_width(new_line_width);
     }
 
     /// Show a temporary message.
