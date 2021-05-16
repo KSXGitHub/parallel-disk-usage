@@ -16,7 +16,7 @@ pub mod visualizer;
 /// The main program.
 pub fn main() {
     if let Err(error) = app::App::from_env().run() {
-        eprintln!("error: {}", error);
+        eprintln!("[error] {}", error);
     }
 }
 
