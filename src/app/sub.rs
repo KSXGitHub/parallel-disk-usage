@@ -36,6 +36,8 @@ where
     pub post_process_children: PostProcessChildren,
     /// Minimal size proportion required to appear.
     pub minimal_ratio: Fraction,
+    /// Preserve order of entries.
+    pub no_sort: bool,
 }
 
 impl<Data, GetData, Report, PostProcessChildren> Sub<Data, GetData, Report, PostProcessChildren>
@@ -57,6 +59,7 @@ where
             reporter,
             post_process_children,
             minimal_ratio,
+            no_sort,
         } = self;
 
         let mut iter = files
@@ -103,6 +106,9 @@ where
             let mut data_tree = data_tree;
             if minimal_ratio > 0.0 {
                 data_tree.par_cull_insignificant_data(minimal_ratio);
+            }
+            if !no_sort {
+                data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
             }
             data_tree
         };
