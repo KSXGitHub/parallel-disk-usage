@@ -1,5 +1,6 @@
 use fmt_iter::repeat;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use zero_copy_pads::Width;
 
 /// Control all status indicators in stderr.
 pub static GLOBAL_STATUS_BOARD: StatusBoard = StatusBoard::new();
@@ -37,7 +38,7 @@ impl StatusBoard {
 
     /// Show a temporary message.
     pub fn temporary_message(&self, message: &str) {
-        self.clear_line(message.len());
+        self.clear_line(message.width());
         eprint!("{}", message);
     }
 
