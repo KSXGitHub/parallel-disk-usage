@@ -23,7 +23,31 @@ use text_block_macros::text_block;
         ""
         "Copyright: Apache-2.0 © 2021 Hoàng Văn Khải <https://ksxgithub.github.io/>"
         "Donation: https://patreon.com/khai96_"
-    }
+    },
+
+    after_help = text_block! {
+        "EXAMPLES:"
+        "    Show disk usage chart of current working directory"
+        "    $ gdu"
+        ""
+        "    Show disk usage chart of a single file or directory"
+        "    $ gdu path/to/file/or/directory"
+        ""
+        "    Compare disk usages of multiple files and/or directories"
+        "    $ gdu file.txt dir/"
+        ""
+        "    Show chart in block sizes instead of apparent sizes"
+        "    $ gdu --quantity=blksize"
+        ""
+        "    Show data in plain numbers instead of metric units"
+        "    $ gdu --bytes-format=plain"
+        ""
+        "    Show disk usage chart of all entries regardless of size"
+        "    $ gdu --minimal-ratio=0"
+        ""
+        "    Only show disk usage chart of entries whose size is at least 5% of total"
+        "    $ gdu --minimal-ratio=0.05"
+    },
 )]
 pub struct Args {
     /// List of files and/or directories.

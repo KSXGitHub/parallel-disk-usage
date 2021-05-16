@@ -10,9 +10,9 @@ pub mod reporter;
 pub mod runtime_error;
 pub mod size;
 pub mod size_getters;
+pub mod status_board;
 pub mod tree_builder;
 pub mod visualizer;
-pub mod status_board;
 
 /// The main program.
 pub fn main() {
