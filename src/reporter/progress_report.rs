@@ -1,4 +1,4 @@
-use crate::size::Size;
+use crate::{size::Size, status_board::GLOBAL_STATUS_BOARD};
 use std::fmt::Write;
 
 /// Scan progress.
@@ -32,6 +32,6 @@ impl<Data: Size + Into<u64>> ProgressReport<Data> {
             write!(text, ", erred {}", errors).unwrap();
         }
         write!(text, ")").unwrap();
-        eprint!("{}", text);
+        GLOBAL_STATUS_BOARD.temporary_message(&text);
     };
 }

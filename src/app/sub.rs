@@ -6,6 +6,7 @@ use crate::{
     reporter::ParallelReporter,
     runtime_error::RuntimeError,
     size::Size,
+    status_board::GLOBAL_STATUS_BOARD,
     visualizer::{ColumnWidthDistribution, Direction, Visualizer},
 };
 use std::{fs::Metadata, iter::once, num::NonZeroUsize, path::PathBuf};
@@ -121,7 +122,7 @@ where
             max_depth,
         };
 
-        eprint!("\r"); // erase progress report.
+        GLOBAL_STATUS_BOARD.clear_line(0);
         print!("{}", visualizer); // visualizer already ends with "\n", println! isn't needed here.
         Ok(())
     }

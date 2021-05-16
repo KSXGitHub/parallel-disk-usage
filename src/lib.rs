@@ -12,6 +12,7 @@ pub mod size;
 pub mod size_getters;
 pub mod tree_builder;
 pub mod visualizer;
+pub mod status_board;
 
 /// The main program.
 pub fn main() {

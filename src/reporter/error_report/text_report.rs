@@ -1,9 +1,13 @@
 use super::ErrorReport;
+use crate::status_board::GLOBAL_STATUS_BOARD;
 use std::fmt::{Display, Error, Formatter};
 
 impl<'a> ErrorReport<'a> {
     /// Prints error message in form of a line of text to stderr.
-    pub const TEXT: fn(ErrorReport) = |report| eprint!("{}", TextReport(report));
+    pub const TEXT: fn(ErrorReport) = |report| {
+        let message = TextReport(report).to_string();
+        GLOBAL_STATUS_BOARD.permanent_message(&message);
+    };
 }
 
 /// Wrapper around [`ErrorReport`] that `impl`s [`Display`]
@@ -12,9 +16,9 @@ struct TextReport<'a>(ErrorReport<'a>);
 
 impl<'a> Display for TextReport<'a> {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> Result<(), Error> {
-        writeln!(
+        write!(
             formatter,
-            "\r[error] {operation} {path:?}: {error}",
+            "[error] {operation} {path:?}: {error}",
             operation = self.0.operation.name(),
             path = self.0.path,
             error = self.0.error,
@@ -38,7 +42,6 @@ fn test() {
         ),
     };
     let actual = TextReport(report).to_string();
-    let expected =
-        "\r[error] read_dir \"path/to/a/directory\": Something goes wrong (os error 420)\n";
+    let expected = "[error] read_dir \"path/to/a/directory\": Something goes wrong (os error 420)";
     assert_eq!(actual, expected);
 }
