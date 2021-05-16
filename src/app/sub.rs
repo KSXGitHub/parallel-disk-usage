@@ -116,7 +116,7 @@ where
         };
 
         eprint!("\r"); // erase progress report.
-        println!("{}", visualizer);
+        print!("{}", visualizer); // visualizer already ends with "\n", println! isn't needed here.
         Ok(())
     }
 }
