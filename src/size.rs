@@ -84,7 +84,7 @@ macro_rules! newtype {
 }
 
 newtype!(
-    #[doc = "Number of bytes."]
+    /// Number of bytes.
     Bytes = u64;
     display: (BytesFormat) -> bytes_format::Output = |bytes, format| {
         format.format(bytes.into())
@@ -92,7 +92,7 @@ newtype!(
 );
 
 newtype!(
-    #[doc = "Number of blocks."]
+    /// Number of blocks.
     Blocks = u64;
     display: (()) -> u64 = |blocks, ()| blocks.inner();
 );

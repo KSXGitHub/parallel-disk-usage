@@ -61,11 +61,11 @@ macro_rules! variant {
 }
 
 variant! {
-    #[doc = "Format a quantity of bytes in [metric system](scale_base::METRIC)."]
+    /// Format a quantity of bytes in [metric system](scale_base::METRIC).
     METRIC
 }
 
 variant! {
-    #[doc = "Format a quantity of bytes in [binary system](scale_base::BINARY)."]
+    /// Format a quantity of bytes in [binary system](scale_base::BINARY).
     BINARY
 }

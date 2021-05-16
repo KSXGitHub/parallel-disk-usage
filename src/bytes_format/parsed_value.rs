@@ -21,19 +21,19 @@ macro_rules! parsed_value_getter {
 
 impl ParsedValue {
     parsed_value_getter!(
-        #[doc = "The visible part of the number."]
+        /// The visible part of the number.
         coefficient: u64
     );
     parsed_value_getter!(
-        #[doc = "The unit that follows `coefficient`."]
+        /// The unit that follows `coefficient`.
         unit: char
     );
     parsed_value_getter!(
-        #[doc = "The divisor that was used upon the original number to get `coefficient`."]
+        /// The divisor that was used upon the original number to get `coefficient`.
         scale: u64
     );
     parsed_value_getter!(
-        #[doc = "The exponent that was used upon base scale to get `scale`."]
+        /// The exponent that was used upon base scale to get `scale`.
         exponent: usize
     );
 }
