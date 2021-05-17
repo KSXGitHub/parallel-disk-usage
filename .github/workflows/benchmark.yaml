@@ -61,8 +61,8 @@ jobs:
           BENCHMARK_MEASUREMENT_COUNT: '1'
           BENCHMARK_EXECUTION_COUNT: '1'
         run: |
-          ./benchmark.sh pdu /usr
-          ./benchmark.sh dust /usr
+          ./benchmark.sh pdu --total-width 150 /usr
+          ./benchmark.sh dust -w 150 /usr
           ./benchmark.sh dutree /usr
           ./benchmark.sh du /usr
 
@@ -71,8 +71,8 @@ jobs:
           BENCHMARK_MEASUREMENT_COUNT: '3'
           BENCHMARK_EXECUTION_COUNT: '5'
         run: |
-          ./benchmark.sh pdu /usr
-          ./benchmark.sh dust --apparent-size /usr
+          ./benchmark.sh pdu --total-width 150 /usr
+          ./benchmark.sh dust -w 150 --apparent-size /usr
           ./benchmark.sh dutree /usr
           ./benchmark.sh du --apparent-size /usr
 
@@ -81,8 +81,8 @@ jobs:
           BENCHMARK_MEASUREMENT_COUNT: '3'
           BENCHMARK_EXECUTION_COUNT: '5'
         run: |
-          ./benchmark.sh pdu --quantity=blksize /usr
-          ./benchmark.sh dust /usr
+          ./benchmark.sh pdu --total-width 150 --quantity=blksize /usr
+          ./benchmark.sh dust -w 150 /usr
           ./benchmark.sh dutree --usage /usr
           ./benchmark.sh du /usr
 
@@ -91,8 +91,8 @@ jobs:
           BENCHMARK_MEASUREMENT_COUNT: '3'
           BENCHMARK_EXECUTION_COUNT: '5'
         run: |
-          ./benchmark.sh pdu --top-down /usr
-          ./benchmark.sh dust --apparent-size --reverse /usr
+          ./benchmark.sh pdu --total-width 150 --top-down /usr
+          ./benchmark.sh dust -w 150 --apparent-size --reverse /usr
           ./benchmark.sh dutree /usr
 
       - name: 'Benchmark: summary, 3 measurement, 5 execution'
@@ -100,6 +100,6 @@ jobs:
           BENCHMARK_MEASUREMENT_COUNT: '3'
           BENCHMARK_EXECUTION_COUNT: '5'
         run: |
-          ./benchmark.sh pdu --max-depth 1 /usr
+          ./benchmark.sh pdu --total-width 150 --max-depth 1 /usr
           ./benchmark.sh dutree --summary /usr
           ./benchmark.sh du --apparent-size --total /usr
