@@ -65,9 +65,6 @@ jobs:
           wait || true
 
       - name: 'Benchmark: basic'
-        env:
-          BENCHMARK_MEASUREMENT_COUNT: '1'
-          BENCHMARK_EXECUTION_COUNT: '1'
         run: |
           ./benchmark.sh pdu --total-width 150 /usr
           ./benchmark.sh dust -w 150 --apparent-size /usr
@@ -75,9 +72,6 @@ jobs:
           ./benchmark.sh sh -c 'du --apparent-size /usr; true'
 
       - name: 'Benchmark: blksize'
-        env:
-          BENCHMARK_MEASUREMENT_COUNT: '1'
-          BENCHMARK_EXECUTION_COUNT: '1'
         run: |
           ./benchmark.sh pdu --total-width 150 --quantity=blksize /usr
           ./benchmark.sh dust -w 150 /usr
@@ -85,18 +79,12 @@ jobs:
           ./benchmark.sh sh -c 'du /usr; true'
 
       - name: 'Benchmark: top-down'
-        env:
-          BENCHMARK_MEASUREMENT_COUNT: '1'
-          BENCHMARK_EXECUTION_COUNT: '1'
         run: |
           ./benchmark.sh pdu --total-width 150 --top-down /usr
           ./benchmark.sh dust -w 150 --apparent-size --reverse /usr
           ./benchmark.sh dutree /usr
 
       - name: 'Benchmark: summary'
-        env:
-          BENCHMARK_MEASUREMENT_COUNT: '1'
-          BENCHMARK_EXECUTION_COUNT: '1'
         run: |
           ./benchmark.sh pdu --total-width 150 --max-depth 1 /usr
           ./benchmark.sh dutree --summary /usr
