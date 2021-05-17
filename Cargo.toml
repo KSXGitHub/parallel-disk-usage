@@ -11,11 +11,11 @@ path = "src/lib.rs"
 
 [[bin]]
 name = "pdu"
-path = "src/main.rs"
+path = "cli/main.rs"
 
 [[bin]]
 name = "pdu-completions"
-path = "src/completions.rs"
+path = "cli/completions.rs"
 
 [dependencies]
 pipe-trait = "^0.3.2"
