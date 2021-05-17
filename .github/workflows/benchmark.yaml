@@ -53,7 +53,7 @@ jobs:
           mkdir -p DUTREE.tmp
           curl -L "${REPO}/releases/download/v${VERSION}/dutree" > DUTREE.tmp/dutree
           chmod +x DUTREE.tmp/dutree
-          echo "$(pwd)/DUTREE" >> "$GITHUB_PATH"
+          echo "$(pwd)/DUTREE.tmp" >> "$GITHUB_PATH"
 
       - name: Inspect command locations
         run: |
