@@ -55,18 +55,82 @@ jobs:
           chmod +x DUTREE.tmp/dutree
           echo "$(pwd)/DUTREE.tmp" >> "$GITHUB_PATH"
 
+      - name: Install hyperfine
+        env:
+          REPO: https://github.com/sharkdp/hyperfine
+          VERSION: '1.11.0'
+        run: |
+          mkdir -p HYPERFINE.tmp
+          archive_name="hyperfine-v${VERSION}-x86_64-unknown-linux-gnu"
+          curl -L "${REPO}/releases/download/v${VERSION}/${archive_name}.tar.gz" > tmp.hyperfine.tar.gz
+          tar xf tmp.hyperfine.tar.gz --directory=HYPERFINE.tmp
+          chmod +x HYPERFINE.tmp/hyperfine
+          echo "$(pwd)/HYPERFINE.tmp" >> "$GITHUB_PATH"
+
       - name: Inspect command locations
         run: |
           which pdu
           which dust
           which dutree
           which du
+          which hyperfine
 
       - name: Inspect versions of the other tools
         run: |
           dust --version
           dutree --version
           du --version
+          hyperfine --version
+
+      - name: Prepare for hyperfine benchmark
+        run: |
+          mkdir -p tmp.sample
+          curl -L https://github.com/torvalds/linux/archive/refs/tags/v5.12.zip > tmp.sample.zip
+          unzip tmp.sample.zip -d tmp.sample
+
+      - name: 'Hyperfine Benchmark: details'
+        run: |
+          commands=(
+            'pdu --total-width 150 tmp.sample'
+            'dust -w 150 --apparent-size tmp.sample'
+            'dutree tmp.sample'
+            'du tmp.sample'
+          )
+          hyperfine --warmup 3 "${commands[@]}"
+
+      - name: 'Hyperfine Benchmark: summary'
+        run: |
+          commands=(
+            'pdu --total-width 150 --max-depth 1 tmp.sample'
+            'dutree --summary tmp.sample'
+            'du --apparent-size --total tmp.sample'
+          )
+          hyperfine --warmup 3 "${commands[@]}"
+
+      - name: 'Hyperfine Benchmark: extreme details'
+        run: |
+          commands=(
+            'pdu --total-width 150 --minimal-ratio 0 tmp.sample'
+            'dutree tmp.sample'
+            'du --apparent-size tmp.sample'
+          )
+          hyperfine --warmup 3 "${commands[@]}"
+
+      - name: 'Hyperfine Benchmark: no sort'
+        run: |
+          commands=(
+            'pdu --total-width 150 --no-sort tmp.sample'
+            'du --apparent-size tmp.sample'
+          )
+          hyperfine --warmup 3 "${commands[@]}"
+
+      - name: 'Hyperfine Benchmark: no sort, summary'
+        run: |
+          commands=(
+            'pdu --total-width 150 --no-sort --max-depth 1 tmp.sample'
+            'du --apparent-size --total tmp.sample'
+          )
+          hyperfine --warmup 3 "${commands[@]}"
 
       - name: Warm up (CPU cache)
         continue-on-error: true
