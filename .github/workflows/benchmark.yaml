@@ -64,7 +64,7 @@ jobs:
           sh -c 'du /usr; true' >/dev/null 2>/dev/null &
           wait || true
 
-      - name: 'Benchmark: basic'
+      - name: 'Benchmark: len'
         run: |
           ./benchmark.sh pdu --total-width 150 /usr
           ./benchmark.sh dust -w 150 --apparent-size /usr
