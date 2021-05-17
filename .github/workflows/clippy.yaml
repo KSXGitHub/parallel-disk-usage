@@ -1,12 +1,12 @@
-name: Test
+name: Clippy
 
 on:
   - push
   - pull_request
 
 jobs:
-  test:
-    name: Test
+  clippy_check:
+    name: Clippy
 
     runs-on: ${{ matrix.os }}
 
@@ -15,7 +15,6 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - windows-latest
           - macos-latest
         profile:
           - name: Debug
@@ -41,14 +40,16 @@ jobs:
             ${{ github.job }}-${{ runner.os }}-${{ matrix.profile.name }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
             ${{ github.job }}-${{ runner.os }}-${{ matrix.profile.name }}-${{ hashFiles('rust-toolchain') }}-
 
-      - uses: actions-rs/toolchain@v1
+      - uses: actions-rs/toolchain@v1.0.7
         with:
           profile: minimal
+          components: clippy
           override: 'true'
           default: 'true'
 
-      - name: Build
-        run: cargo build --locked ${{ matrix.profile.flag }}
-
-      - name: Test
-        run: cargo test --no-fail-fast ${{ matrix.profile.flag }}
+      - name: Use clippy to lint code
+        uses: actions-rs/clippy-check@v1
+        with:
+          name: Clippy Report (${{ hashFiles('rust-toolchain') }}, ${{ matrix.os }})
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features --all-targets ${{ matrix.profile.flag }} -- -D warnings

@@ -1,0 +1,112 @@
+name: Benchmark
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  competing_benchmark:
+    name: Compare benchmark with similar tools
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache
+        uses: actions/cache@v2.1.5
+        timeout-minutes: 1
+        continue-on-error: true
+        if: matrix.os != 'macos-latest' # Cache causes errors on macOS
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+            ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-
+
+      - name: Build pdu
+        run: |
+          cargo build --release
+          echo "$(pwd)/target/release" >> "$GITHUB_PATH"
+
+      - name: Install dust
+        env:
+          REPO: https://github.com/bootandy/dust
+          VERSION: '0.5.4'
+        run: |
+          mkdir -p DUST.tmp
+          archive_name="dust-v${VERSION}-x86_64-unknown-linux-gnu"
+          curl -L "${REPO}/releases/download/v${VERSION}/${archive_name}.tar.gz" > tmp.dust.tar.gz
+          tar xf tmp.dust.tar.gz --directory=DUST.tmp
+          chmod +x "DUST.tmp/${archive_name}/dust"
+          echo "$(pwd)/DUST.tmp/${archive_name}" >> "$GITHUB_PATH"
+
+      - name: Install dutree
+        env:
+          REPO: https://github.com/nachoparker/dutree
+          VERSION: '0.2.15'
+        run: |
+          mkdir -p DUTREE.tmp
+          curl -L "${REPO}/releases/download/v${VERSION}/dutree" > DUTREE.tmp/dutree
+          chmod +x DUTREE.tmp/dutree
+          echo "$(pwd)/DUTREE.tmp" >> "$GITHUB_PATH"
+
+      - name: Inspect command locations
+        run: |
+          which pdu
+          which dust
+          which dutree
+          which du
+
+      - name: Inspect versions of the other tools
+        run: |
+          dust --version
+          dutree --version
+          du --version
+
+      - name: Warm up (CPU cache)
+        continue-on-error: true
+        run: |
+          pdu --total-width 150 /usr >/dev/null 2>/dev/null &
+          dust -w 150 /usr >/dev/null 2>/dev/null &
+          dutree /usr >/dev/null 2>/dev/null &
+          sh -c 'du /usr; true' >/dev/null 2>/dev/null &
+          wait || true
+
+      - name: 'Benchmark: len'
+        env:
+          BENCHMARK_IGNORE_FAILURE: 'true'
+        run: |
+          ./benchmark.sh pdu --total-width 150 /usr
+          ./benchmark.sh dust -w 150 --apparent-size /usr
+          ./benchmark.sh dutree /usr
+          ./benchmark.sh du --apparent-size /usr
+
+      - name: 'Benchmark: blksize'
+        env:
+          BENCHMARK_IGNORE_FAILURE: 'true'
+        run: |
+          ./benchmark.sh pdu --total-width 150 --quantity blksize /usr
+          ./benchmark.sh dust -w 150 /usr
+          ./benchmark.sh dutree --usage /usr
+          ./benchmark.sh du /usr
+
+      - name: 'Benchmark: top-down'
+        env:
+          BENCHMARK_IGNORE_FAILURE: 'true'
+        run: |
+          ./benchmark.sh pdu --total-width 150 --top-down /usr
+          ./benchmark.sh dust -w 150 --apparent-size --reverse /usr
+          ./benchmark.sh dutree /usr
+
+      - name: 'Benchmark: summary'
+        env:
+          BENCHMARK_IGNORE_FAILURE: 'true'
+        run: |
+          ./benchmark.sh pdu --total-width 150 --max-depth 1 /usr
+          ./benchmark.sh dutree --summary /usr
+          ./benchmark.sh du --apparent-size --total /usr

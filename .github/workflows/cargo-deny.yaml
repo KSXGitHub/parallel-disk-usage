@@ -1,0 +1,13 @@
+name: Lint dependency graph
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  cargo_deny:
+    name: Lint crate graph
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: EmbarkStudios/cargo-deny-action@v1.2.6
