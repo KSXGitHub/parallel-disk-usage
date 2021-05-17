@@ -170,6 +170,9 @@ jobs:
         run: |
           echo "$(pwd)/target/release" >> "$GITHUB_PATH"
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+
+      - name: Inspect command locations
+        run: |
           which pdu
           which dust
           which dutree
