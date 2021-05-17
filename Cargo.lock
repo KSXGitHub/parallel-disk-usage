@@ -49,9 +49,9 @@ checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
 
 [[package]]
 name = "build-fs-tree"
-version = "0.2.5"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb6679085ccbbeb09f24d2dc2a9b9fb9b7817abc58a4287caa1d63864bfc8ece"
+checksum = "d58502940f7d391bdab98940ba50e5c4f7667545f914108ef3c680a71f980b00"
 dependencies = [
  "derive_more",
  "pipe-trait 0.3.2",
