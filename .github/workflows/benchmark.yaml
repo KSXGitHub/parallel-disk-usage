@@ -45,9 +45,13 @@ jobs:
           echo "$(pwd)/DUST.tmp/${archive_name}" >> "$GITHUB_PATH"
 
       - name: Install dutree
+        env:
+          REPO: https://github.com/nachoparker/dutree
+          VERSION: '0.2.15'
         run: |
-          cargo install dutree --bin dutree
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          mkdir -p DUTREE.tmp
+          curl -L "${REPO}/releases/download/v${VERSION}/dutree" > DUTREE.tmp/dutree
+          echo "$(pwd)/DUTREE" >> "$GITHUB_PATH"
 
       - name: Inspect command locations
         run: |
