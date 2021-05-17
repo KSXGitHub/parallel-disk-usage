@@ -29,7 +29,9 @@ jobs:
             ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-
 
       - name: Build pdu
-        run: cargo build --release
+        run: |
+          cargo build --release
+          echo "$(pwd)/target/release" >> "$GITHUB_PATH"
 
       - name: Install dust
         env:
@@ -43,11 +45,8 @@ jobs:
           echo "$(pwd)/DUST.tmp/${archive_name}" >> "$GITHUB_PATH"
 
       - name: Install dutree
-        run: cargo install dutree --bin dutree
-
-      - name: Modify $PATH
         run: |
-          echo "$(pwd)/target/release" >> "$GITHUB_PATH"
+          cargo install dutree --bin dutree
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
 
       - name: Inspect command locations
