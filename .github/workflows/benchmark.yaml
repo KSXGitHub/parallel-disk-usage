@@ -32,7 +32,15 @@ jobs:
         run: cargo build --release
 
       - name: Install dust
-        run: cargo install du-dust --bin dust
+        env:
+          REPO: https://github.com/bootandy/dust
+          VERSION: '0.5.4'
+        run: |
+          mkdir -p DUST.tmp
+          archive_name="dust-v${VERSION}-x86_64-unknown-linux-gnu"
+          curl -L "${REPO}/releases/download/v${VERSION}/${archive_name}.tar.gz" > tmp.dust.tar.gz
+          tar xf tmp.dust.tar.gz --directory=DUST.tmp
+          echo "$(pwd)/DUST.tmp/${archive_name}" >> "$GITHUB_PATH"
 
       - name: Install dutree
         run: cargo install dutree --bin dutree
