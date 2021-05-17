@@ -11,13 +11,13 @@ verify_var() {
 verify_var "$BENCHMARK_EXECUTION_COUNT" BENCHMARK_EXECUTION_COUNT
 verify_var "$BENCHMARK_MEASUREMENT_COUNT" BENCHMARK_MEASUREMENT_COUNT
 
-if (("$BENCHMARK_MEASUREMENT_COUNT" != 1)); then
+if (("$BENCHMARK_MEASUREMENT_COUNT" == 1)); then
+  display_unit() { true; }
+else
   display_unit() {
     echo >&2
     echo "benchmark unit $1..." >&2
   }
-else
-  display_unit() { true; }
 fi
 
 stderr_file="$(mktemp)"
