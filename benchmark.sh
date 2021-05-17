@@ -1,9 +1,15 @@
 #! /bin/bash
 set -o errexit -o pipefail -o nounset
 
+stderr_file="$(mktemp)"
+
 unit() (
   for ((i = 0; i < "$BENCHMARK_EXECUTION_COUNT"; i++)); do
-    "$@" >/dev/null 2>/dev/null
+    "$@" >/dev/null 2>"$stderr_file" || {
+      code="$?"
+      cat "$stderr_file" >&2
+      exit "$code"
+    }
   done
 )
 
