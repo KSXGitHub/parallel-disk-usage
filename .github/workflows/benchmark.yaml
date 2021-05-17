@@ -64,49 +64,39 @@ jobs:
           sh -c 'du /usr; true' >/dev/null 2>/dev/null &
           wait || true
 
-      - name: 'Benchmark: 1 measurement, 1 execution'
+      - name: 'Benchmark: basic'
         env:
           BENCHMARK_MEASUREMENT_COUNT: '1'
           BENCHMARK_EXECUTION_COUNT: '1'
-        run: |
-          ./benchmark.sh pdu --total-width 150 /usr
-          ./benchmark.sh dust -w 150 /usr
-          ./benchmark.sh dutree /usr
-          ./benchmark.sh sh -c 'du /usr; true'
-
-      - name: 'Benchmark: 3 measurement, 5 execution'
-        env:
-          BENCHMARK_MEASUREMENT_COUNT: '3'
-          BENCHMARK_EXECUTION_COUNT: '5'
         run: |
           ./benchmark.sh pdu --total-width 150 /usr
           ./benchmark.sh dust -w 150 --apparent-size /usr
           ./benchmark.sh dutree /usr
           ./benchmark.sh sh -c 'du --apparent-size /usr; true'
 
-      - name: 'Benchmark: blksize, 3 measurement, 5 execution'
+      - name: 'Benchmark: blksize'
         env:
-          BENCHMARK_MEASUREMENT_COUNT: '3'
-          BENCHMARK_EXECUTION_COUNT: '5'
+          BENCHMARK_MEASUREMENT_COUNT: '1'
+          BENCHMARK_EXECUTION_COUNT: '1'
         run: |
           ./benchmark.sh pdu --total-width 150 --quantity=blksize /usr
           ./benchmark.sh dust -w 150 /usr
           ./benchmark.sh dutree --usage /usr
           ./benchmark.sh sh -c 'du /usr; true'
 
-      - name: 'Benchmark: top-down, 3 measurement, 5 execution'
+      - name: 'Benchmark: top-down'
         env:
-          BENCHMARK_MEASUREMENT_COUNT: '3'
-          BENCHMARK_EXECUTION_COUNT: '5'
+          BENCHMARK_MEASUREMENT_COUNT: '1'
+          BENCHMARK_EXECUTION_COUNT: '1'
         run: |
           ./benchmark.sh pdu --total-width 150 --top-down /usr
           ./benchmark.sh dust -w 150 --apparent-size --reverse /usr
           ./benchmark.sh dutree /usr
 
-      - name: 'Benchmark: summary, 3 measurement, 5 execution'
+      - name: 'Benchmark: summary'
         env:
-          BENCHMARK_MEASUREMENT_COUNT: '3'
-          BENCHMARK_EXECUTION_COUNT: '5'
+          BENCHMARK_MEASUREMENT_COUNT: '1'
+          BENCHMARK_EXECUTION_COUNT: '1'
         run: |
           ./benchmark.sh pdu --total-width 150 --max-depth 1 /usr
           ./benchmark.sh dutree --summary /usr
