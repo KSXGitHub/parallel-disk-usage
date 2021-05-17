@@ -58,11 +58,11 @@ jobs:
       - name: Warm up (CPU cache)
         continue-on-error: true
         run: |
-          pdu --total-width 150 /usr &
-          dust -w 150 /usr &
-          dutree /usr &
-          sh -c 'du /usr; true' &
-          wait
+          pdu --total-width 150 /usr >/dev/null 2>/dev/null &
+          dust -w 150 /usr >/dev/null 2>/dev/null &
+          dutree /usr >/dev/null 2>/dev/null &
+          sh -c 'du /usr; true' >/dev/null 2>/dev/null &
+          wait || true
 
       - name: 'Benchmark: 1 measurement, 1 execution'
         env:
