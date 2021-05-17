@@ -64,8 +64,8 @@ jobs:
           archive_name="hyperfine-v${VERSION}-x86_64-unknown-linux-gnu"
           curl -L "${REPO}/releases/download/v${VERSION}/${archive_name}.tar.gz" > tmp.hyperfine.tar.gz
           tar xf tmp.hyperfine.tar.gz --directory=HYPERFINE.tmp
-          chmod +x HYPERFINE.tmp/hyperfine
-          echo "$(pwd)/HYPERFINE.tmp" >> "$GITHUB_PATH"
+          chmod +x "HYPERFINE.tmp/${archive_name}/hyperfine"
+          echo "$(pwd)/HYPERFINE.tmp/${archive_name}" >> "$GITHUB_PATH"
 
       - name: Inspect command locations
         run: |
