@@ -71,7 +71,7 @@ jobs:
         env:
           BENCHMARK_IGNORE_FAILURE: 'true'
         run: |
-          ./benchmark.sh pdu --total-width 150 --quantity=blksize /usr
+          ./benchmark.sh pdu --total-width 150 --quantity blksize /usr
           ./benchmark.sh dust -w 150 /usr
           ./benchmark.sh dutree --usage /usr
           ./benchmark.sh du /usr
