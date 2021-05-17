@@ -13,12 +13,11 @@ use std::{
 
 /// Build a [`DataTree`] from a directory tree using [`From`] or [`Into`].
 #[derive(Debug)]
-pub struct FsTreeBuilder<Data, GetData, Report, PostProcessChildren>
+pub struct FsTreeBuilder<Data, GetData, Report>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
     Report: Reporter<Data> + Sync,
-    PostProcessChildren: Fn(&mut Vec<DataTree<OsStringDisplay, Data>>) + Copy + Send + Sync,
 {
     /// Root of the directory tree.
     pub root: PathBuf,
@@ -26,28 +25,23 @@ where
     pub get_data: GetData,
     /// Reports progress to external system.
     pub reporter: Report,
-    /// Processes lists of children after forming.
-    pub post_process_children: PostProcessChildren,
 }
 
-impl<Data, GetData, Report, PostProcessChildren>
-    From<FsTreeBuilder<Data, GetData, Report, PostProcessChildren>>
+impl<Data, GetData, Report> From<FsTreeBuilder<Data, GetData, Report>>
     for DataTree<OsStringDisplay, Data>
 where
     Data: Size + Send + Sync,
     GetData: Fn(&Metadata) -> Data + Sync,
     Report: Reporter<Data> + Sync,
-    PostProcessChildren: Fn(&mut Vec<DataTree<OsStringDisplay, Data>>) + Copy + Send + Sync,
 {
-    fn from(builder: FsTreeBuilder<Data, GetData, Report, PostProcessChildren>) -> Self {
+    fn from(builder: FsTreeBuilder<Data, GetData, Report>) -> Self {
         let FsTreeBuilder {
             root,
             get_data,
             reporter,
-            post_process_children,
         } = builder;
 
-        TreeBuilder::<PathBuf, OsStringDisplay, Data, _, _, PostProcessChildren> {
+        TreeBuilder::<PathBuf, OsStringDisplay, Data, _, _> {
             name: root.file_name().map_or_else(
                 || ".".pipe(OsStringDisplay::os_string_from),
                 OsStringDisplay::os_string_from,
@@ -107,8 +101,6 @@ where
             },
 
             join_path: |prefix, name| prefix.join(&name.0),
-
-            post_process_children,
         }
         .into()
     }

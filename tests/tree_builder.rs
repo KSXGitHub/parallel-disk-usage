@@ -5,6 +5,7 @@ use parallel_disk_usage::{
     size::Bytes,
     tree_builder::{Info, TreeBuilder},
 };
+use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 
 type SampleData = Bytes;
@@ -38,7 +39,7 @@ impl SampleTree {
     }
 
     fn tree(&self, root: &'static str) -> DataTree<SampleName, SampleData> {
-        DataTree::from(TreeBuilder {
+        TreeBuilder {
             path: root.to_string(),
             name: root.to_string(),
             get_info: |path| {
@@ -57,8 +58,9 @@ impl SampleTree {
                 }
             },
             join_path: |prefix, name| format!("{}{}{}", prefix, SAMPLE_SEPARATOR, name),
-            post_process_children: |_| {},
-        })
+        }
+        .pipe(DataTree::from)
+        .into_par_sorted(|left, right| left.name().cmp(right.name()))
     }
 }
 

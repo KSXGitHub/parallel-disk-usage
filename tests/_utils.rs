@@ -108,16 +108,6 @@ where
     }
 }
 
-/// Pass this function to the `post_process_children` field of [`FsTreeBuilder`]
-/// to sanitize the tree.
-pub fn post_process_children<Name, Data>(children: &mut Vec<DataTree<Name, Data>>)
-where
-    Name: Ord,
-    Data: Size,
-{
-    children.sort_by(|left, right| left.name().cmp(right.name()));
-}
-
 /// Test the result of tree builder on the sample workspace.
 pub fn test_sample_tree<Data, SizeFromMetadata>(root: &Path, size_from_metadata: SizeFromMetadata)
 where
@@ -148,9 +138,9 @@ where
                 panic!("Unexpected call to report_error: {:?}", error)
             }),
             root: root.join(suffix),
-            post_process_children,
         }
         .pipe(DataTree::<OsStringDisplay, Data>::from)
+        .into_par_sorted(|left, right| left.name().cmp(right.name()))
         .into_reflection()
     };
 

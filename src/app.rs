@@ -94,7 +94,6 @@ impl App {
                     return Sub {
                         direction: Direction::from_top_down(top_down),
                         get_data: $get_data,
-                        post_process_children: |_| {},
                         reporter: $create_reporter::<$data>(report_error),
                         bytes_format: $format(bytes_format),
                         files,

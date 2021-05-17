@@ -12,12 +12,11 @@ use crate::{
 use std::{fs::Metadata, iter::once, num::NonZeroUsize, path::PathBuf};
 
 /// The sub program of the main application.
-pub struct Sub<Data, GetData, Report, PostProcessChildren>
+pub struct Sub<Data, GetData, Report>
 where
     Data: Size + Into<u64> + Send + Sync,
     Report: ParallelReporter<Data> + Sync,
     GetData: Fn(&Metadata) -> Data + Copy + Sync,
-    PostProcessChildren: Fn(&mut Vec<DataTree<OsStringDisplay, Data>>) + Copy + Send + Sync,
 {
     /// List of files and/or directories.
     pub files: Vec<PathBuf>,
@@ -33,20 +32,17 @@ where
     pub get_data: GetData,
     /// Reports measurement progress.
     pub reporter: Report,
-    /// Processes lists of children after forming.
-    pub post_process_children: PostProcessChildren,
     /// Minimal size proportion required to appear.
     pub minimal_ratio: Fraction,
     /// Preserve order of entries.
     pub no_sort: bool,
 }
 
-impl<Data, GetData, Report, PostProcessChildren> Sub<Data, GetData, Report, PostProcessChildren>
+impl<Data, GetData, Report> Sub<Data, GetData, Report>
 where
     Data: Size + Into<u64> + Send + Sync,
     Report: ParallelReporter<Data> + Sync,
     GetData: Fn(&Metadata) -> Data + Copy + Sync,
-    PostProcessChildren: Fn(&mut Vec<DataTree<OsStringDisplay, Data>>) + Copy + Send + Sync,
 {
     /// Run the sub program.
     pub fn run(self) -> Result<(), RuntimeError> {
@@ -58,7 +54,6 @@ where
             max_depth,
             get_data,
             reporter,
-            post_process_children,
             minimal_ratio,
             no_sort,
         } = self;
@@ -70,7 +65,6 @@ where
                     reporter: &reporter,
                     root,
                     get_data,
-                    post_process_children,
                 }
                 .into()
             });
