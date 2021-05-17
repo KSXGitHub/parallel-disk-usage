@@ -1,8 +1,26 @@
 #! /bin/bash
 set -o errexit -o pipefail -o nounset
 
+ignore_failure=${BENCHMARK_IGNORE_FAILURE:-false}
 execution_count=${BENCHMARK_EXECUTION_COUNT:-1}
 measurement_count=${BENCHMARK_MEASUREMENT_COUNT:-1}
+
+case "$ignore_failure" in
+true)
+  fail() {
+    echo "warning: Process exited with status code $1" >&2
+  }
+  ;;
+false)
+  fail() {
+    exit "$1"
+  }
+  ;;
+*)
+  echo "error: BENCHMARK_IGNORE_FAILURE ($ignore_failure) is neither 'true' or 'false'" >&2
+  exit 1
+  ;;
+esac
 
 verify_var() {
   if (("$1" <= 0)); then
@@ -30,7 +48,7 @@ unit() (
     "$@" >/dev/null 2>"$stderr_file" || {
       code="$?"
       cat "$stderr_file" >&2
-      exit "$code"
+      fail "$code"
     }
   done
 )
