@@ -60,6 +60,12 @@ jobs:
           which dutree
           which du
 
+      - name: Inspect versions of the other tools
+        run: |
+          dust --version
+          dutree --version
+          du --version
+
       - name: Warm up (CPU cache)
         continue-on-error: true
         run: |
