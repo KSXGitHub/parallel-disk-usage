@@ -8,12 +8,7 @@ jobs:
   competing_benchmark:
     name: Compare benchmark with similar tools
 
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -28,10 +23,10 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
-            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-
+            ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+            ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-
 
       - name: Build pdu
         run: cargo build --release
