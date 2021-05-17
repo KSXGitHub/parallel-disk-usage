@@ -16,11 +16,6 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-        profile:
-          - name: Debug
-            flag: ''
-          - name: Release
-            flag: --release
 
     steps:
       - uses: actions/checkout@v2
@@ -35,10 +30,10 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ github.job }}-${{ runner.os }}-${{ matrix.profile.name }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ github.job }}-${{ runner.os }}-${{ matrix.profile.name }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
-            ${{ github.job }}-${{ runner.os }}-${{ matrix.profile.name }}-${{ hashFiles('rust-toolchain') }}-
+            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-
 
       - uses: actions-rs/toolchain@v1.0.7
         with:
@@ -47,9 +42,16 @@ jobs:
           override: 'true'
           default: 'true'
 
-      - name: Use clippy to lint code
+      - name: Use clippy to lint code (dev)
         uses: actions-rs/clippy-check@v1
         with:
           name: Clippy Report (${{ hashFiles('rust-toolchain') }}, ${{ matrix.os }})
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features --all-targets ${{ matrix.profile.flag }} -- -D warnings
+          args: --all-features --all-targets -- -D warnings
+
+      - name: Use clippy to lint code (release)
+        uses: actions-rs/clippy-check@v1
+        with:
+          name: Clippy Report (${{ hashFiles('rust-toolchain') }}, ${{ matrix.os }})
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features --all-targets --release -- -D warnings

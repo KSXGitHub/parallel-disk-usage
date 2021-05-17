@@ -17,11 +17,6 @@ jobs:
           - ubuntu-latest
           - windows-latest
           - macos-latest
-        profile:
-          - name: Debug
-            flag: ''
-          - name: Release
-            flag: --release
 
     steps:
       - uses: actions/checkout@v2
@@ -36,10 +31,10 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ github.job }}-${{ runner.os }}-${{ matrix.profile.name }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ github.job }}-${{ runner.os }}-${{ matrix.profile.name }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
-            ${{ github.job }}-${{ runner.os }}-${{ matrix.profile.name }}-${{ hashFiles('rust-toolchain') }}-
+            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-
 
       - uses: actions-rs/toolchain@v1
         with:
@@ -47,8 +42,14 @@ jobs:
           override: 'true'
           default: 'true'
 
-      - name: Build
-        run: cargo build --locked ${{ matrix.profile.flag }}
+      - name: Build (dev)
+        run: cargo build --locked
 
-      - name: Test
-        run: cargo test --no-fail-fast ${{ matrix.profile.flag }}
+      - name: Test (dev)
+        run: cargo test --no-fail-fast
+
+      - name: Build (release)
+        run: cargo build --locked --release
+
+      - name: Test (release)
+        run: cargo test --no-fail-fast --release
