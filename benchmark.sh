@@ -13,6 +13,7 @@ verify_var "$BENCHMARK_MEASUREMENT_COUNT" BENCHMARK_MEASUREMENT_COUNT
 
 if (("$BENCHMARK_MEASUREMENT_COUNT" != 1)); then
   display_unit() {
+    echo >&2
     echo "benchmark unit $1..." >&2
   }
 else
@@ -33,7 +34,6 @@ unit() (
 
 echo "benchmark command $*..." >&2
 for ((i = 0; i < "$BENCHMARK_MEASUREMENT_COUNT"; i++)); do
-  echo >&2
   display_unit "$i"
   (time unit "$@")
 done
