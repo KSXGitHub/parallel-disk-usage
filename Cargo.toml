@@ -13,6 +13,10 @@ path = "src/lib.rs"
 name = "pdu"
 path = "src/main.rs"
 
+[[bin]]
+name = "pdu-completions"
+path = "src/completions.rs"
+
 [dependencies]
 pipe-trait = "^0.3.2"
 structopt = "^0.3.21"
