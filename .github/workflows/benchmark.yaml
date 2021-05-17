@@ -55,6 +55,15 @@ jobs:
           which dutree
           which du
 
+      - name: Warm up (CPU cache)
+        continue-on-error: true
+        run: |
+          pdu --total-width 150 /usr &
+          dust -w 150 /usr &
+          dutree /usr &
+          sh -c 'du /usr; true' &
+          wait
+
       - name: 'Benchmark: 1 measurement, 1 execution'
         env:
           BENCHMARK_MEASUREMENT_COUNT: '1'
