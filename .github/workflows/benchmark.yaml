@@ -42,6 +42,7 @@ jobs:
           archive_name="dust-v${VERSION}-x86_64-unknown-linux-gnu"
           curl -L "${REPO}/releases/download/v${VERSION}/${archive_name}.tar.gz" > tmp.dust.tar.gz
           tar xf tmp.dust.tar.gz --directory=DUST.tmp
+          chmod +x "DUST.tmp/${archive_name}/dust"
           echo "$(pwd)/DUST.tmp/${archive_name}" >> "$GITHUB_PATH"
 
       - name: Install dutree
@@ -51,6 +52,7 @@ jobs:
         run: |
           mkdir -p DUTREE.tmp
           curl -L "${REPO}/releases/download/v${VERSION}/dutree" > DUTREE.tmp/dutree
+          chmod +x DUTREE.tmp/dutree
           echo "$(pwd)/DUTREE" >> "$GITHUB_PATH"
 
       - name: Inspect command locations
