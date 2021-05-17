@@ -59,27 +59,35 @@ jobs:
           wait || true
 
       - name: 'Benchmark: len'
+        env:
+          BENCHMARK_IGNORE_FAILURE: 'true'
         run: |
-          ./benchmark.sh sh -c 'pdu --total-width 150 /usr; true'
-          ./benchmark.sh sh -c 'dust -w 150 --apparent-size /usr; true'
-          ./benchmark.sh sh -c 'dutree /usr; true'
-          ./benchmark.sh sh -c 'du --apparent-size /usr; true'
+          ./benchmark.sh pdu --total-width 150 /usr
+          ./benchmark.sh dust -w 150 --apparent-size /usr
+          ./benchmark.sh dutree /usr
+          ./benchmark.sh du --apparent-size /usr
 
       - name: 'Benchmark: blksize'
+        env:
+          BENCHMARK_IGNORE_FAILURE: 'true'
         run: |
-          ./benchmark.sh sh -c 'pdu --total-width 150 --quantity=blksize /usr; true'
-          ./benchmark.sh sh -c 'dust -w 150 /usr; true'
-          ./benchmark.sh sh -c 'dutree --usage /usr; true'
-          ./benchmark.sh sh -c 'du /usr; true'
+          ./benchmark.sh pdu --total-width 150 --quantity=blksize /usr
+          ./benchmark.sh dust -w 150 /usr
+          ./benchmark.sh dutree --usage /usr
+          ./benchmark.sh du /usr
 
       - name: 'Benchmark: top-down'
+        env:
+          BENCHMARK_IGNORE_FAILURE: 'true'
         run: |
-          ./benchmark.sh sh -c 'pdu --total-width 150 --top-down /usr; true'
-          ./benchmark.sh sh -c 'dust -w 150 --apparent-size --reverse /usr; true'
-          ./benchmark.sh sh -c 'dutree /usr; true'
+          ./benchmark.sh pdu --total-width 150 --top-down /usr
+          ./benchmark.sh dust -w 150 --apparent-size --reverse /usr
+          ./benchmark.sh dutree /usr
 
       - name: 'Benchmark: summary'
+        env:
+          BENCHMARK_IGNORE_FAILURE: 'true'
         run: |
-          ./benchmark.sh sh -c 'pdu --total-width 150 --max-depth 1 /usr; true'
-          ./benchmark.sh sh -c 'dutree --summary /usr; true'
-          ./benchmark.sh sh -c 'du --apparent-size --total /usr; true'
+          ./benchmark.sh pdu --total-width 150 --max-depth 1 /usr
+          ./benchmark.sh dutree --summary /usr
+          ./benchmark.sh du --apparent-size --total /usr
