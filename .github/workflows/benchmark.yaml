@@ -60,45 +60,45 @@ jobs:
       - name: 'Benchmark: --quantity'
         run: |
           commands=(
-            'pdu --total-width 150 --quantity len tmp.sample'
-            'pdu --total-width 150 --quantity blksize tmp.sample'
-            'pdu --total-width 150 --quantity blocks tmp.sample'
+            'pdu --quantity len tmp.sample'
+            'pdu --quantity blksize tmp.sample'
+            'pdu --quantity blocks tmp.sample'
           )
           hyperfine --warmup 3 "${commands[@]}"
 
       - name: 'Benchmark: [--no-sort]'
         run: |
           commands=(
-            'pdu --total-width 150 tmp.sample'
-            'pdu --total-width 150 --no-sort tmp.sample'
+            'pdu tmp.sample'
+            'pdu --no-sort tmp.sample'
           )
           hyperfine --warmup 3 "${commands[@]}"
 
       - name: 'Benchmark: --minimal-ratio'
         run: |
           commands=(
-            'pdu --total-width 150 --minimal-ratio 0.1 tmp.sample'
-            'pdu --total-width 150 --minimal-ratio 0.01 tmp.sample'
-            'pdu --total-width 150 --minimal-ratio 0 tmp.sample'
+            'pdu --minimal-ratio 0.1 tmp.sample'
+            'pdu --minimal-ratio 0.01 tmp.sample'
+            'pdu --minimal-ratio 0 tmp.sample'
           )
           hyperfine --warmup 3 "${commands[@]}"
 
       - name: 'Benchmark: [--max-depth]'
         run: |
           commands=(
-            'pdu --total-width 150 tmp.sample'
-            'pdu --total-width 150 --max-depth 5 tmp.sample'
-            'pdu --total-width 150 --max-depth 1 tmp.sample'
+            'pdu tmp.sample'
+            'pdu --max-depth 5 tmp.sample'
+            'pdu --max-depth 1 tmp.sample'
           )
           hyperfine --warmup 3 "${commands[@]}"
 
       - name: 'Benchmark: [--max-depth 1] [--no-sort]'
         run: |
           commands=(
-            'pdu --total-width 150 tmp.sample'
-            'pdu --total-width 150 --max-depth 1 tmp.sample'
-            'pdu --total-width 150 --no-sort tmp.sample'
-            'pdu --total-width 150 --max-depth 1 --no-sort tmp.sample'
+            'pdu tmp.sample'
+            'pdu --max-depth 1 tmp.sample'
+            'pdu --no-sort tmp.sample'
+            'pdu --max-depth 1 --no-sort tmp.sample'
           )
           hyperfine --warmup 3 "${commands[@]}"
 
@@ -188,8 +188,8 @@ jobs:
       - name: 'Benchmark: len'
         run: |
           commands=(
-            'pdu --total-width 150 --quantity len tmp.sample'
-            'dust -w 150 --apparent-size tmp.sample'
+            'pdu --quantity len tmp.sample'
+            'dust --apparent-size tmp.sample'
             'dutree tmp.sample'
             'du --apparent-size tmp.sample'
           )
@@ -198,8 +198,8 @@ jobs:
       - name: 'Benchmark: blksize'
         run: |
           commands=(
-            'pdu --total-width 150 --quantity blksize tmp.sample'
-            'dust -w 150 tmp.sample'
+            'pdu --quantity blksize tmp.sample'
+            'dust tmp.sample'
             'dutree --usage tmp.sample'
             'du tmp.sample'
           )
@@ -208,8 +208,8 @@ jobs:
       - name: 'Benchmark: top-down'
         run: |
           commands=(
-            'pdu --total-width 150 --top-down tmp.sample'
-            'dust -w 150 --apparent-size --reverse tmp.sample'
+            'pdu --top-down tmp.sample'
+            'dust --apparent-size --reverse tmp.sample'
             'dutree tmp.sample'
           )
           hyperfine --warmup 3 "${commands[@]}"
@@ -217,7 +217,7 @@ jobs:
       - name: 'Benchmark: summary'
         run: |
           commands=(
-            'pdu --total-width 150 --max-depth 1 tmp.sample'
+            'pdu --max-depth 1 tmp.sample'
             'dutree --summary tmp.sample'
             'du --apparent-size --total tmp.sample'
           )
@@ -226,7 +226,7 @@ jobs:
       - name: 'Benchmark: extreme details'
         run: |
           commands=(
-            'pdu --total-width 150 --minimal-ratio 0 tmp.sample'
+            'pdu --minimal-ratio 0 tmp.sample'
             'dutree tmp.sample'
             'du --apparent-size tmp.sample'
           )
@@ -235,7 +235,7 @@ jobs:
       - name: 'Benchmark: no sort'
         run: |
           commands=(
-            'pdu --total-width 150 --no-sort tmp.sample'
+            'pdu --no-sort tmp.sample'
             'du --apparent-size tmp.sample'
           )
           hyperfine --warmup 3 "${commands[@]}"
@@ -243,7 +243,7 @@ jobs:
       - name: 'Benchmark: no sort, summary'
         run: |
           commands=(
-            'pdu --total-width 150 --no-sort --max-depth 1 tmp.sample'
+            'pdu --no-sort --max-depth 1 tmp.sample'
             'du --apparent-size --total tmp.sample'
           )
           hyperfine --warmup 3 "${commands[@]}"
