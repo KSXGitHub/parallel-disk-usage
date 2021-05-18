@@ -97,7 +97,6 @@ jobs:
 
             function loadReport(ext) {
               const filePath = path.join(cwd, `tmp.hyperfine-report.${ext}`)
-              console.debug(`read ${filePath}...`)
               return readFileSync(filePath, 'utf-8')
             }
 
