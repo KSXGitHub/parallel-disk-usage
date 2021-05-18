@@ -67,9 +67,7 @@ jobs:
           )
           parameters=(
             -L pdu           'pdu'
-            -L quantity      'len,blksize,blocks'
-            -L minimal-ratio '0.1,0.05,0.0.1,0'
-            -L max-depth     '1,3,5,10'
+            -L quantity      'len'
           )
           commands=(
             '{pdu} --quantity={quantity} --max-depth={max-depth} tmp.sample'
