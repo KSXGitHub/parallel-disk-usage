@@ -94,7 +94,7 @@ jobs:
             'pdu --total-width 150 --quantity len tmp.sample'
             'dust -w 150 --apparent-size tmp.sample'
             'dutree tmp.sample'
-            'du tmp.sample'
+            'du --apparent-size tmp.sample'
           )
           hyperfine --warmup 3 "${commands[@]}"
 
