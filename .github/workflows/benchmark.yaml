@@ -88,13 +88,34 @@ jobs:
           curl -L https://github.com/torvalds/linux/archive/refs/tags/v5.12.zip > tmp.sample.zip
           unzip tmp.sample.zip -d tmp.sample
 
-      - name: 'Hyperfine Benchmark: details'
+      - name: 'Hyperfine Benchmark: len'
         run: |
           commands=(
-            'pdu --total-width 150 tmp.sample'
+            'pdu --total-width 150 --quantity len tmp.sample'
             'dust -w 150 --apparent-size tmp.sample'
             'dutree tmp.sample'
             'du tmp.sample'
+          )
+          hyperfine --warmup 3 "${commands[@]}"
+
+      - name: 'Hyperfine Benchmark: blksize'
+        run: |
+          commands=(
+            'pdu --total-width 150 --quantity blksize tmp.sample'
+            'dust -w 150 tmp.sample'
+            'dutree --usage tmp.sample'
+            'du tmp.sample'
+          )
+          hyperfine --warmup 3 "${commands[@]}"
+
+      - name: 'Hyperfine Benchmark: top-down'
+        env:
+          BENCHMARK_IGNORE_FAILURE: 'true'
+        run: |
+          commands=(
+            'pdu --total-width 150 --top-down tmp.sample'
+            'dust -w 150 --apparent-size --reverse tmp.sample'
+            'dutree tmp.sample'
           )
           hyperfine --warmup 3 "${commands[@]}"
 
