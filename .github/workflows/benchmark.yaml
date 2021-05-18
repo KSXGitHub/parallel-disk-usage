@@ -109,8 +109,6 @@ jobs:
           hyperfine --warmup 3 "${commands[@]}"
 
       - name: 'Benchmark: top-down'
-        env:
-          BENCHMARK_IGNORE_FAILURE: 'true'
         run: |
           commands=(
             'pdu --total-width 150 --top-down tmp.sample'
