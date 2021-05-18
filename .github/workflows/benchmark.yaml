@@ -120,15 +120,10 @@ jobs:
               loadReport('md'),
               '',
               codeBlock('hyperfine logs', 'log', 'log'),
-              '',
               codeBlock('report AsciiDoc', 'asciidoc', 'adoc'),
-              '',
               codeBlock('report CSV', 'csv', 'csv'),
-              '',
               codeBlock('report JSON', 'json', 'json'),
-              '',
               codeBlock('report Markdown', 'markdown', 'md'),
-              '',
             ].join('\n')
 
             await github.issues.createComment({
