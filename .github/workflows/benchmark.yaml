@@ -81,7 +81,7 @@ jobs:
             "${parameters[@]}"
             "${commands[@]}"
           )
-          hyperfine "${arguments[@]}" 2>&1 | tee tmp.hyperfine.log
+          hyperfine "${arguments[@]}" 2>&1 | tee tmp.hyperfine-report.log
 
       - name: Post generated benchmark reports to pull request as a comment
         uses: actions/github-script@v4.0.2
