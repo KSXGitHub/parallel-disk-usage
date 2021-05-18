@@ -86,7 +86,7 @@ jobs:
       - name: Post generated benchmark reports to pull request as a comment
         uses: actions/github-script@v4.0.2
         if: github.event_name == 'pull_request'
-        continue-on-error: false # TODO: set this to false
+        continue-on-error: true
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -151,6 +151,7 @@ jobs:
 
       - name: Upload benchmark reports
         uses: actions/upload-artifact@v2.2.3
+        continue-on-error: true
         with:
           name: benchmark-reports
           path: tmp.hyperfine-report.*
