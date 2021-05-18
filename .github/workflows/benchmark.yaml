@@ -82,13 +82,13 @@ jobs:
           du --version
           hyperfine --version
 
-      - name: Prepare for hyperfine benchmark
+      - name: Prepare directory to be measured
         run: |
           mkdir -p tmp.sample
           curl -L https://github.com/torvalds/linux/archive/refs/tags/v5.12.zip > tmp.sample.zip
           unzip tmp.sample.zip -d tmp.sample
 
-      - name: 'Hyperfine Benchmark: len'
+      - name: 'Benchmark: len'
         run: |
           commands=(
             'pdu --total-width 150 --quantity len tmp.sample'
@@ -98,7 +98,7 @@ jobs:
           )
           hyperfine --warmup 3 "${commands[@]}"
 
-      - name: 'Hyperfine Benchmark: blksize'
+      - name: 'Benchmark: blksize'
         run: |
           commands=(
             'pdu --total-width 150 --quantity blksize tmp.sample'
@@ -108,7 +108,7 @@ jobs:
           )
           hyperfine --warmup 3 "${commands[@]}"
 
-      - name: 'Hyperfine Benchmark: top-down'
+      - name: 'Benchmark: top-down'
         env:
           BENCHMARK_IGNORE_FAILURE: 'true'
         run: |
@@ -119,7 +119,7 @@ jobs:
           )
           hyperfine --warmup 3 "${commands[@]}"
 
-      - name: 'Hyperfine Benchmark: summary'
+      - name: 'Benchmark: summary'
         run: |
           commands=(
             'pdu --total-width 150 --max-depth 1 tmp.sample'
@@ -128,7 +128,7 @@ jobs:
           )
           hyperfine --warmup 3 "${commands[@]}"
 
-      - name: 'Hyperfine Benchmark: extreme details'
+      - name: 'Benchmark: extreme details'
         run: |
           commands=(
             'pdu --total-width 150 --minimal-ratio 0 tmp.sample'
@@ -137,7 +137,7 @@ jobs:
           )
           hyperfine --warmup 3 "${commands[@]}"
 
-      - name: 'Hyperfine Benchmark: no sort'
+      - name: 'Benchmark: no sort'
         run: |
           commands=(
             'pdu --total-width 150 --no-sort tmp.sample'
@@ -145,7 +145,7 @@ jobs:
           )
           hyperfine --warmup 3 "${commands[@]}"
 
-      - name: 'Hyperfine Benchmark: no sort, summary'
+      - name: 'Benchmark: no sort, summary'
         run: |
           commands=(
             'pdu --total-width 150 --no-sort --max-depth 1 tmp.sample'
