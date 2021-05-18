@@ -102,7 +102,7 @@ jobs:
 
             function commitInfo() {
               const { sha, repo } = context
-              return `* ref: ${repo}@${sha}`
+              return `* ref: ${repo.repo}@${sha}`
             }
 
             function rendered() {
