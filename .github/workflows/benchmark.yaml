@@ -127,6 +127,8 @@ jobs:
               '',
               codeBlock('report JSON', 'json', 'json'),
               '',
+              codeBlock('report Markdown', 'markdown', 'md'),
+              '',
             ].join('\n')
 
             await github.issues.createComment({
