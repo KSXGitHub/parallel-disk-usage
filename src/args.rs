@@ -4,9 +4,7 @@ pub mod quantity;
 pub use fraction::Fraction;
 pub use quantity::Quantity;
 
-use crate::{
-    bytes_format::BytesFormat, runtime_error::RuntimeError, visualizer::ColumnWidthDistribution,
-};
+use crate::{bytes_format::BytesFormat, visualizer::ColumnWidthDistribution};
 use std::{num::NonZeroUsize, path::PathBuf};
 use structopt::StructOpt;
 use strum::VariantNames;
@@ -100,14 +98,14 @@ pub struct Args {
 
 impl Args {
     /// Deduce [`ColumnWidthDistribution`] from `--total-width` or `--column-width`.
-    pub(crate) fn column_width_distribution(
-        &self,
-    ) -> Result<ColumnWidthDistribution, RuntimeError> {
-        Ok(match (self.total_width, self.column_width.as_deref()) {
+    pub(crate) fn column_width_distribution(&self) -> ColumnWidthDistribution {
+        match (self.total_width, self.column_width.as_deref()) {
             (None, None) => {
-                let (Width(width), _) =
-                    terminal_size().ok_or(RuntimeError::TerminalWidthInferenceFailure)?;
-                ColumnWidthDistribution::total(width as usize)
+                ColumnWidthDistribution::total(if let Some((Width(width), _)) = terminal_size() {
+                    width as usize
+                } else {
+                    150
+                })
             }
             (Some(total_width), None) => ColumnWidthDistribution::total(total_width),
             (None, Some([tree_width, bar_width])) => {
@@ -117,6 +115,6 @@ impl Args {
                 dbg!(total_width, column_width);
                 panic!("Something goes wrong")
             }
-        })
+        }
     }
 }
