@@ -100,6 +100,11 @@ jobs:
               return readFileSync(filePath, 'utf-8')
             }
 
+            function commitInfo() {
+              const { sha, repo } = context
+              return `* ref: ${repo}@${sha}`
+            }
+
             function rendered() {
               return [
                 '<details><summary>Rendered</summary>',
@@ -126,6 +131,8 @@ jobs:
 
             const body = [
               '## Benchmark Results',
+              '',
+              commitInfo(),
               '',
               rendered(),
               codeBlock('Logs', 'log', 'log'),
