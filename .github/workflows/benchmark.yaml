@@ -88,6 +88,7 @@ jobs:
           commands=(
             'pdu tmp.sample'
             'pdu --max-depth=5 tmp.sample'
+            'pdu --max-depth=3 tmp.sample'
             'pdu --max-depth=1 tmp.sample'
           )
           hyperfine --warmup=3 "${commands[@]}"
