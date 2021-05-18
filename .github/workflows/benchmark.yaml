@@ -107,6 +107,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    # run benchmark sequentially to reduce noises
+    needs:
+      - self_benchmark
+
     steps:
       - uses: actions/checkout@v2
 
