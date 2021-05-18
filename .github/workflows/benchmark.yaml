@@ -100,6 +100,16 @@ jobs:
               return readFileSync(filePath, 'utf-8')
             }
 
+            function rendered() {
+              return [
+                '<details><summary>Rendered</summary>',
+                '',
+                loadReport('md'),
+                '',
+                '</details>',
+              ].join('\n')
+            }
+
             function codeBlock(detailsSummary, reportLang, reportExt) {
               return [
                 '<details><summary>',
@@ -117,11 +127,7 @@ jobs:
             const body = [
               '## Benchmark Results',
               '',
-              '<details><summary>Rendered</summary>',
-              '',
-              loadReport('md'),
-              '',
-              '</details>',
+              rendered(),
               codeBlock('Logs', 'log', 'log'),
               codeBlock('AsciiDoc', 'asciidoc', 'adoc'),
               codeBlock('CSV', 'csv', 'csv'),
