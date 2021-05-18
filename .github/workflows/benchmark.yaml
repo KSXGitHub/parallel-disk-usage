@@ -117,8 +117,11 @@ jobs:
             const body = [
               '## Benchmark Results',
               '',
+              '<details><summary>Rendered</summary>',
+              '',
               loadReport('md'),
               '',
+              '</details>',
               codeBlock('Logs', 'log', 'log'),
               codeBlock('AsciiDoc', 'asciidoc', 'adoc'),
               codeBlock('CSV', 'csv', 'csv'),
