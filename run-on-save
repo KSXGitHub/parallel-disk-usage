@@ -1,0 +1,43 @@
+#! /bin/bash
+
+# PURPOSE
+# =======
+#
+# This script is to be run when editor finishes editing a file.
+#
+# INSTALLATION
+# ============
+#
+# Visual Studio Code
+# ------------------
+#
+# 1. Install "Run On Save" extension
+#   - Marketplace ID: pucelle.run-on-save
+#   - GitHub Repo: https://github.com/pucelle/vscode-run-on-save
+#
+# 2. Add the following section to your `settings.json`:
+#    "runOnSave.commands": [
+#      {
+#        "match": ".*",
+#        "command": "sh -c 'if [ -x ./run-on-save ]; then FILE=${file} ./run-on-save; fi'",
+#        "runIn": "backend",
+#      }
+#    ]
+
+set -o errexit -o pipefail -o nounset
+
+# TASK: Use sane-fmt to format TypeScript/JavaScript file
+# Recommend: Install native sane-fmt for good performance (https://github.com/sane-fmt/sane-fmt)
+for ext in js ts jsx tsx; do
+  if [[ "$FILE" == *.$ext && "$FILE" != *node_modules* ]]; then
+    if which sane-fmt &>/dev/null; then
+      echo "Run sane-fmt on $FILE"
+      sane-fmt --color=never --write "$FILE"
+    else
+      echo 'Using WebAssembly implementation of sane-fmt'
+      echo 'Recommend: Install native version from https://github.com/sane-fmt/sane-fmt'
+      pnpm run sane-fmt:fix -- --color=never --hide-passed
+    fi
+    break
+  fi
+done
