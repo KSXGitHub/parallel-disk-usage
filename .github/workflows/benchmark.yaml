@@ -101,8 +101,8 @@ jobs:
             }
 
             function commitInfo() {
-              const { sha, repo } = context
-              return `* ref: ${repo.repo}@${sha}`
+              const { sha, repo: { owner, repo } } = context
+              return `* ref: ${owner}/${repo}@${sha}`
             }
 
             function rendered() {
