@@ -70,8 +70,8 @@ jobs:
             -L quantity      'len'
           )
           commands=(
-            '{pdu} --quantity={quantity} --max-depth={max-depth} tmp.sample'
-            '{pdu} --quantity={quantity} --max-depth={max-depth} --no-sort tmp.sample'
+            '{pdu} --quantity={quantity} tmp.sample'
+            '{pdu} --quantity={quantity} --no-sort tmp.sample'
           )
           arguments=(
             --warmup=3
