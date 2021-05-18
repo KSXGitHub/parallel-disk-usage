@@ -5,6 +5,103 @@ on:
   - pull_request
 
 jobs:
+  self_benchmark:
+    name: Compare benchmark with itself
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache
+        uses: actions/cache@v2.1.5
+        timeout-minutes: 1
+        continue-on-error: true
+        if: matrix.os != 'macos-latest' # Cache causes errors on macOS
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+            ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-
+
+      - name: Build pdu
+        run: |
+          cargo build --release
+          echo "$(pwd)/target/release" >> "$GITHUB_PATH"
+
+      - name: Install hyperfine
+        env:
+          REPO: https://github.com/sharkdp/hyperfine
+          VERSION: '1.11.0'
+        run: |
+          mkdir -p HYPERFINE.tmp
+          archive_name="hyperfine-v${VERSION}-x86_64-unknown-linux-gnu"
+          curl -L "${REPO}/releases/download/v${VERSION}/${archive_name}.tar.gz" > tmp.hyperfine.tar.gz
+          tar xf tmp.hyperfine.tar.gz --directory=HYPERFINE.tmp
+          chmod +x "HYPERFINE.tmp/${archive_name}/hyperfine"
+          echo "$(pwd)/HYPERFINE.tmp/${archive_name}" >> "$GITHUB_PATH"
+
+      - name: Inspect commands
+        run: |
+          which pdu
+          which hyperfine
+          hyperfine --version
+
+      - name: Prepare directory to be measured
+        run: |
+          mkdir -p tmp.sample
+          curl -L https://github.com/torvalds/linux/archive/refs/tags/v5.12.zip > tmp.sample.zip
+          unzip tmp.sample.zip -d tmp.sample
+
+      - name: 'Benchmark: --quantity'
+        run:
+          commands=(
+            'pdu --total-width 150 --quantity len tmp.sample'
+            'pdu --total-width 150 --quantity blksize tmp.sample'
+            'pdu --total-width 150 --quantity blocks tmp.sample'
+          )
+          hyperfine --warmup 3 "${commands[@]}"
+
+      - name: 'Benchmark: [--no-sort]'
+        run:
+          commands=(
+            'pdu --total-width 150 tmp.sample'
+            'pdu --total-width 150 --no-sort tmp.sample'
+          )
+          hyperfine --warmup 3 "${commands[@]}"
+
+      - name: 'Benchmark: --minimal-ratio'
+        run:
+          commands=(
+            'pdu --total-width 150 --minimal-ratio 0.1 tmp.sample'
+            'pdu --total-width 150 --minimal-ratio 0.01 tmp.sample'
+            'pdu --total-width 150 --minimal-ratio 0 tmp.sample'
+          )
+          hyperfine --warmup 3 "${commands[@]}"
+
+      - name: 'Benchmark: [--max-depth]'
+        run:
+          commands=(
+            'pdu --total-width 150 tmp.sample'
+            'pdu --total-width 150 --max-depth 5 tmp.sample'
+            'pdu --total-width 150 --max-depth 1 tmp.sample'
+          )
+          hyperfine --warmup 3 "${commands[@]}"
+
+      - name: 'Benchmark: [--max-depth 1] [--no-sort]'
+        run:
+          commands=(
+            'pdu --total-width 150 tmp.sample'
+            'pdu --total-width 150 --max-depth 1 tmp.sample'
+            'pdu --total-width 150 --no-sort tmp.sample'
+            'pdu --total-width 150 --max-depth 1 --no-sort tmp.sample'
+          )
+          hyperfine --warmup 3 "${commands[@]}"
+
   competing_benchmark:
     name: Compare benchmark with similar tools
 
