@@ -86,7 +86,7 @@ jobs:
       - name: Post generated benchmark reports to pull request as a comment
         uses: actions/github-script@v4.0.2
         if: github.event_name == 'pull_request'
-        continue-on-error: true
+        continue-on-error: false # TODO: set this to false
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
