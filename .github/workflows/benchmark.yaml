@@ -57,6 +57,92 @@ jobs:
           curl -L https://github.com/torvalds/linux/archive/refs/tags/v5.12.zip > tmp.sample.zip
           unzip tmp.sample.zip -d tmp.sample
 
+      - name: Generate benchmark reports
+        run: |
+          reports=(
+            --export-asciidoc tmp.hyperfine-report.adoc
+            --export-csv      tmp.hyperfine-report.csv
+            --export-json     tmp.hyperfine-report.json
+            --export-markdown tmp.hyperfine-report.md
+          )
+          parameters=(
+            -L pdu           'pdu'
+            -L quantity      'len,blksize,blocks'
+            -L minimal-ratio '0.1,0.05,0.0.1,0'
+            -L max-depth     '1,3,5,10'
+          )
+          commands=(
+            '{pdu} --quantity={quantity} --max-depth={max-depth} tmp.sample'
+            '{pdu} --quantity={quantity} --max-depth={max-depth} --no-sort tmp.sample'
+          )
+          arguments=(
+            --warmup=3
+            "${reports[@]}"
+            "${parameters[@]}"
+            "${commands[@]}"
+          )
+          hyperfine "${arguments}[@]" | tee tmp.hyperfine.log
+
+      - name: Post generated benchmark reports to pull request as a comment
+        uses: actions/github-script@v4.0.2
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const path = require('path')
+            const { readFileSync } = require('fs')
+            const process = require('process')
+            const cwd = process.cwd()
+
+            function loadReport(ext) {
+              const filePath = path.join(cwd, `tmp.hyperfine-report.${ext}`)
+              console.debug(`read ${filePath}...`)
+              return readFileSync(filePath, 'utf-8')
+            }
+
+            function codeBlock(detailsSummary, reportLang, reportExt) {
+              return [
+                '<details><summary>',
+                detailsSummary,
+                '</summary>',
+                '',
+                '```' + reportLang,
+                loadReport(reportExt),
+                '```',
+                '',
+                '</details>',
+              ].join('\n')
+            }
+
+            const body = [
+              '## Benchmark Results',
+              '',
+              loadReport('md'),
+              '',
+              codeBlock('hyperfine logs', 'log', 'log'),
+              '',
+              codeBlock('report AsciiDoc', 'asciidoc', 'adoc'),
+              '',
+              codeBlock('report CSV', 'csv', 'csv'),
+              '',
+              codeBlock('report JSON', 'json', 'json'),
+              '',
+            ].join('\n')
+
+            await github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            })
+
+      - name: Upload benchmark reports
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: benchmark-reports
+          path: tmp.hyperfine-report.*
+
       - name: 'Benchmark: --quantity'
         run: |
           commands=(
@@ -189,92 +275,6 @@ jobs:
           mkdir -p tmp.sample
           curl -L https://github.com/torvalds/linux/archive/refs/tags/v5.12.zip > tmp.sample.zip
           unzip tmp.sample.zip -d tmp.sample
-
-      - name: Generate benchmark reports
-        run: |
-          reports=(
-            --export-asciidoc tmp.hyperfine-report.adoc
-            --export-csv      tmp.hyperfine-report.csv
-            --export-json     tmp.hyperfine-report.json
-            --export-markdown tmp.hyperfine-report.md
-          )
-          parameters=(
-            -L pdu           'pdu'
-            -L quantity      'len,blksize,blocks'
-            -L minimal-ratio '0.1,0.05,0.0.1,0'
-            -L max-depth     '1,3,5,10'
-          )
-          commands=(
-            '{pdu} --quantity={quantity} --max-depth={max-depth} tmp.sample'
-            '{pdu} --quantity={quantity} --max-depth={max-depth} --no-sort tmp.sample'
-          )
-          arguments=(
-            --warmup=3
-            "${reports[@]}"
-            "${parameters[@]}"
-            "${commands[@]}"
-          )
-          hyperfine "${arguments}[@]" | tee tmp.hyperfine.log
-
-      - name: Post generated benchmark reports to pull request as a comment
-        uses: actions/github-script@v4.0.2
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const path = require('path')
-            const { readFileSync } = require('fs')
-            const process = require('process')
-            const cwd = process.cwd()
-
-            function loadReport(ext) {
-              const filePath = path.join(cwd, `tmp.hyperfine-report.${ext}`)
-              console.debug(`read ${filePath}...`)
-              return readFileSync(filePath, 'utf-8')
-            }
-
-            function codeBlock(detailsSummary, reportLang, reportExt) {
-              return [
-                '<details><summary>',
-                detailsSummary,
-                '</summary>',
-                '',
-                '```' + reportLang,
-                loadReport(reportExt),
-                '```',
-                '',
-                '</details>',
-              ].join('\n')
-            }
-
-            const body = [
-              '## Benchmark Results',
-              '',
-              loadReport('md'),
-              '',
-              codeBlock('hyperfine logs', 'log', 'log'),
-              '',
-              codeBlock('report AsciiDoc', 'asciidoc', 'adoc'),
-              '',
-              codeBlock('report CSV', 'csv', 'csv'),
-              '',
-              codeBlock('report JSON', 'json', 'json'),
-              '',
-            ].join('\n')
-
-            await github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body,
-            })
-
-      - name: Upload benchmark reports
-        uses: actions/upload-artifact@v2.2.3
-        with:
-          name: benchmark-reports
-          path: tmp.hyperfine-report.*
 
       - name: 'Benchmark: len'
         run: |
