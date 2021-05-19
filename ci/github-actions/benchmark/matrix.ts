@@ -70,7 +70,7 @@ export const SELF_BENCHMARK_MATRIX = SELF_BENCHMARK_TOPICS
 export function getSelfBenchmarkHyperfineName<Version extends string>(
   unit: SelfBenchmarkUnitDev | SelfBenchmarkUnitReleased<Version>,
 ) {
-  return unit.pduVersion ? unit.pduVersion : 'dev' as const
+  return unit.pduExecName
 }
 
 export const SELF_BENCHMARK_HYPERFINE_NAMES = UNITS.map(getSelfBenchmarkHyperfineName)
