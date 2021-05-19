@@ -108,52 +108,6 @@ jobs:
           name: benchmark-reports
           path: tmp.benchmark-report.*
 
-      - name: 'Benchmark: --quantity'
-        run: |
-          commands=(
-            'pdu --quantity=len tmp.sample'
-            'pdu --quantity=blksize tmp.sample'
-            'pdu --quantity=blocks tmp.sample'
-          )
-          hyperfine --warmup=3 "${commands[@]}"
-
-      - name: 'Benchmark: [--no-sort]'
-        run: |
-          commands=(
-            'pdu tmp.sample'
-            'pdu --no-sort tmp.sample'
-          )
-          hyperfine --warmup=3 "${commands[@]}"
-
-      - name: 'Benchmark: --minimal-ratio'
-        run: |
-          commands=(
-            'pdu --minimal-ratio=0.1 tmp.sample'
-            'pdu --minimal-ratio=0.01 tmp.sample'
-            'pdu --minimal-ratio=0 tmp.sample'
-          )
-          hyperfine --warmup=3 "${commands[@]}"
-
-      - name: 'Benchmark: [--max-depth]'
-        run: |
-          commands=(
-            'pdu tmp.sample'
-            'pdu --max-depth=5 tmp.sample'
-            'pdu --max-depth=3 tmp.sample'
-            'pdu --max-depth=1 tmp.sample'
-          )
-          hyperfine --warmup=3 "${commands[@]}"
-
-      - name: 'Benchmark: [--max-depth=1] [--no-sort]'
-        run: |
-          commands=(
-            'pdu tmp.sample'
-            'pdu --max-depth=1 tmp.sample'
-            'pdu --no-sort tmp.sample'
-            'pdu --max-depth=1 --no-sort tmp.sample'
-          )
-          hyperfine --warmup=3 "${commands[@]}"
-
   competing_benchmark:
     name: Compare benchmark with similar tools
 
