@@ -34,7 +34,7 @@ function codeBlock(topic: SelfBenchmarkTopic, summary: string, lang: reportFiles
     '```' + lang,
     loadReport(topic, reportFiles.MAP[lang]),
     '```',
-  ].join(' ')
+  ].join('\n')
 }
 
 function topicReport(topic: SelfBenchmarkTopic) {
@@ -52,7 +52,7 @@ function topicReport(topic: SelfBenchmarkTopic) {
     codeBlock(topic, 'JSON', 'json'),
     '',
     '</details>',
-  ].join(' ')
+  ].join('\n')
 }
 
 const overallReport = [
