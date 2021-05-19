@@ -42,7 +42,7 @@ function topicReport(topic: SelfBenchmarkTopic) {
 
   return [
     '<details>',
-    `<summary><h3>${commandSuffix.join(' ')}<h3></summary>`,
+    `<summary><strong>${commandSuffix.join(' ')}</strong></summary>`,
     '',
     rendered(topic),
     codeBlock(topic, 'Logs', 'log'),
