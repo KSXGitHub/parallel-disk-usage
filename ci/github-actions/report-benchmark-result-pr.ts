@@ -45,7 +45,7 @@ function topicReport(topic: SelfBenchmarkTopic) {
   return [
     '<details><summary>',
     '',
-    '### ' + commandSuffix.join(' '),
+    `**${commandSuffix.join(' ')}**`,
     '',
     '</summary>',
     '',
