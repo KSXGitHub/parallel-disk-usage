@@ -41,11 +41,8 @@ function topicReport(topic: SelfBenchmarkTopic) {
   const { commandSuffix } = parseSelfBenchmarkTopic(topic)
 
   return [
-    '<details><summary>',
-    '',
-    `**${commandSuffix.join(' ')}**`,
-    '',
-    '</summary>',
+    '<details>',
+    `<summary><h3>${commandSuffix.join(' ')}<h3></summary>`,
     '',
     rendered(topic),
     codeBlock(topic, 'Logs', 'log'),
