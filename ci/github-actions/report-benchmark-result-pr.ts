@@ -17,11 +17,9 @@ function loadReport(topic: SelfBenchmarkTopic, ext: reportFiles.Extension) {
 
 function rendered(topic: SelfBenchmarkTopic) {
   return [
-    '<details><summary>Rendered</summary>',
     '',
     loadReport(topic, 'md'),
     '',
-    '</details>',
   ].join('\n')
 }
 
