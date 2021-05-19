@@ -14,6 +14,6 @@ for (const { topic, units } of SELF_BENCHMARK_MATRIX) {
   const pduCommands = units.map(unit => `${unit.pduExecName} ${commandSuffix.join(' ')} ${shCmd(pduTargets)}`)
   const exportReports = reportFiles.hyperfineArgs(reportName)
   const hyperfineCommand = shCmd(['hyperfine', '--warmup=3', ...exportReports, ...unitNames, ...pduCommands])
-  const shellCommand = `${hyperfineCommand} | tee ${reportFiles.getFileName(reportName, 'log')}`
+  const shellCommand = `${hyperfineCommand} 2>&1 | tee ${reportFiles.getFileName(reportName, 'log')}`
   exec(...STRICT_BASH, '-c', shellCommand).exit(errexit)
 }
