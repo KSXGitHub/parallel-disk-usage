@@ -18,7 +18,7 @@ function loadReport(topic: SelfBenchmarkTopic, ext: reportFiles.Extension) {
 function rendered(topic: SelfBenchmarkTopic) {
   return [
     '',
-    loadReport(topic, 'md'),
+    loadReport(topic, 'md').trim(),
     '',
   ].join('\n')
 }
@@ -30,7 +30,7 @@ function codeBlock(topic: SelfBenchmarkTopic, summary: string, lang: reportFiles
     '</summary>',
     '',
     '```' + lang,
-    loadReport(topic, reportFiles.MAP[lang]),
+    loadReport(topic, reportFiles.MAP[lang]).trim(),
     '```',
     '',
     '</details>',
