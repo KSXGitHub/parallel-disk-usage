@@ -34,6 +34,8 @@ function codeBlock(topic: SelfBenchmarkTopic, summary: string, lang: reportFiles
     '```' + lang,
     loadReport(topic, reportFiles.MAP[lang]),
     '```',
+    '',
+    '</details>',
   ].join('\n')
 }
 
