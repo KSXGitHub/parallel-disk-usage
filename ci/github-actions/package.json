@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "dependencies": {
+    "@octokit/rest": "^18.5.3",
+    "shell-escape": "^0.2.0",
+    "exec-inline": "^0.0.5",
+    "@types/shell-escape": "^0.2.0",
+    "@types/node": "^15.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.2.4"
+  }
+}
