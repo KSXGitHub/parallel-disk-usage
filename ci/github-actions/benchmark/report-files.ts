@@ -7,10 +7,11 @@ export const MAP = {
   csv: 'csv',
   json: 'json',
   markdown: 'md',
+  log: 'log',
 } as const
 
 export type Format = keyof typeof MAP
-export type Extension = typeof MAP[Format] | 'log'
+export type Extension = typeof MAP[Format]
 
 export const getFileName = <Name extends string, Ext extends Extension>(name: Name, ext: Ext) =>
   `${PREFIX}.${name}.${ext}` as const
