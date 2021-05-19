@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Cache
+      - name: Cache (rust)
         uses: actions/cache@v2.1.5
         timeout-minutes: 1
         continue-on-error: true
@@ -57,102 +57,49 @@ jobs:
           curl -L https://github.com/torvalds/linux/archive/refs/tags/v5.12.zip > tmp.sample.zip
           unzip tmp.sample.zip -d tmp.sample
 
-      - name: Generate benchmark reports
-        run: |
-          reports=(
-            --export-asciidoc tmp.hyperfine-report.adoc
-            --export-csv      tmp.hyperfine-report.csv
-            --export-json     tmp.hyperfine-report.json
-            --export-markdown tmp.hyperfine-report.md
-          )
-          parameters=(
-            -L pdu           'pdu'
-            -L quantity      'len'
-          )
-          commands=(
-            '{pdu} --quantity={quantity} tmp.sample'
-            '{pdu} --quantity={quantity} --no-sort tmp.sample'
-          )
-          arguments=(
-            --warmup=3
-            "${reports[@]}"
-            "${parameters[@]}"
-            "${commands[@]}"
-          )
-          hyperfine "${arguments[@]}" 2>&1 | tee tmp.hyperfine-report.log
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.1.0'
 
-      - name: Post generated benchmark reports to pull request as a comment
-        uses: actions/github-script@v4.0.2
-        if: github.event_name == 'pull_request'
+      - name: Cache (pnpm)
+        uses: actions/cache@v2.1.5
+        timeout-minutes: 1
         continue-on-error: true
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const path = require('path')
-            const { readFileSync } = require('fs')
-            const process = require('process')
-            const cwd = process.cwd()
+          path: ~/.pnpm-store/v3
+          key: pnpm-${{ matrix.vars.id }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-${{ matrix.vars.id }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+            pnpm-${{ matrix.vars.id }}-
+            pnpm-
 
-            function loadReport(ext) {
-              const filePath = path.join(cwd, `tmp.hyperfine-report.${ext}`)
-              return readFileSync(filePath, 'utf-8')
-            }
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2.0.1
+        with:
+          version: '6.3.0'
+          run_install: 'true'
 
-            function commitInfo() {
-              const { sha, repo: { owner, repo } } = context
-              return `* ref: ${owner}/${repo}@${sha}`
-            }
+      - name: Compile TypeScript
+        run: |
+          cd ci/github-actions
+          pnpx tsc
 
-            function rendered() {
-              return [
-                '<details><summary>Rendered</summary>',
-                '',
-                loadReport('md'),
-                '',
-                '</details>',
-              ].join('\n')
-            }
+      - name: Generate benchmark reports
+        run: node ci/github-actions/benchmark.js tmp.sample
 
-            function codeBlock(detailsSummary, reportLang, reportExt) {
-              return [
-                '<details><summary>',
-                detailsSummary,
-                '</summary>',
-                '',
-                '```' + reportLang,
-                loadReport(reportExt),
-                '```',
-                '',
-                '</details>',
-              ].join('\n')
-            }
-
-            const body = [
-              '## Benchmark Results',
-              '',
-              commitInfo(),
-              '',
-              rendered(),
-              codeBlock('Logs', 'log', 'log'),
-              codeBlock('AsciiDoc', 'asciidoc', 'adoc'),
-              codeBlock('CSV', 'csv', 'csv'),
-              codeBlock('JSON', 'json', 'json'),
-              codeBlock('Markdown', 'markdown', 'md'),
-            ].join('\n')
-
-            await github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body,
-            })
+      - name: Post generated benchmark reports to pull request as a comment
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node ci/github-actions/report-benchmark-result-pr.js
 
       - name: Upload benchmark reports
         uses: actions/upload-artifact@v2.2.3
         continue-on-error: true
         with:
           name: benchmark-reports
-          path: tmp.hyperfine-report.*
+          path: tmp.benchmark-report.*
 
       - name: 'Benchmark: --quantity'
         run: |
