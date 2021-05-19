@@ -1,8 +1,8 @@
 import { getReleasedPduName } from './pdu-programs'
 
 export const QUANTITY = ['len', 'blksize', 'blocks'] as const
-export const MAX_DEPTH = ['1', '3', '5', '10'] as const
-export const MIN_RATIO = ['0.1', '0.01', '0'] as const
+export const MAX_DEPTH = ['1', '10'] as const
+export const MIN_RATIO = ['0.01', '0'] as const
 export const PROGRESS = [false, true] as const
 export const NO_SORT = [false, true] as const
 
