@@ -1,7 +1,7 @@
 {
   "private": true,
   "dependencies": {
-    "@octokit/rest": "^18.5.3",
+    "@actions/github": "^5.0.0",
     "shell-escape": "^0.2.0",
     "exec-inline": "^0.0.5",
     "@types/shell-escape": "^0.2.0",
