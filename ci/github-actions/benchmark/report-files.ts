@@ -12,13 +12,6 @@ export const MAP = {
 export type Format = keyof typeof MAP
 export type Extension = typeof MAP[Format] | 'log'
 
-// const HYPERFINE_EXPORT_REPORTS = [
-//   hyperfineArg('asciidoc'),
-//   hyperfineArg('csv'),
-//   hyperfineArg('json'),
-//   hyperfineArg('markdown'),
-// ] as const
-
 export const getFileName = <Name extends string, Ext extends Extension>(name: Name, ext: Ext) =>
   `${PREFIX}.${name}.${ext}` as const
 
