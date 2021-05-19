@@ -49,10 +49,7 @@ function topicReport(topic: SelfBenchmarkTopic) {
     '',
     rendered(topic),
     codeBlock(topic, 'Logs', 'log'),
-    codeBlock(topic, 'AsciiDoc', 'asciidoc'),
-    codeBlock(topic, 'CSV', 'csv'),
     codeBlock(topic, 'JSON', 'json'),
-    codeBlock(topic, 'Markdown', 'markdown'),
     '',
     '</details>',
   ].join(' ')
