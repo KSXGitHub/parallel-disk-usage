@@ -1,3 +1,4 @@
+import console from 'console'
 import exec from 'exec-inline'
 import process from 'process'
 import shCmd from 'shell-escape'
@@ -10,6 +11,7 @@ const errexit = (param: { readonly status: number | null }) => param.status !== 
 
 for (const { topic, units } of SELF_BENCHMARK_MATRIX) {
   const { commandSuffix, reportName } = parseSelfBenchmarkTopic(topic)
+  console.error({ topic, commandSuffix, reportName })
   const unitNames = SELF_BENCHMARK_HYPERFINE_NAMES.map(name => `--command-name=${name}` as const)
   const pduCommands = units.map(unit => `${unit.pduExecName} ${commandSuffix.join(' ')} ${shCmd(pduTargets)}`)
   const exportReports = reportFiles.hyperfineArgs(reportName)
