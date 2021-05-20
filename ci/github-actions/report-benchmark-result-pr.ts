@@ -2,51 +2,51 @@ import { getOctokit, context } from '@actions/github'
 import console from 'console'
 import { readFileSync } from 'fs'
 import process from 'process'
-import { SELF_BENCHMARK_TOPICS, SelfBenchmarkTopic, parseSelfBenchmarkTopic } from './benchmark/matrix'
+import { SELF_BENCHMARK_CATEGORIES, SelfBenchmarkCategory, parseSelfBenchmarkCategory } from './benchmark/matrix'
 import * as reportFiles from './benchmark/report-files'
 import * as env from './lib/env'
 
 const auth = env.load('GITHUB_TOKEN')
 const commitInfo = `* ref: ${context.issue.owner}/${context.issue.repo}@${context.sha}`
 
-function loadReport(topic: SelfBenchmarkTopic, ext: reportFiles.Extension) {
-  const { reportName } = parseSelfBenchmarkTopic(topic)
+function loadReport(category: SelfBenchmarkCategory, ext: reportFiles.Extension) {
+  const { reportName } = parseSelfBenchmarkCategory(category)
   const filePath = reportFiles.getFileName(reportName, ext)
   return readFileSync(filePath, 'utf-8')
 }
 
-function rendered(topic: SelfBenchmarkTopic) {
+function rendered(category: SelfBenchmarkCategory) {
   return [
     '',
-    loadReport(topic, 'md').trim(),
+    loadReport(category, 'md').trim(),
     '',
   ].join('\n')
 }
 
-function codeBlock(topic: SelfBenchmarkTopic, summary: string, lang: reportFiles.Format) {
+function codeBlock(category: SelfBenchmarkCategory, summary: string, lang: reportFiles.Format) {
   return [
     '<details><summary>',
     summary,
     '</summary>',
     '',
     '```' + lang,
-    loadReport(topic, reportFiles.MAP[lang]).trim(),
+    loadReport(category, reportFiles.MAP[lang]).trim(),
     '```',
     '',
     '</details>',
   ].join('\n')
 }
 
-function topicReport(topic: SelfBenchmarkTopic) {
-  const { commandSuffix } = parseSelfBenchmarkTopic(topic)
+function categoryReport(category: SelfBenchmarkCategory) {
+  const { commandSuffix } = parseSelfBenchmarkCategory(category)
 
   return [
     '<details>',
     `<summary><strong>${commandSuffix.join(' ')}</strong></summary>`,
     '',
-    rendered(topic),
-    codeBlock(topic, 'Logs', 'log'),
-    codeBlock(topic, 'JSON', 'json'),
+    rendered(category),
+    codeBlock(category, 'Logs', 'log'),
+    codeBlock(category, 'JSON', 'json'),
     '',
     '</details>',
   ].join('\n')
@@ -57,7 +57,7 @@ const overallReport = [
   '',
   commitInfo,
   '',
-  ...SELF_BENCHMARK_TOPICS.map(topicReport),
+  ...SELF_BENCHMARK_CATEGORIES.map(categoryReport),
 ].join('\n')
 
 async function main() {

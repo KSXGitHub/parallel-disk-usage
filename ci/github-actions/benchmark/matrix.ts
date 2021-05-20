@@ -6,7 +6,7 @@ export const MIN_RATIO = ['0.01', '0'] as const
 export const PROGRESS = [false, true] as const
 export const NO_SORT = [false, true] as const
 
-export interface SelfBenchmarkTopic {
+export interface SelfBenchmarkCategory {
   readonly quantity: typeof QUANTITY[number]
   readonly maxDepth: typeof MAX_DEPTH[number]
   readonly minRatio: typeof MIN_RATIO[number]
@@ -14,25 +14,25 @@ export interface SelfBenchmarkTopic {
   readonly noSort: typeof NO_SORT[number]
 }
 
-export const SELF_BENCHMARK_TOPICS: readonly SelfBenchmarkTopic[] = [{}]
-  .flatMap(topic => QUANTITY.map(quantity => ({ ...topic, quantity })))
-  .flatMap(topic => MAX_DEPTH.map(maxDepth => ({ ...topic, maxDepth })))
-  .flatMap(topic => MIN_RATIO.map(minRatio => ({ ...topic, minRatio })))
-  .flatMap(topic => PROGRESS.map(progress => ({ ...topic, progress })))
-  .flatMap(topic => NO_SORT.map(noSort => ({ ...topic, noSort })))
+export const SELF_BENCHMARK_CATEGORIES: readonly SelfBenchmarkCategory[] = [{}]
+  .flatMap(category => QUANTITY.map(quantity => ({ ...category, quantity })))
+  .flatMap(category => MAX_DEPTH.map(maxDepth => ({ ...category, maxDepth })))
+  .flatMap(category => MIN_RATIO.map(minRatio => ({ ...category, minRatio })))
+  .flatMap(category => PROGRESS.map(progress => ({ ...category, progress })))
+  .flatMap(category => NO_SORT.map(noSort => ({ ...category, noSort })))
 
-export function parseSelfBenchmarkTopic(topic: SelfBenchmarkTopic) {
-  const reportName = Object.values(topic).join('-')
+export function parseSelfBenchmarkCategory(category: SelfBenchmarkCategory) {
+  const reportName = Object.values(category).join('-')
 
   const commandSuffix = [
-    `--quantity=${topic.quantity}`,
-    `--max-depth=${topic.maxDepth}`,
-    `--min-ratio=${topic.minRatio}`,
-    ...topic.progress ? ['--progress'] as const : [] as const,
-    ...topic.noSort ? ['--no-sort'] as const : [] as const,
+    `--quantity=${category.quantity}`,
+    `--max-depth=${category.maxDepth}`,
+    `--min-ratio=${category.minRatio}`,
+    ...category.progress ? ['--progress'] as const : [] as const,
+    ...category.noSort ? ['--no-sort'] as const : [] as const,
   ] as const
 
-  return { topic, reportName, commandSuffix }
+  return { category, reportName, commandSuffix }
 }
 
 export const RELEASED_PDU_VERSIONS = [] as const
@@ -64,8 +64,8 @@ const RELEASED_UNITS = RELEASED_PDU_VERSIONS.map(createSelfBenchmarkUnitReleased
 
 const UNITS = [DEV_UNIT, ...RELEASED_UNITS]
 
-export const SELF_BENCHMARK_MATRIX = SELF_BENCHMARK_TOPICS
-  .map(topic => ({ topic, units: UNITS }))
+export const SELF_BENCHMARK_MATRIX = SELF_BENCHMARK_CATEGORIES
+  .map(category => ({ category, units: UNITS }))
 
 export function getSelfBenchmarkHyperfineName<Version extends string>(
   unit: SelfBenchmarkUnitDev | SelfBenchmarkUnitReleased<Version>,
