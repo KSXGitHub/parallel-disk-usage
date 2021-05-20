@@ -44,10 +44,10 @@ use text_block_macros::text_block;
         "    $ gdu --bytes-format=binary"
         ""
         "    Show disk usage chart of all entries regardless of size"
-        "    $ gdu --minimal-ratio=0"
+        "    $ gdu --min-ratio=0"
         ""
         "    Only show disk usage chart of entries whose size is at least 5% of total"
-        "    $ gdu --minimal-ratio=0.05"
+        "    $ gdu --min-ratio=0.05"
     },
 )]
 pub struct Args {
@@ -81,7 +81,7 @@ pub struct Args {
 
     /// Minimal size proportion required to appear.
     #[structopt(long, default_value = "0.01")]
-    pub minimal_ratio: Fraction,
+    pub min_ratio: Fraction,
 
     /// Preserve order of entries.
     #[structopt(long)]

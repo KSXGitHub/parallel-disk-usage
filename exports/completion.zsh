@@ -20,7 +20,7 @@ _pdu() {
 '--max-depth=[Maximum depth to display the data (must be greater than 0)]' \
 '(--column-width)--total-width=[Width of the visualization]' \
 '*--column-width=[Maximum widths of the tree column and width of the bar column]' \
-'--minimal-ratio=[Minimal size proportion required to appear]' \
+'--min-ratio=[Minimal size proportion required to appear]' \
 '--top-down[Print the tree top-down instead of bottom-up]' \
 '--no-sort[Preserve order of entries]' \
 '--silent-errors[Prevent filesystem error messages from appearing in stderr]' \

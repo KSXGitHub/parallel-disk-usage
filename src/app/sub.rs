@@ -33,7 +33,7 @@ where
     /// Reports measurement progress.
     pub reporter: Report,
     /// Minimal size proportion required to appear.
-    pub minimal_ratio: Fraction,
+    pub min_ratio: Fraction,
     /// Preserve order of entries.
     pub no_sort: bool,
 }
@@ -54,7 +54,7 @@ where
             max_depth,
             get_data,
             reporter,
-            minimal_ratio,
+            min_ratio,
             no_sort,
         } = self;
 
@@ -96,11 +96,11 @@ where
             eprintln!("[warning] Failed to destroy the thread that reports progress");
         }
 
-        let minimal_ratio: f32 = minimal_ratio.into();
+        let min_ratio: f32 = min_ratio.into();
         let data_tree = {
             let mut data_tree = data_tree;
-            if minimal_ratio > 0.0 {
-                data_tree.par_cull_insignificant_data(minimal_ratio);
+            if min_ratio > 0.0 {
+                data_tree.par_cull_insignificant_data(min_ratio);
             }
             if !no_sort {
                 data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());

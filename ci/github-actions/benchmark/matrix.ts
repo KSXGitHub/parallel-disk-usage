@@ -27,7 +27,7 @@ export function parseSelfBenchmarkTopic(topic: SelfBenchmarkTopic) {
   const commandSuffix = [
     `--quantity=${topic.quantity}`,
     `--max-depth=${topic.maxDepth}`,
-    `--minimal-ratio=${topic.minRatio}`,
+    `--min-ratio=${topic.minRatio}`,
     ...topic.progress ? ['--progress'] as const : [] as const,
     ...topic.noSort ? ['--no-sort'] as const : [] as const,
   ] as const

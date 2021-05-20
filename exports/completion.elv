@@ -20,7 +20,7 @@ edit:completion:arg-completer[pdu] = [@words]{
             cand --max-depth 'Maximum depth to display the data (must be greater than 0)'
             cand --total-width 'Width of the visualization'
             cand --column-width 'Maximum widths of the tree column and width of the bar column'
-            cand --minimal-ratio 'Minimal size proportion required to appear'
+            cand --min-ratio 'Minimal size proportion required to appear'
             cand --top-down 'Print the tree top-down instead of bottom-up'
             cand --no-sort 'Preserve order of entries'
             cand --silent-errors 'Prevent filesystem error messages from appearing in stderr'

@@ -243,7 +243,7 @@ jobs:
       - name: 'Benchmark: extreme details'
         run: |
           commands=(
-            'pdu --minimal-ratio=0 tmp.sample'
+            'pdu --min-ratio=0 tmp.sample'
             'dutree tmp.sample'
             'du --apparent-size tmp.sample'
           )

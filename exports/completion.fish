@@ -3,7 +3,7 @@ complete -c pdu -n "__fish_use_subcommand" -l quantity -d 'Aspect of the files/d
 complete -c pdu -n "__fish_use_subcommand" -l max-depth -d 'Maximum depth to display the data (must be greater than 0)'
 complete -c pdu -n "__fish_use_subcommand" -l total-width -d 'Width of the visualization'
 complete -c pdu -n "__fish_use_subcommand" -l column-width -d 'Maximum widths of the tree column and width of the bar column'
-complete -c pdu -n "__fish_use_subcommand" -l minimal-ratio -d 'Minimal size proportion required to appear'
+complete -c pdu -n "__fish_use_subcommand" -l min-ratio -d 'Minimal size proportion required to appear'
 complete -c pdu -n "__fish_use_subcommand" -l top-down -d 'Print the tree top-down instead of bottom-up'
 complete -c pdu -n "__fish_use_subcommand" -l no-sort -d 'Preserve order of entries'
 complete -c pdu -n "__fish_use_subcommand" -l silent-errors -d 'Prevent filesystem error messages from appearing in stderr'

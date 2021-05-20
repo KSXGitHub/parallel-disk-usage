@@ -83,7 +83,7 @@ impl App {
                     bytes_format,
                     top_down,
                     max_depth,
-                    minimal_ratio,
+                    min_ratio,
                     no_sort,
                     ..
                 } = self.args
@@ -96,7 +96,7 @@ impl App {
                         files,
                         column_width_distribution,
                         max_depth,
-                        minimal_ratio,
+                        min_ratio,
                         no_sort,
                     }
                     .run();
