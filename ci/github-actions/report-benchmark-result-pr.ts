@@ -8,6 +8,7 @@ import * as env from './lib/env'
 
 const auth = env.load('GITHUB_TOKEN')
 const commitInfo = `* ref: ${context.issue.owner}/${context.issue.repo}@${context.sha}`
+const commentTitle = '## Benchmark Reports'
 
 function loadReport(category: SelfBenchmarkCategory, ext: reportFiles.Extension) {
   const { reportName } = parseSelfBenchmarkCategory(category)
@@ -53,7 +54,7 @@ function categoryReport(category: SelfBenchmarkCategory) {
 }
 
 const overallReport = [
-  '## Benchmark Reports',
+  commentTitle,
   '',
   commitInfo,
   '',
@@ -63,13 +64,33 @@ const overallReport = [
 async function main() {
   const github = getOctokit(auth).rest
 
-  // TODO: update created comment
-  await github.issues.createComment({
+  const sharedOptions = {
     issue_number: context.issue.number,
     owner: context.repo.owner,
     repo: context.repo.repo,
-    body: overallReport,
-  })
+  }
+
+  const allComments = await github.issues.listComments(sharedOptions)
+  const targetComments = allComments
+    .data
+    .filter(comment => comment.user?.login === 'github-actions[bot]')
+    .filter(comment => comment.body?.split('\n').includes(commentTitle))
+
+  if (!targetComments.length) {
+    await github.issues.createComment({
+      ...sharedOptions,
+      body: overallReport,
+    })
+    return
+  }
+
+  await Promise.all(targetComments.map(comment =>
+    github.issues.updateComment({
+      ...sharedOptions,
+      comment_id: comment.id,
+      body: overallReport,
+    })
+  ))
 }
 
 main().catch(error => {
