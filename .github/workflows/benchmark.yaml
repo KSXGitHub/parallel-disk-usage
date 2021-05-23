@@ -5,8 +5,8 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  self_benchmark:
-    name: Compare benchmark with itself
+  benchmark:
+    name: Benchmark
 
     runs-on: ubuntu-latest
 
@@ -108,45 +108,6 @@ jobs:
           name: benchmark-reports
           path: tmp.benchmark-report.*
 
-  competing_benchmark:
-    name: Compare benchmark with similar tools
-
-    runs-on: ubuntu-latest
-
-    # run benchmark sequentially to reduce noises
-    needs:
-      - self_benchmark
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Cache
-        uses: actions/cache@v2.1.5
-        timeout-minutes: 1
-        continue-on-error: true
-        if: matrix.os != 'macos-latest' # Cache causes errors on macOS
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
-            ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-
-
-      - uses: actions-rs/toolchain@v1.0.7
-        with:
-          profile: minimal
-          components: clippy
-          override: 'true'
-          default: 'true'
-
-      - name: Build pdu
-        run: |
-          cargo build --release
-          echo "$(pwd)/target/release" >> "$GITHUB_PATH"
-
       - name: Install dust
         env:
           REPO: https://github.com/bootandy/dust
@@ -169,18 +130,6 @@ jobs:
           chmod +x DUTREE.tmp/dutree
           echo "$(pwd)/DUTREE.tmp" >> "$GITHUB_PATH"
 
-      - name: Install hyperfine
-        env:
-          REPO: https://github.com/sharkdp/hyperfine
-          VERSION: '1.11.0'
-        run: |
-          mkdir -p HYPERFINE.tmp
-          archive_name="hyperfine-v${VERSION}-x86_64-unknown-linux-gnu"
-          curl -L "${REPO}/releases/download/v${VERSION}/${archive_name}.tar.gz" > tmp.hyperfine.tar.gz
-          tar xf tmp.hyperfine.tar.gz --directory=HYPERFINE.tmp
-          chmod +x "HYPERFINE.tmp/${archive_name}/hyperfine"
-          echo "$(pwd)/HYPERFINE.tmp/${archive_name}" >> "$GITHUB_PATH"
-
       - name: Inspect command locations
         run: |
           which pdu
@@ -195,12 +144,6 @@ jobs:
           dutree --version
           du --version
           hyperfine --version
-
-      - name: Prepare directory to be measured
-        run: |
-          mkdir -p tmp.sample
-          curl -L https://github.com/torvalds/linux/archive/refs/tags/v5.12.zip > tmp.sample.zip
-          unzip tmp.sample.zip -d tmp.sample
 
       - name: 'Benchmark: len'
         run: |
