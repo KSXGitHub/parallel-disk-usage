@@ -18,4 +18,5 @@ for (const { category, units } of SELF_BENCHMARK_MATRIX) {
   const hyperfineCommand = shCmd(['hyperfine', '--warmup=3', ...exportReports, ...unitNames, ...pduCommands])
   const shellCommand = `${hyperfineCommand} 2>&1 | tee ${reportFiles.getFileName(reportName, 'log')}`
   exec(...STRICT_BASH, '-c', shellCommand).exit(errexit)
+  console.error()
 }
