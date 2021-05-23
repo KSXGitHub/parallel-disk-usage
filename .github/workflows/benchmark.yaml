@@ -123,7 +123,7 @@ jobs:
           cd ci/github-actions
           pnpx tsc
 
-      - name: Benchmark against other versions of pdu
+      - name: Generate benchmark reports
         run: node ci/github-actions/benchmark.js tmp.sample
 
       - name: Post generated benchmark reports to pull request as a comment
