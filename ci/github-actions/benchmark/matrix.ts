@@ -74,3 +74,68 @@ export function getSelfBenchmarkHyperfineName<Version extends string>(
 }
 
 export const SELF_BENCHMARK_HYPERFINE_NAMES = UNITS.map(getSelfBenchmarkHyperfineName)
+
+export interface CompetingBenchmarkCategory {
+  readonly id: string
+  readonly pduCliArgs: readonly string[]
+  readonly competitors: ReadonlyArray<readonly [string, ...string[]]>
+}
+
+export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] = [
+  {
+    id: 'len',
+    pduCliArgs: ['--quantity=len'],
+    competitors: [
+      ['dust', '--apparent-size'],
+      ['dutree'],
+      ['du', '--apparent-size'],
+    ],
+  },
+  {
+    id: 'blksize',
+    pduCliArgs: ['--quantity=blksize'],
+    competitors: [
+      ['dust'],
+      ['dutree', '--usage'],
+      ['du'],
+    ],
+  },
+  {
+    id: 'top-down',
+    pduCliArgs: ['--top-down'],
+    competitors: [
+      ['dust', '--apparent-size', '--reverse'],
+      ['dutree'],
+    ],
+  },
+  {
+    id: 'summary',
+    pduCliArgs: ['--max-depth=1'],
+    competitors: [
+      ['dutree', '--summary'],
+      ['du', '--apparent-size', '--total'],
+    ],
+  },
+  {
+    id: 'extreme-details',
+    pduCliArgs: ['--min-ratio=0'],
+    competitors: [
+      ['dutree'],
+      ['du', '--apparent-size'],
+    ],
+  },
+  {
+    id: 'no-sort',
+    pduCliArgs: ['--no-sort'],
+    competitors: [
+      ['du', '--apparent-size'],
+    ],
+  },
+  {
+    id: 'no-sort+summary',
+    pduCliArgs: ['--no-sort', '--max-depth=1'],
+    competitors: [
+      ['du', '--apparent-size', '--total'],
+    ],
+  },
+]
