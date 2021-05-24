@@ -52,7 +52,7 @@ function regressionReport(item: RegressionItem) {
 }
 
 async function main() {
-  const commitInfo = `* ref: ${context.issue.owner}/${context.issue.repo}@${context.sha}`
+  const commitInfo = `commit: ${context.issue.owner}/${context.issue.repo}@${context.sha}`
   const commentTitle = '## Benchmark Reports'
 
   const regressionCollection = [...collectRegressions()]
