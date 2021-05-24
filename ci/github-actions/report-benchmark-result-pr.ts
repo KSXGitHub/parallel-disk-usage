@@ -56,8 +56,9 @@ async function main() {
   const commentTitle = '## Benchmark Reports'
 
   const regressionCollection = [...collectRegressions()]
+  const maxRegressionReports = 5
   const reportBody = regressionCollection.length
-    ? regressionCollection.slice(0, 5).map(regressionReport).join('\n')
+    ? regressionCollection.slice(0, maxRegressionReports).map(regressionReport).join('\n')
     : 'There are no regressions.'
   const overallReport = [
     commentTitle,
