@@ -56,17 +56,15 @@ function regressionReport(item: RegressionItem) {
 }
 
 const regressionCollection = [...collectRegressions()]
-if (!regressionCollection.length) {
-  console.error('There are no performance regressions.')
-  throw process.exit(0)
-}
-
+const reportBody = regressionCollection.length
+  ? regressionCollection.map(regressionReport).join('\n')
+  : 'There are no regressions.'
 const overallReport = [
   commentTitle,
   '',
   commitInfo,
   '',
-  ...regressionCollection.map(regressionReport),
+  reportBody,
 ].join('\n')
 
 async function main() {
