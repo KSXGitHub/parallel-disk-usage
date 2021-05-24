@@ -1,0 +1,24 @@
+# This PKGBUILD is not a full PKGBUILD
+# pkgname, pkgver, source, and sha1sums are to be generated
+pkgdesc='Create a filesystem tree from YAML'
+pkgrel=1
+arch=(x86_64)
+license=(MIT)
+url='https://github.com/KSXGitHub/parallel-disk-usage'
+provides=(parallel-disk-usage)
+conflicts=(parallel-disk-usage)
+sha1sums=(
+  "$_checksum"                  # for the pdu binary
+  "${_completion_checksums[@]}" # for the completion files
+  SKIP                          # for the readme file
+  SKIP                          # for the license file
+)
+
+package() {
+  install -Dm755 "pdu-$_checksum" "$pkgdir/usr/bin/pdu"
+  install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+  install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/$pkgname/LICENSE.md"
+  install -Dm644 "completion.$pkgver.bash" "$pkgdir/usr/share/bash-completion/completions/pdu"
+  install -Dm644 "completion.$pkgver.fish" "$pkgdir/usr/share/fish/completions/pdu.fish"
+  install -Dm644 "completion.$pkgver.zsh" "$pkgdir/usr/share/zsh/site-functions/_pdu"
+}
