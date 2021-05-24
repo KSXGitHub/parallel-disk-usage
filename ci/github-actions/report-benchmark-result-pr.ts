@@ -52,7 +52,6 @@ function regressionReport(item: RegressionItem) {
 }
 
 async function main() {
-  const commitInfo = `commit: ${context.issue.owner}/${context.issue.repo}@${context.sha}`
   const commentTitle = '## Performance Regression Reports'
 
   const regressionCollection = [...collectRegressions()]
@@ -63,7 +62,7 @@ async function main() {
   const overallReport = [
     commentTitle,
     '',
-    commitInfo,
+    `commit: ${context.issue.owner}/${context.issue.repo}@${context.sha}`,
     '',
     reportBody,
   ].join('\n')
