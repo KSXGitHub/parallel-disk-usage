@@ -36,7 +36,7 @@ function codeBlock(category: SelfBenchmarkCategory, summary: string, lang: repor
 }
 
 function regressionReport(item: RegressionItem) {
-  const { category, regressions } = item
+  const { category } = item
   const { commandSuffix } = parseSelfBenchmarkCategory(category)
 
   return [
