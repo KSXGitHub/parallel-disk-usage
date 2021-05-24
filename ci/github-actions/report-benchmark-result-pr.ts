@@ -57,7 +57,7 @@ async function main() {
 
   const regressionCollection = [...collectRegressions()]
   const reportBody = regressionCollection.length
-    ? regressionCollection.map(regressionReport).join('\n')
+    ? regressionCollection.slice(0, 5).map(regressionReport).join('\n')
     : 'There are no regressions.'
   const overallReport = [
     commentTitle,
