@@ -1,7 +1,7 @@
 name: Benchmark against competitors
 
 on:
-  workflow_dispatch: {}
+  repository_dispatch: {}
 
 jobs:
   competing_benchmark:
