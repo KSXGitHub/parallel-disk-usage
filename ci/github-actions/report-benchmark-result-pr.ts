@@ -60,6 +60,7 @@ async function main() {
   const reportBody = randomRegressions.length
     ? randomRegressions.map(regressionReport).join('\n')
     : 'There are no regressions.'
+
   const overallReport = [
     commentTitle,
     '',
