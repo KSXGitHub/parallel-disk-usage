@@ -10,6 +10,7 @@ specifiers:
   '@types/node-fetch': ^2.5.10
   '@types/shell-escape': ^0.2.0
   ajv: ^8.5.0
+  ajv-formats: ^2.1.0
   exec-inline: ^0.0.5
   fs-extra: ^10.0.0
   node-fetch: ^2.6.1
@@ -26,6 +27,7 @@ dependencies:
   '@types/node-fetch': 2.5.10
   '@types/shell-escape': 0.2.0
   ajv: 8.5.0
+  ajv-formats: 2.1.0
   exec-inline: 0.0.5
   fs-extra: 10.0.0
   node-fetch: 2.6.1
@@ -201,6 +203,15 @@ packages:
 
   /@types/shell-escape/0.2.0:
     resolution: {integrity: sha512-7kUdtJtUylvyISJbe9FMcvMTjRdP0EvNDO1WbT0lT22k/IPBiPRTpmWaKu5HTWLCGLQRWVHrzVHZktTDvvR23g==}
+    dev: false
+
+  /ajv-formats/2.1.0:
+    resolution: {integrity: sha512-USH2jBb+C/hIpwD2iRjp0pe0k+MvzG0mlSn/FIdCgQhUb9ALPRjt2KIQdfZDS9r0ZIeUAg7gOu9KL0PFqGqr5Q==}
+    peerDependenciesMeta:
+      ajv:
+        optional: true
+    dependencies:
+      ajv: 8.5.0
     dev: false
 
   /ajv/8.5.0:

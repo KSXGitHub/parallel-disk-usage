@@ -1,8 +1,8 @@
 import { Type, Static } from '@sinclair/typebox'
-import Ajv from 'ajv'
 import console from 'console'
 import { readFileSync } from 'fs'
 import process from 'process'
+import createAjv from '../lib/ajv'
 
 export const PREFIX = 'tmp.benchmark-report'
 
@@ -47,7 +47,7 @@ export type Report = Static<typeof Report>
 export function loadByPath(path: string): Report {
   const json = readFileSync(path, 'utf-8')
   const data = JSON.parse(json)
-  const ajv = new Ajv()
+  const ajv = createAjv()
   const valid = ajv.validate(Report, data)
   if (valid) return data as Report
   console.error('ValidationError', { data })
