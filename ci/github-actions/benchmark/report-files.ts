@@ -31,17 +31,22 @@ export const hyperfineArgs = <Name extends string>(name: Name) => [
   arg(name, 'markdown'),
 ]
 
-export const ReportUnit = Type.Object({
+const postProcessSchema = <Schema extends {}>(schema: Schema) => ({
+  ...schema,
+  additionalProperties: true,
+})
+
+export const ReportUnit = postProcessSchema(Type.Object({
   command: Type.String(),
   mean: Type.Number(),
   min: Type.Number(),
   max: Type.Number(),
-})
+}))
 export type ReportUnit = Static<typeof ReportUnit>
 
-export const Report = Type.Object({
+export const Report = postProcessSchema(Type.Object({
   results: Type.Array(ReportUnit),
-})
+}))
 export type Report = Static<typeof Report>
 
 export function loadByPath(path: string): Report {
