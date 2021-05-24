@@ -6,6 +6,7 @@ import { Item as RegressionItem, collectRegressions } from './benchmark/collect-
 import { SelfBenchmarkCategory, parseSelfBenchmarkCategory } from './benchmark/matrix'
 import * as reportFiles from './benchmark/report-files'
 import * as env from './lib/env'
+import pickRandom from './lib/pick-random'
 
 function loadReport(category: SelfBenchmarkCategory, ext: reportFiles.Extension) {
   const { reportName } = parseSelfBenchmarkCategory(category)
@@ -54,10 +55,9 @@ function regressionReport(item: RegressionItem) {
 async function main() {
   const commentTitle = '## Performance Regression Reports'
 
-  const regressionCollection = [...collectRegressions()]
-  const maxRegressionReports = 5
+  const regressionCollection = [...pickRandom([...collectRegressions()], 5)]
   const reportBody = regressionCollection.length
-    ? regressionCollection.slice(0, maxRegressionReports).map(regressionReport).join('\n')
+    ? regressionCollection.map(regressionReport).join('\n')
     : 'There are no regressions.'
   const overallReport = [
     commentTitle,
