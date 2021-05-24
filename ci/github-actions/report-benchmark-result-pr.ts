@@ -55,9 +55,10 @@ function regressionReport(item: RegressionItem) {
 async function main() {
   const commentTitle = '## Performance Regression Reports'
 
-  const regressionCollection = [...pickRandom([...collectRegressions()], 5)]
-  const reportBody = regressionCollection.length
-    ? regressionCollection.map(regressionReport).join('\n')
+  const regressionCollection = [...collectRegressions()]
+  const randomRegressions = [...pickRandom(regressionCollection, 5)]
+  const reportBody = randomRegressions.length
+    ? randomRegressions.map(regressionReport).join('\n')
     : 'There are no regressions.'
   const overallReport = [
     commentTitle,
