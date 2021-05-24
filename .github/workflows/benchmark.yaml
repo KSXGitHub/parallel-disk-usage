@@ -123,6 +123,9 @@ jobs:
           cd ci/github-actions
           pnpx tsc
 
+      - name: Download released versions of pdu
+        run: node ci/github-actions/download-released-binaries.js
+
       - name: Generate benchmark reports
         run: node ci/github-actions/benchmark.js tmp.sample
 

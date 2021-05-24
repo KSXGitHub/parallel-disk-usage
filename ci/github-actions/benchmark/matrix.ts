@@ -35,7 +35,9 @@ export function parseSelfBenchmarkCategory(category: SelfBenchmarkCategory) {
   return { category, reportName, commandSuffix }
 }
 
-export const RELEASED_PDU_VERSIONS = [] as const
+export const RELEASED_PDU_VERSIONS = [
+  '0.0.0-rc.0',
+] as const
 
 export interface SelfBenchmarkUnit {
   readonly pduVersion?: string
