@@ -7,10 +7,6 @@ import { SelfBenchmarkCategory, parseSelfBenchmarkCategory } from './benchmark/m
 import * as reportFiles from './benchmark/report-files'
 import * as env from './lib/env'
 
-const auth = env.load('GITHUB_TOKEN')
-const commitInfo = `* ref: ${context.issue.owner}/${context.issue.repo}@${context.sha}`
-const commentTitle = '## Benchmark Reports'
-
 function loadReport(category: SelfBenchmarkCategory, ext: reportFiles.Extension) {
   const { reportName } = parseSelfBenchmarkCategory(category)
   const filePath = reportFiles.getFileName(reportName, ext)
@@ -55,19 +51,23 @@ function regressionReport(item: RegressionItem) {
   ].join('\n')
 }
 
-const regressionCollection = [...collectRegressions()]
-const reportBody = regressionCollection.length
-  ? regressionCollection.map(regressionReport).join('\n')
-  : 'There are no regressions.'
-const overallReport = [
-  commentTitle,
-  '',
-  commitInfo,
-  '',
-  reportBody,
-].join('\n')
-
 async function main() {
+  const commitInfo = `* ref: ${context.issue.owner}/${context.issue.repo}@${context.sha}`
+  const commentTitle = '## Benchmark Reports'
+
+  const regressionCollection = [...collectRegressions()]
+  const reportBody = regressionCollection.length
+    ? regressionCollection.map(regressionReport).join('\n')
+    : 'There are no regressions.'
+  const overallReport = [
+    commentTitle,
+    '',
+    commitInfo,
+    '',
+    reportBody,
+  ].join('\n')
+
+  const auth = env.load('GITHUB_TOKEN')
   const github = getOctokit(auth).rest
 
   const sharedOptions = {
