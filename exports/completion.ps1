@@ -25,7 +25,7 @@ Register-ArgumentCompleter -Native -CommandName 'pdu' -ScriptBlock {
             [CompletionResult]::new('--max-depth', 'max-depth', [CompletionResultType]::ParameterName, 'Maximum depth to display the data (must be greater than 0)')
             [CompletionResult]::new('--total-width', 'total-width', [CompletionResultType]::ParameterName, 'Width of the visualization')
             [CompletionResult]::new('--column-width', 'column-width', [CompletionResultType]::ParameterName, 'Maximum widths of the tree column and width of the bar column')
-            [CompletionResult]::new('--minimal-ratio', 'minimal-ratio', [CompletionResultType]::ParameterName, 'Minimal size proportion required to appear')
+            [CompletionResult]::new('--min-ratio', 'min-ratio', [CompletionResultType]::ParameterName, 'Minimal size proportion required to appear')
             [CompletionResult]::new('--top-down', 'top-down', [CompletionResultType]::ParameterName, 'Print the tree top-down instead of bottom-up')
             [CompletionResult]::new('--no-sort', 'no-sort', [CompletionResultType]::ParameterName, 'Preserve order of entries')
             [CompletionResult]::new('--silent-errors', 'silent-errors', [CompletionResultType]::ParameterName, 'Prevent filesystem error messages from appearing in stderr')

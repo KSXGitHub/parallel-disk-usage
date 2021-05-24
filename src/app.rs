@@ -42,10 +42,7 @@ impl App {
         //
         // The other operations which are invoked frequently should not utilize dynamic dispatch.
 
-        let column_width_distribution = self
-            .args
-            .column_width_distribution()
-            .expect("get column width distribution");
+        let column_width_distribution = self.args.column_width_distribution();
 
         let report_error = if self.args.silent_errors {
             ErrorReport::SILENT
@@ -86,7 +83,7 @@ impl App {
                     bytes_format,
                     top_down,
                     max_depth,
-                    minimal_ratio,
+                    min_ratio,
                     no_sort,
                     ..
                 } = self.args
@@ -99,7 +96,7 @@ impl App {
                         files,
                         column_width_distribution,
                         max_depth,
-                        minimal_ratio,
+                        min_ratio,
                         no_sort,
                     }
                     .run();

@@ -1,0 +1,456 @@
+name: Deployment
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  test:
+    name: Test
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          components: clippy, rustfmt
+          override: 'true'
+          default: 'true'
+
+      - name: Build (dev)
+        run: cargo build --locked
+
+      - name: Test (dev)
+        run: cargo test
+
+      - name: Build (release)
+        run: cargo build --locked --release
+
+      - name: Test (release)
+        run: cargo test --release
+
+      - name: Check formatting
+        if: runner.os == 'Linux'
+        run: cargo fmt -- --check
+
+      - name: Clippy check (dev)
+        if: runner.os == 'Linux'
+        run: cargo clippy -- -D warnings
+
+      - name: Clippy check (release)
+        if: runner.os == 'Linux'
+        run: cargo clippy --release -- -D warnings
+
+  build_linux:
+    name: Build
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1.0.6
+        with:
+          profile: minimal
+          target: ${{ matrix.target }}
+          override: 'true'
+          default: 'true'
+
+      - name: Build
+        run: cargo build --target ${{ matrix.target }} --release
+
+      - name: Strip all debug symbols
+        run: strip --strip-all target/${{ matrix.target }}/release/pdu
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: pdu-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/pdu
+
+  build_macos:
+    name: Build
+
+    runs-on: macos-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        target:
+          - x86_64-apple-darwin
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1.0.6
+        with:
+          profile: minimal
+          target: ${{ matrix.target }}
+          override: 'true'
+          default: 'true'
+
+      - name: Build
+        run: cargo build --target ${{ matrix.target }} --release
+
+      - name: Strip all debug symbols
+        run: strip target/${{ matrix.target }}/release/pdu
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: pdu-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/pdu
+
+  build_windows:
+    name: Build
+
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        target:
+          - x86_64-pc-windows-gnu
+          - x86_64-pc-windows-msvc
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1.0.6
+        with:
+          profile: minimal
+          target: ${{ matrix.target }}
+          override: 'true'
+          default: 'true'
+
+      - name: Build
+        run: cargo build --target ${{ matrix.target }} --release
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: pdu-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/pdu.exe
+
+  create_release:
+    name: Create Release
+
+    needs:
+      - test
+      - build_linux
+      - build_macos
+      - build_windows
+
+    runs-on: ubuntu-latest
+
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      release_type: ${{ steps.release_type.outputs.release_type }}
+      is_release: ${{ steps.release_type.outputs.is_release }}
+      is_prerelease: ${{ steps.release_type.outputs.is_prerelease }}
+      release_tag: ${{ steps.release_type.outputs.release_tag }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install APT packages
+        run: sudo apt install -y python3 python3-toml
+
+      - name: Determine release type
+        id: release_type
+        run: ./ci/github-actions/release-type.py3
+        env:
+          RELEASE_TAG: ${{ github.ref }}
+
+      - name: Create Release
+        id: create_release
+        if: steps.release_type.outputs.is_release == 'true'
+        uses: actions/create-release@v1.1.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.release_type.outputs.release_tag }}
+          release_name: ${{ steps.release_type.outputs.release_tag }}
+          draft: 'false'
+          prerelease: ${{ steps.release_type.outputs.is_prerelease }}
+
+  upload_generated_files:
+    name: Upload Generated Files
+
+    needs:
+      - create_release
+      - test
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Upload Tab-Completion file for Bash
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./exports/completion.bash
+          asset_name: completion.bash
+          asset_content_type: text/plain
+
+      - name: Upload Tab-Completion file for Fish
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./exports/completion.fish
+          asset_name: completion.fish
+          asset_content_type: text/plain
+
+      - name: Upload Tab-Completion file for Zsh
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./exports/completion.zsh
+          asset_name: completion.zsh
+          asset_content_type: text/plain
+
+      - name: Upload Tab-Completion file for PowerShell
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./exports/completion.ps1
+          asset_name: completion.ps1
+          asset_content_type: text/plain
+
+      - name: Upload Tab-Completion file for Elvish
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./exports/completion.elv
+          asset_name: completion.elv
+          asset_content_type: text/plain
+
+  upload_release_assets:
+    name: Upload Release Assets
+
+    needs:
+      - create_release
+      - test
+      - build_linux
+      - build_macos
+      - build_windows
+
+    runs-on: ubuntu-latest
+
+    if: needs.create_release.outputs.is_release == 'true'
+
+    strategy:
+      fail-fast: true
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+          - x86_64-pc-windows-gnu
+          - x86_64-pc-windows-msvc
+          - x86_64-apple-darwin
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download artifact
+        uses: actions/download-artifact@v2.0.9
+        with:
+          name: pdu-${{ matrix.target }}
+
+      - name: Release executable (UNIX)
+        if: "!contains(matrix.target, 'windows')"
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./pdu
+          asset_name: pdu-${{ matrix.target }}
+          asset_content_type: application/x-pie-executable
+
+      - name: Release executable (Windows)
+        if: contains(matrix.target, 'windows')
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./pdu.exe
+          asset_name: pdu-${{ matrix.target }}.exe
+          asset_content_type: application/x-dosexec
+
+  upload_checksums:
+    name: Upload Checksums
+
+    needs:
+      - create_release
+      - test
+      - build_linux
+      - build_macos
+      - build_windows
+
+    if: needs.create_release.outputs.is_release == 'true'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2.0.9
+        with:
+          path: ./downloads
+
+      - name: Flatten directory
+        run: ./ci/github-actions/expose-release-artifacts.sh
+
+      - name: Create checksums
+        run: ./ci/github-actions/create-checksums.sh
+
+      - name: Upload as artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: checksums
+          path: sha*sum.txt
+
+      - name: Release sha1sum
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./sha1sum.txt
+          asset_name: sha1sum.txt
+          asset_content_type: text/plain
+
+      - name: Release sha256sum
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./sha256sum.txt
+          asset_name: sha256sum.txt
+          asset_content_type: text/plain
+
+      - name: Release sha512sum
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./sha512sum.txt
+          asset_name: sha512sum.txt
+          asset_content_type: text/plain
+
+  publish_aur_package:
+    name: Publish AUR package
+
+    needs:
+      - create_release
+      - test
+      - build_linux
+      - upload_release_assets
+
+    if: needs.create_release.outputs.release_type == 'official'
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download checksums
+        uses: actions/download-artifact@v2.0.9
+        with:
+          name: checksums
+          path: ./checksums
+
+      - name: Generate PKGBUILD
+        env:
+          TARGET: ${{ matrix.target }}
+          RELEASE_TAG: ${{ needs.create_release.outputs.release_tag }}
+        run: ./ci/github-actions/generate-pkgbuild.py3
+
+      - name: Publish pdu to the AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v2.2.4
+        with:
+          pkgname: parallel-disk-usage
+          pkgbuild: ./pkgbuild/parallel-disk-usage/PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: ${{ needs.create_release.outputs.release_tag }}
+          force_push: 'true'
+
+      - name: Publish parallel-disk-usage-bin to the AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v2.2.4
+        with:
+          pkgname: parallel-disk-usage-bin
+          pkgbuild: ./pkgbuild/parallel-disk-usage-bin/PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: ${{ needs.create_release.outputs.release_tag }}
+          force_push: 'true'
+
+  publish_cargo_crate:
+    name: Publish Cargo crate
+
+    needs:
+      - create_release
+      - test
+
+    if: needs.create_release.outputs.release_type == 'official'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1.0.6
+        with:
+          profile: minimal
+          override: 'true'
+          default: 'true'
+
+      - name: Login
+        run: cargo login ${{ secrets.CRATE_AUTH_TOKEN }}
+
+      - name: Publish
+        run: cargo publish

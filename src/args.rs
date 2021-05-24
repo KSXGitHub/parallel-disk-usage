@@ -4,9 +4,7 @@ pub mod quantity;
 pub use fraction::Fraction;
 pub use quantity::Quantity;
 
-use crate::{
-    bytes_format::BytesFormat, runtime_error::RuntimeError, visualizer::ColumnWidthDistribution,
-};
+use crate::{bytes_format::BytesFormat, visualizer::ColumnWidthDistribution};
 use std::{num::NonZeroUsize, path::PathBuf};
 use structopt::StructOpt;
 use strum::VariantNames;
@@ -46,10 +44,10 @@ use text_block_macros::text_block;
         "    $ gdu --bytes-format=binary"
         ""
         "    Show disk usage chart of all entries regardless of size"
-        "    $ gdu --minimal-ratio=0"
+        "    $ gdu --min-ratio=0"
         ""
         "    Only show disk usage chart of entries whose size is at least 5% of total"
-        "    $ gdu --minimal-ratio=0.05"
+        "    $ gdu --min-ratio=0.05"
     },
 )]
 pub struct Args {
@@ -83,7 +81,7 @@ pub struct Args {
 
     /// Minimal size proportion required to appear.
     #[structopt(long, default_value = "0.01")]
-    pub minimal_ratio: Fraction,
+    pub min_ratio: Fraction,
 
     /// Preserve order of entries.
     #[structopt(long)]
@@ -100,14 +98,14 @@ pub struct Args {
 
 impl Args {
     /// Deduce [`ColumnWidthDistribution`] from `--total-width` or `--column-width`.
-    pub(crate) fn column_width_distribution(
-        &self,
-    ) -> Result<ColumnWidthDistribution, RuntimeError> {
-        Ok(match (self.total_width, self.column_width.as_deref()) {
+    pub(crate) fn column_width_distribution(&self) -> ColumnWidthDistribution {
+        match (self.total_width, self.column_width.as_deref()) {
             (None, None) => {
-                let (Width(width), _) =
-                    terminal_size().ok_or(RuntimeError::TerminalWidthInferenceFailure)?;
-                ColumnWidthDistribution::total(width as usize)
+                ColumnWidthDistribution::total(if let Some((Width(width), _)) = terminal_size() {
+                    width as usize
+                } else {
+                    150
+                })
             }
             (Some(total_width), None) => ColumnWidthDistribution::total(total_width),
             (None, Some([tree_width, bar_width])) => {
@@ -117,6 +115,6 @@ impl Args {
                 dbg!(total_width, column_width);
                 panic!("Something goes wrong")
             }
-        })
+        }
     }
 }

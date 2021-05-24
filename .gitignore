@@ -4,3 +4,4 @@ tmp
 tmp.*
 .vscode
 *.sublime-*
+node_modules

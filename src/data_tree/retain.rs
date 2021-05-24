@@ -22,21 +22,21 @@ where
     }
 
     /// Recursively cull all descendants whose data are too small relative to root.
-    pub(crate) fn par_cull_insignificant_data(&mut self, minimal_ratio: f32)
+    pub(crate) fn par_cull_insignificant_data(&mut self, min_ratio: f32)
     where
         Data: Into<u64>,
     {
-        let minimal = self.data().into() as f32 * minimal_ratio;
+        let minimal = self.data().into() as f32 * min_ratio;
         self.par_retain(|descendant| descendant.data().into() as f32 >= minimal);
     }
 
     /// Process the tree via [`par_cull_insignificant_data`](Self::par_cull_insignificant_data) method.
     #[cfg(test)]
-    fn into_insignificant_data_par_culled(mut self, minimal_ratio: f32) -> Self
+    fn into_insignificant_data_par_culled(mut self, min_ratio: f32) -> Self
     where
         Data: Into<u64>,
     {
-        self.par_cull_insignificant_data(minimal_ratio);
+        self.par_cull_insignificant_data(min_ratio);
         self
     }
 }

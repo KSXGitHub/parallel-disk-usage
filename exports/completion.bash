@@ -20,7 +20,7 @@ _pdu() {
 
     case "${cmd}" in
         pdu)
-            opts=" -h -V  --top-down --no-sort --silent-errors --progress --help --version --bytes-format --quantity --max-depth --total-width --column-width --minimal-ratio  <files>... "
+            opts=" -h -V  --top-down --no-sort --silent-errors --progress --help --version --bytes-format --quantity --max-depth --total-width --column-width --min-ratio  <files>... "
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -47,7 +47,7 @@ _pdu() {
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
-                --minimal-ratio)
+                --min-ratio)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;

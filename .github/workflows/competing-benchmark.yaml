@@ -1,11 +1,10 @@
-name: Benchmark
+name: Benchmark against competitors
 
 on:
-  pull_request: {}
   repository_dispatch: {}
 
 jobs:
-  benchmark:
+  competing_benchmark:
     name: Benchmark
 
     runs-on: ubuntu-latest
@@ -40,6 +39,28 @@ jobs:
           cargo build --release
           echo "$(pwd)/target/release" >> "$GITHUB_PATH"
 
+      - name: Install dust
+        env:
+          REPO: https://github.com/bootandy/dust
+          VERSION: '0.5.4'
+        run: |
+          mkdir -p DUST.tmp
+          archive_name="dust-v${VERSION}-x86_64-unknown-linux-gnu"
+          curl -L "${REPO}/releases/download/v${VERSION}/${archive_name}.tar.gz" > tmp.dust.tar.gz
+          tar xf tmp.dust.tar.gz --directory=DUST.tmp
+          chmod +x "DUST.tmp/${archive_name}/dust"
+          echo "$(pwd)/DUST.tmp/${archive_name}" >> "$GITHUB_PATH"
+
+      - name: Install dutree
+        env:
+          REPO: https://github.com/nachoparker/dutree
+          VERSION: '0.2.15'
+        run: |
+          mkdir -p DUTREE.tmp
+          curl -L "${REPO}/releases/download/v${VERSION}/dutree" > DUTREE.tmp/dutree
+          chmod +x DUTREE.tmp/dutree
+          echo "$(pwd)/DUTREE.tmp" >> "$GITHUB_PATH"
+
       - name: Install hyperfine
         env:
           REPO: https://github.com/sharkdp/hyperfine
@@ -52,10 +73,19 @@ jobs:
           chmod +x "HYPERFINE.tmp/${archive_name}/hyperfine"
           echo "$(pwd)/HYPERFINE.tmp/${archive_name}" >> "$GITHUB_PATH"
 
-      - name: Inspect commands
+      - name: Inspect command locations
         run: |
           which pdu
+          which dust
+          which dutree
+          which du
           which hyperfine
+
+      - name: Inspect versions of the other tools
+        run: |
+          dust --version
+          dutree --version
+          du --version
           hyperfine --version
 
       - name: Prepare directory to be measured
@@ -92,20 +122,8 @@ jobs:
           cd ci/github-actions
           pnpx tsc
 
-      - name: Download released versions of pdu
-        run: node ci/github-actions/download-released-binaries.js
-
-      - name: Compare benchmark of pdu against other versions of itself
-        run: node ci/github-actions/benchmark.js tmp.sample
-
-      - name: Post generated benchmark reports to pull request as a comment
-        if: github.event_name == 'pull_request'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node ci/github-actions/report-benchmark-result-pr.js
-
-      - name: Check for performance regressions
-        run: node ci/github-actions/check-for-performance-regressions.js
+      - name: Compare benchmark of pdu against its competitors
+        run: node ci/github-actions/competing-benchmark.js
 
       - name: Upload benchmark reports
         uses: actions/upload-artifact@v2.2.3
