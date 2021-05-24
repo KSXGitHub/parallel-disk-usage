@@ -2,7 +2,8 @@ import { getOctokit, context } from '@actions/github'
 import console from 'console'
 import { readFileSync } from 'fs'
 import process from 'process'
-import { SELF_BENCHMARK_CATEGORIES, SelfBenchmarkCategory, parseSelfBenchmarkCategory } from './benchmark/matrix'
+import { Item as RegressionItem, collectRegressions } from './benchmark/collect-regressions'
+import { SelfBenchmarkCategory, parseSelfBenchmarkCategory } from './benchmark/matrix'
 import * as reportFiles from './benchmark/report-files'
 import * as env from './lib/env'
 
@@ -38,7 +39,8 @@ function codeBlock(category: SelfBenchmarkCategory, summary: string, lang: repor
   ].join('\n')
 }
 
-function categoryReport(category: SelfBenchmarkCategory) {
+function regressionReport(item: RegressionItem) {
+  const { category, regressions } = item
   const { commandSuffix } = parseSelfBenchmarkCategory(category)
 
   return [
@@ -53,12 +55,18 @@ function categoryReport(category: SelfBenchmarkCategory) {
   ].join('\n')
 }
 
+const regressionCollection = [...collectRegressions()]
+if (!regressionCollection.length) {
+  console.error('There are no performance regressions.')
+  throw process.exit(0)
+}
+
 const overallReport = [
   commentTitle,
   '',
   commitInfo,
   '',
-  ...SELF_BENCHMARK_CATEGORIES.map(categoryReport),
+  ...regressionCollection.map(regressionReport),
 ].join('\n')
 
 async function main() {
