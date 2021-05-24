@@ -39,6 +39,8 @@ export const RELEASED_PDU_VERSIONS = [
   '0.0.0-rc.0',
 ] as const
 
+export const ACCEPTABLE_PERFORMANCE_REGRESSION = 1.1 // 10%
+
 export interface SelfBenchmarkUnit {
   readonly pduVersion?: string
   readonly pduExecName: string

@@ -1,3 +1,9 @@
+import { Type, Static } from '@sinclair/typebox'
+import Ajv from 'ajv'
+import console from 'console'
+import { readFileSync } from 'fs'
+import process from 'process'
+
 export const PREFIX = 'tmp.benchmark-report'
 
 export type Prefix = typeof PREFIX
@@ -24,3 +30,50 @@ export const hyperfineArgs = <Name extends string>(name: Name) => [
   arg(name, 'json'),
   arg(name, 'markdown'),
 ]
+
+export const ReportUnit = Type.Object({
+  command: Type.String(),
+  mean: Type.Number(),
+  min: Type.Number(),
+  max: Type.Number(),
+})
+export type ReportUnit = Static<typeof ReportUnit>
+
+export const Report = Type.Object({
+  results: Type.Array(ReportUnit),
+})
+export type Report = Static<typeof Report>
+
+export function loadByPath(path: string): Report {
+  const json = readFileSync(path, 'utf-8')
+  const data = JSON.parse(json)
+  const ajv = new Ajv()
+  const valid = ajv.validate(Report, data)
+  if (valid) return data as Report
+  console.error('ValidationError', { data })
+  console.error(ajv.errorsText(ajv.errors))
+  throw process.exit(1)
+}
+
+export const isRegressed = (
+  current: ReportUnit,
+  standard: ReportUnit,
+  maxRatio: number,
+) => current.mean > standard.mean * maxRatio
+
+export interface Regression {
+  readonly current: ReportUnit
+  readonly standard: ReportUnit
+}
+
+export function* detectRegressions(report: Report, maxRatio: number): Generator<Regression> {
+  const [current, ...standards] = report.results
+  if (!current) {
+    throw new Error(`No reports`)
+  }
+  for (const standard of standards) {
+    if (isRegressed(current, standard, maxRatio)) {
+      yield { current, standard }
+    }
+  }
+}
