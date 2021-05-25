@@ -468,8 +468,8 @@ jobs:
       - upload_generated_files
       - upload_release_assets
       - upload_checksums
-      - publish_aur_package
-      - publish_cargo_crate
+      # - publish_aur_package
+      # - publish_cargo_crate
 
     if: needs.create_release.outputs.is_release == 'true'
 
