@@ -592,7 +592,7 @@ jobs:
         run: node ci/github-actions/competing-benchmark.js
 
       - name: Create archive of benchmark reports
-        run: tar czf tmp.benchmark-reports.tar.gz tmp.benchmark-reports.*
+        run: tar czf tmp.benchmark-reports.tar.gz tmp.benchmark-report.*
 
       - name: Upload benchmark reports
         uses: actions/upload-release-asset@v1.0.2
