@@ -1,5 +1,4 @@
 import console from 'console'
-import exec from 'exec-inline'
 import process from 'process'
 import shCmd from 'shell-escape'
 import {
@@ -9,9 +8,9 @@ import {
 } from './benchmark/matrix.js'
 import * as reportFiles from './benchmark/report-files.js'
 import STRICT_BASH from './benchmark/strict-bash.js'
+import exec from './lib/exec-inline.js'
 
 const pduTargets = process.argv.slice(2)
-const errexit = (param: { readonly status: number | null }) => param.status !== 0
 
 for (const { category, units } of SELF_BENCHMARK_MATRIX) {
   const { commandSuffix, reportName } = parseSelfBenchmarkCategory(category)
@@ -21,6 +20,6 @@ for (const { category, units } of SELF_BENCHMARK_MATRIX) {
   const exportReports = reportFiles.hyperfineArgs(reportName)
   const hyperfineCommand = shCmd(['hyperfine', '--warmup=3', ...exportReports, ...unitNames, ...pduCommands])
   const shellCommand = `${hyperfineCommand} 2>&1 | tee ${reportFiles.getFileName(reportName, 'log')}`
-  exec(...STRICT_BASH, '-c', shellCommand).exit(errexit)
+  exec(...STRICT_BASH, '-c', shellCommand).errexit()
   console.error()
 }

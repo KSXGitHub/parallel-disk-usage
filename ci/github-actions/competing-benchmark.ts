@@ -1,11 +1,9 @@
 import console from 'console'
-import exec from 'exec-inline'
 import shCmd from 'shell-escape'
 import { COMPETING_BENCHMARK_MATRIX } from './benchmark/matrix.js'
 import * as reportFiles from './benchmark/report-files.js'
 import STRICT_BASH from './benchmark/strict-bash.js'
-
-const errexit = (param: { readonly status: number | null }) => param.status !== 0
+import exec from './lib/exec-inline.js'
 
 for (const { id, pduCliArgs, competitors } of COMPETING_BENCHMARK_MATRIX) {
   const commands = [
@@ -18,6 +16,6 @@ for (const { id, pduCliArgs, competitors } of COMPETING_BENCHMARK_MATRIX) {
   const commandLog = reportFiles.getFileName(reportName, 'log')
   const hyperfineCommand = shCmd(['hyperfine', '--warmup=3', ...exportReports, ...commands])
   const shellCommand = `${hyperfineCommand} 2>&1 | tee ${commandLog}`
-  exec(...STRICT_BASH, '-c', shellCommand).exit(errexit)
+  exec(...STRICT_BASH, '-c', shellCommand).errexit()
   console.error()
 }
