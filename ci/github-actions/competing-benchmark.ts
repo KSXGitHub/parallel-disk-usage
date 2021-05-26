@@ -1,9 +1,9 @@
 import console from 'console'
 import exec from 'exec-inline'
 import shCmd from 'shell-escape'
-import { COMPETING_BENCHMARK_MATRIX } from './benchmark/matrix'
-import * as reportFiles from './benchmark/report-files'
-import STRICT_BASH from './benchmark/strict-bash'
+import { COMPETING_BENCHMARK_MATRIX } from './benchmark/matrix.js'
+import * as reportFiles from './benchmark/report-files.js'
+import STRICT_BASH from './benchmark/strict-bash.js'
 
 const errexit = (param: { readonly status: number | null }) => param.status !== 0
 

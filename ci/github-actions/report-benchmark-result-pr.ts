@@ -2,11 +2,11 @@ import { getOctokit, context } from '@actions/github'
 import console from 'console'
 import { readFileSync } from 'fs'
 import process from 'process'
-import { Item as RegressionItem, collectRegressions } from './benchmark/collect-regressions'
-import { SelfBenchmarkCategory, parseSelfBenchmarkCategory } from './benchmark/matrix'
-import * as reportFiles from './benchmark/report-files'
-import * as env from './lib/env'
-import pickRandom from './lib/pick-random'
+import { Item as RegressionItem, collectRegressions } from './benchmark/collect-regressions.js'
+import { SelfBenchmarkCategory, parseSelfBenchmarkCategory } from './benchmark/matrix.js'
+import * as reportFiles from './benchmark/report-files.js'
+import * as env from './lib/env.js'
+import pickRandom from './lib/pick-random.js'
 
 function loadReport(category: SelfBenchmarkCategory, ext: reportFiles.Extension) {
   const { reportName } = parseSelfBenchmarkCategory(category)

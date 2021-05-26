@@ -2,7 +2,7 @@ import { Type, Static } from '@sinclair/typebox'
 import console from 'console'
 import { readFileSync } from 'fs'
 import process from 'process'
-import createAjv from '../lib/ajv'
+import createAjv from '../lib/ajv.js'
 
 export const PREFIX = 'tmp.benchmark-report'
 

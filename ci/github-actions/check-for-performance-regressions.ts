@@ -1,7 +1,7 @@
 import console from 'console'
 import process from 'process'
-import collectRegressions from './benchmark/collect-regressions'
-import { ACCEPTABLE_PERFORMANCE_REGRESSION } from './benchmark/matrix'
+import collectRegressions from './benchmark/collect-regressions.js'
+import { ACCEPTABLE_PERFORMANCE_REGRESSION } from './benchmark/matrix.js'
 
 const regressionCollection = [...collectRegressions()]
 

@@ -1,4 +1,4 @@
-import { getReleasedPduName } from './pdu-programs'
+import { getReleasedPduName } from './pdu-programs.js'
 
 export const QUANTITY = ['len', 'blksize', 'blocks'] as const
 export const MAX_DEPTH = ['1', '10'] as const

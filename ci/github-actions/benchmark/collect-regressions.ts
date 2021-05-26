@@ -3,8 +3,8 @@ import {
   ACCEPTABLE_PERFORMANCE_REGRESSION,
   SelfBenchmarkCategory,
   parseSelfBenchmarkCategory,
-} from './matrix'
-import * as reportFiles from './report-files'
+} from './matrix.js'
+import * as reportFiles from './report-files.js'
 
 export interface Item {
   readonly category: SelfBenchmarkCategory

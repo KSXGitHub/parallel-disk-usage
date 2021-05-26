@@ -2,9 +2,13 @@ import console from 'console'
 import exec from 'exec-inline'
 import process from 'process'
 import shCmd from 'shell-escape'
-import { SELF_BENCHMARK_MATRIX, SELF_BENCHMARK_HYPERFINE_NAMES, parseSelfBenchmarkCategory } from './benchmark/matrix'
-import * as reportFiles from './benchmark/report-files'
-import STRICT_BASH from './benchmark/strict-bash'
+import {
+  SELF_BENCHMARK_MATRIX,
+  SELF_BENCHMARK_HYPERFINE_NAMES,
+  parseSelfBenchmarkCategory,
+} from './benchmark/matrix.js'
+import * as reportFiles from './benchmark/report-files.js'
+import STRICT_BASH from './benchmark/strict-bash.js'
 
 const pduTargets = process.argv.slice(2)
 const errexit = (param: { readonly status: number | null }) => param.status !== 0
