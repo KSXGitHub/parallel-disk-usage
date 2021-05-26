@@ -10,11 +10,6 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    env:
-      NODE_OPTIONS: |
-        --experimental-modules
-        --es-module-specifier-resolution=node
-
     steps:
       - uses: actions/checkout@v2
 
@@ -98,19 +93,19 @@ jobs:
           pnpx tsc
 
       - name: Download released versions of pdu
-        run: node ci/github-actions/download-released-binaries.js
+        run: ./es-node.sh ci/github-actions/download-released-binaries.js
 
       - name: Compare benchmark of pdu against other versions of itself
-        run: node ci/github-actions/benchmark.js tmp.sample
+        run: ./es-node.sh ci/github-actions/benchmark.js tmp.sample
 
       - name: Post generated benchmark reports to pull request as a comment
         if: github.event_name == 'pull_request'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node ci/github-actions/report-benchmark-result-pr.js
+        run: ./es-node.sh ci/github-actions/report-benchmark-result-pr.js
 
       - name: Check for performance regressions
-        run: node ci/github-actions/check-for-performance-regressions.js
+        run: ./es-node.sh ci/github-actions/check-for-performance-regressions.js
 
       - name: Upload benchmark reports
         uses: actions/upload-artifact@v2.2.3

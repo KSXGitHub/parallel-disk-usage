@@ -475,11 +475,6 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    env:
-      NODE_OPTIONS: |
-        --experimental-modules
-        --es-module-specifier-resolution=node
-
     steps:
       - uses: actions/checkout@v2
 
@@ -594,7 +589,7 @@ jobs:
           pnpx tsc
 
       - name: Compare benchmark of pdu against its competitors
-        run: node ci/github-actions/competing-benchmark.js
+        run: ./es-node.sh ci/github-actions/competing-benchmark.js
 
       - name: Create archive of benchmark reports
         run: tar czf tmp.benchmark-reports.tar.gz tmp.benchmark-report.*
