@@ -1,13 +1,14 @@
 import { addPath } from '@actions/core'
 import { ok, err } from '@tsfun/result'
 import console from 'console'
-import { ensureDir, createWriteStream, chmod } from 'fs-extra'
+import fsx from 'fs-extra'
 import fetch from 'node-fetch'
 import path from 'path'
 import process from 'process'
 import { RELEASED_PDU_VERSIONS } from './benchmark/matrix.js'
 import { getReleasedPduName } from './benchmark/pdu-programs.js'
 
+const { ensureDir, createWriteStream, chmod } = fsx
 const REPO = 'https://github.com/KSXGitHub/parallel-disk-usage'
 
 async function main() {
