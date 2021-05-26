@@ -475,6 +475,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      NODE_OPTIONS: |
+        --experimental-modules
+        --es-module-specifier-resolution=node
+
     steps:
       - uses: actions/checkout@v2
 
