@@ -49,15 +49,20 @@ export const Report = postProcessSchema(Type.Object({
 }))
 export type Report = Static<typeof Report>
 
-export function loadByPath(path: string): Report {
-  const json = readFileSync(path, 'utf-8')
-  const data = JSON.parse(json)
+export function assertReport(data: unknown): asserts data is Report {
   const ajv = createAjv()
   const valid = ajv.validate(Report, data)
-  if (valid) return data as Report
+  if (valid) return
   console.error('ValidationError', { data })
   console.error(ajv.errorsText(ajv.errors))
   throw process.exit(1)
+}
+
+export function loadByPath(path: string): Report {
+  const json = readFileSync(path, 'utf-8')
+  const data = JSON.parse(json)
+  assertReport(data)
+  return data
 }
 
 export const isRegressed = (

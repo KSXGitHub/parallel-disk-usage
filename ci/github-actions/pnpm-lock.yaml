@@ -3,6 +3,7 @@ lockfileVersion: 5.3
 specifiers:
   '@actions/core': ^1.3.0
   '@actions/github': ^5.0.0
+  '@popeindustries/lit-html-server': ^3.1.0
   '@sinclair/typebox': ^0.16.7
   '@tsfun/result': ^0.0.20
   '@types/fs-extra': ^9.0.11
@@ -20,6 +21,7 @@ specifiers:
 dependencies:
   '@actions/core': 1.3.0
   '@actions/github': 5.0.0
+  '@popeindustries/lit-html-server': 3.1.0
   '@sinclair/typebox': 0.16.7
   '@tsfun/result': 0.0.20
   '@types/fs-extra': 9.0.11
@@ -137,6 +139,11 @@ packages:
     resolution: {integrity: sha512-wiQtW9ZSy4OvgQ09iQOdyXYNN60GqjCL/UdMsepDr1Gr0QzpW6irIKbH3REuAHXAhxkEk9/F2a3Gcs1P6kW5jA==}
     dependencies:
       '@octokit/openapi-types': 7.0.0
+    dev: false
+
+  /@popeindustries/lit-html-server/3.1.0:
+    resolution: {integrity: sha512-OuVxzjN17fIoCGcZFCmF6//rQ86dfevp0703SC2W8S0G257mvjuVBHdRomyVYYFqBjpr9naRz2oFdLjPvCG8bw==}
+    engines: {node: '>=10'}
     dev: false
 
   /@sinclair/typebox/0.16.7:

@@ -98,6 +98,9 @@ jobs:
       - name: Compare benchmark of pdu against other versions of itself
         run: node ci/github-actions/benchmark.js tmp.sample
 
+      - name: Create chart for benchmark reports
+        run: node ci/github-actions/illustrate-benchmark-reports.js
+
       - name: Post generated benchmark reports to pull request as a comment
         if: github.event_name == 'pull_request'
         env:
