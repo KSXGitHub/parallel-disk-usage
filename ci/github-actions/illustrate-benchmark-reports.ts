@@ -10,9 +10,10 @@ const xmlHeader = '<?xml version="1.0" encoding="utf-8" ?>'
 const xmlns = 'http://www.w3.org/2000/svg'
 
 const padding = 10
-const labelWidth = 255
+const charWidth = 9
 const barWidth = 512
-const numberWidth = 127
+const numberLength = 6
+const numberWidth = charWidth * numberLength
 const barHeight = 16
 
 const backgroundColor = 'white'
@@ -26,19 +27,28 @@ const fontFamily = 'monospace'
 function renderReport(report: Report) {
   assert(report.results.length > 0, 'There must be at least 1 report')
   const viewBoxHeight = report.results.length * barHeight
+  const labelLengths = report.results.map(unit => unit.command.length)
+  const labelWidth = Math.max(...labelLengths) * charWidth
   const values = report.results.map(unit => unit.mean)
   const maxValue = Math.max(...values)
   const viewBoxWidth = labelWidth + barWidth + 5 * padding + numberWidth
   const coords = report.results.map((unit, index) => ({ ...unit, index, y: index * barHeight }))
   const labels = coords.map(({ command, y }) =>
-    svg`<text
+    svg`<svg
       x=${padding}
-      y=${y + barHeight}
+      y=${y}
       width=${labelWidth}
       height=${barHeight}
       fill=${textColor}
       font-family=${fontFamily}
-    >${command}</text>`
+    >
+      <text
+        x="0%"
+        y="80%"
+        width="100%"
+        height="100%"
+      >${command}</text>
+    </svg>`
   )
   const bars = coords.map(({ y, index, mean }) =>
     svg`<rect
@@ -50,14 +60,21 @@ function renderReport(report: Report) {
     />`
   )
   const numbers = coords.map(({ y, mean }) =>
-    svg`<text
+    svg`<svg
       x=${padding + labelWidth + padding + barWidth + padding}
-      y=${y + barHeight}
+      y=${y}
       width=${numberWidth}
       height=${barHeight}
-      fill=${textColor}
-      font-family=${fontFamily}
-    >${String(mean).slice(0, 6) + 's'}</text>`
+    >
+      <text
+        x="0%"
+        y="80%"
+        width="100%"
+        height="100%"
+        fill=${textColor}
+        font-family=${fontFamily}
+      >${String(mean).slice(0, numberLength - 1) + 's'}</text>
+    </svg>`
   )
   return svg`<svg
     xmlns=${xmlns}
