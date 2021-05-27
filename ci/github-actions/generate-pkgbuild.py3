@@ -44,7 +44,7 @@ with open('./pkgbuild/parallel-disk-usage-bin/PKGBUILD', 'w') as pkgbuild:
   content += 'pkgname=parallel-disk-usage-bin\n'
   content += f'pkgver={release_tag}\n'
   source_url_prefix = f'https://github.com/KSXGitHub/parallel-disk-usage/releases/download/{release_tag}'
-  source_url = f'{source_url_prefix}/parallel-disk-usage-{target}'
+  source_url = f'{source_url_prefix}/pdu-{target}'
   supported_completions = ['bash', 'fish', 'zsh']
   completion_source = ' '.join(
     f'completion.{release_tag}.{ext}::{source_url_prefix}/completion.{ext}'
