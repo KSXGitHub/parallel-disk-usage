@@ -28,8 +28,8 @@ fn root_dir() {
 #[cfg(windows)]
 #[test]
 fn root_dir() {
-    let actual = path_name(&PathBuf::from("C:\\"));
-    let expected = OsStringDisplay::os_string_from("C:\\");
+    let actual = path_name(&PathBuf::from(r"C:\"));
+    let expected = OsStringDisplay::os_string_from(r"C:\");
     assert_eq!(actual, expected);
 }
 
