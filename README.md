@@ -11,7 +11,7 @@ Summarize disk usage of the set of files, recursively for directories.
 
 ## Description
 
-`pdu` is a CLI program that renders a graphical chart for disk usages of files and directories, it is intended to replace [`dust`](https://github.com/bootandy/dust) and [`dutree`](https://github.com/nachoparker/dutree).
+`pdu` is a CLI program that renders a graphical chart for disk usages of files and directories, it is a replacement of [`dust`](https://github.com/bootandy/dust) and [`dutree`](https://github.com/nachoparker/dutree).
 
 Both `dust` (v0.5.4) and `dutree` (v0.12.5) do not utilize the parallel computing capability of Rust to improve performance.
 
