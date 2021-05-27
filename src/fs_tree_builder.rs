@@ -4,6 +4,7 @@ use super::{
     reporter::{error_report::Operation::*, ErrorReport, Event, Reporter},
     size::Size,
     tree_builder::{Info, TreeBuilder},
+    utils::path_name,
 };
 use pipe_trait::Pipe;
 use std::{
@@ -42,10 +43,7 @@ where
         } = builder;
 
         TreeBuilder::<PathBuf, OsStringDisplay, Data, _, _> {
-            name: root.file_name().map_or_else(
-                || ".".pipe(OsStringDisplay::os_string_from),
-                OsStringDisplay::os_string_from,
-            ),
+            name: path_name(&root),
 
             path: root,
 
