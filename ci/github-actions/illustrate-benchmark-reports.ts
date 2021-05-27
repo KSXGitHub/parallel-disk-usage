@@ -37,7 +37,7 @@ function renderReport(report: Report) {
     svg`<svg
       x=${padding}
       y=${y}
-      width=${labelWidth}
+      width=${command.length * charWidth}
       height=${barHeight}
       fill=${textColor}
       font-family=${fontFamily}
@@ -47,6 +47,8 @@ function renderReport(report: Report) {
         y="80%"
         width="100%"
         height="100%"
+        textLength="100%"
+        lengthAdjust="spacingAndGlyphs"
       >${command}</text>
     </svg>`
   )
