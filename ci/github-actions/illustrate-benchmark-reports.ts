@@ -11,10 +11,10 @@ const xmlns = 'http://www.w3.org/2000/svg'
 
 const padding = 10
 const charWidth = 9
-const barWidth = 512
+const barColumnWidth = 512
 const numberLength = 6
-const numberWidth = charWidth * numberLength
-const barHeight = 16
+const numberColumnWidth = charWidth * numberLength
+const rowHeight = 16
 
 const backgroundColor = 'white'
 const textColor = 'black'
@@ -26,19 +26,19 @@ const fontFamily = 'monospace'
 
 function renderReport(report: Report) {
   assert(report.results.length > 0, 'There must be at least 1 report')
-  const viewBoxHeight = report.results.length * barHeight
+  const viewBoxHeight = report.results.length * rowHeight
   const labelLengths = report.results.map(unit => unit.command.length)
-  const labelWidth = Math.max(...labelLengths) * charWidth
+  const labelColumnWidth = Math.max(...labelLengths) * charWidth
   const values = report.results.map(unit => unit.mean)
   const maxValue = Math.max(...values)
-  const viewBoxWidth = labelWidth + barWidth + 5 * padding + numberWidth
-  const coords = report.results.map((unit, index) => ({ ...unit, index, y: index * barHeight }))
+  const viewBoxWidth = labelColumnWidth + barColumnWidth + 5 * padding + numberColumnWidth
+  const coords = report.results.map((unit, index) => ({ ...unit, index, y: index * rowHeight }))
   const labels = coords.map(({ command, y }) =>
     svg`<svg
       x=${padding}
       y=${y}
       width=${command.length * charWidth}
-      height=${barHeight}
+      height=${rowHeight}
       fill=${textColor}
       font-family=${fontFamily}
     >
@@ -54,19 +54,19 @@ function renderReport(report: Report) {
   )
   const bars = coords.map(({ y, index, mean }) =>
     svg`<rect
-      x=${padding + labelWidth + padding}
+      x=${padding + labelColumnWidth + padding}
       y=${y}
-      width=${Math.round(mean * barWidth / maxValue)}
-      height=${barHeight}
+      width=${Math.round(mean * barColumnWidth / maxValue)}
+      height=${rowHeight}
       fill=${getBarColor(index)}
     />`
   )
   const numbers = coords.map(({ y, mean }) =>
     svg`<svg
-      x=${padding + labelWidth + padding + barWidth + padding}
+      x=${padding + labelColumnWidth + padding + barColumnWidth + padding}
       y=${y}
-      width=${numberWidth}
-      height=${barHeight}
+      width=${numberColumnWidth}
+      height=${rowHeight}
     >
       <text
         x="0%"
