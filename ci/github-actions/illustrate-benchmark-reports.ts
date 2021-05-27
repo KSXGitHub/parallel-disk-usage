@@ -49,8 +49,6 @@ function renderReport(report: Report) {
       y=${y}
       width=${labelWidth}
       height=${rowHeight}
-      fill=${textColor}
-      font-family=${fontFamily}
     >
       <text
         x="0%"
@@ -59,6 +57,8 @@ function renderReport(report: Report) {
         height="100%"
         textLength="100%"
         lengthAdjust="spacingAndGlyphs"
+        fill=${textColor}
+        font-family=${fontFamily}
       >${command}</text>
     </svg>`
   )
