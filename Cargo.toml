@@ -4,6 +4,27 @@ version = "0.0.0-rc.5"
 description = "Summarize disk usage of the set of files, recursively for directories"
 authors = ["khai96_ <hvksmr1996@gmail.com>"]
 edition = "2018"
+readme = "README.md"
+license = "Apache-2.0"
+documentation = "https://docs.rs/parallel-disk-usage"
+repository = "https://github.com/KSXGitHub/parallel-disk-usage.git"
+keywords = [
+  "pdu",
+  "dust",
+  "dutree",
+  "size",
+  "chart",
+]
+categories = [
+  "command-line-utilities",
+  "filesystem",
+]
+include = [
+  "/src",
+  "/Cargo.toml",
+  "/README.md",
+  "/LICENSE",
+]
 
 [lib]
 name = "parallel_disk_usage"
