@@ -3,7 +3,7 @@
 pkgdesc='Create a filesystem tree from YAML'
 pkgrel=1
 arch=(x86_64)
-license=(MIT)
+license=(Apache-2.0)
 url='https://github.com/KSXGitHub/parallel-disk-usage'
 makedepends=(cargo)
 
