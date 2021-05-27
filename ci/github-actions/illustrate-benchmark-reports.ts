@@ -106,9 +106,11 @@ function renderReport(report: Report) {
 }
 
 async function main() {
+  const svgFiles = []
   for (const jsonFile of readdirSync('.')) {
     if (!jsonFile.startsWith('tmp.benchmark-report.') || !jsonFile.endsWith('.json')) continue
     const svgFile = jsonFile.replace(/\.json$/, '.svg')
+    svgFiles.push(svgFile)
     console.error(jsonFile, '→', svgFile)
     const report = JSON.parse(readFileSync(jsonFile, 'utf-8'))
     assertReport(report)
@@ -116,6 +118,10 @@ async function main() {
     const svgFileContent = `${xmlHeader}\n${svgSuffix}`
     writeFileSync(svgFile, svgFileContent)
   }
+  const markdown = svgFiles
+    .map(svgFile => `### ${svgFile}\n![${svgFile}](./${svgFile})\n`)
+    .join('\n')
+  writeFileSync('tmp.benchmark-report.CHARTS.md', `# Benchmark Charts\n${markdown}`)
 }
 
 main().catch(error => {
