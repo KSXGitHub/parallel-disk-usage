@@ -407,7 +407,7 @@ jobs:
           RELEASE_TAG: ${{ needs.create_release.outputs.release_tag }}
         run: ./ci/github-actions/generate-pkgbuild.py3
 
-      - name: Publish pdu to the AUR
+      - name: Publish parallel-disk-usage to the AUR
         uses: KSXGitHub/github-actions-deploy-aur@v2.2.4
         with:
           pkgname: parallel-disk-usage
