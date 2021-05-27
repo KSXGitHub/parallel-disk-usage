@@ -33,6 +33,14 @@ fn root_dir() {
     assert_eq!(actual, expected);
 }
 
+#[cfg(windows)]
+#[test]
+fn prefix() {
+    let actual = path_name(&PathBuf::from(r"\\prefix"));
+    let expected = OsStringDisplay::os_string_from("prefix");
+    assert_eq!(actual, expected);
+}
+
 #[cfg(unix)]
 #[test]
 fn normal_relative() {
