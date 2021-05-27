@@ -2,7 +2,6 @@ import { svg, renderToString } from '@popeindustries/lit-html-server'
 import assert from 'assert'
 import console from 'console'
 import { readdirSync, readFileSync, writeFileSync } from 'fs'
-import path from 'path'
 import process from 'process'
 import { Report, ReportUnit, assertReport } from './benchmark/report-files'
 
