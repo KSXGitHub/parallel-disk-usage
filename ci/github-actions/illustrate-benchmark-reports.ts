@@ -119,9 +119,9 @@ async function main() {
     writeFileSync(svgFile, svgFileContent)
   }
   const markdown = svgFiles
-    .map(svgFile => `### ${svgFile}\n![${svgFile}](./${svgFile})\n`)
+    .map(svgFile => `## ${svgFile}\n![${svgFile}](./${svgFile})\n`)
     .join('\n')
-  writeFileSync('tmp.benchmark-report.CHARTS.md', `# Benchmark Charts\n${markdown}`)
+  writeFileSync('tmp.benchmark-report.CHARTS.md', `# Benchmark Charts\n\n${markdown}`)
 }
 
 main().catch(error => {
