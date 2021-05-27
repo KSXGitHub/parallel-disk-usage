@@ -32,12 +32,22 @@ function renderReport(report: Report) {
   const values = report.results.map(unit => unit.mean)
   const maxValue = Math.max(...values)
   const viewBoxWidth = labelColumnWidth + barColumnWidth + 5 * padding + numberColumnWidth
-  const coords = report.results.map((unit, index) => ({ ...unit, index, y: index * rowHeight }))
-  const labels = coords.map(({ command, y }) =>
+  const shapes = report.results.map((unit, index) => ({
+    ...unit,
+    index,
+    y: index * rowHeight,
+    labelX: padding,
+    barX: padding + labelColumnWidth + padding,
+    numberX: padding + labelColumnWidth + padding + barColumnWidth + padding,
+    labelWidth: unit.command.length * charWidth,
+    barWidth: Math.round(unit.mean * barColumnWidth / maxValue),
+    numberContent: String(unit.mean).slice(0, numberLength - 1) + 's',
+  }))
+  const labels = shapes.map(({ command, y, labelX, labelWidth }) =>
     svg`<svg
-      x=${padding}
+      x=${labelX}
       y=${y}
-      width=${command.length * charWidth}
+      width=${labelWidth}
       height=${rowHeight}
       fill=${textColor}
       font-family=${fontFamily}
@@ -52,18 +62,18 @@ function renderReport(report: Report) {
       >${command}</text>
     </svg>`
   )
-  const bars = coords.map(({ y, index, mean }) =>
+  const bars = shapes.map(({ y, index, barX, barWidth }) =>
     svg`<rect
-      x=${padding + labelColumnWidth + padding}
+      x=${barX}
       y=${y}
-      width=${Math.round(mean * barColumnWidth / maxValue)}
+      width=${barWidth}
       height=${rowHeight}
       fill=${getBarColor(index)}
     />`
   )
-  const numbers = coords.map(({ y, mean }) =>
+  const numbers = shapes.map(({ y, numberX, numberContent }) =>
     svg`<svg
-      x=${padding + labelColumnWidth + padding + barColumnWidth + padding}
+      x=${numberX}
       y=${y}
       width=${numberColumnWidth}
       height=${rowHeight}
@@ -75,7 +85,7 @@ function renderReport(report: Report) {
         height="100%"
         fill=${textColor}
         font-family=${fontFamily}
-      >${String(mean).slice(0, numberLength - 1) + 's'}</text>
+      >${numberContent}</text>
     </svg>`
   )
   return svg`<svg
