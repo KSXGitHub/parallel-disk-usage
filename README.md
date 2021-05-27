@@ -15,6 +15,12 @@ Summarize disk usage of the set of files, recursively for directories.
 
 Both `dust` (v0.5.4) and `dutree` (v0.12.5) do not utilize the parallel computing capability of Rust to improve performance.
 
+## Demo
+
+[![asciicast of pdu command](https://asciinema.org/a/416663.svg)](https://asciinema.org/a/416663)
+
+[![asciicast of pdu command on /usr](https://asciinema.org/a/416664.svg)](https://asciinema.org/a/416664)
+
 ## Installation
 
 ### From GitHub
