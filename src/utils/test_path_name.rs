@@ -29,7 +29,7 @@ fn root_dir() {
 #[test]
 fn root_dir() {
     let actual = path_name(&PathBuf::from("C:\\"));
-    let expected = OsStringDisplay::os_string_from("c:");
+    let expected = OsStringDisplay::os_string_from("C:\\");
     assert_eq!(actual, expected);
 }
 

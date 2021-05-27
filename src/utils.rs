@@ -5,10 +5,9 @@ use std::path::{Component::*, Path};
 pub fn path_name(path: &Path) -> OsStringDisplay {
     match path.components().last() {
         None | Some(CurDir) => OsStringDisplay::os_string_from("."),
-        Some(RootDir) => OsStringDisplay::os_string_from("/"),
         Some(Normal(name)) => OsStringDisplay::os_string_from(name),
         Some(Prefix(prefix)) => OsStringDisplay::os_string_from(prefix.as_os_str()),
-        Some(ParentDir) => OsStringDisplay::os_string_from(path),
+        Some(RootDir) | Some(ParentDir) => OsStringDisplay::os_string_from(path),
     }
 }
 
