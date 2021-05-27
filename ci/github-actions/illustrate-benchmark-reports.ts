@@ -3,7 +3,7 @@ import assert from 'assert'
 import console from 'console'
 import { readdirSync, readFileSync, writeFileSync } from 'fs'
 import process from 'process'
-import { Report, ReportUnit, assertReport } from './benchmark/report-files'
+import { Report, assertReport } from './benchmark/report-files'
 
 const xmlHeader = '<?xml version="1.0" encoding="utf-8" ?>'
 const xmlns = 'http://www.w3.org/2000/svg'
