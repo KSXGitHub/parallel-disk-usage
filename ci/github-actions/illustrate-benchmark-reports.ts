@@ -35,18 +35,19 @@ function renderReport(report: Report) {
   const shapes = report.results.map((unit, index) => ({
     ...unit,
     index,
-    y: index * rowHeight,
     labelX: padding,
     barX: padding + labelColumnWidth + padding,
     numberX: padding + labelColumnWidth + padding + barColumnWidth + padding,
+    textY: (index + 0.8) * rowHeight,
+    barY: index * rowHeight,
     labelWidth: unit.command.length * charWidth,
     barWidth: Math.round(unit.mean * barColumnWidth / maxValue),
     numberContent: String(unit.mean).slice(0, numberLength - 1) + 's',
   }))
-  const labels = shapes.map(({ command, y, labelX, labelWidth }) =>
+  const labels = shapes.map(({ command, labelX, textY, labelWidth }) =>
     svg`<text
       x=${labelX}
-      y=${y + rowHeight * 0.8}
+      y=${textY}
       width=${labelWidth}
       height=${rowHeight}
       textLength=${labelWidth}
@@ -55,19 +56,19 @@ function renderReport(report: Report) {
       font-family=${fontFamily}
     >${command}</text>`
   )
-  const bars = shapes.map(({ y, index, barX, barWidth }) =>
+  const bars = shapes.map(({ index, barX, barY, barWidth }) =>
     svg`<rect
       x=${barX}
-      y=${y}
+      y=${barY}
       width=${barWidth}
       height=${rowHeight}
       fill=${getBarColor(index)}
     />`
   )
-  const numbers = shapes.map(({ y, numberX, numberContent }) =>
+  const numbers = shapes.map(({ numberX, textY, numberContent }) =>
     svg`<text
       x=${numberX}
-      y=${y + rowHeight * 0.8}
+      y=${textY}
       width=${numberColumnWidth}
       height=${rowHeight}
       fill=${textColor}
