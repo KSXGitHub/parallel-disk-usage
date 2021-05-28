@@ -44,23 +44,16 @@ function renderReport(report: Report) {
     numberContent: String(unit.mean).slice(0, numberLength - 1) + 's',
   }))
   const labels = shapes.map(({ command, y, labelX, labelWidth }) =>
-    svg`<svg
+    svg`<text
       x=${labelX}
-      y=${y}
+      y=${y + rowHeight * 0.8}
       width=${labelWidth}
       height=${rowHeight}
-    >
-      <text
-        x="0%"
-        y="80%"
-        width="100%"
-        height="100%"
-        textLength="100%"
-        lengthAdjust="spacingAndGlyphs"
-        fill=${textColor}
-        font-family=${fontFamily}
-      >${command}</text>
-    </svg>`
+      textLength=${labelWidth}
+      lengthAdjust="spacingAndGlyphs"
+      fill=${textColor}
+      font-family=${fontFamily}
+    >${command}</text>`
   )
   const bars = shapes.map(({ y, index, barX, barWidth }) =>
     svg`<rect
@@ -72,21 +65,14 @@ function renderReport(report: Report) {
     />`
   )
   const numbers = shapes.map(({ y, numberX, numberContent }) =>
-    svg`<svg
+    svg`<text
       x=${numberX}
-      y=${y}
+      y=${y + rowHeight * 0.8}
       width=${numberColumnWidth}
       height=${rowHeight}
-    >
-      <text
-        x="0%"
-        y="80%"
-        width="100%"
-        height="100%"
-        fill=${textColor}
-        font-family=${fontFamily}
-      >${numberContent}</text>
-    </svg>`
+      fill=${textColor}
+      font-family=${fontFamily}
+    >${numberContent}</text>`
   )
   return svg`<svg
     xmlns=${xmlns}
