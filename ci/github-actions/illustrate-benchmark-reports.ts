@@ -41,7 +41,7 @@ function renderReport(report: Report) {
     textY: (index + 0.8) * rowHeight,
     barY: index * rowHeight,
     labelWidth: unit.command.length * charWidth,
-    barWidth: Math.round(unit.mean * barColumnWidth / maxValue),
+    barWidth: unit.mean * barColumnWidth / maxValue,
     numberContent: String(unit.mean).slice(0, numberLength - 1) + 's',
   }))
   const labels = shapes.map(({ command, labelX, textY, labelWidth }) =>
