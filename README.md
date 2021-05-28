@@ -49,6 +49,14 @@ paru -S parallel-disk-usage-bin
 paru -S parallel-disk-usage
 ```
 
+### From [Khải's Pacman Repository](https://github.com/KSXGitHub/pacman-repo)
+
+Follow the [installation instruction](https://github.com/KSXGitHub/pacman-repo#installation) then run the following command:
+
+```sh
+sudo pacman -S parallel-disk-usage
+```
+
 ## Distributions
 
 [![Packaging Status](https://repology.org/badge/vertical-allrepos/parallel-disk-usage.svg)](https://repology.org/project/parallel-disk-usage/versions)
