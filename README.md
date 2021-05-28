@@ -15,6 +15,15 @@ Summarize disk usage of the set of files, recursively for directories.
 
 Both `dust` (v0.5.4) and `dutree` (v0.12.5) do not utilize the parallel computing capability of Rust to improve performance.
 
+_Below is a benchmark sample of `pdu` (v0.0.0) against `dust`, `dutree`, and `du` (lower is better):_
+
+<a href="https://github.com/KSXGitHub/parallel-disk-usage-0.0.0-benchmarks/blob/master/tmp.benchmark-report.CHARTS.md">
+  <img
+    alt="benchmark pdu v0.0.0 against dust, dutree, and du"
+    src="https://ksxgithub.github.io/parallel-disk-usage-0.0.0-benchmarks/tmp.benchmark-report.competing.blksize.svg"
+  >
+</a>
+
 ## Demo
 
 [![asciicast of pdu command](https://asciinema.org/a/416663.svg)](https://asciinema.org/a/416663)
