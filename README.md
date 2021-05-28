@@ -23,11 +23,13 @@ Both `dust` (v0.5.4) and `dutree` (v0.12.5) do not utilize the parallel computin
 
 ## Installation
 
-### From GitHub
+### Any Desktop OS
+
+#### From GitHub
 
 Go to the [GitHub Release Page](https://github.com/KSXGitHub/parallel-disk-usage/releases) and download a binary.
 
-### From [crates.io](https://crates.io)
+#### From [crates.io](https://crates.io)
 
 **Prerequisites:**
   * [`cargo`](https://github.com/rust-lang/cargo)
@@ -36,7 +38,9 @@ Go to the [GitHub Release Page](https://github.com/KSXGitHub/parallel-disk-usage
 cargo install parallel-disk-usage
 ```
 
-### From the [Arch User Repository](https://aur.archlinux.org)
+### Arch Linux
+
+#### From the [Arch User Repository](https://aur.archlinux.org)
 
 **Prerequisites:**
   * An AUR helper, such as [`paru`](https://github.com/Morganamilo/paru)
@@ -49,7 +53,7 @@ paru -S parallel-disk-usage-bin
 paru -S parallel-disk-usage
 ```
 
-### From [Khải's Pacman Repository](https://github.com/KSXGitHub/pacman-repo)
+#### From [Khải's Pacman Repository](https://github.com/KSXGitHub/pacman-repo)
 
 Follow the [installation instruction](https://github.com/KSXGitHub/pacman-repo#installation) then run the following command:
 
