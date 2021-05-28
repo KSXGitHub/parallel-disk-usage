@@ -7,6 +7,7 @@ import { Report, assertReport } from './benchmark/report-files'
 
 const xmlHeader = '<?xml version="1.0" encoding="utf-8" ?>'
 const xmlns = 'http://www.w3.org/2000/svg'
+const xlink = 'http://www.w3.org/1999/xlink'
 
 const padding = 10
 const charWidth = 9
@@ -21,7 +22,7 @@ const barColor = ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow', 'grey'] a
 
 const getBarColor = (index: number) => barColor[index % barColor.length]
 
-const fontFamily = 'monospace'
+const fontFamily = 'Consolas, Menlo, monospace'
 
 function renderReport(report: Report) {
   assert(report.results.length > 0, 'There must be at least 1 report')
@@ -89,6 +90,7 @@ function renderReport(report: Report) {
   )
   return svg`<svg
     xmlns=${xmlns}
+    xmlns:xlink=${xlink}
     viewBox=${[0, 0, viewBoxWidth, viewBoxHeight].join(' ')}
   >
     <rect
