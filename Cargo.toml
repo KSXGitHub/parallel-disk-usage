@@ -1,7 +1,7 @@
 [package]
 name = "parallel-disk-usage"
 description = "Summarize disk usage of the set of files, recursively for directories"
-version = "0.0.1"
+version = "0.1.0"
 authors = ["khai96_ <hvksmr1996@gmail.com>"]
 edition = "2018"
 readme = "README.md"
