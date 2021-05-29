@@ -75,6 +75,32 @@ Follow the [installation instruction](https://github.com/KSXGitHub/pacman-repo#i
 sudo pacman -S parallel-disk-usage
 ```
 
+## Development
+
+### Prerequisites
+
+* [`cargo`](github.com/rust-lang/cargo).
+
+### Test
+
+```sh
+cargo clippy -- -D warnings && cargo fmt --check && cargo test
+```
+
+### Run
+
+```sh
+./run pdu "${arguments[@]}"
+```
+
+* `"${arguments[@]}"`: List of arguments to pass to `pdu`.
+
+### Update shell completion files
+
+```sh
+./generate-completions.sh
+```
+
 ## Distributions
 
 [![Packaging Status](https://repology.org/badge/vertical-allrepos/parallel-disk-usage.svg)](https://repology.org/project/parallel-disk-usage/versions)
