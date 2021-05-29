@@ -1,6 +1,7 @@
 // Since the CLI in Windows look a little different, and I am way too lazy to make two versions
 // of completion files, the following tests would only run in UNIX-like environment.
 #![cfg(unix)]
+#![cfg(feature = "cli")]
 
 use parallel_disk_usage::{args::Args, clap::Shell, structopt::StructOpt};
 

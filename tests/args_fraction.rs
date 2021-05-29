@@ -1,3 +1,4 @@
+#![cfg(feature = "cli")]
 use parallel_disk_usage::args::fraction::{ConversionError::*, Fraction, FromStrError::*};
 use pretty_assertions::assert_eq;
 

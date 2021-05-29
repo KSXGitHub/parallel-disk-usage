@@ -34,15 +34,20 @@ path = "src/lib.rs"
 [[bin]]
 name = "pdu"
 path = "cli/main.rs"
+required-features = ["cli"]
 
 [[bin]]
 name = "pdu-completions"
 path = "cli/completions.rs"
+required-features = ["cli-completions"]
+
+[features]
+default = ["cli"]
+cli = ["structopt", "structopt-utilities"]
+cli-completions = ["cli"]
 
 [dependencies]
 pipe-trait = "^0.3.2"
-structopt = "^0.3.21"
-structopt-utilities = "^0.0.8"
 smart-default = "^0.6.0"
 derive_more = "^0.99.14"
 rayon = "^1.5.1"
@@ -53,6 +58,14 @@ itertools = "^0.10.0"
 assert-cmp = "^0.2.0"
 zero-copy-pads = "^0.2.0"
 terminal_size = "^0.1.17"
+
+[dependencies.structopt]
+version = "^0.3.21"
+optional = true
+
+[dependencies.structopt-utilities]
+version = "^0.0.8"
+optional = true
 
 [dependencies.strum]
 version = "^0.20.0"

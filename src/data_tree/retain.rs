@@ -22,6 +22,7 @@ where
     }
 
     /// Recursively cull all descendants whose data are too small relative to root.
+    #[cfg(feature = "cli")]
     pub(crate) fn par_cull_insignificant_data(&mut self, min_ratio: f32)
     where
         Data: Into<u64>,
@@ -32,6 +33,7 @@ where
 
     /// Process the tree via [`par_cull_insignificant_data`](Self::par_cull_insignificant_data) method.
     #[cfg(test)]
+    #[cfg(feature = "cli")]
     fn into_insignificant_data_par_culled(mut self, min_ratio: f32) -> Self
     where
         Data: Into<u64>,
@@ -42,4 +44,5 @@ where
 }
 
 #[cfg(test)]
+#[cfg(feature = "cli")]
 mod test;

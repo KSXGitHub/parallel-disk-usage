@@ -25,6 +25,7 @@ pub enum BytesFormat {
 }
 
 impl BytesFormat {
+    #[cfg(feature = "cli")]
     pub(crate) fn default_value() -> &'static str {
         BytesFormat::MetricUnits.as_ref()
     }

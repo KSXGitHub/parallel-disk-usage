@@ -29,29 +29,47 @@ jobs:
           override: 'true'
           default: 'true'
 
-      - name: Build (dev)
-        run: cargo build --locked
+      - name: Build and Test (dev)
+        env:
+          FMT: 'false'
+          LINT: 'false'
+          BUILD: 'true'
+          TEST: 'true'
+          BUILD_FLAGS: '--locked'
+          TEST_FLAGS: ''
+        run: ./test.sh
 
-      - name: Test (dev)
-        run: cargo test
+      - name: Build and Test (release)
+        env:
+          FMT: 'false'
+          LINT: 'false'
+          BUILD: 'true'
+          TEST: 'true'
+          BUILD_FLAGS: '--locked'
+          TEST_FLAGS: ''
+        run: ./test.sh --release
 
-      - name: Build (release)
-        run: cargo build --locked --release
-
-      - name: Test (release)
-        run: cargo test --release
-
-      - name: Check formatting
+      - name: Fmt and Clippy (dev)
         if: runner.os == 'Linux'
-        run: cargo fmt -- --check
+        env:
+          FMT: 'true'
+          LINT: 'true'
+          BUILD: 'false'
+          TEST: 'false'
+          BUILD_FLAGS: ''
+          TEST_FLAGS: ''
+        run: ./test.sh
 
-      - name: Clippy check (dev)
+      - name: Clippy (release)
         if: runner.os == 'Linux'
-        run: cargo clippy -- -D warnings
-
-      - name: Clippy check (release)
-        if: runner.os == 'Linux'
-        run: cargo clippy --release -- -D warnings
+        env:
+          FMT: 'false'
+          LINT: 'true'
+          BUILD: 'false'
+          TEST: 'false'
+          BUILD_FLAGS: ''
+          TEST_FLAGS: ''
+        run: ./test.sh --release
 
   build_linux:
     name: Build
@@ -76,7 +94,7 @@ jobs:
           default: 'true'
 
       - name: Build
-        run: cargo build --target ${{ matrix.target }} --release
+        run: cargo build --target ${{ matrix.target }} --release --all-features
 
       - name: Strip all debug symbols
         run: strip --strip-all target/${{ matrix.target }}/release/pdu
@@ -109,7 +127,7 @@ jobs:
           default: 'true'
 
       - name: Build
-        run: cargo build --target ${{ matrix.target }} --release
+        run: cargo build --target ${{ matrix.target }} --release --all-features
 
       - name: Strip all debug symbols
         run: strip target/${{ matrix.target }}/release/pdu
@@ -143,7 +161,7 @@ jobs:
           default: 'true'
 
       - name: Build
-        run: cargo build --target ${{ matrix.target }} --release
+        run: cargo build --target ${{ matrix.target }} --release --all-features
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v2

@@ -42,14 +42,22 @@ jobs:
           override: 'true'
           default: 'true'
 
-      - name: Build (dev)
-        run: cargo build --locked
-
       - name: Test (dev)
-        run: cargo test --no-fail-fast
-
-      - name: Build (release)
-        run: cargo build --locked --release
+        env:
+          FMT: 'false'
+          LINT: 'true'
+          BUILD: 'true'
+          TEST: 'true'
+          BUILD_FLAGS: '--locked'
+          TEST_FLAGS: '--no-fail-fast'
+        run: ./test.sh
 
       - name: Test (release)
-        run: cargo test --no-fail-fast --release
+        env:
+          FMT: 'false'
+          LINT: 'true'
+          BUILD: 'true'
+          TEST: 'true'
+          BUILD_FLAGS: '--locked'
+          TEST_FLAGS: '--no-fail-fast'
+        run: ./test.sh --release
