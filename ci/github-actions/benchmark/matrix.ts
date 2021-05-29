@@ -92,7 +92,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     competitors: [
       ['dust', '--apparent-size'],
       ['dutree'],
-      ['dua', '--apparent-size'],
+      ['dua', 'aggregate', '--apparent-size'],
       ['du', '--apparent-size'],
     ],
   },
@@ -119,7 +119,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     pduCliArgs: ['--max-depth=1'],
     competitors: [
       ['dutree', '--summary'],
-      ['dua', '--apparent-size'],
+      ['dua', 'aggregate', '--apparent-size'],
       ['du', '--apparent-size', '--total'],
     ],
   },
@@ -142,7 +142,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     id: 'no-sort+summary',
     pduCliArgs: ['--no-sort', '--max-depth=1'],
     competitors: [
-      ['dua', '--apparent-size'],
+      ['dua', 'aggregate', '--apparent-size'],
       ['du', '--apparent-size', '--total'],
     ],
   },
