@@ -115,10 +115,12 @@ sudo pacman -S parallel-disk-usage
   * `du`
   * [`dust`](https://github.com/bootandy/dust)
   * [`dutree`](https://github.com/nachoparker/dutree)
+  * [`dua`](https://github.com/byron/dua-cli)
 * **TUI:**
   * [`ncdu`](https://dev.yorhel.nl/ncdu)
   * [`gdu`](https://github.com/dundee/gdu)
   * [`godu`](https://github.com/viktomas/godu)
+  * [`dua`](https://github.com/byron/dua-cli)
 * **GUI:**
   * [GNOME's Disk Usage Analyzer, a.k.a. `baobab`](https://wiki.gnome.org/action/show/Apps/DiskUsageAnalyzer)
   * Filelight
