@@ -103,6 +103,7 @@ jobs:
 
       - name: Post generated benchmark reports to pull request as a comment
         if: github.event_name == 'pull_request'
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node ci/github-actions/report-benchmark-result-pr.js
