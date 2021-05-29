@@ -115,6 +115,7 @@ sudo pacman -S parallel-disk-usage
   * `du`
   * [`dust`](https://github.com/bootandy/dust)
   * [`dutree`](https://github.com/nachoparker/dutree)
+  * [`dua`](https://github.com/byron/dua-cli)
 * **TUI:**
   * [`ncdu`](https://dev.yorhel.nl/ncdu)
   * [`gdu`](https://github.com/dundee/gdu)
