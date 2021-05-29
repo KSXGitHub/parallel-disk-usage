@@ -61,6 +61,10 @@ cargo clippy -- -D warnings && cargo fmt --check && cargo test
 ./generate-completions.sh
 ```
 
+## Extending `parallel-disk-usage`
+
+The [parallel-disk-usage crate](https://crates.io/crates/parallel-disk-usage) is both a binary crate and a library crate. If you desire features that `pdu` itself lacks (that is, after you have asked the maintainer(s) of `pdu` for the features but they refused), you may use the library crate to build a tool of your own. The documentation for the library crate can be found in [docs.rs](https://docs.rs/parallel-disk-usage).
+
 ## Installation
 
 ### Any Desktop OS
