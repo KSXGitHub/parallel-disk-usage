@@ -26,13 +26,9 @@ run_if() (
 )
 
 unit() (
-  build_flags=()
-  test_flags=()
-  eval "build_flags+=(${BUILD_FLAGS:-})"
-  eval "test_flags+=(${TEST_FLAGS:-})"
-  run_if "${LINT:-true}" cargo clippy "$@" -- -D warnings
-  run_if "${BUILD:-true}" cargo build "${build_flags[@]}" "$@"
-  run_if "${TEST:-true}" cargo test "${test_flags[@]}" "$@"
+  eval run_if "${LINT:-true}" cargo clippy "$@" -- -D warnings
+  eval run_if "${BUILD:-true}" cargo build "${BUILD_FLAGS:-}" "$@"
+  eval run_if "${TEST:-true}" cargo test "${TEST_FLAGS:-}" "$@"
 )
 
 run_if "${FMT:-true}" cargo fmt
