@@ -1,6 +1,6 @@
 [package]
 name = "parallel-disk-usage"
-description = "Summarize disk usage of the set of files, recursively for directories"
+description = "Highly parallelized, blazing fast directory tree analyzer"
 version = "0.1.2"
 authors = ["khai96_ <hvksmr1996@gmail.com>"]
 edition = "2018"

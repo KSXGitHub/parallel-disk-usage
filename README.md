@@ -7,7 +7,7 @@
 [![Lint dependency graph](https://github.com/KSXGitHub/parallel-disk-usage/actions/workflows/cargo-deny.yaml/badge.svg)](https://github.com/KSXGitHub/parallel-disk-usage/actions/workflows/cargo-deny.yaml)
 [![Crates.io Version](https://img.shields.io/crates/v/parallel-disk-usage?logo=rust)](https://crates.io/crates/parallel-disk-usage)
 
-Summarize disk usage of the set of files, recursively for directories.
+Highly parallelized, blazing fast directory tree analyzer.
 
 ## Description
 
