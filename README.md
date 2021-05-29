@@ -79,7 +79,7 @@ Go to the [GitHub Release Page](https://github.com/KSXGitHub/parallel-disk-usage
   * [`cargo`](https://github.com/rust-lang/cargo)
 
 ```sh
-cargo install parallel-disk-usage
+cargo install parallel-disk-usage --bin pdu
 ```
 
 ### Arch Linux
