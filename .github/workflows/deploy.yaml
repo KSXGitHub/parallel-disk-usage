@@ -527,6 +527,18 @@ jobs:
           chmod +x DUTREE.tmp/dutree
           echo "$(pwd)/DUTREE.tmp" >> "$GITHUB_PATH"
 
+      - name: Install dua
+        env:
+          REPO: https://github.com/Byron/dua-cli
+          VERSION: '2.11.3'
+        run: |
+          mkdir -p DUA.tmp
+          archive_name="dua-v${VERSION}-x86_64-unknown-linux-musl"
+          curl -L "${REPO}/releases/download/v${VERSION}/${archive_name}.tar.gz" > tmp.dua.tar.gz
+          tar xf tmp.dua.tar.gz --directory=DUA.tmp
+          chmod +x "DUA.tmp/${archive_name}/dua"
+          echo "$(pwd)/DUA.tmp/${archive_name}" >> "$GITHUB_PATH"
+
       - name: Install hyperfine
         env:
           REPO: https://github.com/sharkdp/hyperfine
@@ -544,6 +556,7 @@ jobs:
           which pdu
           which dust
           which dutree
+          which dua
           which du
           which hyperfine
 
@@ -551,6 +564,7 @@ jobs:
         run: |
           dust --version
           dutree --version
+          dua --version
           du --version
           hyperfine --version
 
