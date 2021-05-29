@@ -45,7 +45,7 @@ jobs:
       - name: Test (dev)
         env:
           FMT: 'false'
-          LINT: 'true'
+          LINT: 'false'
           BUILD: 'true'
           TEST: 'true'
           BUILD_FLAGS: '--locked'
@@ -55,7 +55,7 @@ jobs:
       - name: Test (release)
         env:
           FMT: 'false'
-          LINT: 'true'
+          LINT: 'false'
           BUILD: 'true'
           TEST: 'true'
           BUILD_FLAGS: '--locked'
