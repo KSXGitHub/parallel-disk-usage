@@ -33,6 +33,7 @@ jobs:
         env:
           FMT: 'false'
           LINT: 'false'
+          DOC: 'true'
           BUILD: 'true'
           TEST: 'true'
           BUILD_FLAGS: '--locked'
@@ -43,6 +44,7 @@ jobs:
         env:
           FMT: 'false'
           LINT: 'false'
+          DOC: 'true'
           BUILD: 'true'
           TEST: 'true'
           BUILD_FLAGS: '--locked'
