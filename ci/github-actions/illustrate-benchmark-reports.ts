@@ -35,6 +35,7 @@ function renderReport(report: Report) {
   const shapes = report.results.map((unit, index) => ({
     ...unit,
     index,
+    name: unit.command.split(' ')[0].trim(),
     labelX: padding,
     barX: padding + labelColumnWidth + padding,
     numberX: padding + labelColumnWidth + padding + barColumnWidth + padding,
@@ -44,8 +45,10 @@ function renderReport(report: Report) {
     barWidth: unit.mean * barColumnWidth / maxValue,
     numberContent: String(unit.mean).slice(0, numberLength - 1) + 's',
   }))
-  const labels = shapes.map(({ command, labelX, textY, labelWidth }) =>
+  const labels = shapes.map(({ command, index, name, labelX, textY, labelWidth }) =>
     svg`<text
+      data-index=${index}
+      data-name=${name}
       x=${labelX}
       y=${textY}
       width=${labelWidth}
@@ -56,8 +59,10 @@ function renderReport(report: Report) {
       font-family=${fontFamily}
     >${command}</text>`
   )
-  const bars = shapes.map(({ index, barX, barY, barWidth }) =>
+  const bars = shapes.map(({ index, name, barX, barY, barWidth }) =>
     svg`<rect
+      data-index=${index}
+      data-name=${name}
       x=${barX}
       y=${barY}
       width=${barWidth}
@@ -65,8 +70,10 @@ function renderReport(report: Report) {
       fill=${getBarColor(index)}
     />`
   )
-  const numbers = shapes.map(({ numberX, textY, numberContent }) =>
+  const numbers = shapes.map(({ index, name, numberX, textY, numberContent }) =>
     svg`<text
+      data-index=${index}
+      data-name=${name}
       x=${numberX}
       y=${textY}
       width=${numberColumnWidth}
