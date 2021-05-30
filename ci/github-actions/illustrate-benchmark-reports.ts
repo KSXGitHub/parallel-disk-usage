@@ -49,11 +49,15 @@ function renderReport(report: Report) {
     .map(shape => ({
       ...shape,
       barColor: getBarColor(shape.index),
+      labelClassName: `label ${shape.name}`,
+      barClassName: `bar ${shape.name}`,
+      numberClassName: `number ${shape.name}`,
     }))
   const labels = shapes.map(shape =>
     svg`<text
       data-index=${shape.index}
       data-name=${shape.name}
+      class=${shape.labelClassName}
       x=${shape.labelX}
       y=${shape.textY}
       width=${shape.labelWidth}
@@ -68,6 +72,7 @@ function renderReport(report: Report) {
     svg`<rect
       data-index=${shape.index}
       data-name=${shape.name}
+      class=${shape.barClassName}
       x=${shape.barX}
       y=${shape.barY}
       width=${shape.barWidth}
@@ -79,6 +84,7 @@ function renderReport(report: Report) {
     svg`<text
       data-index=${shape.index}
       data-name=${shape.name}
+      class=${shape.numberClassName}
       x=${shape.numberX}
       y=${shape.textY}
       width=${numberColumnWidth}
