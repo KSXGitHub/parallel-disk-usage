@@ -93,6 +93,8 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
       ['dust', '--apparent-size'],
       ['dutree'],
       ['dua', '--apparent-size'],
+      ['ncdu', '-o', '/dev/stdout', '-0'],
+      ['gdu', '--show-apparent-size', '--non-interactive', '--no-progress'],
       ['du', '--apparent-size'],
     ],
   },
@@ -103,6 +105,8 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
       ['dust'],
       ['dutree', '--usage'],
       ['dua'],
+      ['ncdu', '-o', '/dev/stdout', '-0'],
+      ['gdu', '--non-interactive', '--no-progress'],
       ['du'],
     ],
   },
@@ -120,6 +124,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     competitors: [
       ['dutree', '--summary'],
       ['dua', '--apparent-size'],
+      ['ncdu', '-o', '/dev/null', '-0'],
       ['du', '--apparent-size', '--total'],
     ],
   },
@@ -128,6 +133,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     pduCliArgs: ['--min-ratio=0'],
     competitors: [
       ['dutree'],
+      ['ncdu', '-o', '/dev/stdout', '-0'],
       ['du', '--apparent-size'],
     ],
   },
@@ -136,6 +142,9 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     pduCliArgs: ['--no-sort'],
     competitors: [
       ['du', '--apparent-size'],
+      ['dua', '--apparent-size'],
+      ['ncdu', '-o', '/dev/stdout', '-0'],
+      ['gdu', '--show-apparent-size', '--non-interactive', '--no-progress'],
     ],
   },
   {
@@ -143,7 +152,17 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     pduCliArgs: ['--no-sort', '--max-depth=1'],
     competitors: [
       ['dua', '--apparent-size'],
+      ['ncdu', '-o', '/dev/null', '-0'],
+      ['gdu', '--show-apparent-size', '--non-interactive', '--no-progress'],
       ['du', '--apparent-size', '--total'],
+    ],
+  },
+  {
+    id: 'progress',
+    pduCliArgs: ['--progress'],
+    competitors: [
+      ['ncdu', '-o', '/dev/stdout', '-1'],
+      ['gdu', '--show-apparent-size', '--non-interactive'],
     ],
   },
 ]
