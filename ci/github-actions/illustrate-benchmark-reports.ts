@@ -99,6 +99,11 @@ function renderReport(report: Report) {
     xmlns:xlink=${xlink}
     viewBox=${[0, 0, viewBoxWidth, viewBoxHeight].join(' ')}
   >
+    <style>
+      .label.pdu {
+        font-weight: bold;
+      }
+    </style>
     <rect
       id="background"
       x="0"
