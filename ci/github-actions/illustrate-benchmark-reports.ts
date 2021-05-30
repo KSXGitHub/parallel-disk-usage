@@ -9,7 +9,8 @@ const xmlHeader = '<?xml version="1.0" encoding="utf-8" ?>'
 const xmlns = 'http://www.w3.org/2000/svg'
 const xlink = 'http://www.w3.org/1999/xlink'
 
-const padding = 10
+const hPadding = 10
+const vPadding = 5
 const charWidth = 9
 const barColumnWidth = 512
 const numberLength = 6
@@ -26,22 +27,22 @@ const fontFamily = 'Consolas, Menlo, monospace'
 
 function renderReport(report: Report) {
   assert(report.results.length > 0, 'There must be at least 1 report')
-  const viewBoxHeight = report.results.length * rowHeight
+  const viewBoxHeight = report.results.length * rowHeight + 2 * vPadding
   const labelLengths = report.results.map(unit => unit.command.length)
   const labelColumnWidth = Math.max(...labelLengths) * charWidth
   const values = report.results.map(unit => unit.mean)
   const maxValue = Math.max(...values)
-  const viewBoxWidth = labelColumnWidth + barColumnWidth + 5 * padding + numberColumnWidth
+  const viewBoxWidth = labelColumnWidth + barColumnWidth + 5 * hPadding + numberColumnWidth
   const shapes = report.results
     .map((unit, index) => ({
       ...unit,
       index,
       name: unit.command.split(' ')[0].trim(),
-      labelX: padding,
-      barX: padding + labelColumnWidth + padding,
-      numberX: padding + labelColumnWidth + padding + barColumnWidth + padding,
-      textY: (index + 0.8) * rowHeight,
-      barY: index * rowHeight,
+      labelX: hPadding,
+      barX: hPadding + labelColumnWidth + hPadding,
+      numberX: hPadding + labelColumnWidth + hPadding + barColumnWidth + hPadding,
+      textY: vPadding + (index + 0.8) * rowHeight,
+      barY: vPadding + index * rowHeight,
       labelWidth: unit.command.length * charWidth,
       barWidth: unit.mean * barColumnWidth / maxValue,
       numberContent: String(unit.mean).slice(0, numberLength - 1) + 's',
