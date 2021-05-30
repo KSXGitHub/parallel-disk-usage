@@ -29,47 +29,25 @@ jobs:
           override: 'true'
           default: 'true'
 
-      - name: Build and Test (dev)
-        env:
-          FMT: 'false'
-          LINT: 'false'
-          DOC: 'true'
-          BUILD: 'true'
-          TEST: 'true'
-          BUILD_FLAGS: '--locked'
-          TEST_FLAGS: ''
-        run: ./test.sh
-
-      - name: Build and Test (release)
-        env:
-          FMT: 'false'
-          LINT: 'false'
-          DOC: 'true'
-          BUILD: 'true'
-          TEST: 'true'
-          BUILD_FLAGS: '--locked'
-          TEST_FLAGS: ''
-        run: ./test.sh --release
-
-      - name: Fmt and Clippy (dev)
-        if: runner.os == 'Linux'
+      - name: Test (dev)
         env:
           FMT: 'true'
           LINT: 'true'
-          BUILD: 'false'
-          TEST: 'false'
-          BUILD_FLAGS: ''
+          DOC: 'true'
+          BUILD: 'true'
+          TEST: 'true'
+          BUILD_FLAGS: '--locked'
           TEST_FLAGS: ''
         run: ./test.sh
 
-      - name: Clippy (release)
-        if: runner.os == 'Linux'
+      - name: Test (release)
         env:
-          FMT: 'false'
+          FMT: 'true'
           LINT: 'true'
-          BUILD: 'false'
-          TEST: 'false'
-          BUILD_FLAGS: ''
+          DOC: 'true'
+          BUILD: 'true'
+          TEST: 'true'
+          BUILD_FLAGS: '--locked'
           TEST_FLAGS: ''
         run: ./test.sh --release
 
