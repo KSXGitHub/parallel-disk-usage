@@ -528,7 +528,7 @@ jobs:
       - name: Install dua
         env:
           REPO: https://github.com/Byron/dua-cli
-          VERSION: '2.11.3'
+          VERSION: '2.12.1'
         run: |
           mkdir -p DUA.tmp
           archive_name="dua-v${VERSION}-x86_64-unknown-linux-musl"
