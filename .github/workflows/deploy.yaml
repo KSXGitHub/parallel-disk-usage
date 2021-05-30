@@ -567,7 +567,7 @@ jobs:
         run: |
           mkdir -p GDU.tmp
           curl -L "${REPO}/releases/download/v${VERSION}/gdu_linux_amd64.tgz" > tmp.gdu.tar.gz
-          tar xf tmp.dua.tar.gz --directory=GDU.tmp
+          tar xf tmp.gdu.tar.gz --directory=GDU.tmp
           mkdir -p GDU.tmp/bin
           chmod +x GDU.tmp/gdu_linux_amd64
           ln -s "$(pwd)/GDU.tmp/gdu_linux_amd64" GDU.tmp/bin/gdu
