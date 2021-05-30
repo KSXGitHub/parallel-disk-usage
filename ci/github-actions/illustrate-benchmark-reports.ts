@@ -122,6 +122,7 @@ async function main() {
     console.error(jsonFile, '→', svgFile)
     const report = JSON.parse(readFileSync(jsonFile, 'utf-8'))
     assertReport(report)
+    report.results.sort((left, right) => left.mean - right.mean)
     const svgSuffix = await renderToString(renderReport(report))
     const svgFileContent = `${xmlHeader}\n${svgSuffix}`
     writeFileSync(svgFile, svgFileContent)
