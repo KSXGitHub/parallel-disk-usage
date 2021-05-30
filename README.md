@@ -72,6 +72,24 @@ Environment Variables
 
 * `"${arguments[@]}"`: List of arguments to pass to `pdu`.
 
+### Build
+
+#### Debug build
+
+```sh
+cargo build --bin pdu
+```
+
+The resulting executable is located at `target/debug/pdu`.
+
+#### Release build
+
+```sh
+cargo build --bin pdu --release
+```
+
+The resulting executable is located at `target/release/pdu`.
+
 ### Update shell completion files
 
 ```sh
