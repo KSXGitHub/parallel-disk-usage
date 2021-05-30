@@ -84,6 +84,7 @@ function renderReport(report: Report) {
     svg`<text
       data-index=${shape.index}
       data-name=${shape.name}
+      data-value=${shape.mean}
       class=${shape.numberClassName}
       x=${shape.numberX}
       y=${shape.textY}
