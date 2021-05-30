@@ -45,42 +45,42 @@ function renderReport(report: Report) {
     barWidth: unit.mean * barColumnWidth / maxValue,
     numberContent: String(unit.mean).slice(0, numberLength - 1) + 's',
   }))
-  const labels = shapes.map(({ command, index, name, labelX, textY, labelWidth }) =>
+  const labels = shapes.map(shape =>
     svg`<text
-      data-index=${index}
-      data-name=${name}
-      x=${labelX}
-      y=${textY}
-      width=${labelWidth}
+      data-index=${shape.index}
+      data-name=${shape.name}
+      x=${shape.labelX}
+      y=${shape.textY}
+      width=${shape.labelWidth}
       height=${rowHeight}
-      textLength=${labelWidth}
+      textLength=${shape.labelWidth}
       lengthAdjust="spacingAndGlyphs"
       fill=${textColor}
       font-family=${fontFamily}
-    >${command}</text>`
+    >${shape.command}</text>`
   )
-  const bars = shapes.map(({ index, name, barX, barY, barWidth }) =>
+  const bars = shapes.map(shape =>
     svg`<rect
-      data-index=${index}
-      data-name=${name}
-      x=${barX}
-      y=${barY}
-      width=${barWidth}
+      data-index=${shape.index}
+      data-name=${shape.name}
+      x=${shape.barX}
+      y=${shape.barY}
+      width=${shape.barWidth}
       height=${rowHeight}
-      fill=${getBarColor(index)}
+      fill=${getBarColor(shape.index)}
     />`
   )
-  const numbers = shapes.map(({ index, name, numberX, textY, numberContent }) =>
+  const numbers = shapes.map(shape =>
     svg`<text
-      data-index=${index}
-      data-name=${name}
-      x=${numberX}
-      y=${textY}
+      data-index=${shape.index}
+      data-name=${shape.name}
+      x=${shape.numberX}
+      y=${shape.textY}
       width=${numberColumnWidth}
       height=${rowHeight}
       fill=${textColor}
       font-family=${fontFamily}
-    >${numberContent}</text>`
+    >${shape.numberContent}</text>`
   )
   return svg`<svg
     xmlns=${xmlns}
