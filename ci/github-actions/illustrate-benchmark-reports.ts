@@ -32,19 +32,24 @@ function renderReport(report: Report) {
   const values = report.results.map(unit => unit.mean)
   const maxValue = Math.max(...values)
   const viewBoxWidth = labelColumnWidth + barColumnWidth + 5 * padding + numberColumnWidth
-  const shapes = report.results.map((unit, index) => ({
-    ...unit,
-    index,
-    name: unit.command.split(' ')[0].trim(),
-    labelX: padding,
-    barX: padding + labelColumnWidth + padding,
-    numberX: padding + labelColumnWidth + padding + barColumnWidth + padding,
-    textY: (index + 0.8) * rowHeight,
-    barY: index * rowHeight,
-    labelWidth: unit.command.length * charWidth,
-    barWidth: unit.mean * barColumnWidth / maxValue,
-    numberContent: String(unit.mean).slice(0, numberLength - 1) + 's',
-  }))
+  const shapes = report.results
+    .map((unit, index) => ({
+      ...unit,
+      index,
+      name: unit.command.split(' ')[0].trim(),
+      labelX: padding,
+      barX: padding + labelColumnWidth + padding,
+      numberX: padding + labelColumnWidth + padding + barColumnWidth + padding,
+      textY: (index + 0.8) * rowHeight,
+      barY: index * rowHeight,
+      labelWidth: unit.command.length * charWidth,
+      barWidth: unit.mean * barColumnWidth / maxValue,
+      numberContent: String(unit.mean).slice(0, numberLength - 1) + 's',
+    }))
+    .map(shape => ({
+      ...shape,
+      barColor: getBarColor(shape.index),
+    }))
   const labels = shapes.map(shape =>
     svg`<text
       data-index=${shape.index}
@@ -67,7 +72,7 @@ function renderReport(report: Report) {
       y=${shape.barY}
       width=${shape.barWidth}
       height=${rowHeight}
-      fill=${getBarColor(shape.index)}
+      fill=${shape.barColor}
     />`
   )
   const numbers = shapes.map(shape =>
