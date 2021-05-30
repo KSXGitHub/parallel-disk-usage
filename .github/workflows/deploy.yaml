@@ -566,12 +566,11 @@ jobs:
           VERSION: '5.0.0'
         run: |
           mkdir -p GDU.tmp
-          archive_name="dua-v${VERSION}-x86_64-unknown-linux-musl"
           curl -L "${REPO}/releases/download/v${VERSION}/gdu_linux_amd64.tgz" > tmp.gdu.tar.gz
           tar xf tmp.dua.tar.gz --directory=GDU.tmp
           mkdir -p GDU.tmp/bin
-          chmod +x "GDU.tmp/${archive_name}"
-          ln -s "$(pwd)/GDU.tmp/${archive_name}" GDU.tmp/bin/gdu
+          chmod +x GDU.tmp/gdu_linux_amd64
+          ln -s "$(pwd)/GDU.tmp/gdu_linux_amd64" GDU.tmp/bin/gdu
           echo "$(pwd)/GDU.tmp/bin" >> "$GITHUB_PATH"
 
       - name: Install hyperfine
