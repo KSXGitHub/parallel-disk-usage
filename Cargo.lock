@@ -49,16 +49,14 @@ checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
 
 [[package]]
 name = "build-fs-tree"
-version = "0.2.6"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d58502940f7d391bdab98940ba50e5c4f7667545f914108ef3c680a71f980b00"
+checksum = "6dd069710472bf9b4eed1390eb563a7c6570ee386f7deaa5af54c57f6ed8fe30"
 dependencies = [
  "derive_more",
  "pipe-trait 0.3.2",
  "serde",
  "serde_yaml",
- "structopt",
- "structopt-utilities",
  "text-block-macros",
 ]
 

@@ -72,7 +72,7 @@ version = "^0.20.0"
 features = ["derive"]
 
 [dev-dependencies]
-build-fs-tree = "^0.2.6"
+build-fs-tree = "^0.3.0"
 maplit = "^1.0.2"
 pretty_assertions = "^0.7.2"
 rand = "^0.8.3"
