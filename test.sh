@@ -32,7 +32,7 @@ unit() (
   eval run_if "${TEST:-true}" cargo test "${TEST_FLAGS:-}" "$@"
 )
 
-run_if "${FMT:-true}" cargo fmt
+run_if "${FMT:-true}" cargo fmt -- --check
 unit "$@"
 unit --no-default-features "$@"
 unit --all-features "$@"
