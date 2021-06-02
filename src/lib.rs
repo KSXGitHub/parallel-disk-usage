@@ -6,6 +6,8 @@ mod utils;
 pub mod app;
 #[cfg(feature = "cli")]
 pub mod args;
+#[cfg(feature = "cli")]
+pub mod runtime_error;
 
 /// The main program.
 #[cfg(feature = "cli")]
@@ -27,7 +29,6 @@ pub mod data_tree;
 pub mod fs_tree_builder;
 pub mod os_string_display;
 pub mod reporter;
-pub mod runtime_error;
 pub mod size;
 pub mod size_getters;
 pub mod status_board;
