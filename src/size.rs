@@ -6,6 +6,9 @@ use std::{
     ops::{Add, AddAssign, Mul, MulAssign},
 };
 
+#[cfg(feature = "json")]
+use serde::{Deserialize, Serialize};
+
 /// Types whose values can be used as disk usage statistic.
 pub trait Size:
     Debug
@@ -38,6 +41,7 @@ macro_rules! newtype {
     ) => {
         #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         #[derive(From, Into, Add, AddAssign, Sum)]
+        #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
         $(#[$attribute])*
         pub struct $name($inner);
 

@@ -1,0 +1,172 @@
+use parallel_disk_usage::{
+    data_tree::{reflection::ConversionError, DataTree, Reflection},
+    size::Bytes,
+};
+use pretty_assertions::assert_eq;
+use std::mem::transmute;
+
+type SampleName = &'static str;
+type SampleData = Bytes;
+type SampleReflection = Reflection<SampleName, SampleData>;
+type SampleTree = DataTree<SampleName, SampleData>;
+
+fn valid_reflection() -> SampleReflection {
+    Reflection {
+        name: "root",
+        data: Bytes::new(7853),
+        children: vec![
+            Reflection {
+                name: "a",
+                data: Bytes::new(78),
+                children: Vec::new(),
+            },
+            Reflection {
+                name: "b",
+                data: Bytes::new(321),
+                children: vec![Reflection {
+                    name: "0",
+                    data: Bytes::new(321),
+                    children: Vec::new(),
+                }],
+            },
+            Reflection {
+                name: "c",
+                data: Bytes::new(3456),
+                children: vec![
+                    Reflection {
+                        name: "0",
+                        data: Bytes::new(732),
+                        children: Vec::new(),
+                    },
+                    Reflection {
+                        name: "1",
+                        data: Bytes::new(352),
+                        children: Vec::new(),
+                    },
+                ],
+            },
+        ],
+    }
+}
+
+fn invalid_reflection_excessive_children() -> SampleReflection {
+    Reflection {
+        name: "root",
+        data: Bytes::new(2468),
+        children: vec![
+            Reflection {
+                name: "a",
+                data: Bytes::new(78),
+                children: Vec::new(),
+            },
+            Reflection {
+                name: "b",
+                data: Bytes::new(321),
+                children: vec![Reflection {
+                    name: "0",
+                    data: Bytes::new(321),
+                    children: vec![
+                        Reflection {
+                            name: "abc",
+                            data: Bytes::new(123),
+                            children: vec![Reflection {
+                                name: "xyz",
+                                data: Bytes::new(4321),
+                                children: Vec::new(),
+                            }],
+                        },
+                        Reflection {
+                            name: "def",
+                            data: Bytes::new(456),
+                            children: Vec::new(),
+                        },
+                    ],
+                }],
+            },
+            Reflection {
+                name: "c",
+                data: Bytes::new(1084),
+                children: vec![
+                    Reflection {
+                        name: "0",
+                        data: Bytes::new(732),
+                        children: Vec::new(),
+                    },
+                    Reflection {
+                        name: "1",
+                        data: Bytes::new(352),
+                        children: Vec::new(),
+                    },
+                ],
+            },
+        ],
+    }
+}
+
+#[test]
+fn valid_conversion() {
+    let actual = valid_reflection()
+        .par_try_into_tree()
+        .expect("create tree")
+        .into_reflection();
+    let expected = valid_reflection();
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn invalid_conversion_excessive_children() {
+    let actual = invalid_reflection_excessive_children()
+        .par_try_into_tree()
+        .expect_err("create error");
+    let expected = ConversionError::ExcessiveChildren {
+        path: vec!["root", "b", "0"].into_iter().collect(),
+        data: Bytes::new(321),
+        children: vec![
+            Reflection {
+                name: "abc",
+                data: Bytes::new(123),
+                children: vec![Reflection {
+                    name: "xyz",
+                    data: Bytes::new(4321),
+                    children: Vec::new(),
+                }],
+            },
+            Reflection {
+                name: "def",
+                data: Bytes::new(456),
+                children: Vec::new(),
+            },
+        ],
+        children_sum: Bytes::new(123 + 456),
+    };
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn display_excessive_children() {
+    let actual = invalid_reflection_excessive_children()
+        .par_try_into_tree()
+        .expect_err("create error")
+        .to_string();
+    let expected = r#"ExcessiveChildren: "root/b/0": Bytes(321) is less than Bytes(579)"#;
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn transmute_tree_into_reflection() {
+    let valid_tree = valid_reflection()
+        .par_try_into_tree()
+        .expect("create valid tree");
+    let actual: SampleReflection = unsafe { transmute(valid_tree) };
+    let expected = valid_reflection();
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn transmute_reflection_into_tree() {
+    let actual: SampleTree = unsafe { transmute(valid_reflection()) };
+    let expected = valid_reflection()
+        .par_try_into_tree()
+        .expect("create expected tree");
+    assert_eq!(actual, expected);
+}

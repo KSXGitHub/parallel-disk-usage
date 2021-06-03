@@ -21,6 +21,8 @@ edit:completion:arg-completer[pdu] = [@words]{
             cand --total-width 'Width of the visualization'
             cand --column-width 'Maximum widths of the tree column and width of the bar column'
             cand --min-ratio 'Minimal size proportion required to appear'
+            cand --json-input 'Read JSON data from stdin'
+            cand --json-output 'Print JSON data instead of an ASCII chart'
             cand --top-down 'Print the tree top-down instead of bottom-up'
             cand --no-sort 'Preserve order of entries'
             cand --silent-errors 'Prevent filesystem error messages from appearing in stderr'

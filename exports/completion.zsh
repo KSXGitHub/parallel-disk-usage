@@ -21,6 +21,8 @@ _pdu() {
 '(--column-width)--total-width=[Width of the visualization]' \
 '*--column-width=[Maximum widths of the tree column and width of the bar column]' \
 '--min-ratio=[Minimal size proportion required to appear]' \
+'(--quantity)--json-input[Read JSON data from stdin]' \
+'--json-output[Print JSON data instead of an ASCII chart]' \
 '--top-down[Print the tree top-down instead of bottom-up]' \
 '--no-sort[Preserve order of entries]' \
 '--silent-errors[Prevent filesystem error messages from appearing in stderr]' \
