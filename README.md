@@ -113,6 +113,8 @@ The resulting executable is located at `target/release/pdu`.
 
 The [parallel-disk-usage crate](https://crates.io/crates/parallel-disk-usage) is both a binary crate and a library crate. If you desire features that `pdu` itself lacks (that is, after you have asked the maintainer(s) of `pdu` for the features but they refused), you may use the library crate to build a tool of your own. The documentation for the library crate can be found in [docs.rs](https://docs.rs/parallel-disk-usage).
 
+Alternatively, the `pdu` command provides `--json-input` flag and `--json-output` flag. The `--json-output` flag converts disk usage data into JSON and the `--json-input` flag turns said JSON into visualization. These 2 flags allow integration with other CLI tools (via pipe, as per the UNIX philosophy).
+
 ## Installation
 
 ### Any Desktop OS
