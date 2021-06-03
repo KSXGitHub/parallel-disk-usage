@@ -1,7 +1,8 @@
 use crate::{
     args::Fraction,
-    data_tree::DataTree,
+    data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
+    json_data::JsonData,
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
     runtime_error::RuntimeError,
@@ -9,17 +10,21 @@ use crate::{
     status_board::GLOBAL_STATUS_BOARD,
     visualizer::{ColumnWidthDistribution, Direction, Visualizer},
 };
-use std::{fs::Metadata, iter::once, num::NonZeroUsize, path::PathBuf};
+use serde::Serialize;
+use std::{fs::Metadata, io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
 
 /// The sub program of the main application.
 pub struct Sub<Data, GetData, Report>
 where
-    Data: Size + Into<u64> + Send + Sync,
+    Data: Size + Into<u64> + Serialize + Send + Sync,
     Report: ParallelReporter<Data> + Sync,
     GetData: Fn(&Metadata) -> Data + Copy + Sync,
+    DataTreeReflection<String, Data>: Into<JsonData>,
 {
     /// List of files and/or directories.
     pub files: Vec<PathBuf>,
+    /// Print JSON data instead of an ASCII chart.
+    pub json_output: bool,
     /// Format to be used to [`display`](Size::display) the data.
     pub bytes_format: Data::DisplayFormat,
     /// The direction of the visualization.
@@ -40,14 +45,16 @@ where
 
 impl<Data, GetData, Report> Sub<Data, GetData, Report>
 where
-    Data: Size + Into<u64> + Send + Sync,
+    Data: Size + Into<u64> + Serialize + Send + Sync,
     Report: ParallelReporter<Data> + Sync,
     GetData: Fn(&Metadata) -> Data + Copy + Sync,
+    DataTreeReflection<String, Data>: Into<JsonData>,
 {
     /// Run the sub program.
     pub fn run(self) -> Result<(), RuntimeError> {
         let Sub {
             files,
+            json_output,
             bytes_format,
             direction,
             column_width_distribution,
@@ -107,6 +114,16 @@ where
             }
             data_tree
         };
+
+        if json_output {
+            let json_data: JsonData = data_tree
+                .into_reflection() // I really want to use std::mem::transmute here but can't.
+                .par_convert_names_to_utf8() // TODO: allow non-UTF8 somehow.
+                .expect("convert all names from raw string to UTF-8")
+                .into();
+            return serde_json::to_writer(stdout(), &json_data)
+                .map_err(RuntimeError::SerializationFailure);
+        }
 
         let visualizer = Visualizer {
             data_tree: &data_tree,

@@ -43,7 +43,8 @@ required-features = ["cli-completions"]
 
 [features]
 default = ["cli"]
-cli = ["structopt", "structopt-utilities"]
+json = ["serde/derive", "serde_json"]
+cli = ["structopt", "structopt-utilities", "json"]
 cli-completions = ["cli"]
 
 [dependencies]
@@ -65,6 +66,14 @@ optional = true
 
 [dependencies.structopt-utilities]
 version = "^0.0.8"
+optional = true
+
+[dependencies.serde]
+version = "^1.0.126"
+optional = true
+
+[dependencies.serde_json]
+version = "^1.0.64"
 optional = true
 
 [dependencies.strum]

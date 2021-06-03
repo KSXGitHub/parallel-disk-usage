@@ -4,6 +4,9 @@ use std::{
     fmt::{Debug, Display, Error, Formatter},
 };
 
+#[cfg(feature = "json")]
+use serde::{Deserialize, Serialize};
+
 /// [`Display`] inner [`OsStr`] or [`OsString`].
 ///
 /// If the inner string can be converted to UTF-8, displays the UTF-8.
@@ -24,6 +27,7 @@ use std::{
     From,
     FromStr,
 )]
+#[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 pub struct OsStringDisplay<Inner = OsString>(pub Inner)
 where
     Inner: AsRef<OsStr> + Debug;

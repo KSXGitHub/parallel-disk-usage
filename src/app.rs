@@ -4,13 +4,15 @@ pub use sub::Sub;
 
 use crate::{
     args::{Args, Quantity},
+    json_data::JsonData,
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
     size::{Bytes, Size},
     size_getters::GET_APPARENT_SIZE,
-    visualizer::Direction,
+    visualizer::{Direction, Visualizer},
 };
-use std::time::Duration;
+use pipe_trait::Pipe;
+use std::{io::stdin, time::Duration};
 use structopt_utilities::StructOptUtils;
 
 #[cfg(unix)]
@@ -43,6 +45,48 @@ impl App {
         // The other operations which are invoked frequently should not utilize dynamic dispatch.
 
         let column_width_distribution = self.args.column_width_distribution();
+
+        if self.args.json_input {
+            if !self.args.files.is_empty() {
+                return Err(RuntimeError::JsonInputArgConflict);
+            }
+
+            let Args {
+                bytes_format,
+                top_down,
+                max_depth,
+                ..
+            } = self.args;
+            let direction = Direction::from_top_down(top_down);
+
+            let json_data = stdin()
+                .pipe(serde_json::from_reader::<_, JsonData>)
+                .map_err(RuntimeError::DeserializationFailure)?;
+
+            macro_rules! visualize {
+                ($reflection:expr, $bytes_format: expr) => {{
+                    let data_tree = $reflection
+                        .par_try_into_tree()
+                        .map_err(|error| RuntimeError::InvalidInputReflection(error.to_string()))?;
+                    Visualizer {
+                        data_tree: &data_tree,
+                        bytes_format: $bytes_format,
+                        column_width_distribution,
+                        direction,
+                        max_depth,
+                    }
+                    .to_string()
+                }};
+            }
+
+            let visualization = match json_data {
+                JsonData::Bytes(reflection) => visualize!(reflection, bytes_format),
+                JsonData::Blocks(reflection) => visualize!(reflection, ()),
+            };
+
+            print!("{}", visualization); // it already ends with "\n", println! isn't needed here.
+            return Ok(());
+        }
 
         let report_error = if self.args.silent_errors {
             ErrorReport::SILENT
@@ -80,6 +124,7 @@ impl App {
                     quantity: Quantity::$quantity,
                     progress: $progress,
                     files,
+                    json_output,
                     bytes_format,
                     top_down,
                     max_depth,
@@ -94,6 +139,7 @@ impl App {
                         reporter: $create_reporter::<$data>(report_error),
                         bytes_format: $format(bytes_format),
                         files,
+                        json_output,
                         column_width_distribution,
                         max_depth,
                         min_ratio,

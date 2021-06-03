@@ -48,12 +48,26 @@ use text_block_macros::text_block;
         ""
         "    Only show disk usage chart of entries whose size is at least 5% of total"
         "    $ pdu --min-ratio=0.05"
+        ""
+        "    Show disk usage data as JSON instead of chart"
+        "    $ pdu --min-ratio=0 --json-output | jq"
+        ""
+        "    Visualize existing JSON representation of disk usage data"
+        "    $ pdu --min-ratio=0 < disk-usage.json"
     },
 )]
 pub struct Args {
     /// List of files and/or directories.
     #[structopt(name = "files")]
     pub files: Vec<PathBuf>,
+
+    /// Read JSON data from stdin.
+    #[structopt(long, conflicts_with = "quantity")]
+    pub json_input: bool,
+
+    /// Print JSON data instead of an ASCII chart.
+    #[structopt(long)]
+    pub json_output: bool,
 
     /// How to display the numbers of bytes.
     #[structopt(long, possible_values = BytesFormat::VARIANTS, default_value = BytesFormat::default_value())]
