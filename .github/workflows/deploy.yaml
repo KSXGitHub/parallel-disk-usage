@@ -581,6 +581,8 @@ jobs:
           dust --version
           dutree --version
           dua --version
+          ncdu --version
+          gdu --version
           du --version
           hyperfine --version
 
