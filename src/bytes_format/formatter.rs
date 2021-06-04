@@ -24,13 +24,14 @@ impl Formatter {
     }
 
     /// Parse a value according to the prefixing rule.
-    pub const fn parse_value(self, value: u64) -> ParsedValue {
+    pub fn parse_value(self, value: u64) -> ParsedValue {
+        let float_value = value as f32;
         macro_rules! check {
             ($exp:literal => $unit:literal) => {{
                 let scale = self.scale($exp);
                 if value >= scale {
-                    return ParsedValue {
-                        coefficient: rounded_div::u64(value, scale),
+                    return ParsedValue::Big {
+                        coefficient: float_value / (scale as f32),
                         unit: $unit,
                         exponent: $exp,
                         scale,
@@ -44,11 +45,8 @@ impl Formatter {
         check!(3 => 'G');
         check!(2 => 'M');
         check!(1 => 'K');
-        ParsedValue {
-            coefficient: value,
-            unit: 'B',
-            scale: 1,
-            exponent: 0,
+        ParsedValue::Small {
+            value: value as u16,
         }
     }
 }

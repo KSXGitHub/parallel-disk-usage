@@ -2,38 +2,23 @@ use derive_more::Display;
 
 /// Return value of [`Formatter::parse_value`](super::Formatter::parse_value).
 #[derive(Debug, Display, Clone, Copy)]
-#[display(fmt = "{}{}", coefficient, unit)]
-pub struct ParsedValue {
-    pub(super) coefficient: u64,
-    pub(super) unit: char,
-    pub(super) scale: u64,
-    pub(super) exponent: usize,
-}
-
-macro_rules! parsed_value_getter {
-    ($(#[$attributes:meta])* $field:ident: $result:ty) => {
-        $(#[$attributes])*
-        pub const fn $field(self) -> $result {
-            self.$field
-        }
-    };
-}
-
-impl ParsedValue {
-    parsed_value_getter!(
+pub enum ParsedValue {
+    /// When input value is less than `scale_base`.
+    #[display(fmt = "{}   ", value)]
+    Small {
+        /// Input value that is less than `scale_base`.
+        value: u16,
+    },
+    /// When input value is greater than `scale_base`.
+    #[display(fmt = "{:.1}{}", coefficient, unit)]
+    Big {
         /// The visible part of the number.
-        coefficient: u64
-    );
-    parsed_value_getter!(
+        coefficient: f32,
         /// The unit that follows `coefficient`.
-        unit: char
-    );
-    parsed_value_getter!(
+        unit: char,
         /// The divisor that was used upon the original number to get `coefficient`.
-        scale: u64
-    );
-    parsed_value_getter!(
+        scale: u64,
         /// The exponent that was used upon base scale to get `scale`.
-        exponent: usize
-    );
+        exponent: usize,
+    },
 }
