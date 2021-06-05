@@ -2,7 +2,7 @@ use crate::{
     args::Fraction,
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
-    json_data::{JsonData, SchemaVersion, UnitAndTree},
+    json_data::{BinaryVersion, JsonData, SchemaVersion, UnitAndTree},
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
     runtime_error::RuntimeError,
@@ -123,6 +123,7 @@ where
                 .into();
             let json_data = JsonData {
                 schema_version: SchemaVersion,
+                binary_version: Some(BinaryVersion::current()),
                 unit_and_tree,
             };
             return serde_json::to_writer(stdout(), &json_data)

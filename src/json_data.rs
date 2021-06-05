@@ -1,5 +1,7 @@
+pub mod binary_version;
 pub mod schema_version;
 
+pub use binary_version::BinaryVersion;
 pub use schema_version::SchemaVersion;
 
 use crate::{
@@ -31,6 +33,9 @@ pub enum UnitAndTree {
 pub struct JsonData {
     /// The `"schema-version"` field.
     pub schema_version: SchemaVersion,
+    /// The `"pdu"` field.
+    #[cfg_attr(feature = "json", serde(rename = "pdu"))]
+    pub binary_version: Option<BinaryVersion>,
     /// The `"unit"` field and the `"tree"` field.
     #[cfg_attr(feature = "json", serde(flatten))]
     pub unit_and_tree: UnitAndTree,
