@@ -144,10 +144,12 @@ where
         .into_reflection()
     };
 
+    let sub = |suffix: &str| root.join(suffix).pipe(OsStringDisplay::os_string_from);
+
     assert_eq!(
         measure("flat"),
         sanitize_tree_reflection(DataTreeReflection {
-            name: OsStringDisplay::os_string_from("flat"),
+            name: sub("flat"),
             data: suffix_size!("flat", "flat/0", "flat/1", "flat/2", "flat/3"),
             children: vec![
                 DataTreeReflection {
@@ -177,7 +179,7 @@ where
     assert_eq!(
         measure("nested"),
         sanitize_tree_reflection(DataTreeReflection {
-            name: OsStringDisplay::os_string_from("nested"),
+            name: sub("nested"),
             data: suffix_size!("nested", "nested/0", "nested/0/1"),
             children: vec![DataTreeReflection {
                 name: OsStringDisplay::os_string_from("0"),
@@ -194,7 +196,7 @@ where
     assert_eq!(
         measure("empty-dir"),
         sanitize_tree_reflection(DataTreeReflection {
-            name: OsStringDisplay::os_string_from("empty-dir"),
+            name: sub("empty-dir"),
             data: suffix_size!("empty-dir"),
             children: Vec::new(),
         }),

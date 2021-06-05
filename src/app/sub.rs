@@ -2,7 +2,7 @@ use crate::{
     args::Fraction,
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
-    json_data::JsonData,
+    json_data::{BinaryVersion, JsonData, SchemaVersion, UnitAndTree},
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
     runtime_error::RuntimeError,
@@ -19,7 +19,7 @@ where
     Data: Size + Into<u64> + Serialize + Send + Sync,
     Report: ParallelReporter<Data> + Sync,
     GetData: Fn(&Metadata) -> Data + Copy + Sync,
-    DataTreeReflection<String, Data>: Into<JsonData>,
+    DataTreeReflection<String, Data>: Into<UnitAndTree>,
 {
     /// List of files and/or directories.
     pub files: Vec<PathBuf>,
@@ -48,7 +48,7 @@ where
     Data: Size + Into<u64> + Serialize + Send + Sync,
     Report: ParallelReporter<Data> + Sync,
     GetData: Fn(&Metadata) -> Data + Copy + Sync,
-    DataTreeReflection<String, Data>: Into<JsonData>,
+    DataTreeReflection<String, Data>: Into<UnitAndTree>,
 {
     /// Run the sub program.
     pub fn run(self) -> Result<(), RuntimeError> {
@@ -116,11 +116,16 @@ where
         };
 
         if json_output {
-            let json_data: JsonData = data_tree
+            let unit_and_tree: UnitAndTree = data_tree
                 .into_reflection() // I really want to use std::mem::transmute here but can't.
                 .par_convert_names_to_utf8() // TODO: allow non-UTF8 somehow.
                 .expect("convert all names from raw string to UTF-8")
                 .into();
+            let json_data = JsonData {
+                schema_version: SchemaVersion,
+                binary_version: Some(BinaryVersion::current()),
+                unit_and_tree,
+            };
             return serde_json::to_writer(stdout(), &json_data)
                 .map_err(RuntimeError::SerializationFailure);
         }

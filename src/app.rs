@@ -4,7 +4,7 @@ pub use sub::Sub;
 
 use crate::{
     args::{Args, Quantity},
-    json_data::JsonData,
+    json_data::{JsonData, UnitAndTree},
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
     size::{Bytes, Size},
@@ -59,9 +59,10 @@ impl App {
             } = self.args;
             let direction = Direction::from_top_down(top_down);
 
-            let json_data = stdin()
+            let unit_and_tree = stdin()
                 .pipe(serde_json::from_reader::<_, JsonData>)
-                .map_err(RuntimeError::DeserializationFailure)?;
+                .map_err(RuntimeError::DeserializationFailure)?
+                .unit_and_tree;
 
             macro_rules! visualize {
                 ($reflection:expr, $bytes_format: expr) => {{
@@ -79,9 +80,9 @@ impl App {
                 }};
             }
 
-            let visualization = match json_data {
-                JsonData::Bytes(reflection) => visualize!(reflection, bytes_format),
-                JsonData::Blocks(reflection) => visualize!(reflection, ()),
+            let visualization = match unit_and_tree {
+                UnitAndTree::Bytes(reflection) => visualize!(reflection, bytes_format),
+                UnitAndTree::Blocks(reflection) => visualize!(reflection, ()),
             };
 
             print!("{}", visualization); // it already ends with "\n", println! isn't needed here.
