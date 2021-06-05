@@ -1,7 +1,5 @@
 #![deny(warnings)]
 
-mod utils;
-
 #[cfg(feature = "json")]
 pub use serde;
 #[cfg(feature = "json")]
