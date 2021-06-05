@@ -27,6 +27,7 @@ use serde::{Deserialize, Serialize};
 /// **Serialization and deserialization:** Requires enabling the `json` feature to enable `serde`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]
 pub struct Reflection<Name, Data: Size> {
     /// Name of the tree.
     pub name: Name,
