@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, From, TryInto)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "json", serde(tag = "unit", content = "tree"))]
+#[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]
 pub enum UnitAndTree {
     /// Tree where data is [bytes](Bytes).
     Bytes(Reflection<String, Bytes>),
@@ -22,6 +23,7 @@ pub enum UnitAndTree {
 /// input of the program with `--json-input` flag.
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]
 pub struct JsonData {
     /// The `"unit"` field and the `"tree"` field.
     #[cfg_attr(feature = "json", serde(flatten))]
