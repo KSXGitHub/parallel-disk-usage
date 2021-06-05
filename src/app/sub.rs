@@ -2,7 +2,7 @@ use crate::{
     args::Fraction,
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
-    json_data::{JsonData, UnitAndTree},
+    json_data::{JsonData, SchemaVersion, UnitAndTree},
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
     runtime_error::RuntimeError,
@@ -121,7 +121,10 @@ where
                 .par_convert_names_to_utf8() // TODO: allow non-UTF8 somehow.
                 .expect("convert all names from raw string to UTF-8")
                 .into();
-            let json_data = JsonData { unit_and_tree };
+            let json_data = JsonData {
+                schema_version: SchemaVersion,
+                unit_and_tree,
+            };
             return serde_json::to_writer(stdout(), &json_data)
                 .map_err(RuntimeError::SerializationFailure);
         }

@@ -1,3 +1,7 @@
+pub mod schema_version;
+
+pub use schema_version::SchemaVersion;
+
 use crate::{
     data_tree::Reflection,
     size::{Blocks, Bytes},
@@ -25,6 +29,8 @@ pub enum UnitAndTree {
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]
 pub struct JsonData {
+    /// The `"schema-version"` field.
+    pub schema_version: SchemaVersion,
     /// The `"unit"` field and the `"tree"` field.
     #[cfg_attr(feature = "json", serde(flatten))]
     pub unit_and_tree: UnitAndTree,
