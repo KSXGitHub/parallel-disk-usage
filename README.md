@@ -115,6 +115,10 @@ The [parallel-disk-usage crate](https://crates.io/crates/parallel-disk-usage) is
 
 Alternatively, the `pdu` command provides `--json-input` flag and `--json-output` flag. The `--json-output` flag converts disk usage data into JSON and the `--json-input` flag turns said JSON into visualization. These 2 flags allow integration with other CLI tools (via pipe, as per the UNIX philosophy).
 
+Beware that the structure of the JSON tree differs depends on the number of file/directory names that were provided (as CLI arguments):
+* If there are only 0 or 1 file/directory names, the name of the tree root would be a real path (either `.` or the provided name).
+* If there are 2 or more file/directory names, the name of the tree root would be `(total)` (which is not a real path), and the provided names would correspond to the children of the tree root.
+
 ## Installation
 
 ### Any Desktop OS
