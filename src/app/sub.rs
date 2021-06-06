@@ -115,6 +115,8 @@ where
             data_tree
         };
 
+        GLOBAL_STATUS_BOARD.clear_line(0);
+
         if json_output {
             let unit_and_tree: UnitAndTree = data_tree
                 .into_reflection() // I really want to use std::mem::transmute here but can't.
@@ -138,7 +140,6 @@ where
             max_depth,
         };
 
-        GLOBAL_STATUS_BOARD.clear_line(0);
         print!("{}", visualizer); // visualizer already ends with "\n", println! isn't needed here.
         Ok(())
     }
