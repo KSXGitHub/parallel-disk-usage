@@ -11,11 +11,7 @@ Highly parallelized, blazing fast directory tree analyzer.
 
 ## Description
 
-`pdu` is a CLI program that renders a graphical chart for disk usages of files and directories, it is a replacement of [`dust`](https://github.com/bootandy/dust) and [`dutree`](https://github.com/nachoparker/dutree).
-
-Both `dust` (v0.5.4) and `dutree` (v0.12.5) do not utilize the parallel computing capability of Rust to improve performance.
-
-Furthermore, when providing multiple file names to `dust`, it shows bars of the exact same length regardless of size differences. This is the final push for the author of `pdu` to create this tool.
+`pdu` is a CLI program that renders a graphical chart for disk usages of files and directories, it is an alternative to [`dust`](https://github.com/bootandy/dust) and [`dutree`](https://github.com/nachoparker/dutree).
 
 ## Benchmark
 
