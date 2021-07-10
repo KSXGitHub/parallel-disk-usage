@@ -50,7 +50,7 @@ cli-completions = ["cli"]
 [dependencies]
 pipe-trait = "^0.3.2"
 smart-default = "^0.6.0"
-derive_more = "^0.99.14"
+derive_more = "^0.99.16"
 rayon = "^1.5.1"
 text-block-macros = "^0.1.1"
 rounded-div = "^0.1.2"
