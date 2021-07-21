@@ -82,6 +82,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "command-extra"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1b4fe32ea3f2a8d975b6c5cdd3f02ac358f471ca24dbb18d7a4ca58b3193d2d"
+
+[[package]]
 name = "convert_case"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -362,6 +368,7 @@ version = "0.5.3"
 dependencies = [
  "assert-cmp",
  "build-fs-tree",
+ "command-extra",
  "derive_more",
  "fmt-iter",
  "itertools",

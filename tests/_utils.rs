@@ -1,4 +1,5 @@
 use build_fs_tree::{dir, file, Build, MergeableFileSystemTree};
+use command_extra::CommandExtra;
 use derive_more::{AsRef, Deref};
 use parallel_disk_usage::{
     data_tree::{DataTree, DataTreeReflection},
@@ -16,6 +17,7 @@ use std::{
     fs::{create_dir, metadata, remove_dir_all, Metadata},
     io::Error,
     path::{Path, PathBuf},
+    process::Command,
 };
 
 /// Representation of a temporary filesystem item.
@@ -201,4 +203,80 @@ where
             children: Vec::new(),
         }),
     );
+}
+
+/// Path to the `pdu` executable
+pub const PDU: &str = env!("CARGO_BIN_EXE_pdu");
+
+#[derive(Debug, Clone)]
+pub struct CommandRepresentation<'a> {
+    program: &'a str,
+    args: Vec<&'a str>,
+}
+
+impl<'a> CommandRepresentation<'a> {
+    pub fn new(program: &'a str) -> Self {
+        CommandRepresentation {
+            program,
+            args: Vec::new(),
+        }
+    }
+
+    pub fn arg(mut self, arg: &'a str) -> Self {
+        self.args.push(arg);
+        self
+    }
+}
+
+#[derive(Debug, Clone, AsRef, Deref)]
+pub struct CommandList<'a>(Vec<CommandRepresentation<'a>>);
+
+impl<'a> Default for CommandList<'a> {
+    fn default() -> Self {
+        PDU.pipe(CommandRepresentation::new)
+            .pipe(|x| vec![x])
+            .pipe(CommandList)
+    }
+}
+
+impl<'a> CommandList<'a> {
+    pub fn flag_matrix(self, name: &'a str) -> Self {
+        Self::assert_flag(name);
+        let CommandList(list) = self;
+        list.clone()
+            .into_iter()
+            .map(|cmd| cmd.arg(name))
+            .chain(list)
+            .collect::<Vec<_>>()
+            .pipe(CommandList)
+    }
+
+    pub fn option_matrix<const LEN: usize>(self, name: &'a str, values: [&'a str; LEN]) -> Self {
+        Self::assert_flag(name);
+        let CommandList(tail) = self;
+        let mut head: Vec<_> = values
+            .iter()
+            .copied()
+            .flat_map(|value| {
+                tail.clone()
+                    .into_iter()
+                    .map(move |cmd| cmd.arg(name).arg(value))
+            })
+            .collect();
+        head.extend(tail);
+        CommandList(head)
+    }
+
+    pub fn commands(&'a self) -> impl Iterator<Item = Command> + 'a {
+        self.iter()
+            .map(|cmd| Command::new(cmd.program).with_args(&cmd.args))
+    }
+
+    fn assert_flag(name: &str) {
+        match name.len() {
+            0 | 1 => panic!("{:?} is not a valid flag", name),
+            2 => assert!(name.starts_with('-'), "{:?} is not a valid flag", name),
+            _ => assert!(name.starts_with("--"), "{:?} is not a valid flag", name),
+        }
+    }
 }
