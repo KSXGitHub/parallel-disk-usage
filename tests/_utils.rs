@@ -208,20 +208,12 @@ where
 /// Path to the `pdu` executable
 pub const PDU: &str = env!("CARGO_BIN_EXE_pdu");
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct CommandRepresentation<'a> {
-    program: &'a str,
     args: Vec<&'a str>,
 }
 
 impl<'a> CommandRepresentation<'a> {
-    pub fn new(program: &'a str) -> Self {
-        CommandRepresentation {
-            program,
-            args: Vec::new(),
-        }
-    }
-
     pub fn arg(mut self, arg: &'a str) -> Self {
         self.args.push(arg);
         self
@@ -233,7 +225,7 @@ pub struct CommandList<'a>(Vec<CommandRepresentation<'a>>);
 
 impl<'a> Default for CommandList<'a> {
     fn default() -> Self {
-        PDU.pipe(CommandRepresentation::new)
+        CommandRepresentation::default()
             .pipe(|x| vec![x])
             .pipe(CommandList)
     }
@@ -269,7 +261,7 @@ impl<'a> CommandList<'a> {
 
     pub fn commands(&'a self) -> impl Iterator<Item = Command> + 'a {
         self.iter()
-            .map(|cmd| Command::new(cmd.program).with_args(&cmd.args))
+            .map(|cmd| Command::new(PDU).with_args(&cmd.args))
     }
 
     fn assert_flag(name: &str) {
