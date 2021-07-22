@@ -5,6 +5,9 @@ use command_extra::CommandExtra;
 use pipe_trait::Pipe;
 use std::process::Stdio;
 
+/// There are branches of similar shapes in `/src/app.rs` that call
+/// the `sub!` macro. This test suite is to ensure that no combination
+/// of variant is left out by programmer's mistake.
 #[test]
 fn flag_combinations() {
     #[cfg(unix)]
