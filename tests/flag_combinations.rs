@@ -1,3 +1,5 @@
+#![cfg(feature = "cli")]
+
 pub mod _utils;
 pub use _utils::*;
 
