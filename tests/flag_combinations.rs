@@ -4,7 +4,6 @@ pub mod _utils;
 pub use _utils::*;
 
 use command_extra::CommandExtra;
-use pipe_trait::Pipe;
 use std::process::Stdio;
 
 /// There are branches of similar shapes in `/src/app.rs` that call
@@ -32,11 +31,7 @@ fn flag_combinations() {
             .with_stderr(Stdio::piped())
             .output()
             .expect("execute command");
-        let error = output.stderr.pipe_as_ref(String::from_utf8_lossy);
-        let error = error.trim();
-        if !error.is_empty() {
-            eprintln!("STDERR:\n{}\n", error);
-        }
+        inspect_stderr(&output.stderr);
         let status = output.status;
         assert!(status.success(), "status: {:?}", status.code())
     }

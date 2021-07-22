@@ -272,3 +272,11 @@ impl<'a> CommandList<'a> {
         }
     }
 }
+
+pub fn inspect_stderr(stderr: &[u8]) {
+    let text = String::from_utf8_lossy(stderr);
+    let text = text.trim();
+    if !text.is_empty() {
+        eprintln!("STDERR:\n{}\n", text);
+    }
+}
