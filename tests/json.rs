@@ -20,33 +20,13 @@ use pretty_assertions::assert_eq;
 use std::{
     convert::TryInto,
     io::Write,
-    process::{Command, Output, Stdio},
+    process::{Command, Stdio},
 };
 
 type SampleName = String;
 type SampleData = Bytes;
 type SampleReflection = Reflection<SampleName, SampleData>;
 type SampleTree = DataTree<SampleName, SampleData>;
-
-fn stdout_text(
-    Output {
-        status,
-        stdout,
-        stderr,
-    }: Output,
-) -> String {
-    inspect_stderr(&stderr);
-    assert!(
-        status.success(),
-        "progress exits with non-zero status: {:?}",
-        status
-    );
-    stdout
-        .pipe(String::from_utf8)
-        .expect("parse stdout as UTF-8")
-        .trim()
-        .to_string()
-}
 
 fn sample_tree() -> SampleTree {
     let dir = |name: &'static str, children: Vec<SampleTree>| {

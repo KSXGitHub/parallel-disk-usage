@@ -17,7 +17,7 @@ use std::{
     fs::{create_dir, metadata, remove_dir_all, Metadata},
     io::Error,
     path::{Path, PathBuf},
-    process::Command,
+    process::{Command, Output},
 };
 
 /// Representation of a temporary filesystem item.
@@ -271,6 +271,26 @@ impl<'a> CommandList<'a> {
             _ => assert!(name.starts_with("--"), "{:?} is not a valid flag", name),
         }
     }
+}
+
+pub fn stdout_text(
+    Output {
+        status,
+        stdout,
+        stderr,
+    }: Output,
+) -> String {
+    inspect_stderr(&stderr);
+    assert!(
+        status.success(),
+        "progress exits with non-zero status: {:?}",
+        status
+    );
+    stdout
+        .pipe(String::from_utf8)
+        .expect("parse stdout as UTF-8")
+        .trim()
+        .to_string()
 }
 
 pub fn inspect_stderr(stderr: &[u8]) {
