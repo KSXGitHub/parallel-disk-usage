@@ -307,7 +307,7 @@ pub fn stdout_text(
     stdout
         .pipe(String::from_utf8)
         .expect("parse stdout as UTF-8")
-        .trim()
+        .trim_end()
         .to_string()
 }
 

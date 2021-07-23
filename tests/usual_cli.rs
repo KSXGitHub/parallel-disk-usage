@@ -56,7 +56,7 @@ fn total_width() {
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
@@ -93,7 +93,7 @@ fn column_width() {
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
@@ -128,7 +128,7 @@ fn min_ratio_0() {
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
@@ -164,7 +164,7 @@ fn min_ratio() {
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
@@ -200,7 +200,7 @@ fn max_depth_2() {
         max_depth: 2.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
@@ -236,7 +236,7 @@ fn max_depth_1() {
         max_depth: 1.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
@@ -272,7 +272,7 @@ fn top_down() {
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
@@ -308,7 +308,7 @@ fn quantity_len() {
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
@@ -345,7 +345,7 @@ fn quantity_blksize() {
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
@@ -382,7 +382,7 @@ fn quantity_blocks() {
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
@@ -420,7 +420,7 @@ fn bytes_format_plain() {
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
@@ -458,7 +458,7 @@ fn bytes_format_metric() {
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
@@ -496,7 +496,7 @@ fn bytes_format_binary() {
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
@@ -531,7 +531,7 @@ fn path_to_workspace() {
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
@@ -581,7 +581,7 @@ fn multiple_names() {
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);

@@ -124,7 +124,7 @@ fn json_input() {
         .wait_with_output()
         .expect("wait for output of child process")
         .pipe(stdout_text);
-    let actual = actual.trim();
+    let actual = actual.trim_end();
     eprintln!("ACTUAL:\n{}\n", &actual);
 
     let visualizer = Visualizer {
@@ -135,7 +135,7 @@ fn json_input() {
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
-    let expected = expected.trim();
+    let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
