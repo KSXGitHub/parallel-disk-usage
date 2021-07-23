@@ -29,7 +29,7 @@ fn min_ratio_1() {
         .output()
         .expect("spawn command");
     let stderr = String::from_utf8(stderr).expect("parse stderr as UTF-8");
-    let stderr = stderr.trim();
+    let stderr = stderr.trim_end();
     dbg!(&status);
     eprintln!("STDERR:\n{}\n", stderr);
     assert!(!status.success());
@@ -54,7 +54,7 @@ fn max_depth_0() {
         .output()
         .expect("spawn command");
     let stderr = String::from_utf8(stderr).expect("parse stderr as UTF-8");
-    let stderr = stderr.trim();
+    let stderr = stderr.trim_end();
     dbg!(&status);
     eprintln!("STDERR:\n{}\n", stderr);
     assert!(!status.success());
