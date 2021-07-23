@@ -101,7 +101,7 @@ fn json_input() {
         unit_and_tree: sample_tree().into_reflection().into(),
     };
     let json = serde_json::to_string_pretty(&json_data).expect("convert sample tree to JSON");
-    eprintln!("JSON: {}", json);
+    eprintln!("JSON: {}\n", json);
     let workspace = Temp::new_dir().expect("create temporary directory");
     let mut child = Command::new(PDU)
         .with_current_dir(workspace.as_path())
@@ -125,6 +125,7 @@ fn json_input() {
         .expect("wait for output of child process")
         .pipe(stdout_text);
     let actual = actual.trim();
+    eprintln!("ACTUAL:\n{}\n", &actual);
 
     let visualizer = Visualizer {
         data_tree: &sample_tree(),
@@ -135,6 +136,7 @@ fn json_input() {
     };
     let expected = format!("{}", visualizer);
     let expected = expected.trim();
+    eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
 }
@@ -170,6 +172,7 @@ fn json_output_json_input() {
         .output()
         .expect("spawn command with --json-input")
         .pipe(stdout_text);
+    eprintln!("ACTUAL:\n{}\n", &actual);
 
     let expected = Command::new(PDU)
         .with_current_dir(workspace.as_path())
@@ -183,6 +186,7 @@ fn json_output_json_input() {
         .output()
         .expect("spawn command for expected")
         .pipe(stdout_text);
+    eprintln!("EXPECTED:\n{}\n", expected);
 
     assert_eq!(actual, expected);
 }
