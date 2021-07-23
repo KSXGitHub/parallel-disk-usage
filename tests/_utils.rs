@@ -1,4 +1,5 @@
 use build_fs_tree::{dir, file, Build, MergeableFileSystemTree};
+use command_extra::CommandExtra;
 use derive_more::{AsRef, Deref};
 use parallel_disk_usage::{
     data_tree::{DataTree, DataTreeReflection},
@@ -16,6 +17,7 @@ use std::{
     fs::{create_dir, metadata, remove_dir_all, Metadata},
     io::Error,
     path::{Path, PathBuf},
+    process::{Command, Output},
 };
 
 /// Representation of a temporary filesystem item.
@@ -42,6 +44,7 @@ impl Temp {
 }
 
 impl Drop for Temp {
+    /// Delete the created temporary directory.
     fn drop(&mut self) {
         let path = &self.0;
         if let Err(error) = remove_dir_all(path) {
@@ -55,6 +58,7 @@ impl Drop for Temp {
 pub struct SampleWorkspace(Temp);
 
 impl Default for SampleWorkspace {
+    /// Set up a temporary directory for tests.
     fn default() -> Self {
         let temp = Temp::new_dir().expect("create working directory for sample workspace");
 
@@ -201,4 +205,117 @@ where
             children: Vec::new(),
         }),
     );
+}
+
+/// Path to the `pdu` executable
+pub const PDU: &str = env!("CARGO_BIN_EXE_pdu");
+
+/// Representation of a `pdu` command.
+#[derive(Debug, Default, Clone)]
+pub struct CommandRepresentation<'a> {
+    args: Vec<&'a str>,
+}
+
+impl<'a> CommandRepresentation<'a> {
+    /// Add an argument.
+    pub fn arg(mut self, arg: &'a str) -> Self {
+        self.args.push(arg);
+        self
+    }
+}
+
+/// List of `pdu` commands.
+#[derive(Debug, Clone, AsRef, Deref)]
+pub struct CommandList<'a>(Vec<CommandRepresentation<'a>>);
+
+impl<'a> Default for CommandList<'a> {
+    /// Initialize a list with one `pdu` command.
+    fn default() -> Self {
+        CommandRepresentation::default()
+            .pipe(|x| vec![x])
+            .pipe(CommandList)
+    }
+}
+
+impl<'a> CommandList<'a> {
+    /// Duplicate the list with a flag argument.
+    ///
+    /// The resulting list would include the original list with the flag
+    /// followed by the original list without the flag.
+    pub fn flag_matrix(self, name: &'a str) -> Self {
+        Self::assert_flag(name);
+        let CommandList(list) = self;
+        list.clone()
+            .into_iter()
+            .map(|cmd| cmd.arg(name))
+            .chain(list)
+            .collect::<Vec<_>>()
+            .pipe(CommandList)
+    }
+
+    /// Duplicate the list with one or many option argument(s).
+    ///
+    /// The resulting list would include the original list with the option(s)
+    /// followed by the original list without the option(s).
+    pub fn option_matrix<const LEN: usize>(self, name: &'a str, values: [&'a str; LEN]) -> Self {
+        Self::assert_flag(name);
+        let CommandList(tail) = self;
+        let mut head: Vec<_> = values
+            .iter()
+            .copied()
+            .flat_map(|value| {
+                tail.clone()
+                    .into_iter()
+                    .map(move |cmd| cmd.arg(name).arg(value))
+            })
+            .collect();
+        head.extend(tail);
+        CommandList(head)
+    }
+
+    /// Create a list of `pdu` [command](Command).
+    pub fn commands(&'a self) -> impl Iterator<Item = Command> + 'a {
+        self.iter()
+            .map(|cmd| Command::new(PDU).with_args(&cmd.args))
+    }
+
+    /// Make sure a flag name has valid syntax.
+    fn assert_flag(name: &str) {
+        match name.len() {
+            0 | 1 => panic!("{:?} is not a valid flag", name),
+            2 => assert!(name.starts_with('-'), "{:?} is not a valid flag", name),
+            _ => assert!(name.starts_with("--"), "{:?} is not a valid flag", name),
+        }
+    }
+}
+
+/// Make sure that status code is 0, print stderr if it's not empty,
+/// and turn stdin into a string.
+pub fn stdout_text(
+    Output {
+        status,
+        stdout,
+        stderr,
+    }: Output,
+) -> String {
+    inspect_stderr(&stderr);
+    assert!(
+        status.success(),
+        "progress exits with non-zero status: {:?}",
+        status
+    );
+    stdout
+        .pipe(String::from_utf8)
+        .expect("parse stdout as UTF-8")
+        .trim_end()
+        .to_string()
+}
+
+/// Print stderr if it's not empty.
+pub fn inspect_stderr(stderr: &[u8]) {
+    let text = String::from_utf8_lossy(stderr);
+    let text = text.trim();
+    if !text.is_empty() {
+        eprintln!("STDERR:\n{}\n", text);
+    }
 }

@@ -23,7 +23,7 @@ where
 
     /// Recursively cull all descendants whose data are too small relative to root.
     #[cfg(feature = "cli")]
-    pub(crate) fn par_cull_insignificant_data(&mut self, min_ratio: f32)
+    pub fn par_cull_insignificant_data(&mut self, min_ratio: f32)
     where
         Data: Into<u64>,
     {

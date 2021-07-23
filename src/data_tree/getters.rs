@@ -7,6 +7,11 @@ impl<Name, Data: Size> DataTree<Name, Data> {
         &self.name
     }
 
+    /// Get mutable reference to name.
+    pub fn name_mut(&mut self) -> &mut Name {
+        &mut self.name
+    }
+
     /// Extract total disk usage
     pub fn data(&self) -> Data {
         self.data

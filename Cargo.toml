@@ -82,6 +82,7 @@ features = ["derive"]
 
 [dev-dependencies]
 build-fs-tree = "^0.3.0"
+command-extra = "^1.0.0"
 maplit = "^1.0.2"
 pretty_assertions = "^0.7.2"
 rand = "^0.8.4"
