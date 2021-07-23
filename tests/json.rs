@@ -107,7 +107,7 @@ fn json_input() {
         .with_current_dir(workspace.as_path())
         .with_arg("--json-input")
         .with_arg("--bytes-format=metric")
-        .with_arg("--total-width=255")
+        .with_arg("--total-width=100")
         .with_arg("--max-depth=10")
         .with_stdin(Stdio::piped())
         .with_stdout(Stdio::piped())
@@ -130,7 +130,7 @@ fn json_input() {
         data_tree: &sample_tree(),
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        column_width_distribution: ColumnWidthDistribution::total(255),
+        column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
@@ -157,7 +157,7 @@ fn json_output_json_input() {
         .with_current_dir(workspace.as_path())
         .with_arg("--json-input")
         .with_arg("--bytes-format=metric")
-        .with_arg("--total-width=255")
+        .with_arg("--total-width=100")
         .with_arg("--max-depth=10")
         .with_stdin(
             json_output
@@ -174,7 +174,7 @@ fn json_output_json_input() {
     let expected = Command::new(PDU)
         .with_current_dir(workspace.as_path())
         .with_arg("--bytes-format=metric")
-        .with_arg("--total-width=255")
+        .with_arg("--total-width=100")
         .with_arg("--max-depth=10")
         .with_arg(workspace.as_path())
         .with_stdin(Stdio::piped())
