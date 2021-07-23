@@ -44,6 +44,7 @@ impl Temp {
 }
 
 impl Drop for Temp {
+    /// Delete the created temporary directory.
     fn drop(&mut self) {
         let path = &self.0;
         if let Err(error) = remove_dir_all(path) {
@@ -57,6 +58,7 @@ impl Drop for Temp {
 pub struct SampleWorkspace(Temp);
 
 impl Default for SampleWorkspace {
+    /// Set up a temporary directory for tests.
     fn default() -> Self {
         let temp = Temp::new_dir().expect("create working directory for sample workspace");
 
@@ -208,22 +210,26 @@ where
 /// Path to the `pdu` executable
 pub const PDU: &str = env!("CARGO_BIN_EXE_pdu");
 
+/// Representation of a `pdu` command.
 #[derive(Debug, Default, Clone)]
 pub struct CommandRepresentation<'a> {
     args: Vec<&'a str>,
 }
 
 impl<'a> CommandRepresentation<'a> {
+    /// Add an argument.
     pub fn arg(mut self, arg: &'a str) -> Self {
         self.args.push(arg);
         self
     }
 }
 
+/// List of `pdu` commands.
 #[derive(Debug, Clone, AsRef, Deref)]
 pub struct CommandList<'a>(Vec<CommandRepresentation<'a>>);
 
 impl<'a> Default for CommandList<'a> {
+    /// Initialize a list with one `pdu` command.
     fn default() -> Self {
         CommandRepresentation::default()
             .pipe(|x| vec![x])
@@ -232,6 +238,10 @@ impl<'a> Default for CommandList<'a> {
 }
 
 impl<'a> CommandList<'a> {
+    /// Duplicate the list with a flag argument.
+    ///
+    /// The resulting list would include the original list with the flag
+    /// followed by the original list without the flag.
     pub fn flag_matrix(self, name: &'a str) -> Self {
         Self::assert_flag(name);
         let CommandList(list) = self;
@@ -243,6 +253,10 @@ impl<'a> CommandList<'a> {
             .pipe(CommandList)
     }
 
+    /// Duplicate the list with one or many option argument(s).
+    ///
+    /// The resulting list would include the original list with the option(s)
+    /// followed by the original list without the option(s).
     pub fn option_matrix<const LEN: usize>(self, name: &'a str, values: [&'a str; LEN]) -> Self {
         Self::assert_flag(name);
         let CommandList(tail) = self;
@@ -259,11 +273,13 @@ impl<'a> CommandList<'a> {
         CommandList(head)
     }
 
+    /// Create a list of `pdu` [command](Command).
     pub fn commands(&'a self) -> impl Iterator<Item = Command> + 'a {
         self.iter()
             .map(|cmd| Command::new(PDU).with_args(&cmd.args))
     }
 
+    /// Make sure a flag name has valid syntax.
     fn assert_flag(name: &str) {
         match name.len() {
             0 | 1 => panic!("{:?} is not a valid flag", name),
@@ -273,6 +289,8 @@ impl<'a> CommandList<'a> {
     }
 }
 
+/// Make sure that status code is 0, print stderr if it's not empty,
+/// and turn stdin into a string.
 pub fn stdout_text(
     Output {
         status,
@@ -293,6 +311,7 @@ pub fn stdout_text(
         .to_string()
 }
 
+/// Print stderr if it's not empty.
 pub fn inspect_stderr(stderr: &[u8]) {
     let text = String::from_utf8_lossy(stderr);
     let text = text.trim();
