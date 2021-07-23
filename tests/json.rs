@@ -130,7 +130,7 @@ fn json_input() {
         data_tree: &sample_tree(),
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        column_width_distribution: ColumnWidthDistribution::Total { width: 255 },
+        column_width_distribution: ColumnWidthDistribution::total(255),
         max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{}", visualizer);
