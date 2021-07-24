@@ -25,7 +25,7 @@ use serde::{Deserialize, Serialize};
 ///   use [`par_try_into_tree`](Self::par_try_into_tree).
 ///
 /// **Serialization and deserialization:** _(feature: `json`)_ `Reflection` implements
-/// [`Serialize`] and [`Deserialize`] traits, this allows functions in [`serde_json`] to convert
+/// `Serialize` and `Deserialize` traits, this allows functions in `serde_json` to convert
 /// a `Reflection` into/from JSON.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]

@@ -9,8 +9,8 @@ use super::size::Size;
 /// Disk usage data of a filesystem tree.
 ///
 /// **Serialization and deserialization:** _(feature: `json`)_ `DataTree` does not implement
-/// [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits directly,
-/// instead, it can be converted into/from a [`Reflection`] which implements these traits.
+/// `Serialize` and `Deserialize` traits directly, instead, it can be converted into/from a
+/// [`Reflection`] which implements these traits.
 #[derive(Debug, PartialEq, Eq)]
 pub struct DataTree<Name, Data: Size> {
     name: Name,
