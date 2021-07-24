@@ -7,6 +7,10 @@ pub use Reflection as DataTreeReflection;
 use super::size::Size;
 
 /// Disk usage data of a filesystem tree.
+///
+/// **Serializing and deserializing:** _(feature: `json`)_ `DataTree` does not implement
+/// [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits directly,
+/// instead, it can be converted into/from a [`Reflection`] which implements these traits.
 #[derive(Debug, PartialEq, Eq)]
 pub struct DataTree<Name, Data: Size> {
     name: Name,
