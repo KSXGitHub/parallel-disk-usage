@@ -8,6 +8,13 @@ use super::size::Size;
 
 /// Disk usage data of a filesystem tree.
 ///
+/// **Construction:** There are 3 main ways to create a `DataTree`:
+/// * Use [`FsTreeBuilder`](crate::fs_tree_builder::FsTreeBuilder) to create it from the real
+/// filesystem.
+/// * Use [`TreeBuilder`](crate::tree_builder::TreeBuilder) to create it from a representation
+/// of a filesystem.
+/// * Use [`Reflection`].
+///
 /// **Visualization:** Use the [`Visualizer`](crate::visualizer::Visualizer) struct to create an
 /// ASCII chart that visualizes `DataTree`.
 ///
