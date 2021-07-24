@@ -8,6 +8,9 @@ use super::size::Size;
 
 /// Disk usage data of a filesystem tree.
 ///
+/// **Visualization:** Use the [`Visualizer`](crate::visualizer::Visualizer) struct to create an
+/// ASCII chart that visualizes `DataTree`.
+///
 /// **Serialization and deserialization:** _(feature: `json`)_ `DataTree` does not implement
 /// `Serialize` and `Deserialize` traits directly, instead, it can be converted into/from a
 /// [`Reflection`] which implements these traits.
