@@ -24,7 +24,9 @@ use serde::{Deserialize, Serialize};
 /// * To safely convert a `Reflection` into a valid `DataTree`,
 ///   use [`par_try_into_tree`](Self::par_try_into_tree).
 ///
-/// **Serialization and deserialization:** Requires enabling the `json` feature to enable `serde`.
+/// **Serialization and deserialization:** _(feature: `json`)_ `Reflection` implements
+/// [`Serialize`] and [`Deserialize`] traits, this allows functions in [`serde_json`] to convert
+/// a `Reflection` into/from JSON.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]
