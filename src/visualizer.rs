@@ -16,6 +16,30 @@ use super::{data_tree::DataTree, size::Size};
 use std::{fmt::Display, num::NonZeroUsize};
 
 /// Visualize a [`DataTree`].
+///
+/// The fields of the struct are the construction parameters of the ASCII chart.
+/// The [`Display`] trait can be used to create the ASCII chart.
+///
+/// **Example:**
+///
+/// ```no_run
+/// # use parallel_disk_usage::data_tree::DataTree;
+/// # use parallel_disk_usage::os_string_display::OsStringDisplay;
+/// # use parallel_disk_usage::size::Bytes;
+/// # use parallel_disk_usage::bytes_format::BytesFormat;
+/// # use parallel_disk_usage::visualizer::{Visualizer, Direction, ColumnWidthDistribution};
+/// # fn _wrapper(create_data_tree: fn() -> DataTree<OsStringDisplay, Bytes>) {
+/// let data_tree: DataTree<OsStringDisplay, Bytes> = create_data_tree();
+/// let visualizer = Visualizer {
+///     data_tree: &data_tree,
+///     bytes_format: BytesFormat::MetricUnits,
+///     direction: Direction::BottomUp,
+///     column_width_distribution: ColumnWidthDistribution::total(100),
+///     max_depth: std::num::NonZeroUsize::new(10).unwrap(),
+/// };
+/// println!("{}", visualizer);
+/// # }
+/// ```
 #[derive(Debug)]
 pub struct Visualizer<'a, Name, Data>
 where

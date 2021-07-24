@@ -12,6 +12,25 @@ use std::{
 };
 
 /// Build a [`DataTree`] from a directory tree using [`From`] or [`Into`].
+///
+/// **Example:**
+///
+/// ```no_run
+/// # use parallel_disk_usage::fs_tree_builder::FsTreeBuilder;
+/// use parallel_disk_usage::{
+///     data_tree::DataTree,
+///     os_string_display::OsStringDisplay,
+///     reporter::{ErrorOnlyReporter, ErrorReport},
+///     size::Bytes,
+///     size_getters::GET_APPARENT_SIZE,
+/// };
+/// let builder = FsTreeBuilder {
+///     root: std::env::current_dir().unwrap(),
+///     get_data: GET_APPARENT_SIZE,
+///     reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+/// };
+/// let data_tree: DataTree<OsStringDisplay, Bytes> = builder.into();
+/// ```
 #[derive(Debug)]
 pub struct FsTreeBuilder<Data, GetData, Report>
 where
@@ -34,6 +53,7 @@ where
     GetData: Fn(&Metadata) -> Data + Sync,
     Report: Reporter<Data> + Sync,
 {
+    /// Create a [`DataTree`] from an [`FsTreeBuilder`].
     fn from(builder: FsTreeBuilder<Data, GetData, Report>) -> Self {
         let FsTreeBuilder {
             root,

@@ -34,6 +34,7 @@ where
     GetInfo: Fn(&Path) -> Info<Name, Data> + Copy + Send + Sync,
     JoinPath: Fn(&Path, &Name) -> Path + Copy + Send + Sync,
 {
+    /// Create a [`DataTree`] from a [`TreeBuilder`].
     fn from(builder: TreeBuilder<Path, Name, Data, GetInfo, JoinPath>) -> Self {
         let TreeBuilder {
             path,
