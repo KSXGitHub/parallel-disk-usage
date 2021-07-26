@@ -5,10 +5,20 @@ pub use _utils::*;
 
 use command_extra::CommandExtra;
 use maplit::btreeset;
+use parallel_disk_usage::{
+    bytes_format::BytesFormat,
+    data_tree::DataTree,
+    fs_tree_builder::FsTreeBuilder,
+    os_string_display::OsStringDisplay,
+    reporter::{ErrorOnlyReporter, ErrorReport},
+    size_getters::GET_APPARENT_SIZE,
+    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
+};
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use std::{
     collections::BTreeSet,
+    convert::TryInto,
     path::Path,
     process::{Command, Output, Stdio},
 };
@@ -88,18 +98,6 @@ fn max_depth_0() {
 #[cfg(unix)]
 #[test]
 fn fs_errors() {
-    use std::convert::TryInto;
-
-    use parallel_disk_usage::{
-        bytes_format::BytesFormat,
-        data_tree::DataTree,
-        fs_tree_builder::FsTreeBuilder,
-        os_string_display::OsStringDisplay,
-        reporter::{ErrorOnlyReporter, ErrorReport},
-        size_getters::GET_APPARENT_SIZE,
-        visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
-    };
-
     let workspace = SampleWorkspace::default();
     fs_permission(workspace.join("empty-dir"), "-r", false);
     fs_permission(workspace.join("nested").join("0"), "-r", false);
