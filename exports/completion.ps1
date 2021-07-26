@@ -29,6 +29,7 @@ Register-ArgumentCompleter -Native -CommandName 'pdu' -ScriptBlock {
             [CompletionResult]::new('--json-input', 'json-input', [CompletionResultType]::ParameterName, 'Read JSON data from stdin')
             [CompletionResult]::new('--json-output', 'json-output', [CompletionResultType]::ParameterName, 'Print JSON data instead of an ASCII chart')
             [CompletionResult]::new('--top-down', 'top-down', [CompletionResultType]::ParameterName, 'Print the tree top-down instead of bottom-up')
+            [CompletionResult]::new('--align-left', 'align-left', [CompletionResultType]::ParameterName, 'Fill the bar from left to right')
             [CompletionResult]::new('--no-sort', 'no-sort', [CompletionResultType]::ParameterName, 'Preserve order of entries')
             [CompletionResult]::new('--silent-errors', 'silent-errors', [CompletionResultType]::ParameterName, 'Prevent filesystem error messages from appearing in stderr')
             [CompletionResult]::new('--progress', 'progress', [CompletionResultType]::ParameterName, 'Report progress being made at the expense of performance')

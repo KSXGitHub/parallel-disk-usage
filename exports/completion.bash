@@ -20,7 +20,7 @@ _pdu() {
 
     case "${cmd}" in
         pdu)
-            opts=" -h -V  --json-input --json-output --top-down --no-sort --silent-errors --progress --help --version --bytes-format --quantity --max-depth --total-width --column-width --min-ratio  <files>... "
+            opts=" -h -V  --json-input --json-output --top-down --align-left --no-sort --silent-errors --progress --help --version --bytes-format --quantity --max-depth --total-width --column-width --min-ratio  <files>... "
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0

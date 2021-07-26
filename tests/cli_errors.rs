@@ -97,7 +97,7 @@ fn fs_errors() {
         os_string_display::OsStringDisplay,
         reporter::{ErrorOnlyReporter, ErrorReport},
         size_getters::GET_APPARENT_SIZE,
-        visualizer::{ColumnWidthDistribution, Direction, Visualizer},
+        visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
     };
 
     let workspace = SampleWorkspace::default();
@@ -133,6 +133,7 @@ fn fs_errors() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };

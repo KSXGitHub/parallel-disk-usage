@@ -9,7 +9,7 @@ use crate::{
     runtime_error::RuntimeError,
     size::{Bytes, Size},
     size_getters::GET_APPARENT_SIZE,
-    visualizer::{Direction, Visualizer},
+    visualizer::{BarAlignment, Direction, Visualizer},
 };
 use pipe_trait::Pipe;
 use std::{io::stdin, time::Duration};
@@ -54,10 +54,12 @@ impl App {
             let Args {
                 bytes_format,
                 top_down,
+                align_left,
                 max_depth,
                 ..
             } = self.args;
             let direction = Direction::from_top_down(top_down);
+            let bar_alignment = BarAlignment::from_align_left(align_left);
 
             let unit_and_tree = stdin()
                 .pipe(serde_json::from_reader::<_, JsonData>)
@@ -74,6 +76,7 @@ impl App {
                         bytes_format: $bytes_format,
                         column_width_distribution,
                         direction,
+                        bar_alignment,
                         max_depth,
                     }
                     .to_string()
@@ -128,6 +131,7 @@ impl App {
                     json_output,
                     bytes_format,
                     top_down,
+                    align_left,
                     max_depth,
                     min_ratio,
                     no_sort,
@@ -136,6 +140,7 @@ impl App {
                 {
                     return Sub {
                         direction: Direction::from_top_down(top_down),
+                        bar_alignment: BarAlignment::from_align_left(align_left),
                         get_data: $get_data,
                         reporter: $create_reporter::<$data>(report_error),
                         bytes_format: $format(bytes_format),

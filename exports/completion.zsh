@@ -24,6 +24,7 @@ _pdu() {
 '(--quantity)--json-input[Read JSON data from stdin]' \
 '--json-output[Print JSON data instead of an ASCII chart]' \
 '--top-down[Print the tree top-down instead of bottom-up]' \
+'--align-left[Fill the bar from left to right]' \
 '--no-sort[Preserve order of entries]' \
 '--silent-errors[Prevent filesystem error messages from appearing in stderr]' \
 '--progress[Report progress being made at the expense of performance]' \

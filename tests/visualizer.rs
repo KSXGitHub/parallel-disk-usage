@@ -2,7 +2,7 @@ use parallel_disk_usage::{
     bytes_format::BytesFormat::*,
     data_tree::DataTree,
     size::{Blocks, Bytes, Size},
-    visualizer::{ColumnWidthDistribution, Direction, Visualizer},
+    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pretty_assertions::assert_eq;
 use std::{cmp::Ordering, num::NonZeroUsize};
@@ -25,6 +25,7 @@ macro_rules! test_case {
         max_depth = $max_depth:expr,
         column_width_distribution = $column_width_function:ident $($column_width_arguments:literal)+,
         direction = $direction:ident,
+        bar_alignment = $bar_alignment:ident,
         expected = $expected:expr,
     ) => {
         $(#[$attributes])*
@@ -40,6 +41,7 @@ macro_rules! test_case {
                 data_tree: &tree,
                 bytes_format: $bytes_format,
                 direction: Direction::$direction,
+                bar_alignment: BarAlignment::$bar_alignment,
             }
             .to_string();
             let expected = $expected;
@@ -100,6 +102,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 52      ┌──bar                                   │                                  │  0%"
             "  2.5K   ├──foo                                   │                               ███│  9%"
@@ -122,6 +125,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 52      ┌──bar                                   │                                  │  0%"
             "  2.5K   ├──foo                                   │                               ███│  9%"
@@ -144,6 +148,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = TopDown,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 27.1K └─┬root                                    │██████████████████████████████████│100%"
             "  8.5K   ├─┬directory with a really long name     │                       ███████████│ 31%"
@@ -160,12 +165,36 @@ test_case! {
 }
 
 test_case! {
+    typical_bottom_up_binary_align_left where
+        tree = typical_tree::<Bytes>(4096.into(), 1),
+        bytes_format = BinaryUnits,
+        max_depth = 10,
+        column_width_distribution = total 90,
+        direction = BottomUp,
+        bar_alignment = Left,
+        expected = text_block_fnl! {
+            " 52      ┌──bar                                   │                                  │  0%"
+            "  2.5K   ├──foo                                   │███                               │  9%"
+            "  4.0K   ├──empty dir                             │█████                             │ 15%"
+            " 45      │   ┌──hello                             │▒▒▒▒▒░░░░░                        │  0%"
+            " 54      │   ├──world                             │▒▒▒▒▒░░░░░                        │  0%"
+            "  4.1K   │ ┌─┴world                               │█████░░░░░                        │ 15%"
+            "  8.1K   ├─┴hello                                 │██████████                        │ 30%"
+            "475      │   ┌──file with a really long name      │█▒▒▒▒▒░░░░░                       │  2%"
+            "  4.5K   │ ┌─┴subdirectory with a really long name│██████░░░░░                       │ 16%"
+            "  8.5K   ├─┴directory with a really long name     │███████████                       │ 31%"
+            " 27.1K ┌─┴root                                    │██████████████████████████████████│100%"
+        },
+}
+
+test_case! {
     typical_narrow_tree_column where
         tree = typical_tree::<Bytes>(4096.into(), 1),
         bytes_format = BinaryUnits,
         max_depth = 10,
         column_width_distribution = components 24 49,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 52      ┌──bar                │                                                 │  0%"
             "  2.5K   ├──foo                │                                             ████│  9%"
@@ -188,6 +217,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = components 10 23,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 52      ┌──bar  │                       │  0%"
             "  2.5K   ├──foo  │                     ██│  9%"
@@ -205,6 +235,7 @@ test_case! {
         max_depth = 4,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 52      ┌──bar                                   │                                  │  0%"
             "  2.5K   ├──foo                                   │                               ███│  9%"
@@ -227,6 +258,7 @@ test_case! {
         max_depth = 3,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "52      ┌──bar                                   │                                   │  0%"
             " 2.5K   ├──foo                                   │                                ███│  9%"
@@ -246,6 +278,7 @@ test_case! {
         max_depth = 2,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "52      ┌──bar                              │                                        │  0%"
             " 2.5K   ├──foo                              │                                    ████│  9%"
@@ -263,6 +296,7 @@ test_case! {
         max_depth = 1,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "27.1K ┌──root│███████████████████████████████████████████████████████████████████████│100%"
         },
@@ -275,6 +309,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "  4.0K   ┌──empty dir                             │                                  │  0%"
             " 52.0T   ├──bar                                   │                                 █│  2%"
@@ -297,6 +332,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "  4.1K   ┌──empty dir                             │                                  │  0%"
             " 57.2T   ├──bar                                   │                                 █│  2%"
@@ -319,6 +355,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 0      ┌──bar                                   │                                   │  0%"
             " 0      ├──foo                                   │                                   │  0%"
@@ -341,6 +378,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "0          ┌──file with a really long name      │                                    │  0%"
             "0        ┌─┴subdirectory with a really long name│                                    │  0%"
@@ -382,6 +420,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 1.0K             ┌──z│          ░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓██│  4%"
             " 5.0K           ┌─┴f  │          ░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓████████████│ 20%"
@@ -405,6 +444,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 1.0K             ┌──z│          ░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓██│  4%"
             " 5.1K           ┌─┴f  │          ░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓████████████│ 20%"
@@ -428,6 +468,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = TopDown,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "25.0K └─┬a            │██████████████████████████████████████████████████████████████│100%"
             "21.0K   └─┬b          │          ████████████████████████████████████████████████████│ 84%"
@@ -451,6 +492,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 2             ┌──z│          ░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓███│  4%"
             "10           ┌─┴f  │          ░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████████████│ 20%"
@@ -459,6 +501,54 @@ test_case! {
             "34     ┌─┴c        │          ░░░░░░░░░░░████████████████████████████████████████████│ 68%"
             "42   ┌─┴b          │          ███████████████████████████████████████████████████████│ 84%"
             "50 ┌─┴a            │█████████████████████████████████████████████████████████████████│100%"
+        },
+}
+
+test_case! {
+    nested_bottom_up_binary_align_left where
+        tree = nested_tree::<Bytes>(
+            &["a", "b", "c", "d", "e", "f"],
+            4096.into(),
+            "z",
+            1024.into(),
+        ),
+        bytes_format = BinaryUnits,
+        max_depth = 10,
+        column_width_distribution = total 90,
+        direction = BottomUp,
+        bar_alignment = Left,
+        expected = text_block_fnl! {
+            " 1.0K             ┌──z│██▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░          │  4%"
+            " 5.0K           ┌─┴f  │████████████▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░          │ 20%"
+            " 9.0K         ┌─┴e    │██████████████████████▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░          │ 36%"
+            "13.0K       ┌─┴d      │████████████████████████████████▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░          │ 52%"
+            "17.0K     ┌─┴c        │██████████████████████████████████████████░░░░░░░░░░          │ 68%"
+            "21.0K   ┌─┴b          │████████████████████████████████████████████████████          │ 84%"
+            "25.0K ┌─┴a            │██████████████████████████████████████████████████████████████│100%"
+        },
+}
+
+test_case! {
+    nested_top_down_binary_align_left where
+        tree = nested_tree::<Bytes>(
+            &["a", "b", "c", "d", "e", "f"],
+            4096.into(),
+            "z",
+            1024.into(),
+        ),
+        bytes_format = BinaryUnits,
+        max_depth = 10,
+        column_width_distribution = total 90,
+        direction = TopDown,
+        bar_alignment = Left,
+        expected = text_block_fnl! {
+            "25.0K └─┬a            │██████████████████████████████████████████████████████████████│100%"
+            "21.0K   └─┬b          │████████████████████████████████████████████████████          │ 84%"
+            "17.0K     └─┬c        │██████████████████████████████████████████░░░░░░░░░░          │ 68%"
+            "13.0K       └─┬d      │████████████████████████████████▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░          │ 52%"
+            " 9.0K         └─┬e    │██████████████████████▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░          │ 36%"
+            " 5.0K           └─┬f  │████████████▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░          │ 20%"
+            " 1.0K             └──z│██▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒░░░░░░░░░░          │  4%"
         },
 }
 
@@ -480,6 +570,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = components 27 57,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 1.0K           ┌──file with a...│           ░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓███│  5%"
             " 5.0K         ┌─┴great-great-g...│           ░░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓██████████████│ 24%"
@@ -515,6 +606,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = components 24 50,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "17.0K                 ┌──ab...│    ░░░░▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████████████████│ 35%"
             "21.0K               ┌─┴abcd...│    ░░░░▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█████████████████████│ 43%"
@@ -540,6 +632,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 1.0T             ┌──z│          ░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓██│  4%"
             " 5.0T           ┌─┴f  │          ░░░░░░░░░░▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓████████████│ 20%"
@@ -565,6 +658,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "4.1K ┌──empty directory│█████████████████████████████████████████████████████████████│100%"
         },
@@ -577,6 +671,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "0    ┌──empty directory│                                                             │  0%"
         },
@@ -589,6 +684,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "0    ┌──empty file│                                                                  │  0%"
         },
@@ -659,6 +755,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = components 33 25,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 1   ┌──a                           │                         │  1%"
             " 2   ├──file with a long name 1     │                        █│  2%"
@@ -699,6 +796,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = components 10 25,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 1   ┌──a    │                         │  1%"
             " 2   ├──fi...│                        █│  2%"
@@ -727,6 +825,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = components 8 25,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             " 1   ┌──a  │                         │  1%"
             " 3   ├──b  │                        █│  4%"
@@ -747,6 +846,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = components 10 25,
         direction = TopDown,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "81 └─┬root   │█████████████████████████│100%"
             "19   ├─┬di...│                   ██████│ 23%"
@@ -775,6 +875,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = components 8 25,
         direction = TopDown,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "81 └─┬root │█████████████████████████│100%"
             "18   ├─┬d  │                   ██████│ 22%"
@@ -811,6 +912,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 85,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "4.1K   ┌──file with a very super extraordinary extremely long name│      ███████│ 50%"
             "8.1K ┌─┴root                                                      │█████████████│100%"
@@ -824,6 +926,7 @@ test_case! {
         max_depth = 10,
         column_width_distribution = total 50,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "4.0K   ┌──file with a very super ex...│   ███│ 50%"
             "7.9K ┌─┴root                          │██████│100%"
@@ -1029,6 +1132,7 @@ test_case! {
         max_depth = 100,
         column_width_distribution = components 16 34,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "999        ┌──first ...│                       ░░░░░░░░░░░│  0%"
             "750        │ ┌──b      │                       ░░░░░░░▒▒▒▒│  0%"
@@ -1112,6 +1216,7 @@ test_case! {
         max_depth = 3,
         column_width_distribution = total 90,
         direction = BottomUp,
+        bar_alignment = Right,
         expected = text_block_fnl! {
             "999        ┌──first file with a long name│                             ░░░░░░░░░░░░░░│  0%"
             " 35.5K     ├──sub 1.1                    │                             ░░░░░░░░░█████│ 12%"
