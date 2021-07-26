@@ -77,6 +77,10 @@ pub struct Args {
     #[structopt(long)]
     pub top_down: bool,
 
+    /// Fill the bars from left to right.
+    #[structopt(long)]
+    pub align_left: bool,
+
     /// Aspect of the files/directories to be measured.
     #[structopt(long, possible_values = Quantity::VARIANTS, default_value = Quantity::default_value())]
     pub quantity: Quantity,

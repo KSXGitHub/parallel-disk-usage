@@ -13,7 +13,7 @@ use parallel_disk_usage::{
     reporter::{ErrorOnlyReporter, ErrorReport},
     size::Bytes,
     size_getters::GET_APPARENT_SIZE,
-    visualizer::{ColumnWidthDistribution, Direction, Visualizer},
+    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
@@ -131,6 +131,7 @@ fn json_input() {
         data_tree: &sample_tree(),
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };

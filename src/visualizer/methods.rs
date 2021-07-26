@@ -86,7 +86,7 @@ where
                     "{size} {tree}│{bar}│{ratio}",
                     size = align_right(&row.size, size_width),
                     tree = align_left(&row.tree_horizontal_slice, tree_width),
-                    bar = &row.proportion_bar,
+                    bar = row.proportion_bar.display(self.bar_alignment),
                     ratio = align_right(&row.percentage, PERCENTAGE_COLUMN_MAX_WIDTH),
                 )
             })

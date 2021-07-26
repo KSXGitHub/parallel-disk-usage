@@ -7,6 +7,7 @@ complete -c pdu -n "__fish_use_subcommand" -l min-ratio -d 'Minimal size proport
 complete -c pdu -n "__fish_use_subcommand" -l json-input -d 'Read JSON data from stdin'
 complete -c pdu -n "__fish_use_subcommand" -l json-output -d 'Print JSON data instead of an ASCII chart'
 complete -c pdu -n "__fish_use_subcommand" -l top-down -d 'Print the tree top-down instead of bottom-up'
+complete -c pdu -n "__fish_use_subcommand" -l align-left -d 'Fill the bars from left to right'
 complete -c pdu -n "__fish_use_subcommand" -l no-sort -d 'Preserve order of entries'
 complete -c pdu -n "__fish_use_subcommand" -l silent-errors -d 'Prevent filesystem error messages from appearing in stderr'
 complete -c pdu -n "__fish_use_subcommand" -l progress -d 'Report progress being made at the expense of performance'

@@ -1,3 +1,4 @@
+use super::BarAlignment;
 use derive_more::{AsRef, Deref, Display, From, Into};
 use fmt_iter::repeat;
 use std::fmt::{Display, Error, Formatter};
@@ -29,37 +30,58 @@ pub struct ProportionBar {
 }
 
 impl ProportionBar {
-    pub fn display_level0(self) -> impl Display {
+    fn display_level0(self) -> impl Display {
         repeat(LEVEL0_BLOCK, self.level0)
     }
 
-    pub fn display_level1(self) -> impl Display {
+    fn display_level1(self) -> impl Display {
         repeat(LEVEL1_BLOCK, self.level1)
     }
 
-    pub fn display_level2(self) -> impl Display {
+    fn display_level2(self) -> impl Display {
         repeat(LEVEL2_BLOCK, self.level2)
     }
 
-    pub fn display_level3(self) -> impl Display {
+    fn display_level3(self) -> impl Display {
         repeat(LEVEL3_BLOCK, self.level3)
     }
 
-    pub fn display_level4(self) -> impl Display {
+    fn display_level4(self) -> impl Display {
         repeat(LEVEL4_BLOCK, self.level4)
+    }
+
+    /// Create a [displayable](Display) value.
+    pub fn display(self, align: BarAlignment) -> ProportionBarDisplay {
+        ProportionBarDisplay { bar: self, align }
     }
 }
 
-impl Display for ProportionBar {
+/// Result of [`ProportionBar::display`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ProportionBarDisplay {
+    pub bar: ProportionBar,
+    pub align: BarAlignment,
+}
+
+impl Display for ProportionBarDisplay {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(
-            formatter,
-            "{level4}{level3}{level2}{level1}{level0}",
-            level4 = self.display_level4(),
-            level3 = self.display_level3(),
-            level2 = self.display_level2(),
-            level1 = self.display_level1(),
-            level0 = self.display_level0(),
-        )
+        let ProportionBarDisplay { bar, align } = self;
+        macro_rules! fmt {
+            ($pattern:literal) => {
+                write!(
+                    formatter,
+                    $pattern,
+                    level0 = bar.display_level0(),
+                    level1 = bar.display_level1(),
+                    level2 = bar.display_level2(),
+                    level3 = bar.display_level3(),
+                    level4 = bar.display_level4(),
+                );
+            };
+        }
+        match align {
+            BarAlignment::Left => fmt!("{level0}{level1}{level2}{level3}{level4}"),
+            BarAlignment::Right => fmt!("{level4}{level3}{level2}{level1}{level0}"),
+        }
     }
 }

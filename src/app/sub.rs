@@ -8,7 +8,7 @@ use crate::{
     runtime_error::RuntimeError,
     size::Size,
     status_board::GLOBAL_STATUS_BOARD,
-    visualizer::{ColumnWidthDistribution, Direction, Visualizer},
+    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use serde::Serialize;
 use std::{fs::Metadata, io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
@@ -29,6 +29,8 @@ where
     pub bytes_format: Data::DisplayFormat,
     /// The direction of the visualization.
     pub direction: Direction,
+    /// The alignment of the bars.
+    pub bar_alignment: BarAlignment,
     /// Distribution and number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
     /// Maximum number of levels that should be visualized.
@@ -57,6 +59,7 @@ where
             json_output,
             bytes_format,
             direction,
+            bar_alignment,
             column_width_distribution,
             max_depth,
             get_data,
@@ -136,6 +139,7 @@ where
             data_tree: &data_tree,
             bytes_format,
             direction,
+            bar_alignment,
             column_width_distribution,
             max_depth,
         };

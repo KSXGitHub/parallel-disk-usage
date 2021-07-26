@@ -5,10 +5,20 @@ pub use _utils::*;
 
 use command_extra::CommandExtra;
 use maplit::btreeset;
+use parallel_disk_usage::{
+    bytes_format::BytesFormat,
+    data_tree::DataTree,
+    fs_tree_builder::FsTreeBuilder,
+    os_string_display::OsStringDisplay,
+    reporter::{ErrorOnlyReporter, ErrorReport},
+    size_getters::GET_APPARENT_SIZE,
+    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
+};
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use std::{
     collections::BTreeSet,
+    convert::TryInto,
     path::Path,
     process::{Command, Output, Stdio},
 };
@@ -88,18 +98,6 @@ fn max_depth_0() {
 #[cfg(unix)]
 #[test]
 fn fs_errors() {
-    use std::convert::TryInto;
-
-    use parallel_disk_usage::{
-        bytes_format::BytesFormat,
-        data_tree::DataTree,
-        fs_tree_builder::FsTreeBuilder,
-        os_string_display::OsStringDisplay,
-        reporter::{ErrorOnlyReporter, ErrorReport},
-        size_getters::GET_APPARENT_SIZE,
-        visualizer::{ColumnWidthDistribution, Direction, Visualizer},
-    };
-
     let workspace = SampleWorkspace::default();
     fs_permission(workspace.join("empty-dir"), "-r", false);
     fs_permission(workspace.join("nested").join("0"), "-r", false);
@@ -133,6 +131,7 @@ fn fs_errors() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -141,10 +140,14 @@ fn fs_errors() {
 
     fs_permission(workspace.as_path(), "+rwx", true); // to allow SampleWorkspace destructor to clean itself
 
-    let actual_stderr_lines: BTreeSet<_> = stderr.trim_end().lines().collect();
+    let actual_stderr_lines: BTreeSet<_> = stderr
+        .trim_end()
+        .lines()
+        .map(|line| line.trim_start_matches('\r'))
+        .collect();
     let expected_stderr_lines = btreeset! {
-        "\r\r[error] read_dir \"./nested/0\": Permission denied (os error 13)",
-        "\r\r[error] read_dir \"./empty-dir\": Permission denied (os error 13)",
+        "[error] read_dir \"./nested/0\": Permission denied (os error 13)",
+        "[error] read_dir \"./empty-dir\": Permission denied (os error 13)",
     };
     assert_eq!(actual_stderr_lines, expected_stderr_lines);
 

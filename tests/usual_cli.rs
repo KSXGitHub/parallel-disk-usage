@@ -11,7 +11,7 @@ use parallel_disk_usage::{
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
     size_getters::{GET_APPARENT_SIZE, GET_BLOCK_COUNT, GET_BLOCK_SIZE},
-    visualizer::{ColumnWidthDistribution, Direction, Visualizer},
+    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
@@ -52,6 +52,7 @@ fn total_width() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -89,6 +90,7 @@ fn column_width() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::components(10, 90),
         max_depth: 10.try_into().unwrap(),
     };
@@ -124,6 +126,7 @@ fn min_ratio_0() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -160,6 +163,7 @@ fn min_ratio() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -196,6 +200,7 @@ fn max_depth_2() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 2.try_into().unwrap(),
     };
@@ -232,6 +237,7 @@ fn max_depth_1() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 1.try_into().unwrap(),
     };
@@ -268,6 +274,44 @@ fn top_down() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::TopDown,
+        bar_alignment: BarAlignment::Right,
+        column_width_distribution: ColumnWidthDistribution::total(100),
+        max_depth: 10.try_into().unwrap(),
+    };
+    let expected = format!("{}", visualizer);
+    let expected = expected.trim_end();
+    eprintln!("EXPECTED:\n{}\n", expected);
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn align_left() {
+    let workspace = SampleWorkspace::default();
+    let actual = Command::new(PDU)
+        .with_current_dir(workspace.as_path())
+        .with_arg("--total-width=100")
+        .with_arg("--align-left")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text);
+    eprintln!("ACTUAL:\n{}\n", &actual);
+
+    let builder = FsTreeBuilder {
+        root: workspace.to_path_buf(),
+        get_data: GET_APPARENT_SIZE,
+        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+    };
+    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    data_tree.par_cull_insignificant_data(0.01);
+    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
+    let visualizer = Visualizer::<OsStringDisplay, _> {
+        data_tree: &data_tree,
+        bytes_format: BytesFormat::MetricUnits,
+        direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -304,6 +348,7 @@ fn quantity_len() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -341,6 +386,7 @@ fn quantity_blksize() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -378,6 +424,7 @@ fn quantity_blocks() {
         data_tree: &data_tree,
         bytes_format: (),
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -416,6 +463,7 @@ fn bytes_format_plain() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::PlainNumber,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -454,6 +502,7 @@ fn bytes_format_metric() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -492,6 +541,7 @@ fn bytes_format_binary() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::BinaryUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -527,6 +577,7 @@ fn path_to_workspace() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -577,6 +628,7 @@ fn multiple_names() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };

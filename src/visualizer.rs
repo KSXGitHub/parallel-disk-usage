@@ -1,3 +1,4 @@
+pub mod bar_alignment;
 pub mod child_position;
 pub mod column_width_distribution;
 pub mod direction;
@@ -5,6 +6,7 @@ pub mod parenthood;
 pub mod proportion_bar;
 pub mod tree;
 
+pub use bar_alignment::BarAlignment;
 pub use child_position::ChildPosition;
 pub use column_width_distribution::ColumnWidthDistribution;
 pub use direction::Direction;
@@ -27,13 +29,14 @@ use std::{fmt::Display, num::NonZeroUsize};
 /// # use parallel_disk_usage::os_string_display::OsStringDisplay;
 /// # use parallel_disk_usage::size::Bytes;
 /// # use parallel_disk_usage::bytes_format::BytesFormat;
-/// # use parallel_disk_usage::visualizer::{Visualizer, Direction, ColumnWidthDistribution};
+/// # use parallel_disk_usage::visualizer::{Visualizer, Direction, BarAlignment, ColumnWidthDistribution};
 /// # fn _wrapper(create_data_tree: fn() -> DataTree<OsStringDisplay, Bytes>) {
 /// let data_tree: DataTree<OsStringDisplay, Bytes> = create_data_tree();
 /// let visualizer = Visualizer {
 ///     data_tree: &data_tree,
 ///     bytes_format: BytesFormat::MetricUnits,
 ///     direction: Direction::BottomUp,
+///     bar_alignment: BarAlignment::Right,
 ///     column_width_distribution: ColumnWidthDistribution::total(100),
 ///     max_depth: std::num::NonZeroUsize::new(10).unwrap(),
 /// };
@@ -52,6 +55,8 @@ where
     pub bytes_format: Data::DisplayFormat,
     /// The direction of the visualization of the tree.
     pub direction: Direction,
+    /// The alignment of the bars.
+    pub bar_alignment: BarAlignment,
     /// Distribution and total number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
     /// Maximum number of levels that should be visualized.
