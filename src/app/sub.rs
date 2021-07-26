@@ -29,7 +29,7 @@ where
     pub bytes_format: Data::DisplayFormat,
     /// The direction of the visualization.
     pub direction: Direction,
-    /// The alignment of the bar.
+    /// The alignment of the bars.
     pub bar_alignment: BarAlignment,
     /// Distribution and number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,

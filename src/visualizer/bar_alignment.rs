@@ -1,9 +1,9 @@
-/// The alignment of the bar.
+/// The alignment of the bars.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BarAlignment {
-    /// Fill the bar from left to right.
+    /// Fill the bars from left to right.
     Left,
-    /// Fill the bar from right to left.
+    /// Fill the bars from right to left.
     Right,
 }
 

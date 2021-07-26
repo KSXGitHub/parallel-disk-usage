@@ -24,7 +24,7 @@ edit:completion:arg-completer[pdu] = [@words]{
             cand --json-input 'Read JSON data from stdin'
             cand --json-output 'Print JSON data instead of an ASCII chart'
             cand --top-down 'Print the tree top-down instead of bottom-up'
-            cand --align-left 'Fill the bar from left to right'
+            cand --align-left 'Fill the bars from left to right'
             cand --no-sort 'Preserve order of entries'
             cand --silent-errors 'Prevent filesystem error messages from appearing in stderr'
             cand --progress 'Report progress being made at the expense of performance'

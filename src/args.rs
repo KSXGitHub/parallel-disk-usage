@@ -77,7 +77,7 @@ pub struct Args {
     #[structopt(long)]
     pub top_down: bool,
 
-    /// Fill the bar from left to right.
+    /// Fill the bars from left to right.
     #[structopt(long)]
     pub align_left: bool,
 
