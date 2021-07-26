@@ -30,23 +30,23 @@ pub struct ProportionBar {
 }
 
 impl ProportionBar {
-    pub fn display_level0(self) -> impl Display {
+    fn display_level0(self) -> impl Display {
         repeat(LEVEL0_BLOCK, self.level0)
     }
 
-    pub fn display_level1(self) -> impl Display {
+    fn display_level1(self) -> impl Display {
         repeat(LEVEL1_BLOCK, self.level1)
     }
 
-    pub fn display_level2(self) -> impl Display {
+    fn display_level2(self) -> impl Display {
         repeat(LEVEL2_BLOCK, self.level2)
     }
 
-    pub fn display_level3(self) -> impl Display {
+    fn display_level3(self) -> impl Display {
         repeat(LEVEL3_BLOCK, self.level3)
     }
 
-    pub fn display_level4(self) -> impl Display {
+    fn display_level4(self) -> impl Display {
         repeat(LEVEL4_BLOCK, self.level4)
     }
 
