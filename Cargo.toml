@@ -69,7 +69,7 @@ version = "^0.0.8"
 optional = true
 
 [dependencies.serde]
-version = "^1.0.129"
+version = "^1.0.130"
 optional = true
 
 [dependencies.serde_json]
