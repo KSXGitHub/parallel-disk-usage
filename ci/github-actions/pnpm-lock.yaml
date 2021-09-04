@@ -8,13 +8,13 @@ specifiers:
   '@tsfun/result': ^0.0.20
   '@types/fs-extra': ^9.0.11
   '@types/node': ^15.3.0
-  '@types/node-fetch': ^2.5.10
+  '@types/node-fetch': ^3.0.0
   '@types/shell-escape': ^0.2.0
   ajv: ^8.5.0
   ajv-formats: ^2.1.0
   exec-inline: ^0.0.5
   fs-extra: ^10.0.0
-  node-fetch: ^2.6.1
+  node-fetch: ^3.0.0
   shell-escape: ^0.2.0
   typescript: ^4.2.4
 
@@ -26,13 +26,13 @@ dependencies:
   '@tsfun/result': 0.0.20
   '@types/fs-extra': 9.0.11
   '@types/node': 15.3.0
-  '@types/node-fetch': 2.5.10
+  '@types/node-fetch': 3.0.3
   '@types/shell-escape': 0.2.0
   ajv: 8.5.0
   ajv-formats: 2.1.0
   exec-inline: 0.0.5
   fs-extra: 10.0.0
-  node-fetch: 2.6.1
+  node-fetch: 3.0.0
   shell-escape: 0.2.0
 
 devDependencies:
@@ -189,11 +189,11 @@ packages:
       '@types/node': 15.3.0
     dev: false
 
-  /@types/node-fetch/2.5.10:
-    resolution: {integrity: sha512-IpkX0AasN44hgEad0gEF/V6EgR5n69VEqPEgnmoM8GsIGro3PowbWs4tR6IhxUTyPLpOn+fiGG6nrQhcmoCuIQ==}
+  /@types/node-fetch/3.0.3:
+    resolution: {integrity: sha512-HhggYPH5N+AQe/OmN6fmhKmRRt2XuNJow+R3pQwJxOOF9GuwM7O2mheyGeIrs5MOIeNjDEdgdoyHBOrFeJBR3g==}
+    deprecated: This is a stub types definition. node-fetch provides its own type definitions, so you do not need this installed.
     dependencies:
-      '@types/node': 15.3.0
-      form-data: 3.0.1
+      node-fetch: 3.0.0
     dev: false
 
   /@types/node/13.13.52:
@@ -230,24 +230,13 @@ packages:
       uri-js: 4.4.1
     dev: false
 
-  /asynckit/0.4.0:
-    resolution: {integrity: sha1-x57Zf380y48robyXkLzDZkdLS3k=}
-    dev: false
-
   /before-after-hook/2.2.1:
     resolution: {integrity: sha512-/6FKxSTWoJdbsLDF8tdIjaRiFXiE6UHsEHE3OPI/cwPURCVi1ukP0gmLn7XWEiFk5TcwQjjY5PWsU+j+tgXgmw==}
     dev: false
 
-  /combined-stream/1.0.8:
-    resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
-    engines: {node: '>= 0.8'}
-    dependencies:
-      delayed-stream: 1.0.0
-    dev: false
-
-  /delayed-stream/1.0.0:
-    resolution: {integrity: sha1-3zrhmayt+31ECqrgsp4icrJOxhk=}
-    engines: {node: '>=0.4.0'}
+  /data-uri-to-buffer/3.0.1:
+    resolution: {integrity: sha512-WboRycPNsVw3B3TL559F7kuBUM4d8CgMEvk6xEJlOp7OBPjt6G7z8WMWlD2rOFZLk6OYfFIUGsCOWzcQH9K2og==}
+    engines: {node: '>= 6'}
     dev: false
 
   /deprecation/2.3.1:
@@ -266,13 +255,11 @@ packages:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
     dev: false
 
-  /form-data/3.0.1:
-    resolution: {integrity: sha512-RHkBKtLWUVwd7SqRIvCZMEvAMoGUp0XU+seQiZejj0COz3RI3hWP4sCv3gZWWLjJTd7rGwcsF5eKZGii0r/hbg==}
-    engines: {node: '>= 6'}
+  /fetch-blob/3.1.2:
+    resolution: {integrity: sha512-hunJbvy/6OLjCD0uuhLdp0mMPzP/yd2ssd1t2FCJsaA7wkWhpbp9xfuNVpv7Ll4jFhzp6T4LAupSiV9uOeg0VQ==}
+    engines: {node: ^12.20 || >= 14.13}
     dependencies:
-      asynckit: 0.4.0
-      combined-stream: 1.0.8
-      mime-types: 2.1.30
+      web-streams-polyfill: 3.1.0
     dev: false
 
   /fs-extra/10.0.0:
@@ -305,21 +292,17 @@ packages:
       graceful-fs: 4.2.6
     dev: false
 
-  /mime-db/1.47.0:
-    resolution: {integrity: sha512-QBmA/G2y+IfeS4oktet3qRZ+P5kPhCKRXxXnQEudYqUaEioAU1/Lq2us3D/t1Jfo4hE9REQPrbB7K5sOczJVIw==}
-    engines: {node: '>= 0.6'}
-    dev: false
-
-  /mime-types/2.1.30:
-    resolution: {integrity: sha512-crmjA4bLtR8m9qLpHvgxSChT+XoSlZi8J4n/aIdn3z92e/U47Z0V/yl+Wh9W046GgFVAmoNR/fmdbZYcSSIUeg==}
-    engines: {node: '>= 0.6'}
-    dependencies:
-      mime-db: 1.47.0
-    dev: false
-
   /node-fetch/2.6.1:
     resolution: {integrity: sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==}
     engines: {node: 4.x || >=6.0.0}
+    dev: false
+
+  /node-fetch/3.0.0:
+    resolution: {integrity: sha512-bKMI+C7/T/SPU1lKnbQbwxptpCrG9ashG+VkytmXCPZyuM9jB6VU+hY0oi4lC8LxTtAeWdckNCTa3nrGsAdA3Q==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+    dependencies:
+      data-uri-to-buffer: 3.0.1
+      fetch-blob: 3.1.2
     dev: false
 
   /once/1.4.0:
@@ -374,6 +357,11 @@ packages:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
     dependencies:
       punycode: 2.1.1
+    dev: false
+
+  /web-streams-polyfill/3.1.0:
+    resolution: {integrity: sha512-wO9r1YnYe7kFBLHyyVEhV1H8VRWoNiNnuP+v/HUUmSTaRF8F93Kmd3JMrETx0f11GXxRek6OcL2QtjFIdc5WYw==}
+    engines: {node: '>= 8'}
     dev: false
 
   /wrappy/1.0.2:
