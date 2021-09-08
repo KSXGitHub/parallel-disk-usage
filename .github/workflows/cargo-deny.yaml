@@ -2,7 +2,6 @@ name: Lint dependency graph
 
 on:
   - push
-  - pull_request
 
 jobs:
   cargo_deny:

@@ -2,7 +2,6 @@ name: Code formatting
 
 on:
   - push
-  - pull_request
 
 jobs:
   fmt_check:
