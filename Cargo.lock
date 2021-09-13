@@ -56,7 +56,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6dd069710472bf9b4eed1390eb563a7c6570ee386f7deaa5af54c57f6ed8fe30"
 dependencies = [
  "derive_more",
- "pipe-trait 0.3.2",
+ "pipe-trait",
  "serde",
  "serde_yaml",
  "text-block-macros",
@@ -391,7 +391,7 @@ dependencies = [
  "fmt-iter",
  "itertools",
  "maplit",
- "pipe-trait 0.3.2",
+ "pipe-trait",
  "pretty_assertions",
  "rand",
  "rayon",
@@ -415,12 +415,6 @@ checksum = "10f4872ae94d7b90ae48754df22fd42ad52ce740b8f370b03da4835417403e53"
 dependencies = [
  "ucd-trie",
 ]
-
-[[package]]
-name = "pipe-trait"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d4c36ce339a5efdc0e3e60766952bc1df1b9e2b80cb14f1502c00aa90070ce0"
 
 [[package]]
 name = "pipe-trait"
@@ -690,11 +684,11 @@ dependencies = [
 
 [[package]]
 name = "structopt-utilities"
-version = "0.0.8"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "397e6483e84c1d75b05a077dbbc860d546d56f6527cee877c4d73e1a710b4d28"
+checksum = "86d8a1aea356c5b00463fad9e975ff02d097a360a2efadf4bc1dfbdf35302b71"
 dependencies = [
- "pipe-trait 0.2.1",
+ "pipe-trait",
  "structopt",
 ]
 
