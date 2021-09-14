@@ -65,7 +65,7 @@ version = "^0.3.23"
 optional = true
 
 [dependencies.structopt-utilities]
-version = "^0.0.8"
+version = "^0.1.0"
 optional = true
 
 [dependencies.serde]
