@@ -77,7 +77,7 @@ version = "^1.0.68"
 optional = true
 
 [dependencies.strum]
-version = "^0.21.0"
+version = "^0.22.0"
 features = ["derive"]
 
 [dev-dependencies]
