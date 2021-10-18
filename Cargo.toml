@@ -61,7 +61,7 @@ zero-copy-pads = "^0.2.0"
 terminal_size = "^0.1.17"
 
 [dependencies.structopt]
-version = "^0.3.23"
+version = "^0.3.25"
 optional = true
 
 [dependencies.structopt-utilities]
