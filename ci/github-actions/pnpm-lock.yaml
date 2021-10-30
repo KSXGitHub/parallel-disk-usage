@@ -7,7 +7,7 @@ specifiers:
   '@sinclair/typebox': ^0.16.7
   '@tsfun/result': ^0.0.20
   '@types/fs-extra': ^9.0.11
-  '@types/node': ^15.3.0
+  '@types/node': ^16.0.0
   '@types/node-fetch': ^2.5.10
   '@types/shell-escape': ^0.2.0
   ajv: ^8.5.0
@@ -25,7 +25,7 @@ dependencies:
   '@sinclair/typebox': 0.16.7
   '@tsfun/result': 0.0.20
   '@types/fs-extra': 9.0.11
-  '@types/node': 15.3.0
+  '@types/node': 16.11.6
   '@types/node-fetch': 2.5.10
   '@types/shell-escape': 0.2.0
   ajv: 8.5.0
@@ -186,13 +186,13 @@ packages:
   /@types/fs-extra/9.0.11:
     resolution: {integrity: sha512-mZsifGG4QeQ7hlkhO56u7zt/ycBgGxSVsFI/6lGTU34VtwkiqrrSDgw0+ygs8kFGWcXnFQWMrzF2h7TtDFNixA==}
     dependencies:
-      '@types/node': 15.3.0
+      '@types/node': 16.11.6
     dev: false
 
   /@types/node-fetch/2.5.10:
     resolution: {integrity: sha512-IpkX0AasN44hgEad0gEF/V6EgR5n69VEqPEgnmoM8GsIGro3PowbWs4tR6IhxUTyPLpOn+fiGG6nrQhcmoCuIQ==}
     dependencies:
-      '@types/node': 15.3.0
+      '@types/node': 16.11.6
       form-data: 3.0.1
     dev: false
 
@@ -204,8 +204,8 @@ packages:
     resolution: {integrity: sha512-DssMqTV9UnnoxDWu959sDLZzfvqCF0qDNRjaWeYSui9xkFe61kKo4l1TWNTQONpuXEm+gLMRvdlzvNHBamzmEw==}
     dev: false
 
-  /@types/node/15.3.0:
-    resolution: {integrity: sha512-8/bnjSZD86ZfpBsDlCIkNXIvm+h6wi9g7IqL+kmFkQ+Wvu3JrasgLElfiPgoo8V8vVfnEi0QVS12gbl94h9YsQ==}
+  /@types/node/16.11.6:
+    resolution: {integrity: sha512-ua7PgUoeQFjmWPcoo9khiPum3Pd60k4/2ZGXt18sm2Slk0W0xZTqt5Y0Ny1NyBiN1EVQ/+FaF9NcY4Qe6rwk5w==}
     dev: false
 
   /@types/shell-escape/0.2.0:
