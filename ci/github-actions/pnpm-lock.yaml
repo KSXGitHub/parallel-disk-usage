@@ -4,7 +4,7 @@ specifiers:
   '@actions/core': ^1.3.0
   '@actions/github': ^5.0.0
   '@popeindustries/lit-html-server': ^3.1.0
-  '@sinclair/typebox': ^0.16.7
+  '@sinclair/typebox': ^0.23.0
   '@tsfun/result': ^0.0.20
   '@types/fs-extra': ^9.0.11
   '@types/node': ^15.3.0
@@ -22,7 +22,7 @@ dependencies:
   '@actions/core': 1.3.0
   '@actions/github': 5.0.0
   '@popeindustries/lit-html-server': 3.1.0
-  '@sinclair/typebox': 0.16.7
+  '@sinclair/typebox': 0.23.0
   '@tsfun/result': 0.0.20
   '@types/fs-extra': 9.0.11
   '@types/node': 15.3.0
@@ -146,8 +146,8 @@ packages:
     engines: {node: '>=10'}
     dev: false
 
-  /@sinclair/typebox/0.16.7:
-    resolution: {integrity: sha512-d12AkLZJXD30hXBhJSgf33RqGO0NMHIDzsQPYfp6WGoaSuMnSGIUanII2OUbeZFnD/j3Nbl2zifgO2+5tPClCQ==}
+  /@sinclair/typebox/0.23.0:
+    resolution: {integrity: sha512-G8+yjtQlXVBOSWqsi8ezmmt2Y4VyR+FJOvYV/3DwKcJiAvyU+WcSA9chS5X3H+2VN3L/MEHm/puenGo9S6kbcw==}
     dev: false
 
   /@tsfun/prv-option-result-common/0.0.15:

@@ -3,7 +3,7 @@
   "dependencies": {
     "@actions/core": "^1.3.0",
     "@actions/github": "^5.0.0",
-    "@sinclair/typebox": "^0.16.7",
+    "@sinclair/typebox": "^0.23.0",
     "@popeindustries/lit-html-server": "^3.1.0",
     "ajv": "^8.5.0",
     "ajv-formats": "^2.1.0",
