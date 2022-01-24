@@ -48,7 +48,7 @@ cli = ["structopt", "structopt-utilities", "json"]
 cli-completions = ["cli"]
 
 [dependencies]
-pipe-trait = "^0.3.2"
+pipe-trait = "^0.4.0"
 smart-default = "^0.6.0"
 derive_more = "^0.99.17"
 rayon = "^1.5.1"
