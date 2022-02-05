@@ -56,7 +56,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6dd069710472bf9b4eed1390eb563a7c6570ee386f7deaa5af54c57f6ed8fe30"
 dependencies = [
  "derive_more",
- "pipe-trait",
+ "pipe-trait 0.3.2",
  "serde",
  "serde_yaml",
  "text-block-macros",
@@ -391,7 +391,7 @@ dependencies = [
  "fmt-iter",
  "itertools",
  "maplit",
- "pipe-trait",
+ "pipe-trait 0.4.0",
  "pretty_assertions",
  "rand",
  "rayon",
@@ -412,6 +412,12 @@ name = "pipe-trait"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3fd92f5561e74c246a0b7332e09d2364afb40b67d152c4520b3ba2a7d3dea5b3"
+
+[[package]]
+name = "pipe-trait"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c1be1ec9e59f0360aefe84efa6f699198b685ab0d5718081e9f72aa2344289e2"
 
 [[package]]
 name = "ppv-lite86"
@@ -673,7 +679,7 @@ version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "86d8a1aea356c5b00463fad9e975ff02d097a360a2efadf4bc1dfbdf35302b71"
 dependencies = [
- "pipe-trait",
+ "pipe-trait 0.3.2",
  "structopt",
 ]
 
