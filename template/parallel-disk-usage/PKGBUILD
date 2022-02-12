@@ -1,6 +1,6 @@
 # This PKGBUILD is not a full PKGBUILD
 # pkgname, pkgver, source, and sha1sums are to be generated
-pkgdesc='Create a filesystem tree from YAML'
+pkgdesc='Summarize disk usage of the set of files, recursively for directories.'
 pkgrel=1
 arch=(x86_64)
 license=(Apache-2.0)
