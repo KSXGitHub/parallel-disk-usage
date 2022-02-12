@@ -110,6 +110,7 @@ impl App {
         where
             Data: Size + Into<u64> + Send + Sync,
             ProgressReport<Data>: Default + 'static,
+            u64: Into<Data>,
         {
             ProgressAndErrorReporter::new(
                 ProgressReport::TEXT,
