@@ -1,8 +1,10 @@
 use super::{ErrorReport, Event, ParallelReporter, ProgressReport, Reporter, Size};
-use pipe_trait::Pipe;
+use progress_report_state::ProgressReportState;
 use std::{
     any::Any,
-    sync::{Arc, RwLock},
+    marker::PhantomData,
+    ops::ControlFlow,
+    sync::{atomic::Ordering::Relaxed, Arc},
     thread::{sleep, spawn, JoinHandle},
     time::Duration,
 };
@@ -15,19 +17,23 @@ pub struct ProgressAndErrorReporter<Data, ReportError>
 where
     Data: Size + Send + Sync,
     ReportError: Fn(ErrorReport) + Sync,
+    u64: Into<Data>,
 {
     /// Progress information.
-    progress: Arc<RwLock<Option<ProgressReport<Data>>>>,
+    progress: Arc<ProgressReportState>,
     /// Report encountered error.
     report_error: ReportError,
     /// Join handle of progress reporting thread.
     progress_reporter_handle: JoinHandle<()>,
+    /// Keep generic parameters.
+    _phantom: PhantomData<Data>,
 }
 
 impl<Data, ReportError> ProgressAndErrorReporter<Data, ReportError>
 where
     Data: Size + Send + Sync,
     ReportError: Fn(ErrorReport) + Sync,
+    u64: Into<Data>,
 {
     /// Create a new [`ProgressAndErrorReporter`] from a report function.
     pub fn new<ReportProgress>(
@@ -39,25 +45,20 @@ where
         ProgressReport<Data>: Default + 'static,
         ReportProgress: Fn(ProgressReport<Data>) + Send + Sync + 'static,
     {
-        let progress = ProgressReport::default()
-            .pipe(Some)
-            .pipe(RwLock::new)
-            .pipe(Arc::new);
+        let progress = Arc::new(ProgressReportState::default());
         let progress_thread = progress.clone();
         let progress_reporter_handle = spawn(move || loop {
             sleep(progress_report_interval);
-            if let Ok(progress) = progress_thread.read().as_deref() {
-                if let Some(progress) = *progress {
-                    report_progress(progress);
-                } else {
-                    break;
-                }
-            }
+            match progress_thread.to_progress_report() {
+                ControlFlow::Continue(progress) => report_progress(progress),
+                ControlFlow::Break(()) => break,
+            };
         });
         ProgressAndErrorReporter {
             progress,
             report_error,
             progress_reporter_handle,
+            _phantom: PhantomData,
         }
     }
 
@@ -65,15 +66,15 @@ where
     ///
     /// This function would be automatically invoked once the value is [dropped](Drop).
     pub fn stop_progress_reporter(&self) {
-        let mut progress = self.progress.write().expect("lock progress to stop");
-        *progress = None;
+        self.progress.stopped.store(true, Relaxed);
     }
 }
 
 impl<Data, ReportError> Reporter<Data> for ProgressAndErrorReporter<Data, ReportError>
 where
-    Data: Size + Send + Sync,
+    Data: Size + Into<u64> + Send + Sync,
     ReportError: Fn(ErrorReport) + Sync,
+    u64: Into<Data>,
 {
     fn report(&self, event: Event<Data>) {
         use Event::*;
@@ -82,25 +83,19 @@ where
             report_error,
             ..
         } = self;
-        macro_rules! handle_field {
-            ($($field:ident $operator:tt $addend:expr;)+) => {
-                if let Some(progress) = progress.write().ok().as_mut().and_then(|x| x.as_mut()) {
-                    $(progress.$field $operator $addend;)+
-                }
+        macro_rules! bump {
+            ($field:ident += $delta:expr) => {
+                progress.$field.fetch_add($delta, Relaxed)
             };
         }
         match event {
             ReceiveData(data) => {
-                handle_field! {
-                    items += 1;
-                    total += data;
-                }
+                bump!(items += 1);
+                bump!(total += data.into());
             }
             EncounterError(error_report) => {
                 report_error(error_report);
-                handle_field! {
-                    errors += 1;
-                }
+                bump!(errors += 1);
             }
         }
     }
@@ -108,8 +103,9 @@ where
 
 impl<Data, ReportError> ParallelReporter<Data> for ProgressAndErrorReporter<Data, ReportError>
 where
-    Data: Size + Send + Sync,
+    Data: Size + Into<u64> + Send + Sync,
     ReportError: Fn(ErrorReport) + Sync,
+    u64: Into<Data>,
 {
     type DestructionError = Box<dyn Any + Send + 'static>;
     fn destroy(self) -> Result<(), Self::DestructionError> {
@@ -117,3 +113,5 @@ where
         self.progress_reporter_handle.join()
     }
 }
+
+mod progress_report_state;
