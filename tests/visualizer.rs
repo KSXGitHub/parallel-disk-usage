@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 use parallel_disk_usage::{
     bytes_format::BytesFormat::*,
     data_tree::DataTree,
