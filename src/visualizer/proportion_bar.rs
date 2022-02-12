@@ -76,7 +76,7 @@ impl Display for ProportionBarDisplay {
                     level2 = bar.display_level2(),
                     level3 = bar.display_level3(),
                     level4 = bar.display_level4(),
-                );
+                )
             };
         }
         match align {
