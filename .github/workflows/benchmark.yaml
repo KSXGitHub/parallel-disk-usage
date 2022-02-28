@@ -82,7 +82,7 @@ jobs:
             pnpm-
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2.1.0
+        uses: pnpm/action-setup@v2.2.1
         with:
           version: '6.3.0'
           run_install: 'true'
