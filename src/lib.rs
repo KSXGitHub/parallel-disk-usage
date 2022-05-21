@@ -14,10 +14,12 @@ pub mod runtime_error;
 
 /// The main program.
 #[cfg(feature = "cli")]
-pub fn main() {
+pub fn main() -> std::process::ExitCode {
     if let Err(error) = app::App::from_env().run() {
         eprintln!("[error] {}", error);
+        return std::process::ExitCode::FAILURE;
     }
+    std::process::ExitCode::SUCCESS
 }
 
 #[cfg(feature = "cli")]
