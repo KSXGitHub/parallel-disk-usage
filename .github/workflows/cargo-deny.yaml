@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: EmbarkStudios/cargo-deny-action@v1.2.17
+      - uses: EmbarkStudios/cargo-deny-action@v1.3.1
