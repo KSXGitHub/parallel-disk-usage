@@ -58,7 +58,7 @@ fmt-iter = "^0.2.1"
 itertools = "^0.10.3"
 assert-cmp = "^0.2.0"
 zero-copy-pads = "^0.2.0"
-terminal_size = "^0.1.17"
+terminal_size = "^0.2.1"
 
 [dependencies.structopt]
 version = "^0.3.26"
