@@ -22,6 +22,7 @@ use std::{
     path::Path,
     process::{Command, Output, Stdio},
 };
+use text_block_macros::text_block;
 
 fn stdio(command: Command) -> Command {
     command
@@ -65,7 +66,11 @@ fn min_ratio_1() {
     assert!(!status.success());
     assert_eq!(
         stderr,
-        "error: Invalid value for '--min-ratio <min-ratio>': greater than or equal to 1"
+        text_block! {
+            "error: Invalid value \"1\" for '--min-ratio <MIN_RATIO>': greater than or equal to 1"
+            ""
+            "For more information try --help"
+        }
     );
     assert_eq!(&stdout, &[] as &[u8]);
 }
@@ -90,7 +95,11 @@ fn max_depth_0() {
     assert!(!status.success());
     assert_eq!(
         stderr,
-        "error: Invalid value for '--max-depth <max-depth>': number would be zero for non-zero type"
+        text_block! {
+            "error: Invalid value \"0\" for '--max-depth <MAX_DEPTH>': number would be zero for non-zero type"
+            ""
+            "For more information try --help"
+        }
     );
     assert_eq!(&stdout, &[] as &[u8]);
 }

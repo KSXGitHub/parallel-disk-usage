@@ -11,9 +11,9 @@ use crate::{
     size_getters::GET_APPARENT_SIZE,
     visualizer::{BarAlignment, Direction, Visualizer},
 };
+use clap::Parser;
 use pipe_trait::Pipe;
 use std::{io::stdin, time::Duration};
-use structopt_utilities::StructOptUtils;
 
 #[cfg(unix)]
 use crate::{
@@ -31,7 +31,7 @@ impl App {
     /// Initialize the application from the environment.
     pub fn from_env() -> Self {
         App {
-            args: Args::strict_from_args(),
+            args: Args::parse(),
         }
     }
 

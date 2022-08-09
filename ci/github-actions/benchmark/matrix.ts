@@ -22,14 +22,17 @@ export const SELF_BENCHMARK_CATEGORIES: readonly SelfBenchmarkCategory[] = [{}]
   .flatMap(category => NO_SORT.map(noSort => ({ ...category, noSort })))
 
 export function parseSelfBenchmarkCategory(category: SelfBenchmarkCategory) {
-  const reportName = Object.values(category).join('-')
+  const { quantity, maxDepth, minRatio, progress, noSort } = category
+
+  const reportName =
+    `quantity=${quantity},maxDepth=${maxDepth},minRatio=${minRatio},progress=${progress},noSort=${noSort}` as const
 
   const commandSuffix = [
-    `--quantity=${category.quantity}`,
-    `--max-depth=${category.maxDepth}`,
-    `--min-ratio=${category.minRatio}`,
-    ...category.progress ? ['--progress'] as const : [] as const,
-    ...category.noSort ? ['--no-sort'] as const : [] as const,
+    `--quantity=${quantity}`,
+    `--max-depth=${maxDepth}`,
+    `--min-ratio=${minRatio}`,
+    ...progress ? ['--progress'] as const : [] as const,
+    ...noSort ? ['--no-sort'] as const : [] as const,
   ] as const
 
   return { category, reportName, commandSuffix }

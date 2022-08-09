@@ -5,15 +5,14 @@ pub use fraction::Fraction;
 pub use quantity::Quantity;
 
 use crate::{bytes_format::BytesFormat, visualizer::ColumnWidthDistribution};
+use clap::{ColorChoice, Parser};
 use std::{num::NonZeroUsize, path::PathBuf};
-use structopt::StructOpt;
-use strum::VariantNames;
 use terminal_size::{terminal_size, Width};
 use text_block_macros::text_block;
 
 /// The CLI arguments.
-#[derive(Debug, Clone, StructOpt)]
-#[structopt(
+#[derive(Debug, Clone, Parser)]
+#[clap(
     name = "pdu",
 
     long_about = text_block! {
@@ -24,6 +23,20 @@ use text_block_macros::text_block;
     },
 
     after_help = text_block! {
+        "EXAMPLES:"
+        "    $ pdu"
+        "    $ pdu path/to/file/or/directory"
+        "    $ pdu file.txt dir/"
+        "    $ pdu --quantity=blksize"
+        "    $ pdu --bytes-format=plain"
+        "    $ pdu --bytes-format=binary"
+        "    $ pdu --min-ratio=0"
+        "    $ pdu --min-ratio=0.05"
+        "    $ pdu --min-ratio=0 --json-output | jq"
+        "    $ pdu --min-ratio=0 < disk-usage.json"
+    },
+
+    after_long_help = text_block! {
         "EXAMPLES:"
         "    Show disk usage chart of current working directory"
         "    $ pdu"
@@ -55,62 +68,63 @@ use text_block_macros::text_block;
         "    Visualize existing JSON representation of disk usage data"
         "    $ pdu --min-ratio=0 < disk-usage.json"
     },
+
+    color = ColorChoice::Never,
 )]
 pub struct Args {
     /// List of files and/or directories.
-    #[structopt(name = "files")]
     pub files: Vec<PathBuf>,
 
     /// Read JSON data from stdin.
-    #[structopt(long, conflicts_with = "quantity")]
+    #[clap(long, conflicts_with = "quantity")]
     pub json_input: bool,
 
     /// Print JSON data instead of an ASCII chart.
-    #[structopt(long)]
+    #[clap(long)]
     pub json_output: bool,
 
     /// How to display the numbers of bytes.
-    #[structopt(long, possible_values = BytesFormat::VARIANTS, default_value = BytesFormat::default_value())]
+    #[clap(long, value_enum, default_value_t = BytesFormat::MetricUnits)]
     pub bytes_format: BytesFormat,
 
     /// Print the tree top-down instead of bottom-up.
-    #[structopt(long)]
+    #[clap(long)]
     pub top_down: bool,
 
     /// Fill the bars from left to right.
-    #[structopt(long)]
+    #[clap(long)]
     pub align_left: bool,
 
     /// Aspect of the files/directories to be measured.
-    #[structopt(long, possible_values = Quantity::VARIANTS, default_value = Quantity::default_value())]
+    #[clap(long, value_enum, default_value_t = Quantity::ApparentSize)]
     pub quantity: Quantity,
 
     /// Maximum depth to display the data (must be greater than 0).
-    #[structopt(long, default_value = "10")]
+    #[clap(long, default_value = "10")]
     pub max_depth: NonZeroUsize,
 
     /// Width of the visualization.
-    #[structopt(long, conflicts_with = "column-width")]
+    #[clap(long, conflicts_with = "column-width")]
     pub total_width: Option<usize>,
 
     /// Maximum widths of the tree column and width of the bar column.
-    #[structopt(long, number_of_values = 2, value_names = &["tree-width", "bar-width"])]
+    #[clap(long, number_of_values = 2, value_names = &["tree-width", "bar-width"])]
     pub column_width: Option<Vec<usize>>,
 
     /// Minimal size proportion required to appear.
-    #[structopt(long, default_value = "0.01")]
+    #[clap(long, default_value = "0.01", value_parser)]
     pub min_ratio: Fraction,
 
     /// Preserve order of entries.
-    #[structopt(long)]
+    #[clap(long)]
     pub no_sort: bool,
 
     /// Prevent filesystem error messages from appearing in stderr.
-    #[structopt(long)]
+    #[clap(long)]
     pub silent_errors: bool,
 
     /// Report progress being made at the expense of performance.
-    #[structopt(long)]
+    #[clap(long)]
     pub progress: bool,
 }
 

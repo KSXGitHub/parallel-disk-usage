@@ -8,28 +8,26 @@ pub use output::Output;
 pub use parsed_value::ParsedValue;
 
 use pipe_trait::Pipe;
-use strum::{AsRefStr, EnumString, EnumVariantNames};
+
+#[cfg(feature = "cli")]
+use clap::ValueEnum;
 
 /// The [`DisplayFormat`](crate::size::Size::DisplayFormat) type of [`Bytes`](crate::size::Bytes).
-#[derive(Debug, Clone, Copy, AsRefStr, EnumString, EnumVariantNames)]
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "cli", derive(ValueEnum))]
 pub enum BytesFormat {
     /// Display the value as-is.
-    #[strum(serialize = "plain")]
+    #[cfg_attr(feature = "cli", clap(name = "plain"))]
     PlainNumber,
     /// Display the value with a unit suffix in [metric scale](formatter::METRIC).
-    #[strum(serialize = "metric")]
+    #[cfg_attr(feature = "cli", clap(name = "metric"))]
     MetricUnits,
     /// Display the value with a unit suffix in [binary scale](formatter::BINARY).
-    #[strum(serialize = "binary")]
+    #[cfg_attr(feature = "cli", clap(name = "binary"))]
     BinaryUnits,
 }
 
 impl BytesFormat {
-    #[cfg(feature = "cli")]
-    pub(crate) fn default_value() -> &'static str {
-        BytesFormat::MetricUnits.as_ref()
-    }
-
     /// Format a quantity of bytes according to the settings.
     pub fn format(self, bytes: u64) -> Output {
         use formatter::{BINARY, METRIC};

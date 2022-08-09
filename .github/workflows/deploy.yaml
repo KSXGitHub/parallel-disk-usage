@@ -612,13 +612,13 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2.2.2
         with:
-          version: '6.3.0'
+          version: '7.9.0'
           run_install: 'true'
 
       - name: Compile TypeScript
         run: |
           cd ci/github-actions
-          pnpx tsc
+          pnpm exec tsc
 
       - name: Compare benchmark of pdu against its competitors
         run: node ci/github-actions/competing-benchmark.js

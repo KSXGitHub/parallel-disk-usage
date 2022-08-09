@@ -84,13 +84,13 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2.2.2
         with:
-          version: '6.3.0'
+          version: '7.9.0'
           run_install: 'true'
 
       - name: Compile TypeScript
         run: |
           cd ci/github-actions
-          pnpx tsc
+          pnpm exec tsc
 
       - name: Download released versions of pdu
         run: node ci/github-actions/download-released-binaries.js

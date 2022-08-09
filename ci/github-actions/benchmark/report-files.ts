@@ -1,8 +1,5 @@
-import { Type, Static } from '@sinclair/typebox'
 import console from 'console'
 import { readFileSync } from 'fs'
-import process from 'process'
-import createAjv from '../lib/ajv'
 
 export const PREFIX = 'tmp.benchmark-report'
 
@@ -36,26 +33,40 @@ const postProcessSchema = <Schema extends {}>(schema: Schema) => ({
   additionalProperties: true,
 })
 
-export const ReportUnit = postProcessSchema(Type.Object({
-  command: Type.String(),
-  mean: Type.Number(),
-  min: Type.Number(),
-  max: Type.Number(),
-}))
-export type ReportUnit = Static<typeof ReportUnit>
+export interface ReportUnit {
+  command: string
+  mean: number
+  min: number
+  max: number
+}
 
-export const Report = postProcessSchema(Type.Object({
-  results: Type.Array(ReportUnit),
-}))
-export type Report = Static<typeof Report>
+export interface Report {
+  results: ReportUnit[]
+}
 
 export function assertReport(data: unknown): asserts data is Report {
-  const ajv = createAjv()
-  const valid = ajv.validate(Report, data)
-  if (valid) return
-  console.error('ValidationError', { data })
-  console.error(ajv.errorsText(ajv.errors))
-  throw process.exit(1)
+  if (typeof data !== 'object' || data === null) {
+    console.error(data)
+    throw new TypeError(`Data is not an object: ${data}`)
+  }
+  const { results } = data as { [_ in string]: unknown }
+  if (!Array.isArray(results)) {
+    console.error(data)
+    throw new TypeError(`Property 'results' is not an array`)
+  }
+  for (const item of results) {
+    if (typeof item !== 'object' || data === null) {
+      console.error(item)
+      throw new TypeError(`An item is not an object: ${item}`)
+    }
+    for (const name of ['command', 'mean', 'min', 'max'] as const) {
+      if (name in item) {
+        continue
+      }
+      console.error(item)
+      throw new TypeError(`Property '${name}' does not exist in an item`)
+    }
+  }
 }
 
 export function loadByPath(path: string): Report {
