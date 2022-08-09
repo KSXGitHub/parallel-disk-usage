@@ -9,21 +9,17 @@ pub use parsed_value::ParsedValue;
 
 use clap::ValueEnum;
 use pipe_trait::Pipe;
-use strum::{AsRefStr, EnumString, EnumVariantNames};
 
 /// The [`DisplayFormat`](crate::size::Size::DisplayFormat) type of [`Bytes`](crate::size::Bytes).
-#[derive(Debug, Clone, Copy, AsRefStr, EnumString, EnumVariantNames, ValueEnum)]
+#[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum BytesFormat {
     /// Display the value as-is.
-    #[strum(serialize = "plain")]
     #[clap(name = "plain")]
     PlainNumber,
     /// Display the value with a unit suffix in [metric scale](formatter::METRIC).
-    #[strum(serialize = "metric")]
     #[clap(name = "metric")]
     MetricUnits,
     /// Display the value with a unit suffix in [binary scale](formatter::BINARY).
-    #[strum(serialize = "binary")]
     #[clap(name = "binary")]
     BinaryUnits,
 }

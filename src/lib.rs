@@ -41,5 +41,4 @@ pub mod status_board;
 pub mod tree_builder;
 pub mod visualizer;
 
-pub use strum;
 pub use zero_copy_pads;
