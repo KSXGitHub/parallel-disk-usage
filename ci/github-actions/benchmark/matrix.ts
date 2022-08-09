@@ -22,7 +22,10 @@ export const SELF_BENCHMARK_CATEGORIES: readonly SelfBenchmarkCategory[] = [{}]
   .flatMap(category => NO_SORT.map(noSort => ({ ...category, noSort })))
 
 export function parseSelfBenchmarkCategory(category: SelfBenchmarkCategory) {
-  const reportName = Object.values(category).join('-')
+  const reportName = Object
+    .entries(category)
+    .map(([key, value]) => `${key}@${value}`)
+    .join('-')
 
   const commandSuffix = [
     `--quantity=${category.quantity}`,
