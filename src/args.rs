@@ -5,7 +5,7 @@ pub use fraction::Fraction;
 pub use quantity::Quantity;
 
 use crate::{bytes_format::BytesFormat, visualizer::ColumnWidthDistribution};
-use clap::Parser;
+use clap::{ColorChoice, Parser};
 use std::{num::NonZeroUsize, path::PathBuf};
 use strum::VariantNames;
 use terminal_size::{terminal_size, Width};
@@ -55,6 +55,8 @@ use text_block_macros::text_block;
         "    Visualize existing JSON representation of disk usage data"
         "    $ pdu --min-ratio=0 < disk-usage.json"
     },
+
+    color = ColorChoice::Never,
 )]
 pub struct Args {
     /// List of files and/or directories.
