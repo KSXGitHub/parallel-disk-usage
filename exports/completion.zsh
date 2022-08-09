@@ -15,8 +15,12 @@ _pdu() {
 
     local context curcontext="$curcontext" state line
     _arguments "${_arguments_options[@]}" \
-'--bytes-format=[How to display the numbers of bytes]:BYTES_FORMAT:(plain metric binary)' \
-'--quantity=[Aspect of the files/directories to be measured]:QUANTITY:(len blksize blocks)' \
+'--bytes-format=[How to display the numbers of bytes]:BYTES_FORMAT:((plain\:"Display the value as-is"
+metric\:"Display the value with a unit suffix in \[metric scale\](formatter::METRIC)"
+binary\:"Display the value with a unit suffix in \[binary scale\](formatter::BINARY)"))' \
+'--quantity=[Aspect of the files/directories to be measured]:QUANTITY:((len\:"Measure apparent sizes, equivalent to the \[len\](std::fs::Metadata::len) method"
+blksize\:"Measure block sizes, equivalent to the \[blksize\](std::os::unix::prelude::MetadataExt::blksize) method (POSIX only)"
+blocks\:"Count numbers of blocks, equivalent to the \[blocks\](std::os::unix::prelude::MetadataExt::blocks) method (POSIX only)"))' \
 '--max-depth=[Maximum depth to display the data (must be greater than 0)]:MAX_DEPTH: ' \
 '(--column-width)--total-width=[Width of the visualization]:TOTAL_WIDTH: ' \
 '*--column-width=[Maximum widths of the tree column and width of the bar column]:tree-width: :tree-width: ' \

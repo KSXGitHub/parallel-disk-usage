@@ -7,7 +7,6 @@ pub use quantity::Quantity;
 use crate::{bytes_format::BytesFormat, visualizer::ColumnWidthDistribution};
 use clap::{ColorChoice, Parser};
 use std::{num::NonZeroUsize, path::PathBuf};
-use strum::VariantNames;
 use terminal_size::{terminal_size, Width};
 use text_block_macros::text_block;
 
@@ -71,7 +70,7 @@ pub struct Args {
     pub json_output: bool,
 
     /// How to display the numbers of bytes.
-    #[clap(long, possible_values = BytesFormat::VARIANTS, default_value = BytesFormat::default_value())]
+    #[clap(long, value_enum, default_value_t = BytesFormat::MetricUnits)]
     pub bytes_format: BytesFormat,
 
     /// Print the tree top-down instead of bottom-up.
@@ -83,7 +82,7 @@ pub struct Args {
     pub align_left: bool,
 
     /// Aspect of the files/directories to be measured.
-    #[clap(long, possible_values = Quantity::VARIANTS, default_value = Quantity::default_value())]
+    #[clap(long, value_enum, default_value_t = Quantity::ApparentSize)]
     pub quantity: Quantity,
 
     /// Maximum depth to display the data (must be greater than 0).
