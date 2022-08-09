@@ -23,11 +23,11 @@ pub fn main() -> std::process::ExitCode {
 }
 
 #[cfg(feature = "cli")]
-pub use structopt;
+pub use clap;
 #[cfg(feature = "cli")]
-pub use structopt::clap;
+pub use clap_complete;
 #[cfg(feature = "cli")]
-pub use structopt_utilities;
+pub use clap_utilities;
 
 pub mod bytes_format;
 pub mod data_tree;

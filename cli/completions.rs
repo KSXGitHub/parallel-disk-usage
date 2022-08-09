@@ -1,6 +1,7 @@
+use clap_utilities::CommandFactoryExtra;
 use parallel_disk_usage::args::Args;
-use structopt_utilities::StructOptUtils;
+use std::process::ExitCode;
 
-fn main() {
-    Args::run_completion_generator("pdu-completions", "pdu");
+fn main() -> ExitCode {
+    Args::run_completion_generator()
 }

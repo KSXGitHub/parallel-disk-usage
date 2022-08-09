@@ -9,10 +9,9 @@ _pdu() {
     for i in ${COMP_WORDS[@]}
     do
         case "${i}" in
-            pdu)
+            "$1")
                 cmd="pdu"
                 ;;
-            
             *)
                 ;;
         esac
@@ -20,13 +19,12 @@ _pdu() {
 
     case "${cmd}" in
         pdu)
-            opts=" -h -V  --json-input --json-output --top-down --align-left --no-sort --silent-errors --progress --help --version --bytes-format --quantity --max-depth --total-width --column-width --min-ratio  <files>... "
+            opts="-h --help --json-input --json-output --bytes-format --top-down --align-left --quantity --max-depth --total-width --column-width --min-ratio --no-sort --silent-errors --progress <FILES>..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi
             case "${prev}" in
-                
                 --bytes-format)
                     COMPREPLY=($(compgen -W "plain metric binary" -- "${cur}"))
                     return 0
@@ -58,7 +56,6 @@ _pdu() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        
     esac
 }
 

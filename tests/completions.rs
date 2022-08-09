@@ -3,27 +3,30 @@
 #![cfg(unix)]
 #![cfg(feature = "cli")]
 
-use parallel_disk_usage::{args::Args, clap::Shell, structopt::StructOpt};
+use clap_complete::Shell;
+use clap_utilities::CommandFactoryExtra;
+use parallel_disk_usage::args::Args;
 
-macro_rules! test_case {
-    ($name:ident, $variant:ident, $path:literal) => {
+macro_rules! check {
+    ($name:ident: $shell:ident => $path:literal) => {
         #[test]
         fn $name() {
-            let actual = include_str!($path).as_bytes();
-            let mut expected = Vec::new();
-            Args::clap().gen_completions_to("pdu", Shell::$variant, &mut expected);
-            if actual != expected {
-                panic!(concat!(
-                    stringify!($variant),
-                    " completion is outdated. Re-run generate-completions.sh to update",
-                ));
-            }
+            eprintln!(
+                "check!({name}: {shell} => {path});",
+                name = stringify!($name),
+                shell = stringify!($shell),
+                path = $path,
+            );
+            let received =
+                Args::get_completion_string("pdu", Shell::$shell).expect("get completion string");
+            let expected = include_str!($path);
+            assert!(received == expected, "completion is outdated");
         }
     };
 }
 
-test_case!(bash, Bash, "../exports/completion.bash");
-test_case!(fish, Fish, "../exports/completion.fish");
-test_case!(zsh, Zsh, "../exports/completion.zsh");
-test_case!(powershell, PowerShell, "../exports/completion.ps1");
-test_case!(elvish, Elvish, "../exports/completion.elv");
+check!(bash: Bash => "../exports/completion.bash");
+check!(fish: Fish => "../exports/completion.fish");
+check!(zsh: Zsh => "../exports/completion.zsh");
+check!(powershell: PowerShell => "../exports/completion.ps1");
+check!(elvish: Elvish => "../exports/completion.elv");
