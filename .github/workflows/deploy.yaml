@@ -518,12 +518,18 @@ jobs:
       - name: Install dutree
         env:
           REPO: https://github.com/nachoparker/dutree
-          VERSION: '0.2.15'
+          VERSION: '0.2.18'
         run: |
           mkdir -p DUTREE.tmp
-          curl -L "${REPO}/releases/download/v${VERSION}/dutree" > DUTREE.tmp/dutree
-          chmod +x DUTREE.tmp/dutree
-          echo "$(pwd)/DUTREE.tmp" >> "$GITHUB_PATH"
+          flags=(
+            --force
+            --root DUTREE.tmp
+            --version "$VERSION"
+            --profile release
+            --locked
+          )
+          cargo install "${flags[@]}" dutree
+          echo "$(pwd)/DUTREE.tmp/bin" >> "$GITHUB_PATH"
 
       - name: Install dua
         env:
