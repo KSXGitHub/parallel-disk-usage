@@ -7,20 +7,23 @@ pub use formatter::Formatter;
 pub use output::Output;
 pub use parsed_value::ParsedValue;
 
-use clap::ValueEnum;
 use pipe_trait::Pipe;
 
+#[cfg(feature = "cli")]
+use clap::ValueEnum;
+
 /// The [`DisplayFormat`](crate::size::Size::DisplayFormat) type of [`Bytes`](crate::size::Bytes).
-#[derive(Debug, Clone, Copy, ValueEnum)]
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "cli", derive(ValueEnum))]
 pub enum BytesFormat {
     /// Display the value as-is.
-    #[clap(name = "plain")]
+    #[cfg_attr(feature = "cli", clap(name = "plain"))]
     PlainNumber,
     /// Display the value with a unit suffix in [metric scale](formatter::METRIC).
-    #[clap(name = "metric")]
+    #[cfg_attr(feature = "cli", clap(name = "metric"))]
     MetricUnits,
     /// Display the value with a unit suffix in [binary scale](formatter::BINARY).
-    #[clap(name = "binary")]
+    #[cfg_attr(feature = "cli", clap(name = "binary"))]
     BinaryUnits,
 }
 
