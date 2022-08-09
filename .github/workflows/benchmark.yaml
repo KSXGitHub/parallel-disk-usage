@@ -90,7 +90,7 @@ jobs:
       - name: Compile TypeScript
         run: |
           cd ci/github-actions
-          pnpx tsc
+          pnpm exec tsc
 
       - name: Download released versions of pdu
         run: node ci/github-actions/download-released-binaries.js

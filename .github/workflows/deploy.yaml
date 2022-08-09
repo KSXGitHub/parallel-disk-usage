@@ -618,7 +618,7 @@ jobs:
       - name: Compile TypeScript
         run: |
           cd ci/github-actions
-          pnpx tsc
+          pnpm exec tsc
 
       - name: Compare benchmark of pdu against its competitors
         run: node ci/github-actions/competing-benchmark.js
