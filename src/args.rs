@@ -24,6 +24,20 @@ use text_block_macros::text_block;
 
     after_help = text_block! {
         "EXAMPLES:"
+        "    $ pdu"
+        "    $ pdu path/to/file/or/directory"
+        "    $ pdu file.txt dir/"
+        "    $ pdu --quantity=blksize"
+        "    $ pdu --bytes-format=plain"
+        "    $ pdu --bytes-format=binary"
+        "    $ pdu --min-ratio=0"
+        "    $ pdu --min-ratio=0.05"
+        "    $ pdu --min-ratio=0 --json-output | jq"
+        "    $ pdu --min-ratio=0 < disk-usage.json"
+    },
+
+    after_long_help = text_block! {
+        "EXAMPLES:"
         "    Show disk usage chart of current working directory"
         "    $ pdu"
         ""
