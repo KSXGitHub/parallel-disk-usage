@@ -24,7 +24,7 @@ blocks\:"Count numbers of blocks, equivalent to the \[blocks\](std::os::unix::pr
 '--max-depth=[Maximum depth to display the data (must be greater than 0)]:MAX_DEPTH: ' \
 '(--column-width)--total-width=[Width of the visualization]:TOTAL_WIDTH: ' \
 '*--column-width=[Maximum widths of the tree column and width of the bar column]:tree-width: :tree-width: ' \
-'*--min-ratio=[Minimal size proportion required to appear]:MIN_RATIO: ' \
+'--min-ratio=[Minimal size proportion required to appear]:MIN_RATIO: ' \
 '-h[Print help information]' \
 '--help[Print help information]' \
 '(--quantity)--json-input[Read JSON data from stdin]' \
