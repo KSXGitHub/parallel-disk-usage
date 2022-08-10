@@ -127,7 +127,6 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     competitors: [
       ['dutree', '--summary'],
       ['dua', '--apparent-size'],
-      ['ncdu', '-o', '/dev/null', '-0'],
       ['du', '--apparent-size', '--total'],
     ],
   },
