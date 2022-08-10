@@ -94,7 +94,6 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     pduCliArgs: ['--quantity=len'],
     competitors: [
       ['dust', '--apparent-size'],
-      ['dutree'],
       ['dua', '--apparent-size'],
       ['ncdu', '-o', '/dev/stdout', '-0'],
       ['gdu', '--show-apparent-size', '--non-interactive', '--no-progress'],
@@ -106,7 +105,6 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     pduCliArgs: ['--quantity=blksize'],
     competitors: [
       ['dust'],
-      ['dutree', '--usage'],
       ['dua'],
       ['ncdu', '-o', '/dev/stdout', '-0'],
       ['gdu', '--non-interactive', '--no-progress'],
@@ -118,7 +116,6 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     pduCliArgs: ['--top-down'],
     competitors: [
       ['dust', '--apparent-size', '--reverse'],
-      ['dutree'],
     ],
   },
   {
