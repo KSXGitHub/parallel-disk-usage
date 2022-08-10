@@ -112,7 +112,7 @@ pub struct Args {
     pub column_width: Option<Vec<usize>>,
 
     /// Minimal size proportion required to appear.
-    #[clap(long, default_value = "0.01", value_parser)]
+    #[clap(long, default_value = "0.01")]
     pub min_ratio: Fraction,
 
     /// Preserve order of entries.

@@ -1,7 +1,7 @@
-use clap::builder::{TypedValueParser, ValueParserFactory};
 use derive_more::{AsRef, Deref, Display, Into};
 use std::{
     convert::{TryFrom, TryInto},
+    error::Error,
     num::ParseFloatError,
     str::FromStr,
 };
@@ -48,6 +48,8 @@ pub enum FromStrError {
     Conversion(ConversionError),
 }
 
+impl Error for FromStrError {}
+
 impl FromStr for Fraction {
     type Err = FromStrError;
     fn from_str(text: &str) -> Result<Self, Self::Err> {
@@ -55,41 +57,5 @@ impl FromStr for Fraction {
             .map_err(FromStrError::ParseFloatError)?
             .try_into()
             .map_err(FromStrError::Conversion)
-    }
-}
-
-impl ValueParserFactory for Fraction {
-    type Parser = FractionValueParser;
-    fn value_parser() -> Self::Parser {
-        FractionValueParser
-    }
-}
-
-/// The [parser](ValueParserFactory::Parser) of [`Fraction`].
-#[derive(Debug, Clone)]
-#[non_exhaustive]
-pub struct FractionValueParser;
-
-impl TypedValueParser for FractionValueParser {
-    type Value = Fraction;
-
-    fn parse_ref(
-        &self,
-        _: &clap::Command,
-        arg: Option<&clap::Arg>,
-        value: &std::ffi::OsStr,
-    ) -> Result<Self::Value, clap::Error> {
-        let value = value
-            .to_str()
-            .ok_or_else(|| clap::Error::raw(clap::ErrorKind::InvalidUtf8, "Invalid UTF-8"))?;
-        value.parse().map_err(|error| {
-            clap::Error::raw(
-                clap::ErrorKind::ValueValidation,
-                format_args!(
-                    "Invalid value {value:?} for '{arg}': {error}\n\nFor more information try --help\n",
-                    arg = arg.map_or_else(|| "...".to_string(), |arg| arg.to_string()),
-                ),
-            )
-        })
     }
 }
