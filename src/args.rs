@@ -15,6 +15,8 @@ use text_block_macros::text_block;
 #[clap(
     name = "pdu",
 
+    version,
+
     long_about = text_block! {
         "Summarize disk usage of the set of files, recursively for directories."
         ""
@@ -108,11 +110,11 @@ pub struct Args {
     pub total_width: Option<usize>,
 
     /// Maximum widths of the tree column and width of the bar column.
-    #[clap(long, number_of_values = 2, value_names = &["tree-width", "bar-width"])]
+    #[clap(long, number_of_values = 2, value_names = &["TREE_WIDTH", "BAR_WIDTH"])]
     pub column_width: Option<Vec<usize>>,
 
     /// Minimal size proportion required to appear.
-    #[clap(long, default_value = "0.01", value_parser)]
+    #[clap(long, default_value = "0.01")]
     pub min_ratio: Fraction,
 
     /// Preserve order of entries.

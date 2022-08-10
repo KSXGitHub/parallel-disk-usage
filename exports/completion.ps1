@@ -29,6 +29,8 @@ Register-ArgumentCompleter -Native -CommandName 'pdu' -ScriptBlock {
             [CompletionResult]::new('--min-ratio', 'min-ratio', [CompletionResultType]::ParameterName, 'Minimal size proportion required to appear')
             [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help information')
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help information')
+            [CompletionResult]::new('-V', 'V', [CompletionResultType]::ParameterName, 'Print version information')
+            [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'Print version information')
             [CompletionResult]::new('--json-input', 'json-input', [CompletionResultType]::ParameterName, 'Read JSON data from stdin')
             [CompletionResult]::new('--json-output', 'json-output', [CompletionResultType]::ParameterName, 'Print JSON data instead of an ASCII chart')
             [CompletionResult]::new('--top-down', 'top-down', [CompletionResultType]::ParameterName, 'Print the tree top-down instead of bottom-up')
