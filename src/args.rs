@@ -108,7 +108,7 @@ pub struct Args {
     pub total_width: Option<usize>,
 
     /// Maximum widths of the tree column and width of the bar column.
-    #[clap(long, number_of_values = 2, value_names = &["tree-width", "bar-width"])]
+    #[clap(long, number_of_values = 2, value_names = &["TREE_WIDTH", "BAR_WIDTH"])]
     pub column_width: Option<Vec<usize>>,
 
     /// Minimal size proportion required to appear.
