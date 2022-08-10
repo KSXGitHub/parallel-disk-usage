@@ -488,6 +488,7 @@ dependencies = [
  "smart-default",
  "terminal_size",
  "text-block-macros",
+ "thiserror",
  "zero-copy-pads",
 ]
 

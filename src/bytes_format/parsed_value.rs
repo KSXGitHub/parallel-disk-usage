@@ -1,16 +1,16 @@
-use derive_more::Display;
+use thiserror::Error;
 
 /// Return value of [`Formatter::parse_value`](super::Formatter::parse_value).
-#[derive(Debug, Display, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Error)]
 pub enum ParsedValue {
     /// When input value is less than `scale_base`.
-    #[display(fmt = "{}   ", value)]
+    #[error("{value}   ")]
     Small {
         /// Input value that is less than `scale_base`.
         value: u16,
     },
     /// When input value is greater than `scale_base`.
-    #[display(fmt = "{:.1}{}", coefficient, unit)]
+    #[error("{coefficient:.1}{unit}")]
     Big {
         /// The visible part of the number.
         coefficient: f32,
