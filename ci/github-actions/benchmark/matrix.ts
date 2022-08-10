@@ -124,7 +124,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     competitors: [
       ['dutree', '--summary'],
       ['dua', '--apparent-size'],
-      ['du', '--apparent-size', '--total'],
+      ['du', '--apparent-size', '--summarize'],
     ],
   },
   {
@@ -153,7 +153,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
       ['dua', '--apparent-size'],
       ['ncdu', '-o', '/dev/null', '-0'],
       ['gdu', '--show-apparent-size', '--non-interactive', '--no-progress'],
-      ['du', '--apparent-size', '--total'],
+      ['du', '--apparent-size', '--summarize'],
     ],
   },
   {
