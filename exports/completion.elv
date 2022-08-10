@@ -26,6 +26,8 @@ set edit:completion:arg-completer[pdu] = {|@words|
             cand --min-ratio 'Minimal size proportion required to appear'
             cand -h 'Print help information'
             cand --help 'Print help information'
+            cand -V 'Print version information'
+            cand --version 'Print version information'
             cand --json-input 'Read JSON data from stdin'
             cand --json-output 'Print JSON data instead of an ASCII chart'
             cand --top-down 'Print the tree top-down instead of bottom-up'

@@ -15,6 +15,8 @@ use text_block_macros::text_block;
 #[clap(
     name = "pdu",
 
+    version,
+
     long_about = text_block! {
         "Summarize disk usage of the set of files, recursively for directories."
         ""
