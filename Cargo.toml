@@ -67,7 +67,7 @@ serde = { version = "^1.0.143", optional = true }
 serde_json = { version = "^1.0.83", optional = true }
 
 [dev-dependencies]
-build-fs-tree = "^0.3.0"
+build-fs-tree = "^0.4.0"
 command-extra = "^1.0.0"
 maplit = "^1.0.2"
 pretty_assertions = "^1.2.1"
