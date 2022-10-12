@@ -155,6 +155,7 @@ highlight = "all"
 # List of crates that are allowed. Use with care!
 allow = [
     #{ name = "ansi_term", version = "=0.11.0" },
+    { name = "unicode-ident", version = "*" },
 ]
 # List of crates to deny
 deny = [
