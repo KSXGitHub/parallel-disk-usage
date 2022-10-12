@@ -8,8 +8,8 @@ _pdu() {
 
     for i in ${COMP_WORDS[@]}
     do
-        case "${i}" in
-            "$1")
+        case "${cmd},${i}" in
+            ",$1")
                 cmd="pdu"
                 ;;
             *)
@@ -19,7 +19,7 @@ _pdu() {
 
     case "${cmd}" in
         pdu)
-            opts="-h -V --help --version --json-input --json-output --bytes-format --top-down --align-left --quantity --max-depth --total-width --column-width --min-ratio --no-sort --silent-errors --progress <FILES>..."
+            opts="-h -V --json-input --json-output --bytes-format --top-down --align-left --quantity --max-depth --total-width --column-width --min-ratio --no-sort --silent-errors --progress --help --version [FILES]..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0

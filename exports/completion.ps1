@@ -27,10 +27,6 @@ Register-ArgumentCompleter -Native -CommandName 'pdu' -ScriptBlock {
             [CompletionResult]::new('--total-width', 'total-width', [CompletionResultType]::ParameterName, 'Width of the visualization')
             [CompletionResult]::new('--column-width', 'column-width', [CompletionResultType]::ParameterName, 'Maximum widths of the tree column and width of the bar column')
             [CompletionResult]::new('--min-ratio', 'min-ratio', [CompletionResultType]::ParameterName, 'Minimal size proportion required to appear')
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help information')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help information')
-            [CompletionResult]::new('-V', 'V', [CompletionResultType]::ParameterName, 'Print version information')
-            [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'Print version information')
             [CompletionResult]::new('--json-input', 'json-input', [CompletionResultType]::ParameterName, 'Read JSON data from stdin')
             [CompletionResult]::new('--json-output', 'json-output', [CompletionResultType]::ParameterName, 'Print JSON data instead of an ASCII chart')
             [CompletionResult]::new('--top-down', 'top-down', [CompletionResultType]::ParameterName, 'Print the tree top-down instead of bottom-up')
@@ -38,6 +34,10 @@ Register-ArgumentCompleter -Native -CommandName 'pdu' -ScriptBlock {
             [CompletionResult]::new('--no-sort', 'no-sort', [CompletionResultType]::ParameterName, 'Preserve order of entries')
             [CompletionResult]::new('--silent-errors', 'silent-errors', [CompletionResultType]::ParameterName, 'Prevent filesystem error messages from appearing in stderr')
             [CompletionResult]::new('--progress', 'progress', [CompletionResultType]::ParameterName, 'Report progress being made at the expense of performance')
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help information (use `--help` for more detail)')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help information (use `--help` for more detail)')
+            [CompletionResult]::new('-V', 'V', [CompletionResultType]::ParameterName, 'Print version information')
+            [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'Print version information')
             break
         }
     })
