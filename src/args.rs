@@ -106,7 +106,7 @@ pub struct Args {
     pub max_depth: NonZeroUsize,
 
     /// Width of the visualization.
-    #[clap(long, conflicts_with = "column-width")]
+    #[clap(long, conflicts_with = "column_width")]
     pub total_width: Option<usize>,
 
     /// Maximum widths of the tree column and width of the bar column.
