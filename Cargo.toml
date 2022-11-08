@@ -60,7 +60,7 @@ itertools = "^0.10.4"
 assert-cmp = "^0.2.0"
 zero-copy-pads = "^0.2.0"
 terminal_size = "^0.2.2"
-clap = { version = "^4.0.13", optional = true }
+clap = { version = "^4.0.22", optional = true }
 clap_complete = { version = "^4.0.5", optional = true }
 clap-utilities = { version = "^0.2.0", optional = true }
 serde = { version = "^1.0.145", optional = true }
