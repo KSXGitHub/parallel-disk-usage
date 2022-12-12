@@ -63,7 +63,7 @@ terminal_size = "^0.2.3"
 clap = { version = "^4.0.13", optional = true }
 clap_complete = { version = "^4.0.6", optional = true }
 clap-utilities = { version = "^0.2.0", optional = true }
-serde = { version = "^1.0.149", optional = true }
+serde = { version = "^1.0.150", optional = true }
 serde_json = { version = "^1.0.88", optional = true }
 
 [dev-dependencies]
