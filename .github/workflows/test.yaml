@@ -55,6 +55,8 @@ jobs:
 
       - name: Test (release)
         env:
+          RUSTFLAGS: '-D warnings'
+          RUSTDOCFLAGS: '-D warnings'
           FMT: 'false'
           LINT: 'false'
           DOC: 'true'
