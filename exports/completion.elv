@@ -31,10 +31,10 @@ set edit:completion:arg-completer[pdu] = {|@words|
             cand --no-sort 'Preserve order of entries'
             cand --silent-errors 'Prevent filesystem error messages from appearing in stderr'
             cand --progress 'Report progress being made at the expense of performance'
-            cand -h 'Print help information (use `--help` for more detail)'
-            cand --help 'Print help information (use `--help` for more detail)'
-            cand -V 'Print version information'
-            cand --version 'Print version information'
+            cand -h 'Print help (see more with ''--help'')'
+            cand --help 'Print help (see more with ''--help'')'
+            cand -V 'Print version'
+            cand --version 'Print version'
         }
     ]
     $completions[$command]

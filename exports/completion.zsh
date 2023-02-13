@@ -32,10 +32,10 @@ blocks\:"Count numbers of blocks, equivalent to the \[blocks\](std::os::unix::pr
 '--no-sort[Preserve order of entries]' \
 '--silent-errors[Prevent filesystem error messages from appearing in stderr]' \
 '--progress[Report progress being made at the expense of performance]' \
-'-h[Print help information (use `--help` for more detail)]' \
-'--help[Print help information (use `--help` for more detail)]' \
-'-V[Print version information]' \
-'--version[Print version information]' \
+'-h[Print help (see more with '\''--help'\'')]' \
+'--help[Print help (see more with '\''--help'\'')]' \
+'-V[Print version]' \
+'--version[Print version]' \
 '*::files -- List of files and/or directories:_files' \
 && ret=0
 }
