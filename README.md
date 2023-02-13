@@ -4,7 +4,6 @@
 [![Benchmark](https://github.com/KSXGitHub/parallel-disk-usage/actions/workflows/benchmark.yaml/badge.svg)](https://github.com/KSXGitHub/parallel-disk-usage/actions/workflows/benchmark.yaml)
 [![Clippy](https://github.com/KSXGitHub/parallel-disk-usage/actions/workflows/clippy.yaml/badge.svg)](https://github.com/KSXGitHub/parallel-disk-usage/actions/workflows/clippy.yaml)
 [![Code formatting](https://github.com/KSXGitHub/parallel-disk-usage/actions/workflows/fmt.yaml/badge.svg)](https://github.com/KSXGitHub/parallel-disk-usage/actions/workflows/fmt.yaml)
-[![Lint dependency graph](https://github.com/KSXGitHub/parallel-disk-usage/actions/workflows/cargo-deny.yaml/badge.svg)](https://github.com/KSXGitHub/parallel-disk-usage/actions/workflows/cargo-deny.yaml)
 [![Crates.io Version](https://img.shields.io/crates/v/parallel-disk-usage?logo=rust)](https://crates.io/crates/parallel-disk-usage)
 
 Highly parallelized, blazing fast directory tree analyzer.
