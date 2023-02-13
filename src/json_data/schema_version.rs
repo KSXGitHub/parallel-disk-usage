@@ -1,9 +1,9 @@
 #[cfg(feature = "json")]
+use derive_more::{Display, Error};
+#[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "json")]
 use std::convert::TryFrom;
-#[cfg(feature = "json")]
-use thiserror::Error;
 
 /// Content of [`SchemaVersion`].
 pub const SCHEMA_VERSION: &str = "2021-06-05";
@@ -16,8 +16,8 @@ pub struct SchemaVersion;
 
 /// Error when trying to parse [`SchemaVersion`].
 #[cfg(feature = "json")]
-#[derive(Debug, Error)]
-#[error("InvalidSchema: {:?}: input schema is not {:?}", input, SCHEMA_VERSION)]
+#[derive(Debug, Display, Error)]
+#[display(fmt = "InvalidSchema: {input:?}: input schema is not {SCHEMA_VERSION:?}")]
 pub struct InvalidSchema {
     /// The input string.
     pub input: String,

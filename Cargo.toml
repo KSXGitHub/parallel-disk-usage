@@ -51,7 +51,6 @@ cli-completions = ["cli"]
 pipe-trait = "^0.4.0"
 smart-default = "^0.6.0"
 derive_more = "^0.99.17"
-thiserror = "^1.0.38"
 rayon = "^1.6.1"
 text-block-macros = "^0.1.1"
 rounded-div = "^0.1.2"

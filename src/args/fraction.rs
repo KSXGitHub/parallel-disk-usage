@@ -1,23 +1,22 @@
-use derive_more::{AsRef, Deref, Display, Into};
+use derive_more::{AsRef, Deref, Display, Error, Into};
 use std::{
     convert::{TryFrom, TryInto},
     num::ParseFloatError,
     str::FromStr,
 };
-use thiserror::Error;
 
 /// Floating-point value that is greater than or equal to 0 and less than 1.
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd, AsRef, Deref, Display, Into)]
 pub struct Fraction(f32);
 
 /// Error that occurs when calling [`Fraction::new`].
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Error)]
 pub enum ConversionError {
     /// Provided value is greater than or equal to 1.
-    #[error("greater than or equal to 1")]
+    #[display(fmt = "greater than or equal to 1")]
     UpperBound,
     /// Provided value is less than 0.
-    #[error("less than 0")]
+    #[display(fmt = "less than 0")]
     LowerBound,
 }
 
@@ -42,8 +41,7 @@ impl TryFrom<f32> for Fraction {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Error)]
-#[error("{_0}")]
+#[derive(Debug, Display, Clone, PartialEq, Eq, Error)]
 pub enum FromStrError {
     ParseFloatError(ParseFloatError),
     Conversion(ConversionError),
