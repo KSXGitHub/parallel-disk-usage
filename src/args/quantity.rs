@@ -7,16 +7,19 @@ use clap::ValueEnum;
 pub enum Quantity {
     /// Measure apparent sizes, equivalent to the
     /// [len](std::fs::Metadata::len) method.
-    #[cfg_attr(feature = "cli", clap(name = "len"))]
+    #[cfg_attr(feature = "cli", clap(name = "len", help = "Measure apparent sizes"))]
     ApparentSize,
     /// Measure block sizes, equivalent to the
     /// [blksize](std::os::unix::prelude::MetadataExt::blksize) method (POSIX only).
     #[cfg(unix)]
-    #[cfg_attr(feature = "cli", clap(name = "blksize"))]
+    #[cfg_attr(feature = "cli", clap(name = "blksize", help = "Measure blksize"))]
     BlockSize,
     /// Count numbers of blocks, equivalent to the
     /// [blocks](std::os::unix::prelude::MetadataExt::blocks) method (POSIX only).
     #[cfg(unix)]
-    #[cfg_attr(feature = "cli", clap(name = "blocks"))]
+    #[cfg_attr(
+        feature = "cli",
+        clap(name = "blocks", help = "Count number of blocks")
+    )]
     BlockCount,
 }
