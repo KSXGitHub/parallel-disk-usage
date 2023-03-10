@@ -131,7 +131,7 @@ fn json_input() {
         data_tree: &sample_tree(),
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };

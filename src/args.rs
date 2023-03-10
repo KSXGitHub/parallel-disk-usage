@@ -93,9 +93,9 @@ pub struct Args {
     #[clap(long)]
     pub top_down: bool,
 
-    /// Fill the bars from left to right.
+    /// Set the root of the bars to the right.
     #[clap(long)]
-    pub align_left: bool,
+    pub align_right: bool,
 
     /// Aspect of the files/directories to be measured.
     #[clap(long, value_enum, default_value_t = Quantity::DEFAULT)]
