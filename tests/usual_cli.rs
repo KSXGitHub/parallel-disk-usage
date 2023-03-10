@@ -52,7 +52,7 @@ fn total_width() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -90,7 +90,7 @@ fn column_width() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::components(10, 90),
         max_depth: 10.try_into().unwrap(),
     };
@@ -127,7 +127,7 @@ fn min_ratio_0() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -165,7 +165,7 @@ fn min_ratio() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -203,7 +203,7 @@ fn max_depth_2() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 2.try_into().unwrap(),
     };
@@ -241,7 +241,7 @@ fn max_depth_1() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 1.try_into().unwrap(),
     };
@@ -278,7 +278,7 @@ fn top_down() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::TopDown,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -290,12 +290,12 @@ fn top_down() {
 }
 
 #[test]
-fn align_left() {
+fn align_right() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
         .with_current_dir(workspace.as_path())
         .with_arg("--total-width=100")
-        .with_arg("--align-left")
+        .with_arg("--align-right")
         .pipe(stdio)
         .output()
         .expect("spawn command")
@@ -315,7 +315,7 @@ fn align_left() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
+        bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -352,7 +352,7 @@ fn quantity_apparent_size() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -390,7 +390,7 @@ fn quantity_block_size() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -428,7 +428,7 @@ fn quantity_block_count() {
         data_tree: &data_tree,
         bytes_format: (),
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -467,7 +467,7 @@ fn bytes_format_plain() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::PlainNumber,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -506,7 +506,7 @@ fn bytes_format_metric() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -545,7 +545,7 @@ fn bytes_format_binary() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::BinaryUnits,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -581,7 +581,7 @@ fn path_to_workspace() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
@@ -633,7 +633,7 @@ fn multiple_names() {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
         direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
+        bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };

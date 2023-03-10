@@ -54,12 +54,12 @@ impl App {
             let Args {
                 bytes_format,
                 top_down,
-                align_left,
+                align_right,
                 max_depth,
                 ..
             } = self.args;
             let direction = Direction::from_top_down(top_down);
-            let bar_alignment = BarAlignment::from_align_left(align_left);
+            let bar_alignment = BarAlignment::from_align_right(align_right);
 
             let unit_and_tree = stdin()
                 .pipe(serde_json::from_reader::<_, JsonData>)
@@ -132,7 +132,7 @@ impl App {
                     json_output,
                     bytes_format,
                     top_down,
-                    align_left,
+                    align_right,
                     max_depth,
                     min_ratio,
                     no_sort,
@@ -141,7 +141,7 @@ impl App {
                 {
                     return Sub {
                         direction: Direction::from_top_down(top_down),
-                        bar_alignment: BarAlignment::from_align_left(align_left),
+                        bar_alignment: BarAlignment::from_align_right(align_right),
                         get_data: $get_data,
                         reporter: $create_reporter::<$data>(report_error),
                         bytes_format: $format(bytes_format),
