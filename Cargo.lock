@@ -448,7 +448,7 @@ dependencies = [
 
 [[package]]
 name = "parallel-disk-usage"
-version = "0.8.6"
+version = "0.9.0"
 dependencies = [
  "assert-cmp",
  "build-fs-tree",
