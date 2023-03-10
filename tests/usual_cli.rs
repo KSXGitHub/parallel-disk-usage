@@ -41,7 +41,7 @@ fn total_width() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_APPARENT_SIZE,
+        get_data: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -79,7 +79,7 @@ fn column_width() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_APPARENT_SIZE,
+        get_data: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -106,6 +106,7 @@ fn min_ratio_0() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
         .with_current_dir(workspace.as_path())
+        .with_arg("--quantity=apparent-size")
         .with_arg("--total-width=100")
         .with_arg("--min-ratio=0")
         .pipe(stdio)
@@ -142,6 +143,7 @@ fn min_ratio() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
         .with_current_dir(workspace.as_path())
+        .with_arg("--quantity=apparent-size")
         .with_arg("--total-width=100")
         .with_arg("--min-ratio=0.1")
         .pipe(stdio)
@@ -179,6 +181,7 @@ fn max_depth_2() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
         .with_current_dir(workspace.as_path())
+        .with_arg("--quantity=apparent-size")
         .with_arg("--total-width=100")
         .with_arg("--max-depth=2")
         .pipe(stdio)
@@ -216,6 +219,7 @@ fn max_depth_1() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
         .with_current_dir(workspace.as_path())
+        .with_arg("--quantity=apparent-size")
         .with_arg("--total-width=100")
         .with_arg("--max-depth=1")
         .pipe(stdio)
@@ -263,7 +267,7 @@ fn top_down() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_APPARENT_SIZE,
+        get_data: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -300,7 +304,7 @@ fn align_left() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_APPARENT_SIZE,
+        get_data: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -323,12 +327,12 @@ fn align_left() {
 }
 
 #[test]
-fn quantity_len() {
+fn quantity_apparent_size() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
         .with_current_dir(workspace.as_path())
         .with_arg("--total-width=100")
-        .with_arg("--quantity=len")
+        .with_arg("--quantity=apparent-size")
         .pipe(stdio)
         .output()
         .expect("spawn command")
@@ -361,12 +365,12 @@ fn quantity_len() {
 
 #[cfg(unix)]
 #[test]
-fn quantity_blksize() {
+fn quantity_block_size() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
         .with_current_dir(workspace.as_path())
         .with_arg("--total-width=100")
-        .with_arg("--quantity=blksize")
+        .with_arg("--quantity=block-size")
         .pipe(stdio)
         .output()
         .expect("spawn command")
@@ -399,12 +403,12 @@ fn quantity_blksize() {
 
 #[cfg(unix)]
 #[test]
-fn quantity_blocks() {
+fn quantity_block_count() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
         .with_current_dir(workspace.as_path())
         .with_arg("--total-width=100")
-        .with_arg("--quantity=blocks")
+        .with_arg("--quantity=block-count")
         .pipe(stdio)
         .output()
         .expect("spawn command")
@@ -442,7 +446,7 @@ fn bytes_format_plain() {
     let actual = Command::new(PDU)
         .with_current_dir(workspace.as_path())
         .with_arg("--total-width=100")
-        .with_arg("--quantity=blksize")
+        .with_arg("--quantity=block-size")
         .with_arg("--bytes-format=plain")
         .pipe(stdio)
         .output()
@@ -481,7 +485,7 @@ fn bytes_format_metric() {
     let actual = Command::new(PDU)
         .with_current_dir(workspace.as_path())
         .with_arg("--total-width=100")
-        .with_arg("--quantity=blksize")
+        .with_arg("--quantity=block-size")
         .with_arg("--bytes-format=metric")
         .pipe(stdio)
         .output()
@@ -520,7 +524,7 @@ fn bytes_format_binary() {
     let actual = Command::new(PDU)
         .with_current_dir(workspace.as_path())
         .with_arg("--total-width=100")
-        .with_arg("--quantity=blksize")
+        .with_arg("--quantity=block-size")
         .with_arg("--bytes-format=binary")
         .pipe(stdio)
         .output()
@@ -567,7 +571,7 @@ fn path_to_workspace() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_APPARENT_SIZE,
+        get_data: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -593,6 +597,7 @@ fn multiple_names() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
         .with_current_dir(workspace.as_path())
+        .with_arg("--quantity=apparent-size")
         .with_arg("--total-width=100")
         .with_arg("nested")
         .with_arg("flat")

@@ -29,7 +29,7 @@ use text_block_macros::text_block;
         "    $ pdu"
         "    $ pdu path/to/file/or/directory"
         "    $ pdu file.txt dir/"
-        "    $ pdu --quantity=blksize"
+        "    $ pdu --quantity=apparent-size"
         "    $ pdu --bytes-format=plain"
         "    $ pdu --bytes-format=binary"
         "    $ pdu --min-ratio=0"
@@ -49,8 +49,8 @@ use text_block_macros::text_block;
         "    Compare disk usages of multiple files and/or directories"
         "    $ pdu file.txt dir/"
         ""
-        "    Show chart in block sizes instead of apparent sizes"
-        "    $ pdu --quantity=blksize"
+        "    Show chart in apparent sizes instead of block sizes"
+        "    $ pdu --quantity=apparent-size"
         ""
         "    Show data in plain numbers instead of metric units"
         "    $ pdu --bytes-format=plain"
@@ -98,7 +98,7 @@ pub struct Args {
     pub align_left: bool,
 
     /// Aspect of the files/directories to be measured.
-    #[clap(long, value_enum, default_value_t = Quantity::ApparentSize)]
+    #[clap(long, value_enum, default_value_t = Quantity::DEFAULT)]
     pub quantity: Quantity,
 
     /// Maximum depth to display the data (must be greater than 0).

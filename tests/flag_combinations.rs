@@ -12,9 +12,9 @@ use std::process::Stdio;
 #[test]
 fn flag_combinations() {
     #[cfg(unix)]
-    let quantity = ["len", "blksize", "blocks"];
+    let quantity = ["apparent-size", "block-size", "block-count"];
     #[cfg(windows)]
-    let quantity = ["len"];
+    let quantity = ["apparent-size"];
 
     let list = CommandList::default()
         .option_matrix("--quantity", quantity)

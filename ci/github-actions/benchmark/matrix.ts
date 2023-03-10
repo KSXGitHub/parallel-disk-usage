@@ -1,6 +1,6 @@
 import { getReleasedPduName } from './pdu-programs'
 
-export const QUANTITY = ['len', 'blksize', 'blocks'] as const
+export const QUANTITY = ['apparent-size', 'block-size', 'block-count'] as const
 export const MAX_DEPTH = ['1', '10'] as const
 export const MIN_RATIO = ['0.01', '0'] as const
 export const PROGRESS = [false, true] as const
@@ -39,7 +39,7 @@ export function parseSelfBenchmarkCategory(category: SelfBenchmarkCategory) {
 }
 
 export const RELEASED_PDU_VERSIONS = [
-  '0.0.0',
+  '0.9.0',
 ] as const
 
 export const ACCEPTABLE_PERFORMANCE_REGRESSION = 1.1 // 10%
@@ -90,8 +90,8 @@ export interface CompetingBenchmarkCategory {
 
 export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] = [
   {
-    id: 'len',
-    pduCliArgs: ['--quantity=len'],
+    id: 'apparent-size',
+    pduCliArgs: ['--quantity=apparent-size'],
     competitors: [
       ['dust', '--apparent-size'],
       ['dua', '--apparent-size'],
@@ -101,8 +101,8 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     ],
   },
   {
-    id: 'blksize',
-    pduCliArgs: ['--quantity=blksize'],
+    id: 'block-size',
+    pduCliArgs: ['--quantity=block-size'],
     competitors: [
       ['dust'],
       ['dua'],
@@ -115,7 +115,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     id: 'top-down',
     pduCliArgs: ['--top-down'],
     competitors: [
-      ['dust', '--apparent-size', '--reverse'],
+      ['dust', '--reverse'],
     ],
   },
   {
@@ -123,8 +123,8 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     pduCliArgs: ['--max-depth=1'],
     competitors: [
       ['dutree', '--summary'],
-      ['dua', '--apparent-size'],
-      ['du', '--apparent-size', '--summarize'],
+      ['dua'],
+      ['du', '--summarize'],
     ],
   },
   {
@@ -140,20 +140,20 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     id: 'no-sort',
     pduCliArgs: ['--no-sort'],
     competitors: [
-      ['du', '--apparent-size'],
-      ['dua', '--apparent-size'],
+      ['du'],
+      ['dua'],
       ['ncdu', '-o', '/dev/stdout', '-0'],
-      ['gdu', '--show-apparent-size', '--non-interactive', '--no-progress'],
+      ['gdu', '--non-interactive', '--no-progress'],
     ],
   },
   {
     id: 'no-sort+summary',
     pduCliArgs: ['--no-sort', '--max-depth=1'],
     competitors: [
-      ['dua', '--apparent-size'],
+      ['dua'],
       ['ncdu', '-o', '/dev/null', '-0'],
-      ['gdu', '--show-apparent-size', '--non-interactive', '--no-progress'],
-      ['du', '--apparent-size', '--summarize'],
+      ['gdu', '--non-interactive', '--no-progress'],
+      ['du', '--summarize'],
     ],
   },
   {
@@ -161,7 +161,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     pduCliArgs: ['--progress'],
     competitors: [
       ['ncdu', '-o', '/dev/stdout', '-1'],
-      ['gdu', '--show-apparent-size', '--non-interactive'],
+      ['gdu', '--non-interactive'],
     ],
   },
 ]
