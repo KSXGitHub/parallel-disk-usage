@@ -30,7 +30,7 @@ _pdu() {
                     return 0
                     ;;
                 --quantity)
-                    COMPREPLY=($(compgen -W "len blksize blocks" -- "${cur}"))
+                    COMPREPLY=($(compgen -W "apparent-size block-size block-count" -- "${cur}"))
                     return 0
                     ;;
                 --max-depth)

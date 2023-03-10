@@ -119,6 +119,7 @@ fn fs_errors() {
         .with_current_dir(workspace.as_path())
         .with_arg("--min-ratio=0")
         .with_arg("--total-width=100")
+        .with_arg("--quantity=apparent-size")
         .pipe(stdio)
         .output()
         .expect("spawn command");

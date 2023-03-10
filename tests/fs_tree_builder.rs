@@ -16,9 +16,9 @@ fn len_as_bytes() {
 
 #[cfg(unix)]
 #[test]
-fn blksize_as_bytes() {
+fn blocks_as_bytes() {
     let workspace = SampleWorkspace::default();
-    test_sample_tree::<Bytes, _>(&workspace, |metadata| metadata.blksize());
+    test_sample_tree::<Bytes, _>(&workspace, |metadata| metadata.blocks() * 512);
 }
 
 #[cfg(unix)]

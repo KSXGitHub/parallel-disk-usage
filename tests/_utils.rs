@@ -6,7 +6,8 @@ use parallel_disk_usage::{
     fs_tree_builder::FsTreeBuilder,
     os_string_display::OsStringDisplay,
     reporter::ErrorOnlyReporter,
-    size::Size,
+    size::{Bytes, Size},
+    size_getters::{self, SizeGetter},
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
@@ -19,6 +20,13 @@ use std::{
     path::{Path, PathBuf},
     process::{Command, Output},
 };
+
+/// Default size getter method.
+#[cfg(unix)]
+pub const DEFAULT_GET_SIZE: SizeGetter<Bytes> = size_getters::GET_BLOCK_SIZE;
+/// Default size getter method.
+#[cfg(not(unix))]
+pub const DEFAULT_GET_SIZE: SizeGetter<Bytes> = size_getters::GET_APPARENT_SIZE;
 
 /// Representation of a temporary filesystem item.
 ///
