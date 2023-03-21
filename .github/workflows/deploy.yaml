@@ -406,7 +406,7 @@ jobs:
         run: ./ci/github-actions/generate-pkgbuild.py3
 
       - name: Publish parallel-disk-usage to the AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v2.6.0
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
         with:
           pkgname: parallel-disk-usage
           pkgbuild: ./pkgbuild/parallel-disk-usage/PKGBUILD
@@ -417,7 +417,7 @@ jobs:
           force_push: 'true'
 
       - name: Publish parallel-disk-usage-bin to the AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v2.6.0
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
         with:
           pkgname: parallel-disk-usage-bin
           pkgbuild: ./pkgbuild/parallel-disk-usage-bin/PKGBUILD
