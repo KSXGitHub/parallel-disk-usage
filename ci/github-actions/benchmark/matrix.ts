@@ -94,9 +94,9 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     pduCliArgs: ['--quantity=apparent-size'],
     competitors: [
       ['dust', '--apparent-size'],
-      ['dua', '-l', '--apparent-size'],
+      ['dua', '--count-hard-links', '--apparent-size'],
       ['ncdu', '-o', '/dev/stdout', '-0'],
-      ['gdu', '-l', '--show-apparent-size', '--non-interactive', '--no-progress'],
+      ['gdu', '--count-links', '--show-apparent-size', '--non-interactive', '--no-progress'],
       ['du', '-l', '--apparent-size'],
     ],
   },
@@ -105,9 +105,9 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     pduCliArgs: ['--quantity=block-size'],
     competitors: [
       ['dust'],
-      ['dua', '-l'],
+      ['dua', '--count-hard-links'],
       ['ncdu', '-o', '/dev/stdout', '-0'],
-      ['gdu', '-l', '--non-interactive', '--no-progress'],
+      ['gdu', '--count-links', '--non-interactive', '--no-progress'],
       ['du', '-l'],
     ],
   },
@@ -123,7 +123,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     pduCliArgs: ['--max-depth=1'],
     competitors: [
       ['dutree', '--summary'],
-      ['dua', '-l'],
+      ['dua', '--count-hard-links'],
       ['du', '-l', '--summarize'],
     ],
   },
@@ -141,18 +141,18 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     pduCliArgs: ['--no-sort'],
     competitors: [
       ['du', '-l'],
-      ['dua', '-l'],
+      ['dua', '--count-hard-links'],
       ['ncdu', '-o', '/dev/stdout', '-0'],
-      ['gdu','-l', '--non-interactive', '--no-progress'],
+      ['gdu', '--count-links', '--non-interactive', '--no-progress'],
     ],
   },
   {
     id: 'no-sort+summary',
     pduCliArgs: ['--no-sort', '--max-depth=1'],
     competitors: [
-      ['dua', '-l'],
+      ['dua', '--count-hard-links'],
       ['ncdu', '-o', '/dev/null', '-0'],
-      ['gdu', '-l', '--non-interactive', '--no-progress'],
+      ['gdu', '--count-links', '--non-interactive', '--no-progress'],
       ['du', '-l', '--summarize'],
     ],
   },
@@ -161,7 +161,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     pduCliArgs: ['--progress'],
     competitors: [
       ['ncdu', '-o', '/dev/stdout', '-1'],
-      ['gdu', '-l', '--non-interactive'],
+      ['gdu', '--count-links', '--non-interactive'],
     ],
   },
 ]
