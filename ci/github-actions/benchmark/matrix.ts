@@ -97,7 +97,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
       ['dua', '--count-hard-links', '--apparent-size'],
       ['ncdu', '-o', '/dev/stdout', '-0'],
       ['gdu', '--count-links', '--show-apparent-size', '--non-interactive', '--no-progress'],
-      ['du', '-l', '--apparent-size'],
+      ['du', '--count-links', '--apparent-size'],
     ],
   },
   {
@@ -108,7 +108,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
       ['dua', '--count-hard-links'],
       ['ncdu', '-o', '/dev/stdout', '-0'],
       ['gdu', '--count-links', '--non-interactive', '--no-progress'],
-      ['du', '-l'],
+      ['du', '--count-links'],
     ],
   },
   {
@@ -124,7 +124,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     competitors: [
       ['dutree', '--summary'],
       ['dua', '--count-hard-links'],
-      ['du', '-l', '--summarize'],
+      ['du', '--count-links', '--summarize'],
     ],
   },
   {
@@ -133,14 +133,14 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     competitors: [
       ['dutree'],
       ['ncdu', '-o', '/dev/stdout', '-0'],
-      ['du', '-l', '--apparent-size'],
+      ['du', '--count-links', '--apparent-size'],
     ],
   },
   {
     id: 'no-sort',
     pduCliArgs: ['--no-sort'],
     competitors: [
-      ['du', '-l'],
+      ['du', '--count-links'],
       ['dua', '--count-hard-links'],
       ['ncdu', '-o', '/dev/stdout', '-0'],
       ['gdu', '--count-links', '--non-interactive', '--no-progress'],
@@ -153,7 +153,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
       ['dua', '--count-hard-links'],
       ['ncdu', '-o', '/dev/null', '-0'],
       ['gdu', '--count-links', '--non-interactive', '--no-progress'],
-      ['du', '-l', '--summarize'],
+      ['du', '--count-links', '--summarize'],
     ],
   },
   {
