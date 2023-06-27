@@ -67,7 +67,7 @@ where
             path: root,
 
             get_info: |path| {
-                let stats = match symlink_metadata(&path) {
+                let stats = match symlink_metadata(path) {
                     Err(error) => {
                         reporter.report(Event::EncounterError(ErrorReport {
                             operation: SymlinkMetadata,
@@ -94,7 +94,6 @@ where
                         }
                         Ok(entries) => entries,
                     }
-                    .into_iter()
                     .filter_map(|entry| match entry {
                         Err(error) => {
                             reporter.report(Event::EncounterError(ErrorReport {

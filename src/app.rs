@@ -98,7 +98,8 @@ impl App {
             ErrorReport::TEXT
         };
 
-        fn error_only_reporter<Data: Size>(
+        #[allow(clippy::extra_unused_type_parameters)]
+        fn error_only_reporter<Data>(
             report_error: fn(ErrorReport),
         ) -> ErrorOnlyReporter<fn(ErrorReport)> {
             ErrorOnlyReporter::new(report_error)
