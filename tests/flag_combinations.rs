@@ -23,9 +23,9 @@ fn flag_combinations() {
     for command in list.commands() {
         dbg!(&command);
         let workspace = SampleWorkspace::default();
-        dbg!(workspace.as_path());
+        dbg!(&workspace);
         let output = command
-            .with_current_dir(workspace.as_path())
+            .with_current_dir(&workspace)
             .with_stdin(Stdio::null())
             .with_stdout(Stdio::null())
             .with_stderr(Stdio::piped())

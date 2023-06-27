@@ -31,7 +31,7 @@ fn stdio(command: Command) -> Command {
 fn total_width() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--total-width=100")
         .pipe(stdio)
         .output()
@@ -67,7 +67,7 @@ fn total_width() {
 fn column_width() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--column-width")
         .with_arg("10")
         .with_arg("90")
@@ -105,7 +105,7 @@ fn column_width() {
 fn min_ratio_0() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--quantity=apparent-size")
         .with_arg("--total-width=100")
         .with_arg("--min-ratio=0")
@@ -142,7 +142,7 @@ fn min_ratio_0() {
 fn min_ratio() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--quantity=apparent-size")
         .with_arg("--total-width=100")
         .with_arg("--min-ratio=0.1")
@@ -180,7 +180,7 @@ fn min_ratio() {
 fn max_depth_2() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--quantity=apparent-size")
         .with_arg("--total-width=100")
         .with_arg("--max-depth=2")
@@ -218,7 +218,7 @@ fn max_depth_2() {
 fn max_depth_1() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--quantity=apparent-size")
         .with_arg("--total-width=100")
         .with_arg("--max-depth=1")
@@ -256,7 +256,7 @@ fn max_depth_1() {
 fn top_down() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--total-width=100")
         .with_arg("--top-down")
         .pipe(stdio)
@@ -293,7 +293,7 @@ fn top_down() {
 fn align_right() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--total-width=100")
         .with_arg("--align-right")
         .pipe(stdio)
@@ -330,7 +330,7 @@ fn align_right() {
 fn quantity_apparent_size() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--total-width=100")
         .with_arg("--quantity=apparent-size")
         .pipe(stdio)
@@ -368,7 +368,7 @@ fn quantity_apparent_size() {
 fn quantity_block_size() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--total-width=100")
         .with_arg("--quantity=block-size")
         .pipe(stdio)
@@ -406,7 +406,7 @@ fn quantity_block_size() {
 fn quantity_block_count() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--total-width=100")
         .with_arg("--quantity=block-count")
         .pipe(stdio)
@@ -444,7 +444,7 @@ fn quantity_block_count() {
 fn bytes_format_plain() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--total-width=100")
         .with_arg("--quantity=block-size")
         .with_arg("--bytes-format=plain")
@@ -483,7 +483,7 @@ fn bytes_format_plain() {
 fn bytes_format_metric() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--total-width=100")
         .with_arg("--quantity=block-size")
         .with_arg("--bytes-format=metric")
@@ -522,7 +522,7 @@ fn bytes_format_metric() {
 fn bytes_format_binary() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--total-width=100")
         .with_arg("--quantity=block-size")
         .with_arg("--bytes-format=binary")
@@ -560,9 +560,9 @@ fn bytes_format_binary() {
 fn path_to_workspace() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--total-width=100")
-        .with_arg(workspace.as_path())
+        .with_arg(&workspace)
         .pipe(stdio)
         .output()
         .expect("spawn command")
@@ -596,7 +596,7 @@ fn path_to_workspace() {
 fn multiple_names() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--quantity=apparent-size")
         .with_arg("--total-width=100")
         .with_arg("nested")

@@ -54,7 +54,7 @@ fn min_ratio_1() {
         stdout,
         stderr,
     } = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--min-ratio=1")
         .pipe(stdio)
         .output()
@@ -83,7 +83,7 @@ fn max_depth_0() {
         stdout,
         stderr,
     } = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--max-depth=0")
         .pipe(stdio)
         .output()
@@ -116,7 +116,7 @@ fn fs_errors() {
         stdout,
         stderr,
     } = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--min-ratio=0")
         .with_arg("--total-width=100")
         .with_arg("--quantity=apparent-size")
@@ -148,7 +148,7 @@ fn fs_errors() {
     let expected_stdout = format!("{}", visualizer);
     eprintln!("EXPECTED STDOUT:\n{}\n", &expected_stdout);
 
-    fs_permission(workspace.as_path(), "+rwx", true); // to allow SampleWorkspace destructor to clean itself
+    fs_permission(&workspace, "+rwx", true); // to allow SampleWorkspace destructor to clean itself
 
     let actual_stderr_lines: BTreeSet<_> = stderr
         .trim_end()

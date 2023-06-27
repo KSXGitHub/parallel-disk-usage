@@ -32,6 +32,8 @@ pub const DEFAULT_GET_SIZE: SizeGetter<Bytes> = size_getters::GET_APPARENT_SIZE;
 ///
 /// **NOTE:** Delete this once https://github.com/samgiles/rs-mktemp/issues/8 is resolved.
 #[derive(Debug, AsRef, Deref)]
+#[as_ref(forward)]
+#[deref(forward)]
 pub struct Temp(PathBuf);
 
 impl Temp {
@@ -63,6 +65,8 @@ impl Drop for Temp {
 
 /// Temporary workspace with sample filesystem tree.
 #[derive(Debug, AsRef, Deref)]
+#[as_ref(forward)]
+#[deref(forward)]
 pub struct SampleWorkspace(Temp);
 
 impl Default for SampleWorkspace {

@@ -60,11 +60,11 @@ fn sample_tree() -> SampleTree {
 fn json_output() {
     let workspace = SampleWorkspace::default();
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--json-output")
         .with_arg("--quantity=apparent-size")
         .with_arg("--min-ratio=0")
-        .with_arg(workspace.as_path())
+        .with_arg(&workspace)
         .with_stdin(Stdio::null())
         .with_stdout(Stdio::piped())
         .with_stderr(Stdio::piped())
@@ -104,7 +104,7 @@ fn json_input() {
     eprintln!("JSON: {}\n", json);
     let workspace = Temp::new_dir().expect("create temporary directory");
     let mut child = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--json-input")
         .with_arg("--bytes-format=metric")
         .with_arg("--total-width=100")
@@ -147,17 +147,17 @@ fn json_output_json_input() {
     let workspace = SampleWorkspace::default();
 
     let json_output = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--json-output")
         .with_arg("--quantity=apparent-size")
-        .with_arg(workspace.as_path())
+        .with_arg(&workspace)
         .with_stdin(Stdio::null())
         .with_stdout(Stdio::piped())
         .with_stderr(Stdio::piped())
         .spawn()
         .expect("spawn command with --json-output");
     let actual = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--json-input")
         .with_arg("--bytes-format=metric")
         .with_arg("--total-width=100")
@@ -176,12 +176,12 @@ fn json_output_json_input() {
     eprintln!("ACTUAL:\n{}\n", &actual);
 
     let expected = Command::new(PDU)
-        .with_current_dir(workspace.as_path())
+        .with_current_dir(&workspace)
         .with_arg("--bytes-format=metric")
         .with_arg("--total-width=100")
         .with_arg("--max-depth=10")
         .with_arg("--quantity=apparent-size")
-        .with_arg(workspace.as_path())
+        .with_arg(&workspace)
         .with_stdin(Stdio::piped())
         .with_stdout(Stdio::piped())
         .with_stderr(Stdio::piped())
