@@ -20,7 +20,7 @@ jobs:
           - macos-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions-rs/toolchain@v1
         with:
@@ -64,7 +64,7 @@ jobs:
           - x86_64-unknown-linux-musl
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions-rs/toolchain@v1.0.7
         with:
@@ -97,7 +97,7 @@ jobs:
           - x86_64-apple-darwin
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions-rs/toolchain@v1.0.7
         with:
@@ -131,7 +131,7 @@ jobs:
           - x86_64-pc-windows-msvc
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions-rs/toolchain@v1.0.7
         with:
@@ -168,7 +168,7 @@ jobs:
       release_tag: ${{ steps.release_type.outputs.release_tag }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install APT packages
         run: sudo apt install -y python3 python3-toml
@@ -201,7 +201,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Upload Tab-Completion file for Bash
         uses: actions/upload-release-asset@v1.0.2
@@ -278,7 +278,7 @@ jobs:
           - x86_64-apple-darwin
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Download artifact
         uses: actions/download-artifact@v3
@@ -322,7 +322,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Download all artifacts
         uses: actions/download-artifact@v3
@@ -391,7 +391,7 @@ jobs:
           - x86_64-unknown-linux-gnu
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Download checksums
         uses: actions/download-artifact@v3
@@ -439,7 +439,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions-rs/toolchain@v1.0.7
         with:
@@ -474,7 +474,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Cache (rust)
         uses: actions/cache@v3
