@@ -617,7 +617,6 @@ fn multiple_names() {
                 reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
-            data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
             data_tree
         })
@@ -627,7 +626,8 @@ fn multiple_names() {
                 0.into(),
                 children.collect(),
             )
-        });
+        })
+        .into_par_sorted(|left, right| left.data().cmp(&right.data()).reverse());
     data_tree.par_cull_insignificant_data(0.01);
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
