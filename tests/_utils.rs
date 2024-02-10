@@ -73,18 +73,17 @@ impl Default for SampleWorkspace {
     /// Set up a temporary directory for tests.
     fn default() -> Self {
         let temp = Temp::new_dir().expect("create working directory for sample workspace");
-        let long_str = "a".repeat(1000);
 
-        MergeableFileSystemTree::<&str, &str>::from(dir! {
+        MergeableFileSystemTree::<&str, String>::from(dir! {
             "flat" => dir! {
                 "0" => file!("")
-                "1" => file!("a")
-                "2" => file!("ab")
-                "3" => file!(&*long_str)
+                "1" => file!("a".repeat(1000))
+                "2" => file!("a".repeat(2000))
+                "3" => file!("a".repeat(3000))
             }
             "nested" => dir! {
                 "0" => dir! {
-                    "1" => file!("abcdef")
+                    "1" => file!("a".repeat(6000))
                 }
             }
             "empty-dir" => dir! {}
