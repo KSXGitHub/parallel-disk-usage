@@ -617,16 +617,17 @@ fn multiple_names() {
                 reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
-            data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
             data_tree
         })
         .pipe(|children| {
-            DataTree::dir(
+            let mut data_tree = DataTree::dir(
                 OsStringDisplay::os_string_from("(total)"),
                 0.into(),
                 children.collect(),
-            )
+            );
+            data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+            data_tree
         });
     data_tree.par_cull_insignificant_data(0.01);
     let visualizer = Visualizer::<OsStringDisplay, _> {
