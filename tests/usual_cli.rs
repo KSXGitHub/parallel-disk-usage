@@ -46,7 +46,12 @@ fn total_width() {
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -84,7 +89,12 @@ fn column_width() {
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -121,7 +131,12 @@ fn min_ratio_0() {
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -159,7 +174,12 @@ fn min_ratio() {
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.1);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -197,7 +217,12 @@ fn max_depth_2() {
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -235,7 +260,12 @@ fn max_depth_1() {
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -272,7 +302,12 @@ fn top_down() {
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -309,7 +344,12 @@ fn align_right() {
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -346,7 +386,12 @@ fn quantity_apparent_size() {
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -384,7 +429,12 @@ fn quantity_block_size() {
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -422,7 +472,12 @@ fn quantity_block_count() {
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -461,7 +516,12 @@ fn bytes_format_plain() {
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -500,7 +560,12 @@ fn bytes_format_metric() {
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -539,7 +604,12 @@ fn bytes_format_binary() {
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -576,7 +646,12 @@ fn path_to_workspace() {
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| {
+        left.data()
+            .cmp(&right.data())
+            .then_with(|| left.name().cmp(right.name()))
+            .reverse()
+    });
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
