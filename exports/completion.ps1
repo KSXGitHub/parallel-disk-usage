@@ -36,7 +36,7 @@ Register-ArgumentCompleter -Native -CommandName 'pdu' -ScriptBlock {
             [CompletionResult]::new('--progress', 'progress', [CompletionResultType]::ParameterName, 'Report progress being made at the expense of performance')
             [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
-            [CompletionResult]::new('-V', 'V', [CompletionResultType]::ParameterName, 'Print version')
+            [CompletionResult]::new('-V', 'V ', [CompletionResultType]::ParameterName, 'Print version')
             [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'Print version')
             break
         }

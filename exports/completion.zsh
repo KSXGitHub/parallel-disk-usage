@@ -46,4 +46,8 @@ _pdu_commands() {
     _describe -t commands 'pdu commands' commands "$@"
 }
 
-_pdu "$@"
+if [ "$funcstack[1]" = "_pdu" ]; then
+    _pdu "$@"
+else
+    compdef _pdu pdu
+fi

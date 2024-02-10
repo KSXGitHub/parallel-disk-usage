@@ -59,4 +59,8 @@ _pdu() {
     esac
 }
 
-complete -F _pdu -o bashdefault -o default pdu
+if [[ "${BASH_VERSINFO[0]}" -eq 4 && "${BASH_VERSINFO[1]}" -ge 4 || "${BASH_VERSINFO[0]}" -gt 4 ]]; then
+    complete -F _pdu -o nosort -o bashdefault -o default pdu
+else
+    complete -F _pdu -o bashdefault -o default pdu
+fi
