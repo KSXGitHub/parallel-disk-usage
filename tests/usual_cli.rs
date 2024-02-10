@@ -617,7 +617,12 @@ fn multiple_names() {
                 reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
-            data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+            data_tree.par_sort_by(|left, right| {
+                left.data()
+                    .cmp(&right.data())
+                    .then_with(|| left.name().cmp(right.name()))
+                    .reverse()
+            });
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
             data_tree
         })

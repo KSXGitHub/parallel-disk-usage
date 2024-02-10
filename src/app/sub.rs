@@ -113,7 +113,12 @@ where
                 data_tree.par_cull_insignificant_data(min_ratio);
             }
             if !no_sort {
-                data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+                data_tree.par_sort_by(|left, right| {
+                    left.data()
+                        .cmp(&right.data())
+                        .then_with(|| left.name().cmp(right.name()))
+                        .reverse()
+                });
             }
             data_tree
         };
