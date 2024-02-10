@@ -79,7 +79,7 @@ impl Default for SampleWorkspace {
                 "0" => file!("")
                 "1" => file!("a")
                 "2" => file!("ab")
-                "3" => file!("abc")
+                "3" => file!("abcd")
             }
             "nested" => dir! {
                 "0" => dir! {
