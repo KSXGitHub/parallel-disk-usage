@@ -621,14 +621,13 @@ fn multiple_names() {
             data_tree
         })
         .pipe(|children| {
-            let mut data_tree = DataTree::dir(
+            DataTree::dir(
                 OsStringDisplay::os_string_from("(total)"),
                 0.into(),
                 children.collect(),
-            );
-            data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
-            data_tree
-        });
+            )
+        })
+        .pipe(|tree| tree.into_par_sorted(|left, right| left.data().cmp(&right.data()).reverse()));
     data_tree.par_cull_insignificant_data(0.01);
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
