@@ -140,6 +140,7 @@ impl App {
                     ..
                 } = self.args
                 {
+                    #[allow(clippy::redundant_closure_call)]
                     return Sub {
                         direction: Direction::from_top_down(top_down),
                         bar_alignment: BarAlignment::from_align_right(align_right),
