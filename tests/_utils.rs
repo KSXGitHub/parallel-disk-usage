@@ -83,7 +83,7 @@ impl Default for SampleWorkspace {
             }
             "nested" => dir! {
                 "0" => dir! {
-                    "1" => file!("a".repeat(6000))
+                    "1" => file!("a".repeat(5000))
                 }
             }
             "empty-dir" => dir! {}
