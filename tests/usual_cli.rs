@@ -627,7 +627,7 @@ fn multiple_names() {
                 children.collect(),
             )
         })
-        .pipe(|tree| tree.into_par_sorted(|left, right| left.data().cmp(&right.data()).reverse()));
+        .into_par_sorted(|left, right| left.data().cmp(&right.data()).reverse());
     data_tree.par_cull_insignificant_data(0.01);
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
