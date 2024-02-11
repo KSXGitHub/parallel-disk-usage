@@ -96,7 +96,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
       ['dust', '--apparent-size'],
       ['dua', '--count-hard-links', '--apparent-size'],
       ['ncdu', '-o', '/dev/stdout', '-0'],
-      ['gdu', '--count-links', '--show-apparent-size', '--non-interactive', '--no-progress'],
+      ['gdu', '--show-apparent-size', '--non-interactive', '--no-progress'],
       ['du', '--count-links', '--apparent-size'],
     ],
   },
