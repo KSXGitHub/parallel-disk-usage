@@ -1,4 +1,4 @@
-use super::{NodeInfo, TreeColumnWidth, TreeRow, TreeTable};
+use super::{NodeInfo, TreeRow, TreeTable};
 use crate::{size::Size, visualizer::ProportionBar};
 use assert_cmp::debug_assert_op;
 use derive_more::{Deref, DerefMut};
@@ -10,13 +10,6 @@ pub(super) struct BarRow<Name, NodeData> {
     #[deref_mut]
     pub(super) tree_row: TreeRow<Name, NodeData>,
     pub(super) proportion_bar: ProportionBar,
-}
-
-#[derive(Default, Clone, Copy, Deref, DerefMut)]
-pub(super) struct BarColumnWidth {
-    #[deref]
-    #[deref_mut]
-    pub(super) tree_column_width: TreeColumnWidth,
 }
 
 pub(super) fn render_bars<'a, Name, Data>(
