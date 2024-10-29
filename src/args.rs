@@ -20,7 +20,7 @@ use text_block_macros::text_block;
     long_about = text_block! {
         "Summarize disk usage of the set of files, recursively for directories."
         ""
-        "Copyright: Apache-2.0 © 2021 Hoàng Văn Khải <https://ksxgithub.github.io/>"
+        "Copyright: Apache-2.0 © 2021 Hoàng Văn Khải <https://github.com/KSXGitHub/>"
         "Sponsor: https://github.com/sponsors/KSXGitHub"
     },
 
