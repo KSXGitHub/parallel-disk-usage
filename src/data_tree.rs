@@ -10,9 +10,9 @@ use super::size::Size;
 ///
 /// **Construction:** There are 3 main ways to create a `DataTree`:
 /// * Use [`FsTreeBuilder`](crate::fs_tree_builder::FsTreeBuilder) to create it from the real
-/// filesystem.
+///   filesystem.
 /// * Use [`TreeBuilder`](crate::tree_builder::TreeBuilder) to create it from a representation
-/// of a filesystem.
+///   of a filesystem.
 /// * Use [`Reflection`].
 ///
 /// **Visualization:** Use the [`Visualizer`](crate::visualizer::Visualizer) struct to create an
