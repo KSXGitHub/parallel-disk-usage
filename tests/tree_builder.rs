@@ -60,7 +60,7 @@ impl SampleTree {
             join_path: |prefix, name| format!("{prefix}{SAMPLE_SEPARATOR}{name}"),
         }
         .pipe(DataTree::from)
-        .into_par_sorted(|left, right| left.name().cmp(right.name()))
+        .into_par_sorted(|left, right| left.name().as_str().cmp(right.name().as_str()))
     }
 }
 
