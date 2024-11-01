@@ -14,17 +14,17 @@ _pdu() {
     fi
 
     local context curcontext="$curcontext" state line
-    _arguments "${_arguments_options[@]}" \
+    _arguments "${_arguments_options[@]}" : \
 '--bytes-format=[How to display the numbers of bytes]:BYTES_FORMAT:((plain\:"Display plain number of bytes without units"
 metric\:"Use metric scale, i.e. 1K = 1000B, 1M = 1000K, and so on"
 binary\:"Use binary scale, i.e. 1K = 1024B, 1M = 1024K, and so on"))' \
 '--quantity=[Aspect of the files/directories to be measured]:QUANTITY:((apparent-size\:"Measure apparent sizes"
 block-size\:"Measure block sizes (block-count * 512B)"
 block-count\:"Count numbers of blocks"))' \
-'--max-depth=[Maximum depth to display the data (must be greater than 0)]:MAX_DEPTH: ' \
-'(--column-width)--total-width=[Width of the visualization]:TOTAL_WIDTH: ' \
-'*--column-width=[Maximum widths of the tree column and width of the bar column]:TREE_WIDTH: :TREE_WIDTH: ' \
-'--min-ratio=[Minimal size proportion required to appear]:MIN_RATIO: ' \
+'--max-depth=[Maximum depth to display the data (must be greater than 0)]:MAX_DEPTH:_default' \
+'(--column-width)--total-width=[Width of the visualization]:TOTAL_WIDTH:_default' \
+'*--column-width=[Maximum widths of the tree column and width of the bar column]:TREE_WIDTH:_default:TREE_WIDTH:_default' \
+'--min-ratio=[Minimal size proportion required to appear]:MIN_RATIO:_default' \
 '(--quantity)--json-input[Read JSON data from stdin]' \
 '--json-output[Print JSON data instead of an ASCII chart]' \
 '--top-down[Print the tree top-down instead of bottom-up]' \
