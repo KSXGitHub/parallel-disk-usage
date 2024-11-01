@@ -64,8 +64,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
+
+      - name: Install compilation target
+        run: rustup target add ${{ matrix.target }}
+
 
       - name: Build
         run: cargo build --target ${{ matrix.target }} --release --all-features
@@ -94,8 +96,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
+
+      - name: Install compilation target
+        run: rustup target add ${{ matrix.target }}
 
       - name: Build
         run: cargo build --target ${{ matrix.target }} --release --all-features
@@ -125,8 +128,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
+
+      - name: Install compilation target
+        run: rustup target add ${{ matrix.target }}
+
 
       - name: Build
         run: cargo build --target ${{ matrix.target }} --release --all-features
