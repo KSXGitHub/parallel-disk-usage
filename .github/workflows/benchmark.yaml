@@ -28,12 +28,9 @@ jobs:
             ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
             ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-
 
-      - uses: actions-rs/toolchain@v1.0.7
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
           components: clippy
-          override: 'true'
-          default: 'true'
 
       - name: Build pdu
         run: |

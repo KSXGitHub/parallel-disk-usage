@@ -36,11 +36,7 @@ jobs:
             ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
             ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          override: 'true'
-          default: 'true'
+      - uses: dtolnay/rust-toolchain@stable
 
       - name: Test (dev)
         env:
