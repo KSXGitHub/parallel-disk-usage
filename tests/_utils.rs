@@ -7,7 +7,7 @@ use parallel_disk_usage::{
     get_size::{self, GetSize},
     os_string_display::OsStringDisplay,
     reporter::ErrorOnlyReporter,
-    size::Size,
+    size,
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
@@ -99,17 +99,17 @@ impl Default for SampleWorkspace {
 ///
 /// The real filesystem is often messy, causing `children` to mess up its order.
 /// This function makes the order of `children` deterministic by reordering them recursively.
-pub fn sanitize_tree_reflection<Name, Data>(
-    tree_reflection: DataTreeReflection<Name, Data>,
-) -> DataTreeReflection<Name, Data>
+pub fn sanitize_tree_reflection<Name, Size>(
+    tree_reflection: DataTreeReflection<Name, Size>,
+) -> DataTreeReflection<Name, Size>
 where
     Name: Ord,
-    Data: Size,
-    DataTreeReflection<Name, Data>: Send,
+    Size: size::Size,
+    DataTreeReflection<Name, Size>: Send,
 {
     let DataTreeReflection {
         name,
-        data,
+        size,
         mut children,
     } = tree_reflection;
     children.sort_by(|left, right| left.name.cmp(&right.name));
@@ -119,18 +119,18 @@ where
         .collect();
     DataTreeReflection {
         name,
-        data,
+        size,
         children,
     }
 }
 
 /// Test the result of tree builder on the sample workspace.
-pub fn test_sample_tree<Data, SizeGetter>(root: &Path, size_getter: SizeGetter)
+pub fn test_sample_tree<Size, SizeGetter>(root: &Path, size_getter: SizeGetter)
 where
-    Data: Size<Inner = u64> + From<u64> + Send + Sync,
-    SizeGetter: GetSize<Size = Data> + Copy + Sync,
+    Size: size::Size<Inner = u64> + From<u64> + Send + Sync,
+    SizeGetter: GetSize<Size = Size> + Copy + Sync,
 {
-    let suffix_size = |suffix: &str| -> Data {
+    let suffix_size = |suffix: &str| -> Size {
         root.join(suffix)
             .pipe(metadata)
             .unwrap_or_else(|error| panic!("get_size {}: {}", suffix, error))
@@ -148,13 +148,13 @@ where
 
     let measure = |suffix: &str| {
         FsTreeBuilder {
-            get_data: size_getter,
+            size_getter,
             reporter: ErrorOnlyReporter::new(|error| {
                 panic!("Unexpected call to report_error: {:?}", error)
             }),
             root: root.join(suffix),
         }
-        .pipe(DataTree::<OsStringDisplay, Data>::from)
+        .pipe(DataTree::<OsStringDisplay, Size>::from)
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
         .into_reflection()
     };
@@ -165,26 +165,26 @@ where
         measure("flat"),
         sanitize_tree_reflection(DataTreeReflection {
             name: sub("flat"),
-            data: suffix_size!("flat", "flat/0", "flat/1", "flat/2", "flat/3"),
+            size: suffix_size!("flat", "flat/0", "flat/1", "flat/2", "flat/3"),
             children: vec![
                 DataTreeReflection {
                     name: OsStringDisplay::os_string_from("0"),
-                    data: suffix_size("flat/0"),
+                    size: suffix_size("flat/0"),
                     children: Vec::new(),
                 },
                 DataTreeReflection {
                     name: OsStringDisplay::os_string_from("1"),
-                    data: suffix_size("flat/1"),
+                    size: suffix_size("flat/1"),
                     children: Vec::new(),
                 },
                 DataTreeReflection {
                     name: OsStringDisplay::os_string_from("2"),
-                    data: suffix_size("flat/2"),
+                    size: suffix_size("flat/2"),
                     children: Vec::new(),
                 },
                 DataTreeReflection {
                     name: OsStringDisplay::os_string_from("3"),
-                    data: suffix_size("flat/3"),
+                    size: suffix_size("flat/3"),
                     children: Vec::new(),
                 },
             ]
@@ -195,13 +195,13 @@ where
         measure("nested"),
         sanitize_tree_reflection(DataTreeReflection {
             name: sub("nested"),
-            data: suffix_size!("nested", "nested/0", "nested/0/1"),
+            size: suffix_size!("nested", "nested/0", "nested/0/1"),
             children: vec![DataTreeReflection {
                 name: OsStringDisplay::os_string_from("0"),
-                data: suffix_size!("nested/0", "nested/0/1"),
+                size: suffix_size!("nested/0", "nested/0/1"),
                 children: vec![DataTreeReflection {
                     name: OsStringDisplay::os_string_from("1"),
-                    data: suffix_size!("nested/0/1"),
+                    size: suffix_size!("nested/0/1"),
                     children: Vec::new(),
                 }]
             }],
@@ -212,7 +212,7 @@ where
         measure("empty-dir"),
         sanitize_tree_reflection(DataTreeReflection {
             name: sub("empty-dir"),
-            data: suffix_size!("empty-dir"),
+            size: suffix_size!("empty-dir"),
             children: Vec::new(),
         }),
     );

@@ -1,4 +1,5 @@
-use super::{ErrorReport, Event, ParallelReporter, Reporter, Size};
+use super::{ErrorReport, Event, ParallelReporter, Reporter};
+use crate::size;
 
 /// Only report errors.
 #[derive(Debug)]
@@ -14,12 +15,12 @@ impl<ReportError: Fn(ErrorReport)> ErrorOnlyReporter<ReportError> {
     }
 }
 
-impl<Data, ReportError> Reporter<Data> for ErrorOnlyReporter<ReportError>
+impl<Size, ReportError> Reporter<Size> for ErrorOnlyReporter<ReportError>
 where
-    Data: Size,
+    Size: size::Size,
     ReportError: Fn(ErrorReport),
 {
-    fn report(&self, event: Event<Data>) {
+    fn report(&self, event: Event<Size>) {
         let ErrorOnlyReporter { report_error } = self;
         if let Event::EncounterError(error_report) = event {
             report_error(error_report);
@@ -27,9 +28,9 @@ where
     }
 }
 
-impl<Data, ReportError> ParallelReporter<Data> for ErrorOnlyReporter<ReportError>
+impl<Size, ReportError> ParallelReporter<Size> for ErrorOnlyReporter<ReportError>
 where
-    Data: Size,
+    Size: size::Size,
     ReportError: Fn(ErrorReport),
 {
     type DestructionError = (); // TODO: change this to `!` once it is stable.

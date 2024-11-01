@@ -13,34 +13,34 @@ type SampleTree = DataTree<SampleName, SampleData>;
 fn valid_reflection() -> SampleReflection {
     Reflection {
         name: "root",
-        data: Bytes::new(7853),
+        size: Bytes::new(7853),
         children: vec![
             Reflection {
                 name: "a",
-                data: Bytes::new(78),
+                size: Bytes::new(78),
                 children: Vec::new(),
             },
             Reflection {
                 name: "b",
-                data: Bytes::new(321),
+                size: Bytes::new(321),
                 children: vec![Reflection {
                     name: "0",
-                    data: Bytes::new(321),
+                    size: Bytes::new(321),
                     children: Vec::new(),
                 }],
             },
             Reflection {
                 name: "c",
-                data: Bytes::new(3456),
+                size: Bytes::new(3456),
                 children: vec![
                     Reflection {
                         name: "0",
-                        data: Bytes::new(732),
+                        size: Bytes::new(732),
                         children: Vec::new(),
                     },
                     Reflection {
                         name: "1",
-                        data: Bytes::new(352),
+                        size: Bytes::new(352),
                         children: Vec::new(),
                     },
                 ],
@@ -52,32 +52,32 @@ fn valid_reflection() -> SampleReflection {
 fn invalid_reflection_excessive_children() -> SampleReflection {
     Reflection {
         name: "root",
-        data: Bytes::new(2468),
+        size: Bytes::new(2468),
         children: vec![
             Reflection {
                 name: "a",
-                data: Bytes::new(78),
+                size: Bytes::new(78),
                 children: Vec::new(),
             },
             Reflection {
                 name: "b",
-                data: Bytes::new(321),
+                size: Bytes::new(321),
                 children: vec![Reflection {
                     name: "0",
-                    data: Bytes::new(321),
+                    size: Bytes::new(321),
                     children: vec![
                         Reflection {
                             name: "abc",
-                            data: Bytes::new(123),
+                            size: Bytes::new(123),
                             children: vec![Reflection {
                                 name: "xyz",
-                                data: Bytes::new(4321),
+                                size: Bytes::new(4321),
                                 children: Vec::new(),
                             }],
                         },
                         Reflection {
                             name: "def",
-                            data: Bytes::new(456),
+                            size: Bytes::new(456),
                             children: Vec::new(),
                         },
                     ],
@@ -85,16 +85,16 @@ fn invalid_reflection_excessive_children() -> SampleReflection {
             },
             Reflection {
                 name: "c",
-                data: Bytes::new(1084),
+                size: Bytes::new(1084),
                 children: vec![
                     Reflection {
                         name: "0",
-                        data: Bytes::new(732),
+                        size: Bytes::new(732),
                         children: Vec::new(),
                     },
                     Reflection {
                         name: "1",
-                        data: Bytes::new(352),
+                        size: Bytes::new(352),
                         children: Vec::new(),
                     },
                 ],
@@ -120,20 +120,20 @@ fn invalid_conversion_excessive_children() {
         .expect_err("create error");
     let expected = ConversionError::ExcessiveChildren {
         path: vec!["root", "b", "0"].into_iter().collect(),
-        data: Bytes::new(321),
+        size: Bytes::new(321),
         children: vec![
             Reflection {
                 name: "abc",
-                data: Bytes::new(123),
+                size: Bytes::new(123),
                 children: vec![Reflection {
                     name: "xyz",
-                    data: Bytes::new(4321),
+                    size: Bytes::new(4321),
                     children: Vec::new(),
                 }],
             },
             Reflection {
                 name: "def",
-                data: Bytes::new(456),
+                size: Bytes::new(456),
                 children: Vec::new(),
             },
         ],

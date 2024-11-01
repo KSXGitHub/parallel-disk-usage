@@ -1,25 +1,25 @@
 use super::Reflection;
-use crate::{data_tree::DataTree, size::Size};
+use crate::{data_tree::DataTree, size};
 
-impl<Name, Data: Size> From<DataTree<Name, Data>> for Reflection<Name, Data> {
-    fn from(source: DataTree<Name, Data>) -> Self {
+impl<Name, Size: size::Size> From<DataTree<Name, Size>> for Reflection<Name, Size> {
+    fn from(source: DataTree<Name, Size>) -> Self {
         let DataTree {
             name,
-            data,
+            size,
             children,
         } = source;
         let children: Vec<_> = children.into_iter().map(Reflection::from).collect();
         Reflection {
             name,
-            data,
+            size,
             children,
         }
     }
 }
 
-impl<Name, Data: Size> DataTree<Name, Data> {
+impl<Name, Size: size::Size> DataTree<Name, Size> {
     /// Create reflection.
-    pub fn into_reflection(self) -> Reflection<Name, Data> {
+    pub fn into_reflection(self) -> Reflection<Name, Size> {
         self.into()
     }
 }

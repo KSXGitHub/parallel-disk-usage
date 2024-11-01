@@ -3,7 +3,7 @@
 use parallel_disk_usage::{
     bytes_format::BytesFormat::*,
     data_tree::DataTree,
-    size::{Blocks, Bytes, Size},
+    size::{self, Blocks, Bytes},
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pretty_assertions::assert_eq;
@@ -11,11 +11,11 @@ use std::{cmp::Ordering, num::NonZeroUsize};
 use text_block_macros::text_block_fnl;
 use zero_copy_pads::Width;
 
-fn order_tree<Name, Data: Size>(
-    left: &DataTree<Name, Data>,
-    right: &DataTree<Name, Data>,
+fn order_tree<Name, Size: size::Size>(
+    left: &DataTree<Name, Size>,
+    right: &DataTree<Name, Size>,
 ) -> Ordering {
-    left.data().cmp(&right.data()).reverse()
+    left.size().cmp(&right.size()).reverse()
 }
 
 macro_rules! test_case {
@@ -68,13 +68,13 @@ macro_rules! test_case {
     };
 }
 
-fn typical_tree<Data>(size_per_dir: Data, file_size_factor: u64) -> DataTree<&'static str, Data>
+fn typical_tree<Size>(size_per_dir: Size, file_size_factor: u64) -> DataTree<&'static str, Size>
 where
-    Data: Size + Ord + From<u64> + Send,
+    Size: size::Size + Ord + From<u64> + Send,
 {
-    let dir = DataTree::<&'static str, Data>::fixed_size_dir_constructor(size_per_dir);
+    let dir = DataTree::<&'static str, Size>::fixed_size_dir_constructor(size_per_dir);
     let file =
-        |name: &'static str, size: u64| DataTree::file(name, Data::from(size * file_size_factor));
+        |name: &'static str, size: u64| DataTree::file(name, Size::from(size * file_size_factor));
     dir(
         "root",
         vec![
@@ -396,12 +396,12 @@ test_case! {
         },
 }
 
-fn nested_tree<Data: Size>(
+fn nested_tree<Size: size::Size>(
     dir_names: &[&'static str],
-    size_per_dir: Data,
+    size_per_dir: Size,
     file_name: &'static str,
-    file_size: Data,
-) -> DataTree<&'static str, Data> {
+    file_size: Size,
+) -> DataTree<&'static str, Size> {
     if let Some((head, tail)) = dir_names.split_first() {
         let child = nested_tree(tail, size_per_dir, file_name, file_size);
         DataTree::dir(*head, size_per_dir, vec![child])
@@ -646,9 +646,9 @@ test_case! {
         },
 }
 
-fn empty_dir<Data>(inode_size: Data) -> DataTree<&'static str, Data>
+fn empty_dir<Size>(inode_size: Size) -> DataTree<&'static str, Size>
 where
-    Data: Size + Ord + From<u64> + Send,
+    Size: size::Size + Ord + From<u64> + Send,
 {
     DataTree::dir("empty directory", inode_size, Vec::new()).into_par_sorted(order_tree)
 }
@@ -692,12 +692,12 @@ test_case! {
         },
 }
 
-fn long_and_short_names<Data>() -> DataTree<&'static str, Data>
+fn long_and_short_names<Size>() -> DataTree<&'static str, Size>
 where
-    Data: Size + Ord + From<u64> + Send,
+    Size: size::Size + Ord + From<u64> + Send,
 {
-    let dir = DataTree::<&'static str, Data>::fixed_size_dir_constructor(1.into());
-    let file = |name: &'static str, size: u64| DataTree::file(name, Data::from(size));
+    let dir = DataTree::<&'static str, Size>::fixed_size_dir_constructor(1.into());
+    let file = |name: &'static str, size: u64| DataTree::file(name, Size::from(size));
     dir(
         "root",
         vec![
@@ -891,12 +891,12 @@ test_case! {
         },
 }
 
-fn tree_with_a_file_of_extremely_long_name<Data>() -> DataTree<&'static str, Data>
+fn tree_with_a_file_of_extremely_long_name<Size>() -> DataTree<&'static str, Size>
 where
-    Data: Size + Ord + From<u64> + Send,
+    Size: size::Size + Ord + From<u64> + Send,
 {
-    let dir = DataTree::<&'static str, Data>::fixed_size_dir_constructor(4069.into());
-    let file = |name: &'static str, size: u64| DataTree::file(name, Data::from(size));
+    let dir = DataTree::<&'static str, Size>::fixed_size_dir_constructor(4069.into());
+    let file = |name: &'static str, size: u64| DataTree::file(name, Size::from(size));
     dir(
         "root",
         vec![file(
@@ -935,12 +935,12 @@ test_case! {
         },
 }
 
-fn big_tree_with_long_names<Data>() -> DataTree<&'static str, Data>
+fn big_tree_with_long_names<Size>() -> DataTree<&'static str, Size>
 where
-    Data: Size + Ord + From<u64> + Send,
+    Size: size::Size + Ord + From<u64> + Send,
 {
-    let dir = DataTree::<&'static str, Data>::fixed_size_dir_constructor(4069.into());
-    let file = |name: &'static str, size: u64| DataTree::file(name, Data::from(size));
+    let dir = DataTree::<&'static str, Size>::fixed_size_dir_constructor(4069.into());
+    let file = |name: &'static str, size: u64| DataTree::file(name, Size::from(size));
     let mut short_file_names = [
         "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r",
         "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",

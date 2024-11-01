@@ -13,14 +13,14 @@ use table::*;
 use tree_table::*;
 
 use super::{ColumnWidthDistribution, Visualizer};
-use crate::size::Size;
+use crate::size;
 use std::{cmp::min, fmt::Display};
 use zero_copy_pads::{align_left, align_right};
 
-impl<'a, Name, Data> Visualizer<'a, Name, Data>
+impl<'a, Name, Size> Visualizer<'a, Name, Size>
 where
     Name: Display,
-    Data: Size + Into<u64>,
+    Size: size::Size + Into<u64>,
 {
     /// Create ASCII rows that visualize of the [tree](crate::data_tree::DataTree), such rows
     /// are meant to be printed to a terminal screen.
@@ -77,7 +77,7 @@ where
         let size_width = tree_table.column_width.size_column_width;
         let tree_width = tree_table.column_width.tree_column_width;
 
-        let bar_table = render_bars(tree_table, self.data_tree.data().into(), bar_width);
+        let bar_table = render_bars(tree_table, self.data_tree.size().into(), bar_width);
 
         bar_table
             .into_iter()

@@ -1,11 +1,11 @@
 use super::DataTree;
-use crate::size::Size;
+use crate::size;
 use rayon::prelude::*;
 
-impl<Name, Data> DataTree<Name, Data>
+impl<Name, Size> DataTree<Name, Size>
 where
     Self: Send,
-    Data: Size,
+    Size: size::Size,
 {
     /// Recursively cull all descendants that do not satisfy given `predicate`, in parallel.
     pub fn par_retain(&mut self, predicate: impl Fn(&Self) -> bool + Copy + Sync) {
@@ -21,14 +21,14 @@ where
         self
     }
 
-    /// Recursively cull all descendants whose data are too small relative to root.
+    /// Recursively cull all descendants whose sizes are too small relative to root.
     #[cfg(feature = "cli")]
     pub fn par_cull_insignificant_data(&mut self, min_ratio: f32)
     where
-        Data: Into<u64>,
+        Size: Into<u64>,
     {
-        let minimal = self.data().into() as f32 * min_ratio;
-        self.par_retain(|descendant| descendant.data().into() as f32 >= minimal);
+        let minimal = self.size().into() as f32 * min_ratio;
+        self.par_retain(|descendant| descendant.size().into() as f32 >= minimal);
     }
 
     /// Process the tree via [`par_cull_insignificant_data`](Self::par_cull_insignificant_data) method.
@@ -36,7 +36,7 @@ where
     #[cfg(feature = "cli")]
     fn into_insignificant_data_par_culled(mut self, min_ratio: f32) -> Self
     where
-        Data: Into<u64>,
+        Size: Into<u64>,
     {
         self.par_cull_insignificant_data(min_ratio);
         self

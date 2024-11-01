@@ -7,7 +7,7 @@ use crate::{
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
     runtime_error::RuntimeError,
-    size::Size,
+    size,
     status_board::GLOBAL_STATUS_BOARD,
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
@@ -15,19 +15,19 @@ use serde::Serialize;
 use std::{io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
 
 /// The sub program of the main application.
-pub struct Sub<Data, GetData, Report>
+pub struct Sub<Size, SizeGetter, Report>
 where
-    Data: Size + Into<u64> + Serialize + Send + Sync,
-    Report: ParallelReporter<Data> + Sync,
-    GetData: GetSize<Size = Data> + Copy + Sync,
-    DataTreeReflection<String, Data>: Into<UnitAndTree>,
+    Report: ParallelReporter<Size> + Sync,
+    Size: size::Size + Into<u64> + Serialize + Send + Sync,
+    SizeGetter: GetSize<Size = Size> + Copy + Sync,
+    DataTreeReflection<String, Size>: Into<UnitAndTree>,
 {
     /// List of files and/or directories.
     pub files: Vec<PathBuf>,
     /// Print JSON data instead of an ASCII chart.
     pub json_output: bool,
-    /// Format to be used to [`display`](Size::display) the data.
-    pub bytes_format: Data::DisplayFormat,
+    /// Format to be used to [`display`](size::Size::display) the sizes returned by [`size_getter`](Self::size_getter).
+    pub bytes_format: Size::DisplayFormat,
     /// The direction of the visualization.
     pub direction: Direction,
     /// The alignment of the bars.
@@ -36,8 +36,8 @@ where
     pub column_width_distribution: ColumnWidthDistribution,
     /// Maximum number of levels that should be visualized.
     pub max_depth: NonZeroUsize,
-    /// Returns measured quantity of the files/directories.
-    pub get_data: GetData,
+    /// [Get the size](GetSize) of files/directories.
+    pub size_getter: SizeGetter,
     /// Reports measurement progress.
     pub reporter: Report,
     /// Minimal size proportion required to appear.
@@ -46,12 +46,12 @@ where
     pub no_sort: bool,
 }
 
-impl<Data, GetData, Report> Sub<Data, GetData, Report>
+impl<Size, SizeGetter, Report> Sub<Size, SizeGetter, Report>
 where
-    Data: Size + Into<u64> + Serialize + Send + Sync,
-    Report: ParallelReporter<Data> + Sync,
-    GetData: GetSize<Size = Data> + Copy + Sync,
-    DataTreeReflection<String, Data>: Into<UnitAndTree>,
+    Size: size::Size + Into<u64> + Serialize + Send + Sync,
+    Report: ParallelReporter<Size> + Sync,
+    SizeGetter: GetSize<Size = Size> + Copy + Sync,
+    DataTreeReflection<String, Size>: Into<UnitAndTree>,
 {
     /// Run the sub program.
     pub fn run(self) -> Result<(), RuntimeError> {
@@ -63,7 +63,7 @@ where
             bar_alignment,
             column_width_distribution,
             max_depth,
-            get_data,
+            size_getter,
             reporter,
             min_ratio,
             no_sort,
@@ -71,11 +71,11 @@ where
 
         let mut iter = files
             .into_iter()
-            .map(|root| -> DataTree<OsStringDisplay, Data> {
+            .map(|root| -> DataTree<OsStringDisplay, Size> {
                 FsTreeBuilder {
                     reporter: &reporter,
                     root,
-                    get_data,
+                    size_getter,
                 }
                 .into()
             });
@@ -98,7 +98,7 @@ where
             let children: Vec<_> = once(data_tree).chain(iter).collect();
             DataTree::dir(
                 OsStringDisplay::os_string_from("(total)"),
-                Data::default(),
+                Size::default(),
                 children,
             )
         };
@@ -114,7 +114,7 @@ where
                 data_tree.par_cull_insignificant_data(min_ratio);
             }
             if !no_sort {
-                data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+                data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
             }
             data_tree
         };

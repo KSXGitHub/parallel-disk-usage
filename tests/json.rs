@@ -53,7 +53,7 @@ fn sample_tree() -> SampleTree {
             ),
         ],
     )
-    .into_par_sorted(|left, right| left.data().cmp(&right.data()).reverse())
+    .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse())
 }
 
 #[test]
@@ -80,7 +80,7 @@ fn json_output() {
     dbg!(&actual);
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GetApparentSize,
+        size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let expected = builder

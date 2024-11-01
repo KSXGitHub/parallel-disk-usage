@@ -69,26 +69,26 @@ fn flat() {
     let actual = SampleTree::create_sample().tree("flat").into_reflection();
     let expected = DataTreeReflection {
         name: "flat".to_string(),
-        data: len("") + len("a") + len("ab") + len("abc") + SAMPLE_DIR_SIZE,
+        size: len("") + len("a") + len("ab") + len("abc") + SAMPLE_DIR_SIZE,
         children: vec![
             DataTreeReflection {
                 name: "0".to_string(),
-                data: len(""),
+                size: len(""),
                 children: Vec::new(),
             },
             DataTreeReflection {
                 name: "1".to_string(),
-                data: len("a"),
+                size: len("a"),
                 children: Vec::new(),
             },
             DataTreeReflection {
                 name: "2".to_string(),
-                data: len("ab"),
+                size: len("ab"),
                 children: Vec::new(),
             },
             DataTreeReflection {
                 name: "3".to_string(),
-                data: len("abc"),
+                size: len("abc"),
                 children: Vec::new(),
             },
         ],
@@ -101,13 +101,13 @@ fn nested() {
     let actual = SampleTree::create_sample().tree("nested").into_reflection();
     let expected = DataTreeReflection {
         name: "nested".to_string(),
-        data: len("abcdef") + SAMPLE_DIR_SIZE + SAMPLE_DIR_SIZE,
+        size: len("abcdef") + SAMPLE_DIR_SIZE + SAMPLE_DIR_SIZE,
         children: vec![DataTreeReflection {
             name: "0".to_string(),
-            data: len("abcdef") + SAMPLE_DIR_SIZE,
+            size: len("abcdef") + SAMPLE_DIR_SIZE,
             children: vec![DataTreeReflection {
                 name: "1".to_string(),
-                data: len("abcdef"),
+                size: len("abcdef"),
                 children: Vec::new(),
             }],
         }],
@@ -122,7 +122,7 @@ fn empty_dir() {
         .into_reflection();
     let expected = DataTreeReflection {
         name: "empty-dir".to_string(),
-        data: SAMPLE_DIR_SIZE,
+        size: SAMPLE_DIR_SIZE,
         children: Vec::new(),
     };
     assert_eq!(actual, expected);

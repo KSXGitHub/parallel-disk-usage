@@ -1,4 +1,4 @@
-use crate::size::Size;
+use crate::size;
 use std::{
     collections::VecDeque,
     ffi::OsStr,
@@ -30,11 +30,11 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]
-pub struct Reflection<Name, Data: Size> {
+pub struct Reflection<Name, Size: size::Size> {
     /// Name of the tree.
     pub name: Name,
     /// Disk usage of a file or total disk usage of a folder.
-    pub data: Data,
+    pub size: Size,
     /// Data of children filesystem subtrees.
     pub children: Vec<Self>,
 }
@@ -43,31 +43,31 @@ pub struct Reflection<Name, Data: Size> {
 /// [`DataTree`](crate::data_tree::DataTree) fails.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
-pub enum ConversionError<Name, Data: Size> {
-    /// When a node's data is less than the sum of its children.
+pub enum ConversionError<Name, Size: size::Size> {
+    /// When a node's size is less than the sum of its children.
     ExcessiveChildren {
         /// Path from root to the node.
         path: VecDeque<Name>,
-        /// Data hold by the node.
-        data: Data,
+        /// Size hold by the node.
+        size: Size,
         /// Children of the node.
-        children: Vec<Reflection<Name, Data>>,
-        /// Sum of data hold by children of the node.
-        children_sum: Data,
+        children: Vec<Reflection<Name, Size>>,
+        /// Sum of size hold by children of the node.
+        children_sum: Size,
     },
 }
 
-impl<Name, Data> Display for ConversionError<Name, Data>
+impl<Name, Size> Display for ConversionError<Name, Size>
 where
     Name: AsRef<OsStr> + Debug,
-    Data: Size,
+    Size: size::Size,
 {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> Result<(), Error> {
         use ConversionError::*;
         match self {
             ExcessiveChildren {
                 path,
-                data,
+                size,
                 children_sum,
                 ..
             } => {
@@ -77,10 +77,7 @@ where
                     .fold(PathBuf::new(), |acc, x| acc.join(x));
                 write!(
                     formatter,
-                    "ExcessiveChildren: {path:?}: {data:?} is less than {sum:?}",
-                    path = path,
-                    data = data,
-                    sum = children_sum,
+                    "ExcessiveChildren: {path:?}: {size:?} is less than {children_sum:?}",
                 )
             }
         }

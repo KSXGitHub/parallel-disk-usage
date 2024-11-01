@@ -131,11 +131,11 @@ fn fs_errors() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GetApparentSize,
+        size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer {
         data_tree: &data_tree,

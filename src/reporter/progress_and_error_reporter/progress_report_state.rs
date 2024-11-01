@@ -1,4 +1,4 @@
-use crate::{reporter::ProgressReport, size::Size};
+use crate::{reporter::ProgressReport, size};
 use std::{
     ops::ControlFlow,
     sync::atomic::{AtomicBool, AtomicU64, Ordering::Relaxed},
@@ -20,10 +20,10 @@ pub struct ProgressReportState {
 impl ProgressReportState {
     /// Yield [`ProgressReport`] if it is running.
     /// Return `Break` otherwise.
-    pub fn to_progress_report<Data>(&self) -> ControlFlow<(), ProgressReport<Data>>
+    pub fn to_progress_report<Size>(&self) -> ControlFlow<(), ProgressReport<Size>>
     where
-        Data: Size,
-        u64: Into<Data>,
+        Size: size::Size,
+        u64: Into<Size>,
     {
         macro_rules! load {
             ($field:ident) => {

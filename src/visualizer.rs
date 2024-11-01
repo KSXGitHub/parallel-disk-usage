@@ -14,7 +14,7 @@ pub use parenthood::Parenthood;
 pub use proportion_bar::{ProportionBar, ProportionBarBlock};
 pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
 
-use super::{data_tree::DataTree, size::Size};
+use super::{data_tree::DataTree, size};
 use std::{fmt::Display, num::NonZeroUsize};
 
 /// Visualize a [`DataTree`].
@@ -44,15 +44,15 @@ use std::{fmt::Display, num::NonZeroUsize};
 /// # }
 /// ```
 #[derive(Debug)]
-pub struct Visualizer<'a, Name, Data>
+pub struct Visualizer<'a, Name, Size>
 where
     Name: Display,
-    Data: Size,
+    Size: size::Size,
 {
     /// The tree to visualize.
-    pub data_tree: &'a DataTree<Name, Data>,
-    /// Format to be used to [`display`](Size::display) the data.
-    pub bytes_format: Data::DisplayFormat,
+    pub data_tree: &'a DataTree<Name, Size>,
+    /// Format to be used to [`display`](size::Size::display) the sizes.
+    pub bytes_format: Size::DisplayFormat,
     /// The direction of the visualization of the tree.
     pub direction: Direction,
     /// The alignment of the bars.

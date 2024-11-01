@@ -1,5 +1,5 @@
 use super::{NodeInfo, Table, BORDER_COLUMNS, PERCENTAGE_COLUMN_MAX_WIDTH};
-use crate::{data_tree::DataTree, size::Size, visualizer::Visualizer};
+use crate::{data_tree::DataTree, size, visualizer::Visualizer};
 use assert_cmp::debug_assert_op;
 use derive_more::{Deref, DerefMut};
 use std::{cmp::max, fmt::Display, num::NonZeroUsize};
@@ -37,12 +37,12 @@ impl InitialColumnWidth {
 pub(super) type InitialTable<Name, NodeData> =
     Table<InitialRow<Name, NodeData>, InitialColumnWidth>;
 
-pub(super) fn render_initial<Name, Data>(
-    visualizer: Visualizer<Name, Data>,
-) -> InitialTable<&'_ Name, Data>
+pub(super) fn render_initial<Name, Size>(
+    visualizer: Visualizer<Name, Size>,
+) -> InitialTable<&'_ Name, Size>
 where
     Name: Display,
-    Data: Size + Into<u64>,
+    Size: size::Size + Into<u64>,
 {
     #[derive(Clone)]
     struct Param<Name, NodeData> {
@@ -60,14 +60,14 @@ where
         node_info: NodeInfo<Name, NodeData>,
     }
 
-    fn traverse<'a, Name, Data, Act>(
-        tree: &'a DataTree<Name, Data>,
+    fn traverse<'a, Name, Size, Act>(
+        tree: &'a DataTree<Name, Size>,
         act: &mut Act,
-        param: Param<&'a Name, Data>,
-    ) -> Option<TraverseResult<&'a Name, Data>>
+        param: Param<&'a Name, Size>,
+    ) -> Option<TraverseResult<&'a Name, Size>>
     where
-        Data: Size,
-        Act: FnMut(&'a DataTree<Name, Data>, Param<&'a Name, Data>) -> ActResult<&'a Name, Data>,
+        Size: size::Size,
+        Act: FnMut(&'a DataTree<Name, Size>, Param<&'a Name, Size>) -> ActResult<&'a Name, Size>,
     {
         if param.remaining_depth == 0 {
             return None;
@@ -95,7 +95,7 @@ where
     }
 
     let mut initial_table = InitialTable::default();
-    let total_fs_size = visualizer.data_tree.data().into();
+    let total_fs_size = visualizer.data_tree.size().into();
 
     traverse(
         visualizer.data_tree,
@@ -107,7 +107,7 @@ where
                 preceding_sibling,
             } = param;
             let name = node.name();
-            let node_data = node.data();
+            let node_data = node.size();
             let row_index = initial_table.len();
             debug_assert_op!(remaining_depth > 0);
             let children_count = if remaining_depth != 1 {
@@ -115,14 +115,14 @@ where
             } else {
                 0
             };
-            let fs_size = node.data().into();
+            let fs_size = node.size().into();
             let percentage = if total_fs_size == 0 {
                 "0%".to_string()
             } else {
                 let percentage = rounded_div::u64(fs_size * 100, total_fs_size);
                 format!("{}%", percentage)
             };
-            let size = node.data().display(visualizer.bytes_format).to_string();
+            let size = node.size().display(visualizer.bytes_format).to_string();
             let sibling_count = ancestors.last().map_or(1, |parent| parent.children_count);
             debug_assert_op!(sibling_count != 0);
             debug_assert_op!(index_as_child < sibling_count);

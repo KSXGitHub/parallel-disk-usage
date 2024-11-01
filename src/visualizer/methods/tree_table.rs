@@ -1,6 +1,6 @@
 use super::{InitialColumnWidth, InitialRow, InitialTable, Table};
 use crate::{
-    size::Size,
+    size,
     visualizer::{
         ChildPosition, Parenthood, TreeHorizontalSlice, TreeSkeletalComponent, Visualizer,
     },
@@ -41,14 +41,14 @@ impl TreeColumnWidth {
 
 pub(super) type TreeTable<Name, NodeData> = Table<TreeRow<Name, NodeData>, TreeColumnWidth>;
 
-pub(super) fn render_tree<'a, Name, Data>(
-    visualizer: Visualizer<'a, Name, Data>,
-    initial_table: InitialTable<&'a Name, Data>,
+pub(super) fn render_tree<'a, Name, Size>(
+    visualizer: Visualizer<'a, Name, Size>,
+    initial_table: InitialTable<&'a Name, Size>,
     max_width: usize,
-) -> TreeTable<&'a Name, Data>
+) -> TreeTable<&'a Name, Size>
 where
     Name: Display,
-    Data: Size + Into<u64>,
+    Size: size::Size + Into<u64>,
 {
     let InitialTable {
         data: initial_data,
@@ -119,7 +119,7 @@ where
         let mut children_of_excluded = LinkedList::<usize>::new();
 
         for excluded_row_index in excluded_row_indices.iter().copied() {
-            let is_child = |row: &&TreeRow<&Name, Data>| {
+            let is_child = |row: &&TreeRow<&Name, Size>| {
                 row.parent()
                     .map_or(false, |node_info| node_info.row_index == excluded_row_index)
             };
@@ -165,12 +165,12 @@ where
         if let (Some(preceding_sibling_row_index), Some(parent_row_index)) =
             (preceding_sibling_row_index, parent_row_index)
         {
-            let is_sibling = |row: &&TreeRow<&Name, Data>| {
+            let is_sibling = |row: &&TreeRow<&Name, Size>| {
                 row.parent()
                     .map_or(false, |parent| parent.row_index == parent_row_index)
             };
             let is_excluded =
-                |row: &TreeRow<&Name, Data>| excluded_row_indices.contains(&row.row_index);
+                |row: &TreeRow<&Name, Size>| excluded_row_indices.contains(&row.row_index);
             let following_siblings_are_all_excluded = intermediate_table
                 .index(excluded_row_index..)
                 .iter()
@@ -187,7 +187,7 @@ where
         }
     }
 
-    let is_included = |row: &TreeRow<&Name, Data>| !excluded_row_indices.contains(&row.row_index);
+    let is_included = |row: &TreeRow<&Name, Size>| !excluded_row_indices.contains(&row.row_index);
     let tree_data: LinkedList<_> = intermediate_table.into_iter().filter(is_included).collect();
 
     TreeTable {

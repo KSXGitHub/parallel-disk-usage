@@ -1,5 +1,5 @@
 use super::{NodeInfo, TreeRow, TreeTable};
-use crate::{size::Size, visualizer::ProportionBar};
+use crate::{size, visualizer::ProportionBar};
 use assert_cmp::debug_assert_op;
 use derive_more::{Deref, DerefMut};
 use std::{collections::LinkedList, fmt::Display};
@@ -12,20 +12,20 @@ pub(super) struct BarRow<Name, NodeData> {
     pub(super) proportion_bar: ProportionBar,
 }
 
-pub(super) fn render_bars<'a, Name, Data>(
-    tree_table: TreeTable<&'a Name, Data>,
+pub(super) fn render_bars<'a, Name, Size>(
+    tree_table: TreeTable<&'a Name, Size>,
     total: u64,
     width: usize,
-) -> LinkedList<BarRow<&'a Name, Data>>
+) -> LinkedList<BarRow<&'a Name, Size>>
 where
     Name: Display,
-    Data: Size + Into<u64> + 'a,
+    Size: size::Size + Into<u64> + 'a,
 {
     tree_table
         .data
         .into_iter()
         .map(|tree_row| {
-            let get_value = |node_info: &NodeInfo<&Name, Data>| {
+            let get_value = |node_info: &NodeInfo<&Name, Size>| {
                 let node_data = node_info.node_data.into();
                 if total == 0 {
                     return 0;

@@ -1,25 +1,25 @@
 use super::{ConversionError, Reflection};
-use crate::{data_tree::DataTree, size::Size};
+use crate::{data_tree::DataTree, size};
 use rayon::prelude::*;
 use std::{ffi::OsStr, iter::once};
 
-impl<Name, Data> Reflection<Name, Data>
+impl<Name, Size> Reflection<Name, Size>
 where
     Name: Send,
-    Data: Size + Send,
+    Size: size::Size + Send,
 {
     /// Attempting to convert a [`Reflection`] into a valid [`DataTree`].
-    pub fn par_try_into_tree(self) -> Result<DataTree<Name, Data>, ConversionError<Name, Data>> {
+    pub fn par_try_into_tree(self) -> Result<DataTree<Name, Size>, ConversionError<Name, Size>> {
         let Reflection {
             name,
-            data,
+            size,
             children,
         } = self;
-        let children_sum = children.iter().map(|child| child.data).sum();
-        if data < children_sum {
+        let children_sum = children.iter().map(|child| child.size).sum();
+        if size < children_sum {
             return Err(ConversionError::ExcessiveChildren {
                 path: once(name).collect(),
-                data,
+                size,
                 children,
                 children_sum,
             });
@@ -32,14 +32,14 @@ where
             Ok(children) => children,
             Err(ConversionError::ExcessiveChildren {
                 mut path,
-                data,
+                size,
                 children,
                 children_sum,
             }) => {
                 path.push_front(name);
                 return Err(ConversionError::ExcessiveChildren {
                     path,
-                    data,
+                    size,
                     children,
                     children_sum,
                 });
@@ -47,49 +47,49 @@ where
         };
         Ok(DataTree {
             name,
-            data,
+            size,
             children,
         })
     }
 
-    /// Attempt to transform names and data.
-    pub fn par_try_map<TargetName, TargetData, Error, Transform>(
+    /// Attempt to transform names and sizes.
+    pub fn par_try_map<TargetName, TargetSize, Error, Transform>(
         self,
         transform: Transform,
-    ) -> Result<Reflection<TargetName, TargetData>, Error>
+    ) -> Result<Reflection<TargetName, TargetSize>, Error>
     where
         TargetName: Send,
-        TargetData: Size + Send + Sync,
+        TargetSize: size::Size + Send + Sync,
         Error: Send,
-        Transform: Fn(Name, Data) -> Result<(TargetName, TargetData), Error> + Copy + Sync,
+        Transform: Fn(Name, Size) -> Result<(TargetName, TargetSize), Error> + Copy + Sync,
     {
         let Reflection {
             name,
-            data,
+            size,
             children,
         } = self;
         let children = children
             .into_par_iter()
             .map(|child| child.par_try_map(transform))
             .collect::<Result<Vec<_>, _>>()?;
-        let (name, data) = transform(name, data)?;
+        let (name, size) = transform(name, size)?;
         Ok(Reflection {
             name,
-            data,
+            size,
             children,
         })
     }
 
     /// Attempt to convert all names from `OsString` to `String`.
-    pub fn par_convert_names_to_utf8(self) -> Result<Reflection<String, Data>, Name>
+    pub fn par_convert_names_to_utf8(self) -> Result<Reflection<String, Size>, Name>
     where
         Name: AsRef<OsStr>,
-        Data: Sync,
+        Size: Sync,
     {
-        self.par_try_map(|name, data| {
+        self.par_try_map(|name, size| {
             name.as_ref()
                 .to_str()
-                .map(|name| (name.to_string(), data))
+                .map(|name| (name.to_string(), size))
                 .ok_or(name)
         })
     }

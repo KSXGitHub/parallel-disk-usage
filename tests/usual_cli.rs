@@ -41,12 +41,12 @@ fn total_width() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: DEFAULT_GET_SIZE,
+        size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -79,12 +79,12 @@ fn column_width() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: DEFAULT_GET_SIZE,
+        size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -117,11 +117,11 @@ fn min_ratio_0() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GetApparentSize,
+        size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -154,12 +154,12 @@ fn min_ratio() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GetApparentSize,
+        size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.1);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -192,12 +192,12 @@ fn max_depth_2() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GetApparentSize,
+        size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -230,12 +230,12 @@ fn max_depth_1() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GetApparentSize,
+        size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -267,12 +267,12 @@ fn top_down() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: DEFAULT_GET_SIZE,
+        size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -304,12 +304,12 @@ fn align_right() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: DEFAULT_GET_SIZE,
+        size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -341,12 +341,12 @@ fn quantity_apparent_size() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GetApparentSize,
+        size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -379,12 +379,12 @@ fn quantity_block_size() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GetBlockSize,
+        size_getter: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -417,12 +417,12 @@ fn quantity_block_count() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GetBlockCount,
+        size_getter: GetBlockCount,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -456,12 +456,12 @@ fn bytes_format_plain() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GetBlockSize,
+        size_getter: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -495,12 +495,12 @@ fn bytes_format_metric() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GetBlockSize,
+        size_getter: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -534,12 +534,12 @@ fn bytes_format_binary() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GetBlockSize,
+        size_getter: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
@@ -571,12 +571,12 @@ fn path_to_workspace() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: DEFAULT_GET_SIZE,
+        size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
-    data_tree.par_sort_by(|left, right| left.data().cmp(&right.data()).reverse());
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
         bytes_format: BytesFormat::MetricUnits,
@@ -613,7 +613,7 @@ fn multiple_names() {
         .map(|name| {
             let builder = FsTreeBuilder {
                 root: workspace.to_path_buf().join(name),
-                get_data: GetApparentSize,
+                size_getter: GetApparentSize,
                 reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -627,7 +627,7 @@ fn multiple_names() {
                 children.collect(),
             )
         })
-        .into_par_sorted(|left, right| left.data().cmp(&right.data()).reverse());
+        .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse());
     data_tree.par_cull_insignificant_data(0.01);
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,

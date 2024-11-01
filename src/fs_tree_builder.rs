@@ -3,7 +3,7 @@ use super::{
     get_size::GetSize,
     os_string_display::OsStringDisplay,
     reporter::{error_report::Operation::*, ErrorReport, Event, Reporter},
-    size::Size,
+    size,
     tree_builder::{Info, TreeBuilder},
 };
 use pipe_trait::Pipe;
@@ -27,42 +27,42 @@ use std::{
 /// };
 /// let builder = FsTreeBuilder {
 ///     root: std::env::current_dir().unwrap(),
-///     get_data: GetApparentSize,
+///     size_getter: GetApparentSize,
 ///     reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
 /// };
 /// let data_tree: DataTree<OsStringDisplay, Bytes> = builder.into();
 /// ```
 #[derive(Debug)]
-pub struct FsTreeBuilder<Data, GetData, Report>
+pub struct FsTreeBuilder<Size, SizeGetter, Report>
 where
-    Data: Size + Send + Sync,
-    GetData: GetSize<Size = Data> + Sync,
-    Report: Reporter<Data> + Sync,
+    Report: Reporter<Size> + Sync,
+    Size: size::Size + Send + Sync,
+    SizeGetter: GetSize<Size = Size> + Sync,
 {
     /// Root of the directory tree.
     pub root: PathBuf,
     /// Returns size of an item.
-    pub get_data: GetData,
+    pub size_getter: SizeGetter,
     /// Reports progress to external system.
     pub reporter: Report,
 }
 
-impl<Data, GetData, Report> From<FsTreeBuilder<Data, GetData, Report>>
-    for DataTree<OsStringDisplay, Data>
+impl<Size, SizeGetter, Report> From<FsTreeBuilder<Size, SizeGetter, Report>>
+    for DataTree<OsStringDisplay, Size>
 where
-    Data: Size + Send + Sync,
-    GetData: GetSize<Size = Data> + Sync,
-    Report: Reporter<Data> + Sync,
+    Report: Reporter<Size> + Sync,
+    Size: size::Size + Send + Sync,
+    SizeGetter: GetSize<Size = Size> + Sync,
 {
     /// Create a [`DataTree`] from an [`FsTreeBuilder`].
-    fn from(builder: FsTreeBuilder<Data, GetData, Report>) -> Self {
+    fn from(builder: FsTreeBuilder<Size, SizeGetter, Report>) -> Self {
         let FsTreeBuilder {
             root,
-            get_data,
+            size_getter,
             reporter,
         } = builder;
 
-        TreeBuilder::<PathBuf, OsStringDisplay, Data, _, _> {
+        TreeBuilder::<PathBuf, OsStringDisplay, Size, _, _> {
             name: OsStringDisplay::os_string_from(&root),
 
             path: root,
@@ -76,7 +76,7 @@ where
                             error,
                         }));
                         return Info {
-                            data: Data::default(),
+                            size: Size::default(),
                             children: Vec::new(),
                         };
                     }
@@ -111,10 +111,10 @@ where
                     Vec::new()
                 };
 
-                let data = get_data.get_size(&stats);
-                reporter.report(Event::ReceiveData(data));
+                let size = size_getter.get_size(&stats);
+                reporter.report(Event::ReceiveData(size));
 
-                Info { data, children }
+                Info { size, children }
             },
 
             join_path: |prefix, name| prefix.join(&name.0),

@@ -1,18 +1,18 @@
-use crate::{size::Size, status_board::GLOBAL_STATUS_BOARD};
+use crate::{size, status_board::GLOBAL_STATUS_BOARD};
 use std::fmt::Write;
 
 /// Scan progress.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub struct ProgressReport<Data: Size> {
+pub struct ProgressReport<Size: size::Size> {
     /// Number of scanned items.
     pub items: u64,
     /// Total size of scanned items.
-    pub total: Data,
+    pub total: Size,
     /// Number of occurred errors.
     pub errors: u64,
 }
 
-impl<Data: Size + Into<u64>> ProgressReport<Data> {
+impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
     /// Print progress to stderr.
     pub const TEXT: fn(Self) = |report| {
         let ProgressReport {

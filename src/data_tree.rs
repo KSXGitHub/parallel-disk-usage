@@ -4,7 +4,7 @@ pub use reflection::Reflection;
 
 pub use Reflection as DataTreeReflection;
 
-use super::size::Size;
+use super::size;
 
 /// Disk usage data of a filesystem tree.
 ///
@@ -22,9 +22,9 @@ use super::size::Size;
 /// `Serialize` and `Deserialize` traits directly, instead, it can be converted into/from a
 /// [`Reflection`] which implements these traits.
 #[derive(Debug, PartialEq, Eq)]
-pub struct DataTree<Name, Data: Size> {
+pub struct DataTree<Name, Size: size::Size> {
     name: Name,
-    data: Data,
+    size: Size,
     children: Vec<Self>,
 }
 

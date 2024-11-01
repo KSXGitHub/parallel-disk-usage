@@ -1,11 +1,11 @@
 use super::{Direction::*, Visualizer};
-use crate::size::Size;
+use crate::size;
 use std::fmt::{Display, Error, Formatter};
 
-impl<'a, Name, Data> Display for Visualizer<'a, Name, Data>
+impl<'a, Name, Size> Display for Visualizer<'a, Name, Size>
 where
     Name: Display,
-    Data: Size + Into<u64>,
+    Size: size::Size + Into<u64>,
 {
     /// Create the ASCII chart.
     fn fmt(&self, formatter: &mut Formatter<'_>) -> Result<(), Error> {

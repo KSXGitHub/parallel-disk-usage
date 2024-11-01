@@ -1,4 +1,5 @@
-use super::{ErrorReport, Event, ParallelReporter, ProgressReport, Reporter, Size};
+use super::{ErrorReport, Event, ParallelReporter, ProgressReport, Reporter};
+use crate::size;
 use progress_report_state::ProgressReportState;
 use std::{
     any::Any,
@@ -13,11 +14,11 @@ use std::{
 ///
 /// **NOTE:** If an error occurred, `report_error` would be called before `report_progress`.
 #[derive(Debug)]
-pub struct ProgressAndErrorReporter<Data, ReportError>
+pub struct ProgressAndErrorReporter<Size, ReportError>
 where
-    Data: Size + Send + Sync,
+    Size: size::Size + Send + Sync,
     ReportError: Fn(ErrorReport) + Sync,
-    u64: Into<Data>,
+    u64: Into<Size>,
 {
     /// Progress information.
     progress: Arc<ProgressReportState>,
@@ -26,14 +27,14 @@ where
     /// Join handle of progress reporting thread.
     progress_reporter_handle: JoinHandle<()>,
     /// Keep generic parameters.
-    _phantom: PhantomData<Data>,
+    _phantom: PhantomData<Size>,
 }
 
-impl<Data, ReportError> ProgressAndErrorReporter<Data, ReportError>
+impl<Size, ReportError> ProgressAndErrorReporter<Size, ReportError>
 where
-    Data: Size + Send + Sync,
+    Size: size::Size + Send + Sync,
     ReportError: Fn(ErrorReport) + Sync,
-    u64: Into<Data>,
+    u64: Into<Size>,
 {
     /// Create a new [`ProgressAndErrorReporter`] from a report function.
     pub fn new<ReportProgress>(
@@ -42,8 +43,8 @@ where
         report_error: ReportError,
     ) -> Self
     where
-        ProgressReport<Data>: Default + 'static,
-        ReportProgress: Fn(ProgressReport<Data>) + Send + Sync + 'static,
+        ProgressReport<Size>: Default + 'static,
+        ReportProgress: Fn(ProgressReport<Size>) + Send + Sync + 'static,
     {
         let progress = Arc::new(ProgressReportState::default());
         let progress_thread = progress.clone();
@@ -70,13 +71,13 @@ where
     }
 }
 
-impl<Data, ReportError> Reporter<Data> for ProgressAndErrorReporter<Data, ReportError>
+impl<Size, ReportError> Reporter<Size> for ProgressAndErrorReporter<Size, ReportError>
 where
-    Data: Size + Into<u64> + Send + Sync,
+    Size: size::Size + Into<u64> + Send + Sync,
     ReportError: Fn(ErrorReport) + Sync,
-    u64: Into<Data>,
+    u64: Into<Size>,
 {
-    fn report(&self, event: Event<Data>) {
+    fn report(&self, event: Event<Size>) {
         use Event::*;
         let ProgressAndErrorReporter {
             progress,
@@ -89,9 +90,9 @@ where
             };
         }
         match event {
-            ReceiveData(data) => {
+            ReceiveData(size) => {
                 bump!(items += 1);
-                bump!(total += data.into());
+                bump!(total += size.into());
             }
             EncounterError(error_report) => {
                 report_error(error_report);
@@ -101,11 +102,11 @@ where
     }
 }
 
-impl<Data, ReportError> ParallelReporter<Data> for ProgressAndErrorReporter<Data, ReportError>
+impl<Size, ReportError> ParallelReporter<Size> for ProgressAndErrorReporter<Size, ReportError>
 where
-    Data: Size + Into<u64> + Send + Sync,
+    Size: size::Size + Into<u64> + Send + Sync,
     ReportError: Fn(ErrorReport) + Sync,
-    u64: Into<Data>,
+    u64: Into<Size>,
 {
     type DestructionError = Box<dyn Any + Send + 'static>;
     fn destroy(self) -> Result<(), Self::DestructionError> {

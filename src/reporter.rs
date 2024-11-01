@@ -10,28 +10,28 @@ pub use event::Event;
 pub use progress_and_error_reporter::ProgressAndErrorReporter;
 pub use progress_report::ProgressReport;
 
-use crate::size::Size;
+use crate::size;
 
 /// Report progress.
-pub trait Reporter<Data: Size> {
+pub trait Reporter<Size: size::Size> {
     /// Handle report event.
-    fn report(&self, event: Event<Data>);
+    fn report(&self, event: Event<Size>);
 }
 
 /// Utilize threads to report progress.
-pub trait ParallelReporter<Data: Size>: Reporter<Data> {
+pub trait ParallelReporter<Size: size::Size>: Reporter<Size> {
     /// Error type of the [`destroy`](Self::destroy) method.
     type DestructionError;
     /// Stop all threads.
     fn destroy(self) -> Result<(), Self::DestructionError>;
 }
 
-impl<Data, Target> Reporter<Data> for &Target
+impl<Size, Target> Reporter<Size> for &Target
 where
-    Data: Size,
-    Target: Reporter<Data>,
+    Size: size::Size,
+    Target: Reporter<Size>,
 {
-    fn report(&self, event: Event<Data>) {
+    fn report(&self, event: Event<Size>) {
         Target::report(*self, event)
     }
 }

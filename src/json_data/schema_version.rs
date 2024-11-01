@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
 /// Content of [`SchemaVersion`].
-pub const SCHEMA_VERSION: &str = "2021-06-05";
+pub const SCHEMA_VERSION: &str = "2024-11-02";
 
 /// Verifying schema version.
 #[derive(Debug, Clone, Copy)]

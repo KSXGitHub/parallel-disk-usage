@@ -1,12 +1,12 @@
 use super::DataTree;
-use crate::size::Size;
+use crate::size;
 use rayon::prelude::*;
 use std::cmp::Ordering;
 
-impl<Name, Data> DataTree<Name, Data>
+impl<Name, Size> DataTree<Name, Size>
 where
     Self: Send,
-    Data: Size,
+    Size: size::Size,
 {
     /// Sort all descendants recursively, in parallel.
     pub fn par_sort_by(&mut self, compare: impl Fn(&Self, &Self) -> Ordering + Copy + Sync) {

@@ -1,7 +1,7 @@
 use super::DataTree;
-use crate::size::Size;
+use crate::size;
 
-impl<Name, Data: Size> DataTree<Name, Data> {
+impl<Name, Size: size::Size> DataTree<Name, Size> {
     /// Extract name
     pub fn name(&self) -> &Name {
         &self.name
@@ -13,8 +13,8 @@ impl<Name, Data: Size> DataTree<Name, Data> {
     }
 
     /// Extract total disk usage
-    pub fn data(&self) -> Data {
-        self.data
+    pub fn size(&self) -> Size {
+        self.size
     }
 
     /// Extract children

@@ -1,9 +1,9 @@
 use super::ErrorReport;
-use crate::size::Size;
+use crate::size;
 
 /// Report trigger event.
 #[derive(Debug)]
-pub enum Event<'a, Data: Size> {
-    ReceiveData(Data),
+pub enum Event<'a, Size: size::Size> {
+    ReceiveData(Size),
     EncounterError(ErrorReport<'a>),
 }

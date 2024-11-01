@@ -8,7 +8,7 @@ use crate::{
     json_data::{JsonData, UnitAndTree},
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
-    size::{Bytes, Size},
+    size::{self, Bytes},
     visualizer::{BarAlignment, Direction, Visualizer},
 };
 use clap::Parser;
@@ -99,19 +99,19 @@ impl App {
         };
 
         #[allow(clippy::extra_unused_type_parameters)]
-        fn error_only_reporter<Data>(
+        fn error_only_reporter<Size>(
             report_error: fn(ErrorReport),
         ) -> ErrorOnlyReporter<fn(ErrorReport)> {
             ErrorOnlyReporter::new(report_error)
         }
 
-        fn progress_and_error_reporter<Data>(
+        fn progress_and_error_reporter<Size>(
             report_error: fn(ErrorReport),
-        ) -> ProgressAndErrorReporter<Data, fn(ErrorReport)>
+        ) -> ProgressAndErrorReporter<Size, fn(ErrorReport)>
         where
-            Data: Size + Into<u64> + Send + Sync,
-            ProgressReport<Data>: Default + 'static,
-            u64: Into<Data>,
+            Size: size::Size + Into<u64> + Send + Sync,
+            ProgressReport<Size>: Default + 'static,
+            u64: Into<Size>,
         {
             ProgressAndErrorReporter::new(
                 ProgressReport::TEXT,
@@ -124,8 +124,8 @@ impl App {
             ($(
                 $(#[$variant_attrs:meta])*
                 {
-                    $data:ty => $format:expr;
-                    $quantity:ident => $get_data:ident;
+                    $size:ty => $format:expr;
+                    $quantity:ident => $size_getter:ident;
                     $progress:literal => $create_reporter:ident;
                 }
             )*) => { match self.args {$(
@@ -145,8 +145,8 @@ impl App {
                 } => Sub {
                     direction: Direction::from_top_down(top_down),
                     bar_alignment: BarAlignment::from_align_right(align_right),
-                    get_data: $get_data,
-                    reporter: $create_reporter::<$data>(report_error),
+                    size_getter: $size_getter,
+                    reporter: $create_reporter::<$size>(report_error),
                     bytes_format: $format(bytes_format),
                     files,
                     json_output,

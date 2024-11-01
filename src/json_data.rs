@@ -19,9 +19,9 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "json", serde(tag = "unit", content = "tree"))]
 #[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]
 pub enum UnitAndTree {
-    /// Tree where data is [bytes](Bytes).
+    /// Tree where size is [bytes](Bytes).
     Bytes(Reflection<String, Bytes>),
-    /// Tree where data is [blocks](Blocks).
+    /// Tree where size is [blocks](Blocks).
     Blocks(Reflection<String, Blocks>),
 }
 

@@ -1,20 +1,20 @@
 use super::Visualizer;
-use crate::size::Size;
+use crate::size;
 use std::fmt::Display;
 
-impl<'a, Name, Data> Clone for Visualizer<'a, Name, Data>
+impl<'a, Name, Size> Clone for Visualizer<'a, Name, Size>
 where
     Name: Display,
-    Data: Size,
+    Size: size::Size,
 {
     fn clone(&self) -> Self {
         *self
     }
 }
 
-impl<'a, Name, Data> Copy for Visualizer<'a, Name, Data>
+impl<'a, Name, Size> Copy for Visualizer<'a, Name, Size>
 where
     Name: Display,
-    Data: Size,
+    Size: size::Size,
 {
 }
