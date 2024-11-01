@@ -13,10 +13,10 @@ pub struct Fraction(f32);
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Error)]
 pub enum ConversionError {
     /// Provided value is greater than or equal to 1.
-    #[display(fmt = "greater than or equal to 1")]
+    #[display("greater than or equal to 1")]
     UpperBound,
     /// Provided value is less than 0.
-    #[display(fmt = "less than 0")]
+    #[display("less than 0")]
     LowerBound,
 }
 

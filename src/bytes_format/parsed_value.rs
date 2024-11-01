@@ -4,13 +4,13 @@ use derive_more::{Display, Error};
 #[derive(Debug, Display, Clone, Copy, Error)]
 pub enum ParsedValue {
     /// When input value is less than `scale_base`.
-    #[display(fmt = "{value}   ")]
+    #[display("{value}   ")]
     Small {
         /// Input value that is less than `scale_base`.
         value: u16,
     },
     /// When input value is greater than `scale_base`.
-    #[display(fmt = "{coefficient:.1}{unit}")]
+    #[display("{coefficient:.1}{unit}")]
     Big {
         /// The visible part of the number.
         coefficient: f32,

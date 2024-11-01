@@ -2,7 +2,7 @@ use super::{ChildPosition, Direction, Parenthood};
 use derive_more::{AsRef, Deref, Display, Into};
 use fmt_iter::FmtIter;
 use pipe_trait::Pipe;
-use std::fmt::{Display, Error, Formatter};
+use std::fmt::{Error, Formatter};
 use zero_copy_pads::Width;
 
 /// Determine 3 characters to use as skeletal component that connect a node
