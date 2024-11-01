@@ -2,6 +2,7 @@ use crate::{
     args::Fraction,
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
+    get_size::GetSize,
     json_data::{BinaryVersion, JsonData, SchemaVersion, UnitAndTree},
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
@@ -11,14 +12,14 @@ use crate::{
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use serde::Serialize;
-use std::{fs::Metadata, io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
+use std::{io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
 
 /// The sub program of the main application.
 pub struct Sub<Data, GetData, Report>
 where
     Data: Size + Into<u64> + Serialize + Send + Sync,
     Report: ParallelReporter<Data> + Sync,
-    GetData: Fn(&Metadata) -> Data + Copy + Sync,
+    GetData: GetSize<Size = Data> + Copy + Sync,
     DataTreeReflection<String, Data>: Into<UnitAndTree>,
 {
     /// List of files and/or directories.
@@ -49,7 +50,7 @@ impl<Data, GetData, Report> Sub<Data, GetData, Report>
 where
     Data: Size + Into<u64> + Serialize + Send + Sync,
     Report: ParallelReporter<Data> + Sync,
-    GetData: Fn(&Metadata) -> Data + Copy + Sync,
+    GetData: GetSize<Size = Data> + Copy + Sync,
     DataTreeReflection<String, Data>: Into<UnitAndTree>,
 {
     /// Run the sub program.

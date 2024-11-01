@@ -9,10 +9,10 @@ use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::{DataTree, Reflection},
     fs_tree_builder::FsTreeBuilder,
+    get_size::GetApparentSize,
     json_data::{JsonData, SchemaVersion},
     reporter::{ErrorOnlyReporter, ErrorReport},
     size::Bytes,
-    size_getters::GET_APPARENT_SIZE,
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pipe_trait::Pipe;
@@ -80,7 +80,7 @@ fn json_output() {
     dbg!(&actual);
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_APPARENT_SIZE,
+        get_data: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let expected = builder

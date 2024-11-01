@@ -9,9 +9,9 @@ use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
+    get_size::GetApparentSize,
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
-    size_getters::GET_APPARENT_SIZE,
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pipe_trait::Pipe;
@@ -131,7 +131,7 @@ fn fs_errors() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_APPARENT_SIZE,
+        get_data: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();

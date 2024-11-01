@@ -4,11 +4,11 @@ pub use sub::Sub;
 
 use crate::{
     args::{Args, Quantity},
+    get_size::GetApparentSize,
     json_data::{JsonData, UnitAndTree},
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
     size::{Bytes, Size},
-    size_getters::GET_APPARENT_SIZE,
     visualizer::{BarAlignment, Direction, Visualizer},
 };
 use clap::Parser;
@@ -17,8 +17,8 @@ use std::{io::stdin, time::Duration};
 
 #[cfg(unix)]
 use crate::{
+    get_size::{GetBlockCount, GetBlockSize},
     size::Blocks,
-    size_getters::{GET_BLOCK_COUNT, GET_BLOCK_SIZE},
 };
 
 /// The main application.
@@ -162,41 +162,41 @@ impl App {
         run! {
             {
                 Bytes => |x| x;
-                ApparentSize => GET_APPARENT_SIZE;
+                ApparentSize => GetApparentSize;
                 false => error_only_reporter;
             }
 
             {
                 Bytes => |x| x;
-                ApparentSize => GET_APPARENT_SIZE;
+                ApparentSize => GetApparentSize;
                 true => progress_and_error_reporter;
             }
 
             #[cfg(unix)]
             {
                 Bytes => |x| x;
-                BlockSize => GET_BLOCK_SIZE;
+                BlockSize => GetBlockSize;
                 false => error_only_reporter;
             }
 
             #[cfg(unix)]
             {
                 Bytes => |x| x;
-                BlockSize => GET_BLOCK_SIZE;
+                BlockSize => GetBlockSize;
                 true => progress_and_error_reporter;
             }
 
             #[cfg(unix)]
             {
                 Blocks => |_| ();
-                BlockCount => GET_BLOCK_COUNT;
+                BlockCount => GetBlockCount;
                 false => error_only_reporter;
             }
 
             #[cfg(unix)]
             {
                 Blocks => |_| ();
-                BlockCount => GET_BLOCK_COUNT;
+                BlockCount => GetBlockCount;
                 true => progress_and_error_reporter;
             }
         }

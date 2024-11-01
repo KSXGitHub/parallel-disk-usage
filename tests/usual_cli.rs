@@ -8,9 +8,9 @@ use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
+    get_size::{GetApparentSize, GetBlockCount, GetBlockSize},
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
-    size_getters::{GET_APPARENT_SIZE, GET_BLOCK_COUNT, GET_BLOCK_SIZE},
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pipe_trait::Pipe;
@@ -117,7 +117,7 @@ fn min_ratio_0() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_APPARENT_SIZE,
+        get_data: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -154,7 +154,7 @@ fn min_ratio() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_APPARENT_SIZE,
+        get_data: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -192,7 +192,7 @@ fn max_depth_2() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_APPARENT_SIZE,
+        get_data: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -230,7 +230,7 @@ fn max_depth_1() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_APPARENT_SIZE,
+        get_data: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -341,7 +341,7 @@ fn quantity_apparent_size() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_APPARENT_SIZE,
+        get_data: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -379,7 +379,7 @@ fn quantity_block_size() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_BLOCK_SIZE,
+        get_data: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -417,7 +417,7 @@ fn quantity_block_count() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_BLOCK_COUNT,
+        get_data: GetBlockCount,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -456,7 +456,7 @@ fn bytes_format_plain() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_BLOCK_SIZE,
+        get_data: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -495,7 +495,7 @@ fn bytes_format_metric() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_BLOCK_SIZE,
+        get_data: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -534,7 +534,7 @@ fn bytes_format_binary() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        get_data: GET_BLOCK_SIZE,
+        get_data: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -613,7 +613,7 @@ fn multiple_names() {
         .map(|name| {
             let builder = FsTreeBuilder {
                 root: workspace.to_path_buf().join(name),
-                get_data: GET_APPARENT_SIZE,
+                get_data: GetApparentSize,
                 reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();

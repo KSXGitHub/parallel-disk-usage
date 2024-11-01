@@ -4,10 +4,10 @@ use derive_more::{AsRef, Deref};
 use parallel_disk_usage::{
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
+    get_size::{self, GetSize},
     os_string_display::OsStringDisplay,
     reporter::ErrorOnlyReporter,
-    size::{Bytes, Size},
-    size_getters::{self, SizeGetter},
+    size::Size,
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
@@ -15,7 +15,7 @@ use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use rayon::prelude::*;
 use std::{
     env::temp_dir,
-    fs::{create_dir, metadata, remove_dir_all, Metadata},
+    fs::{create_dir, metadata, remove_dir_all},
     io::Error,
     path::{Path, PathBuf},
     process::{Command, Output},
@@ -23,10 +23,10 @@ use std::{
 
 /// Default size getter method.
 #[cfg(unix)]
-pub const DEFAULT_GET_SIZE: SizeGetter<Bytes> = size_getters::GET_BLOCK_SIZE;
+pub const DEFAULT_GET_SIZE: get_size::GetBlockSize = get_size::GetBlockSize;
 /// Default size getter method.
 #[cfg(not(unix))]
-pub const DEFAULT_GET_SIZE: SizeGetter<Bytes> = size_getters::GET_APPARENT_SIZE;
+pub const DEFAULT_GET_SIZE: get_size::GetApparentSize = get_size::GetApparentSize;
 
 /// Representation of a temporary filesystem item.
 ///
@@ -125,17 +125,16 @@ where
 }
 
 /// Test the result of tree builder on the sample workspace.
-pub fn test_sample_tree<Data, SizeFromMetadata>(root: &Path, size_from_metadata: SizeFromMetadata)
+pub fn test_sample_tree<Data, SizeGetter>(root: &Path, size_getter: SizeGetter)
 where
     Data: Size<Inner = u64> + From<u64> + Send + Sync,
-    SizeFromMetadata: Fn(&Metadata) -> u64 + Copy + Sync,
+    SizeGetter: GetSize<Size = Data> + Copy + Sync,
 {
     let suffix_size = |suffix: &str| -> Data {
         root.join(suffix)
             .pipe(metadata)
             .unwrap_or_else(|error| panic!("get_size {}: {}", suffix, error))
-            .pipe_ref(size_from_metadata)
-            .into()
+            .pipe(|ref metadata| size_getter.get_size(metadata))
     };
 
     macro_rules! suffix_size {
@@ -149,7 +148,7 @@ where
 
     let measure = |suffix: &str| {
         FsTreeBuilder {
-            get_data: |metadata| size_from_metadata(metadata).into(),
+            get_data: size_getter,
             reporter: ErrorOnlyReporter::new(|error| {
                 panic!("Unexpected call to report_error: {:?}", error)
             }),
