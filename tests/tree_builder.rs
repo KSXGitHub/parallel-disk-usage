@@ -57,7 +57,7 @@ impl SampleTree {
                     None => panic!("Path does not exist"),
                 }
             },
-            join_path: |prefix, name| format!("{}{}{}", prefix, SAMPLE_SEPARATOR, name),
+            join_path: |prefix, name| format!("{prefix}{SAMPLE_SEPARATOR}{name}"),
         }
         .pipe(DataTree::from)
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
