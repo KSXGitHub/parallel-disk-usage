@@ -120,13 +120,17 @@ impl App {
             )
         }
 
-        macro_rules! sub {
-            (
-                $data:ty => $format:expr;
-                $quantity:ident => $get_data:ident;
-                $progress:literal => $create_reporter:ident;
-            ) => {
-                if let Args {
+        macro_rules! run {
+            ($(
+                $(#[$variant_attrs:meta])*
+                {
+                    $data:ty => $format:expr;
+                    $quantity:ident => $get_data:ident;
+                    $progress:literal => $create_reporter:ident;
+                }
+            )*) => { match self.args {$(
+                $(#[$variant_attrs])*
+                Args {
                     quantity: Quantity::$quantity,
                     progress: $progress,
                     files,
@@ -138,68 +142,63 @@ impl App {
                     min_ratio,
                     no_sort,
                     ..
-                } = self.args
-                {
-                    #[allow(clippy::redundant_closure_call)]
-                    return Sub {
-                        direction: Direction::from_top_down(top_down),
-                        bar_alignment: BarAlignment::from_align_right(align_right),
-                        get_data: $get_data,
-                        reporter: $create_reporter::<$data>(report_error),
-                        bytes_format: $format(bytes_format),
-                        files,
-                        json_output,
-                        column_width_distribution,
-                        max_depth,
-                        min_ratio,
-                        no_sort,
-                    }
-                    .run();
+                } => Sub {
+                    direction: Direction::from_top_down(top_down),
+                    bar_alignment: BarAlignment::from_align_right(align_right),
+                    get_data: $get_data,
+                    reporter: $create_reporter::<$data>(report_error),
+                    bytes_format: $format(bytes_format),
+                    files,
+                    json_output,
+                    column_width_distribution,
+                    max_depth,
+                    min_ratio,
+                    no_sort,
                 }
-            };
+                .run(),
+            )*} };
         }
 
-        sub! {
-            Bytes => |x| x;
-            ApparentSize => GET_APPARENT_SIZE;
-            false => error_only_reporter;
-        }
+        run! {
+            {
+                Bytes => |x| x;
+                ApparentSize => GET_APPARENT_SIZE;
+                false => error_only_reporter;
+            }
 
-        sub! {
-            Bytes => |x| x;
-            ApparentSize => GET_APPARENT_SIZE;
-            true => progress_and_error_reporter;
-        }
+            {
+                Bytes => |x| x;
+                ApparentSize => GET_APPARENT_SIZE;
+                true => progress_and_error_reporter;
+            }
 
-        #[cfg(unix)]
-        sub! {
-            Bytes => |x| x;
-            BlockSize => GET_BLOCK_SIZE;
-            false => error_only_reporter;
-        }
+            #[cfg(unix)]
+            {
+                Bytes => |x| x;
+                BlockSize => GET_BLOCK_SIZE;
+                false => error_only_reporter;
+            }
 
-        #[cfg(unix)]
-        sub! {
-            Bytes => |x| x;
-            BlockSize => GET_BLOCK_SIZE;
-            true => progress_and_error_reporter;
-        }
+            #[cfg(unix)]
+            {
+                Bytes => |x| x;
+                BlockSize => GET_BLOCK_SIZE;
+                true => progress_and_error_reporter;
+            }
 
-        #[cfg(unix)]
-        sub! {
-            Blocks => |_| ();
-            BlockCount => GET_BLOCK_COUNT;
-            false => error_only_reporter;
-        }
+            #[cfg(unix)]
+            {
+                Blocks => |_| ();
+                BlockCount => GET_BLOCK_COUNT;
+                false => error_only_reporter;
+            }
 
-        #[cfg(unix)]
-        sub! {
-            Blocks => |_| ();
-            BlockCount => GET_BLOCK_COUNT;
-            true => progress_and_error_reporter;
+            #[cfg(unix)]
+            {
+                Blocks => |_| ();
+                BlockCount => GET_BLOCK_COUNT;
+                true => progress_and_error_reporter;
+            }
         }
-
-        dbg!(self.args);
-        panic!("Invalid combination of arguments")
     }
 }
