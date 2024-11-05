@@ -492,7 +492,7 @@ jobs:
       - name: Install dust
         env:
           REPO: https://github.com/bootandy/dust
-          VERSION: '0.8.1'
+          VERSION: '1.1.1'
         run: |
           mkdir -p DUST.tmp
           archive_name="dust-v${VERSION}-x86_64-unknown-linux-gnu"
@@ -520,7 +520,7 @@ jobs:
       - name: Install dua
         env:
           REPO: https://github.com/Byron/dua-cli
-          VERSION: '2.19.2'
+          VERSION: '2.29.4'
         run: |
           mkdir -p DUA.tmp
           archive_name="dua-v${VERSION}-x86_64-unknown-linux-musl"
@@ -535,7 +535,7 @@ jobs:
       - name: Install gdu
         env:
           REPO: https://github.com/dundee/gdu
-          VERSION: '5.15.0'
+          VERSION: '5.29.0'
         run: |
           mkdir -p GDU.tmp
           curl -L "${REPO}/releases/download/v${VERSION}/gdu_linux_amd64.tgz" > tmp.gdu.tar.gz
