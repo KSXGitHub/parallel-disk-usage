@@ -171,6 +171,14 @@ Follow the [installation instruction](https://github.com/KSXGitHub/pacman-repo#i
 sudo pacman -S parallel-disk-usage
 ```
 
+#### From [Arch Linux CN Repository](https://github.com/archlinuxcn/repo)
+
+Follow the [installation instruction](https://github.com/archlinuxcn/repo#usage) then run the following command:
+
+```sh
+sudo pacman -S parallel-disk-usage
+```
+
 ## Distributions
 
 [![Packaging Status](https://repology.org/badge/vertical-allrepos/parallel-disk-usage.svg)](https://repology.org/project/parallel-disk-usage/versions)
