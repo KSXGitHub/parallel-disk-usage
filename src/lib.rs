@@ -34,6 +34,7 @@ pub mod data_tree;
 pub mod fs_tree_builder;
 pub mod get_size;
 pub mod json_data;
+pub mod mount_point;
 pub mod os_string_display;
 pub mod reporter;
 pub mod size;

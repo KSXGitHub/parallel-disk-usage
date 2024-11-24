@@ -65,6 +65,7 @@ clap_complete = { version = "^4.5.36", optional = true }
 clap-utilities = { version = "^0.2.0", optional = true }
 serde = { version = "^1.0.214", optional = true }
 serde_json = { version = "^1.0.132", optional = true }
+sysinfo = "0.32.0"
 
 [dev-dependencies]
 build-fs-tree = "^0.7.1"

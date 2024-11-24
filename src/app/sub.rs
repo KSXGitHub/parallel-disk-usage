@@ -4,6 +4,7 @@ use crate::{
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
     json_data::{BinaryVersion, JsonData, SchemaVersion, UnitAndTree},
+    mount_point::find_mountpoint,
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
     runtime_error::RuntimeError,
@@ -12,7 +13,8 @@ use crate::{
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use serde::Serialize;
-use std::{io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
+use std::{fs, io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
+use sysinfo::{DiskKind, Disks};
 
 /// The sub program of the main application.
 pub struct Sub<Size, SizeGetter, Report>
@@ -68,6 +70,29 @@ where
             min_ratio,
             no_sort,
         } = self;
+
+        // If one of the files is on HDD, set thread number to 1
+        let disks = Disks::new_with_refreshed_list();
+
+        if files
+            .iter()
+            .filter_map(|file| fs::canonicalize(file).ok())
+            .any(|path| {
+                let mount_points: Vec<_> = disks.iter().map(|disk| disk.mount_point()).collect();
+                if let Some(mount_point) = find_mountpoint(&path, &mount_points) {
+                    disks.iter().any(|disk| {
+                        matches!(disk.kind(), DiskKind::HDD) && disk.mount_point() == mount_point
+                    })
+                } else {
+                    false
+                }
+            })
+        {
+            rayon::ThreadPoolBuilder::new()
+                .num_threads(1)
+                .build_global()
+                .unwrap();
+        }
 
         let mut iter = files
             .into_iter()
