@@ -37,7 +37,7 @@ fn total_width() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -56,9 +56,9 @@ fn total_width() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -75,7 +75,7 @@ fn column_width() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -94,9 +94,9 @@ fn column_width() {
         column_width_distribution: ColumnWidthDistribution::components(10, 90),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -113,7 +113,7 @@ fn min_ratio_0() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -131,9 +131,9 @@ fn min_ratio_0() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -150,7 +150,7 @@ fn min_ratio() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -169,9 +169,9 @@ fn min_ratio() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -188,7 +188,7 @@ fn max_depth_2() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -207,9 +207,9 @@ fn max_depth_2() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 2.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -226,7 +226,7 @@ fn max_depth_1() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -245,9 +245,9 @@ fn max_depth_1() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 1.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -263,7 +263,7 @@ fn top_down() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -282,9 +282,9 @@ fn top_down() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -300,7 +300,7 @@ fn align_right() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -319,9 +319,9 @@ fn align_right() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -337,7 +337,7 @@ fn quantity_apparent_size() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -356,9 +356,9 @@ fn quantity_apparent_size() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -375,7 +375,7 @@ fn quantity_block_size() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -394,9 +394,9 @@ fn quantity_block_size() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -413,7 +413,7 @@ fn quantity_block_count() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -432,9 +432,9 @@ fn quantity_block_count() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -452,7 +452,7 @@ fn bytes_format_plain() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -471,9 +471,9 @@ fn bytes_format_plain() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -491,7 +491,7 @@ fn bytes_format_metric() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -510,9 +510,9 @@ fn bytes_format_metric() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -530,7 +530,7 @@ fn bytes_format_binary() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -549,9 +549,9 @@ fn bytes_format_binary() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -567,7 +567,7 @@ fn path_to_workspace() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -585,9 +585,9 @@ fn path_to_workspace() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }
@@ -606,7 +606,7 @@ fn multiple_names() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{}\n", &actual);
+    eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree = ["nested", "flat", "empty-dir"]
         .iter()
@@ -637,9 +637,9 @@ fn multiple_names() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected = format!("{}", visualizer);
+    let expected = format!("{visualizer}");
     let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{}\n", expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
 }

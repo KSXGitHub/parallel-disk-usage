@@ -73,9 +73,9 @@ where
     fn fmt(&self, formatter: &mut Formatter<'_>) -> Result<(), Error> {
         let inner = self.as_os_str();
         if let Some(utf8) = inner.to_str() {
-            write!(formatter, "{}", utf8)
+            write!(formatter, "{utf8}")
         } else {
-            write!(formatter, "{:?}", inner)
+            write!(formatter, "{inner:?}")
         }
     }
 }

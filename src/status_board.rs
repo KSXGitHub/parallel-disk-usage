@@ -32,19 +32,19 @@ impl StatusBoard {
     /// Clear the line that the cursor is pointing to.
     pub fn clear_line(&self, new_line_width: usize) {
         let empty_line = repeat(' ', self.get_line_width());
-        eprint!("\r{}\r", empty_line);
+        eprint!("\r{empty_line}\r");
         self.set_line_width(new_line_width);
     }
 
     /// Show a temporary message.
     pub fn temporary_message(&self, message: &str) {
         self.clear_line(message.width());
-        eprint!("{}", message);
+        eprint!("{message}");
     }
 
     /// Log a permanent message.
     pub fn permanent_message(&self, message: &str) {
         self.clear_line(0);
-        eprintln!("{}", message);
+        eprintln!("{message}");
     }
 }

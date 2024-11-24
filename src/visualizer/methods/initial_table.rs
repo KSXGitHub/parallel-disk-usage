@@ -120,7 +120,7 @@ where
                 "0%".to_string()
             } else {
                 let percentage = rounded_div::u64(fs_size * 100, total_fs_size);
-                format!("{}%", percentage)
+                format!("{percentage}%")
             };
             let size = node.size().display(visualizer.bytes_format).to_string();
             let sibling_count = ancestors.last().map_or(1, |parent| parent.children_count);

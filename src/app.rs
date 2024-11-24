@@ -88,7 +88,7 @@ impl App {
                 UnitAndTree::Blocks(reflection) => visualize!(reflection, ()),
             };
 
-            print!("{}", visualization); // it already ends with "\n", println! isn't needed here.
+            print!("{visualization}"); // it already ends with "\n", println! isn't needed here.
             return Ok(());
         }
 

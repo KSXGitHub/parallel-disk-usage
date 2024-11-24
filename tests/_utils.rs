@@ -58,7 +58,7 @@ impl Drop for Temp {
     fn drop(&mut self) {
         let path = &self.0;
         if let Err(error) = remove_dir_all(path) {
-            eprintln!("warning: Failed to delete {:?}: {}", path, error);
+            eprintln!("warning: Failed to delete {path:?}: {error}");
         }
     }
 }
@@ -133,7 +133,7 @@ where
     let suffix_size = |suffix: &str| -> Size {
         root.join(suffix)
             .pipe(metadata)
-            .unwrap_or_else(|error| panic!("get_size {}: {}", suffix, error))
+            .unwrap_or_else(|error| panic!("get_size {suffix}: {error}"))
             .pipe(|ref metadata| size_getter.get_size(metadata))
     };
 
@@ -327,6 +327,6 @@ pub fn inspect_stderr(stderr: &[u8]) {
     let text = String::from_utf8_lossy(stderr);
     let text = text.trim();
     if !text.is_empty() {
-        eprintln!("STDERR:\n{}\n", text);
+        eprintln!("STDERR:\n{text}\n");
     }
 }

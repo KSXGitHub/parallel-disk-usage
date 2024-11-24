@@ -16,7 +16,7 @@ pub mod runtime_error;
 #[cfg(feature = "cli")]
 pub fn main() -> std::process::ExitCode {
     if let Err(error) = app::App::from_env().run() {
-        eprintln!("[error] {}", error);
+        eprintln!("[error] {error}");
         return std::process::ExitCode::FAILURE;
     }
     std::process::ExitCode::SUCCESS

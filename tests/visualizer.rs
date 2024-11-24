@@ -47,7 +47,7 @@ macro_rules! test_case {
             }
             .to_string();
             let expected = $expected;
-            eprintln!("\nACTUAL:\n{}\n", &actual);
+            eprintln!("\nACTUAL:\n{actual}\n");
 
             let actual_lines: Vec<_> = actual.lines().collect();
             let expected_lines: Vec<_> = expected.lines().collect();
