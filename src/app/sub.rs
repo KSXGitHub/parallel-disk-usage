@@ -1,10 +1,11 @@
+mod mount_point;
+
 use crate::{
     args::Fraction,
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
     json_data::{BinaryVersion, JsonData, SchemaVersion, UnitAndTree},
-    mount_point::find_mountpoint,
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
     runtime_error::RuntimeError,
@@ -12,9 +13,10 @@ use crate::{
     status_board::GLOBAL_STATUS_BOARD,
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
+use mount_point::find_mount_point;
 use serde::Serialize;
 use std::{fs, io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
-use sysinfo::{DiskKind, Disks};
+use sysinfo::{Disk, DiskKind, Disks};
 
 /// The sub program of the main application.
 pub struct Sub<Size, SizeGetter, Report>
@@ -74,24 +76,11 @@ where
         // If one of the files is on HDD, set thread number to 1
         let disks = Disks::new_with_refreshed_list();
 
-        if files
-            .iter()
-            .filter_map(|file| fs::canonicalize(file).ok())
-            .any(|path| {
-                let mount_points: Vec<_> = disks.iter().map(|disk| disk.mount_point()).collect();
-                if let Some(mount_point) = find_mountpoint(&path, &mount_points) {
-                    disks.iter().any(|disk| {
-                        matches!(disk.kind(), DiskKind::HDD) && disk.mount_point() == mount_point
-                    })
-                } else {
-                    false
-                }
-            })
-        {
+        if detect_hdd_in_files(&disks, &files, |disk| disk.kind()) {
             rayon::ThreadPoolBuilder::new()
                 .num_threads(1)
                 .build_global()
-                .unwrap();
+                .unwrap_or_else(|_| eprintln!("warning: This program is suboptimal with HDD"));
         }
 
         let mut iter = files
@@ -173,4 +162,25 @@ where
         print!("{}", visualizer); // visualizer already ends with "\n", println! isn't needed here.
         Ok(())
     }
+}
+
+fn detect_hdd_in_files(
+    disks: &[Disk],
+    files: &[PathBuf],
+    get_disk_kind: impl Fn(&Disk) -> DiskKind,
+) -> bool {
+    files
+        .iter()
+        .filter_map(|file| fs::canonicalize(file).ok())
+        .any(|path| {
+            if let Some(mount_point) =
+                find_mount_point(&path, disks.iter().map(|disk| disk.mount_point()))
+            {
+                disks.iter().any(|disk| {
+                    get_disk_kind(disk) == DiskKind::HDD && disk.mount_point() == mount_point
+                })
+            } else {
+                false
+            }
+        })
 }
