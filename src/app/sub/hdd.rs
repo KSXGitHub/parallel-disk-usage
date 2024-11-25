@@ -36,6 +36,7 @@ fn path_is_in_hdd<Disk>(
 #[cfg(test)]
 mod tests {
     use super::{any_path_is_in_hdd, path_is_in_hdd};
+    use pretty_assertions::assert_eq;
     use std::path::{self, Path, PathBuf};
     use sysinfo::DiskKind;
 
@@ -76,6 +77,7 @@ mod tests {
             ("/mnt/data/test/test", true),
             ("/mnt/repo/test/test", false),
         ] {
+            println!("CASE: {path} → {in_hdd:?}");
             assert_eq!(
                 path_is_in_hdd(
                     Path::new(path),
@@ -133,6 +135,7 @@ mod tests {
                 false,
             ),
         ] {
+            println!("CASE: {paths:?} → {in_hdd:?}");
             assert_eq!(
                 any_path_is_in_hdd(
                     &paths,

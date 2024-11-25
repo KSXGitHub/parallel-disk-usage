@@ -6,13 +6,14 @@ pub fn find_mount_point<'a>(
 ) -> Option<&'a Path> {
     mount_points
         .into_iter()
-        .filter(|mnt| path.starts_with(&*mnt.to_string_lossy()))
+        .filter(|mnt| path.starts_with(mnt))
         .max_by_key(|mnt| AsRef::<OsStr>::as_ref(mnt).len()) // Mount points can be nested in each other
 }
 
 #[cfg(test)]
 mod tests {
     use super::find_mount_point;
+    use pretty_assertions::assert_eq;
     use std::path::Path;
 
     #[test]
@@ -32,6 +33,7 @@ mod tests {
             ("/mnt/data/test/test", "/mnt/data/"),
             ("/mnt/repo/test/test", "/mnt/repo/"),
         ] {
+            println!("CASE: {path} → {mount_point}");
             assert_eq!(
                 find_mount_point(Path::new(path), mount_points).unwrap(),
                 Path::new(mount_point)
