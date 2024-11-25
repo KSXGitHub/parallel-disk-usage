@@ -1,3 +1,4 @@
+mod hdd;
 mod mount_point;
 
 use crate::{
@@ -13,10 +14,10 @@ use crate::{
     status_board::GLOBAL_STATUS_BOARD,
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
-use mount_point::find_mount_point;
+use hdd::detect_hdd_in_files;
 use serde::Serialize;
-use std::{fs, io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
-use sysinfo::{Disk, DiskKind, Disks};
+use std::{io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
+use sysinfo::Disks;
 
 /// The sub program of the main application.
 pub struct Sub<Size, SizeGetter, Report>
@@ -162,25 +163,4 @@ where
         print!("{visualizer}"); // visualizer already ends with "\n", println! isn't needed here.
         Ok(())
     }
-}
-
-fn detect_hdd_in_files(
-    disks: &[Disk],
-    files: &[PathBuf],
-    get_disk_kind: impl Fn(&Disk) -> DiskKind,
-) -> bool {
-    files
-        .iter()
-        .filter_map(|file| fs::canonicalize(file).ok())
-        .any(|path| {
-            if let Some(mount_point) =
-                find_mount_point(&path, disks.iter().map(|disk| disk.mount_point()))
-            {
-                disks.iter().any(|disk| {
-                    get_disk_kind(disk) == DiskKind::HDD && disk.mount_point() == mount_point
-                })
-            } else {
-                false
-            }
-        })
 }
