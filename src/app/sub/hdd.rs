@@ -7,11 +7,11 @@ use sysinfo::DiskKind;
 
 pub fn any_path_is_in_hdd<Disk>(
     disks: &[Disk],
-    files: &[PathBuf],
+    paths: &[PathBuf],
     get_disk_kind: impl Fn(&Disk) -> DiskKind,
     get_mount_point: impl Fn(&Disk) -> &Path + Copy,
 ) -> bool {
-    files
+    paths
         .iter()
         .filter_map(|file| fs::canonicalize(file).ok())
         .any(|path| {
