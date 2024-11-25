@@ -83,10 +83,11 @@ where
             |disk| disk.kind(),
             |disk| disk.mount_point(),
         ) {
+            eprintln!("warning: HDD detected, the thread limit will be set to 1");
             rayon::ThreadPoolBuilder::new()
                 .num_threads(1)
                 .build_global()
-                .unwrap_or_else(|_| eprintln!("warning: This program is suboptimal with HDD"));
+                .unwrap_or_else(|_| eprintln!("warning: Failed to set thread limit to 1"));
         }
 
         let mut iter = files
