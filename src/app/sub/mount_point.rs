@@ -16,7 +16,7 @@ mod tests {
     use std::path::Path;
 
     #[test]
-    fn test_mountpoint() {
+    fn test_mount_point() {
         let mount_points = [
             Path::new("/"),
             Path::new("/home"),
