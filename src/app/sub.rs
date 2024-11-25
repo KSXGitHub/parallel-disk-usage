@@ -77,7 +77,12 @@ where
         // If one of the files is on HDD, set thread number to 1
         let disks = Disks::new_with_refreshed_list();
 
-        if detect_hdd_in_files(&disks, &files, |disk| disk.kind()) {
+        if detect_hdd_in_files(
+            &disks,
+            &files,
+            |disk| disk.kind(),
+            |disk| disk.mount_point(),
+        ) {
             rayon::ThreadPoolBuilder::new()
                 .num_threads(1)
                 .build_global()
