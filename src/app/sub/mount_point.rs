@@ -1,6 +1,6 @@
 use std::{ffi::OsStr, path::Path};
 
-pub(super) fn find_mount_point<'a>(
+pub fn find_mount_point<'a>(
     path: &Path,
     mount_points: impl IntoIterator<Item = &'a Path>,
 ) -> Option<&'a Path> {
