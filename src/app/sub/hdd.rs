@@ -142,7 +142,7 @@ mod tests {
                     disks,
                     |disk| disk.kind,
                     |disk| &disk.mount_point,
-                    |path| path::absolute(path),
+                    |path| Ok(path.to_path_buf()),
                 ),
                 in_hdd
             );
