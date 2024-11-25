@@ -5,7 +5,7 @@ use std::{
 };
 use sysinfo::DiskKind;
 
-pub fn detect_hdd_in_files<Disk>(
+pub fn any_path_is_in_hdd<Disk>(
     disks: &[Disk],
     files: &[PathBuf],
     get_disk_kind: impl Fn(&Disk) -> DiskKind,

@@ -14,7 +14,7 @@ use crate::{
     status_board::GLOBAL_STATUS_BOARD,
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
-use hdd::detect_hdd_in_files;
+use hdd::any_path_is_in_hdd;
 use serde::Serialize;
 use std::{io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
 use sysinfo::Disks;
@@ -77,7 +77,7 @@ where
         // If one of the files is on HDD, set thread number to 1
         let disks = Disks::new_with_refreshed_list();
 
-        if detect_hdd_in_files(
+        if any_path_is_in_hdd(
             &disks,
             &files,
             |disk| disk.kind(),
