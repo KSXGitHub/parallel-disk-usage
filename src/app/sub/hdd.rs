@@ -37,7 +37,7 @@ fn path_is_in_hdd<Disk>(
 mod tests {
     use super::{any_path_is_in_hdd, path_is_in_hdd};
     use pretty_assertions::assert_eq;
-    use std::path::{self, Path, PathBuf};
+    use std::path::{Path, PathBuf};
     use sysinfo::DiskKind;
 
     struct Disk {
