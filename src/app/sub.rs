@@ -159,7 +159,7 @@ where
             max_depth,
         };
 
-        print!("{}", visualizer); // visualizer already ends with "\n", println! isn't needed here.
+        print!("{visualizer}"); // visualizer already ends with "\n", println! isn't needed here.
         Ok(())
     }
 }

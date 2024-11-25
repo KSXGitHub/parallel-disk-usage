@@ -29,7 +29,7 @@ impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
         )
         .unwrap();
         if errors != 0 {
-            write!(text, ", erred {}", errors).unwrap();
+            write!(text, ", erred {errors}").unwrap();
         }
         write!(text, ")").unwrap();
         GLOBAL_STATUS_BOARD.temporary_message(&text);

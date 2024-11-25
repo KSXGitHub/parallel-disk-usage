@@ -62,7 +62,7 @@ fn min_ratio_1() {
     let stderr = String::from_utf8(stderr).expect("parse stderr as UTF-8");
     let stderr = stderr.trim_end();
     dbg!(&status);
-    eprintln!("STDERR:\n{}\n", stderr);
+    eprintln!("STDERR:\n{stderr}\n");
     assert!(!status.success());
     assert_eq!(
         stderr,
@@ -91,7 +91,7 @@ fn max_depth_0() {
     let stderr = String::from_utf8(stderr).expect("parse stderr as UTF-8");
     let stderr = stderr.trim_end();
     dbg!(&status);
-    eprintln!("STDERR:\n{}\n", stderr);
+    eprintln!("STDERR:\n{stderr}\n");
     assert!(!status.success());
     assert_eq!(
         stderr,
@@ -127,7 +127,7 @@ fn fs_errors() {
     let stderr = String::from_utf8(stderr).expect("parse stderr as UTF-8");
     let stdout = String::from_utf8(stdout).expect("parse stdout as UTF-8");
     dbg!(&status);
-    eprintln!("STDERR+STDOUT:\n{}{}\n", &stderr, &stdout);
+    eprintln!("STDERR+STDOUT:\n{stderr}{stdout}\n");
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
@@ -145,7 +145,7 @@ fn fs_errors() {
         column_width_distribution: ColumnWidthDistribution::total(100),
         max_depth: 10.try_into().unwrap(),
     };
-    let expected_stdout = format!("{}", visualizer);
+    let expected_stdout = format!("{visualizer}");
     eprintln!("EXPECTED STDOUT:\n{}\n", &expected_stdout);
 
     fs_permission(&workspace, "+rwx", true); // to allow SampleWorkspace destructor to clean itself

@@ -40,7 +40,7 @@ use std::{fmt::Display, num::NonZeroUsize};
 ///     column_width_distribution: ColumnWidthDistribution::total(100),
 ///     max_depth: std::num::NonZeroUsize::new(10).unwrap(),
 /// };
-/// println!("{}", visualizer);
+/// println!("{visualizer}");
 /// # }
 /// ```
 #[derive(Debug)]
