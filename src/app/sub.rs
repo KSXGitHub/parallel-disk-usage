@@ -16,7 +16,7 @@ use crate::{
 };
 use hdd::any_path_is_in_hdd;
 use serde::Serialize;
-use std::{io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
+use std::{fs, io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
 use sysinfo::Disks;
 
 /// The sub program of the main application.
@@ -78,10 +78,11 @@ where
         let disks = Disks::new_with_refreshed_list();
 
         if any_path_is_in_hdd(
-            &disks,
             &files,
+            &disks,
             |disk| disk.kind(),
             |disk| disk.mount_point(),
+            |path| fs::canonicalize(path),
         ) {
             eprintln!("warning: HDD detected, the thread limit will be set to 1");
             rayon::ThreadPoolBuilder::new()
