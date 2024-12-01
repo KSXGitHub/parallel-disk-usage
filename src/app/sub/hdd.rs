@@ -110,7 +110,7 @@ mod tests {
             ("/mnt/repo/test/test", false),
         ] {
             println!("CASE: {path} → {in_hdd:?}");
-            assert_eq!(path_is_in_hdd::<MockedApi>(Path::new(path), disks,), in_hdd);
+            assert_eq!(path_is_in_hdd::<MockedApi>(Path::new(path), disks), in_hdd);
         }
     }
 
