@@ -98,8 +98,9 @@ impl App {
             Threads::Auto => {
                 let disks = Disks::new_with_refreshed_list();
                 if any_path_is_in_hdd::<hdd::RealApi>(&self.args.files, &disks) {
-                    eprintln!("warning: HDD detected, the thread limit will be set to 1");
-                    Some(1)
+                    // eprintln!("warning: HDD detected, the thread limit will be set to 1");
+                    // Some(1)
+                    panic!("HDD detected");
                 } else {
                     None
                 }
