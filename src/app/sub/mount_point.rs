@@ -18,25 +18,20 @@ mod tests {
 
     #[test]
     fn test_mount_point() {
-        let mount_points = [
-            Path::new("/"),
-            Path::new("/home"),
-            Path::new("/mnt/data"),
-            Path::new("/mnt/data/repo"),
-            Path::new("/mnt/repo"),
-        ];
+        let all_mount_points = ["/", "/home", "/mnt/data", "/mnt/data/repo", "/mnt/repo"];
 
-        for (path, mount_point) in &[
+        for (path, expected_mount_point) in &[
             ("/etc/fstab", "/"),
             ("/home/user", "/home"),
             ("/mnt/data/repo/test", "/mnt/data/repo"),
             ("/mnt/data/test/test", "/mnt/data/"),
             ("/mnt/repo/test/test", "/mnt/repo/"),
         ] {
-            println!("CASE: {path} → {mount_point}");
+            println!("CASE: {path} → {expected_mount_point}");
+            let all_mount_points = all_mount_points.map(Path::new);
             assert_eq!(
-                find_mount_point(Path::new(path), mount_points).unwrap(),
-                Path::new(mount_point)
+                find_mount_point(Path::new(path), all_mount_points).unwrap(),
+                Path::new(expected_mount_point)
             );
         }
     }
