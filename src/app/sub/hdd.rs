@@ -60,6 +60,12 @@ mod tests {
         mount_point: &'static str,
     }
 
+    impl Disk {
+        fn new(kind: DiskKind, mount_point: &'static str) -> Self {
+            Self { kind, mount_point }
+        }
+    }
+
     struct MockedApi;
     impl Api for MockedApi {
         type Disk = Disk;
@@ -80,26 +86,11 @@ mod tests {
     #[test]
     fn test_path_in_hdd() {
         let disks = &[
-            Disk {
-                kind: DiskKind::SSD,
-                mount_point: "/",
-            },
-            Disk {
-                kind: DiskKind::HDD,
-                mount_point: "/home",
-            },
-            Disk {
-                kind: DiskKind::HDD,
-                mount_point: "/mnt/data",
-            },
-            Disk {
-                kind: DiskKind::SSD,
-                mount_point: "/mnt/repo",
-            },
-            Disk {
-                kind: DiskKind::HDD,
-                mount_point: "/mnt/data/repo",
-            },
+            Disk::new(DiskKind::SSD, "/"),
+            Disk::new(DiskKind::HDD, "/home"),
+            Disk::new(DiskKind::HDD, "/mnt/data"),
+            Disk::new(DiskKind::SSD, "/mnt/repo"),
+            Disk::new(DiskKind::HDD, "/mnt/data/repo"),
         ];
 
         for (path, in_hdd) in [
@@ -117,26 +108,11 @@ mod tests {
     #[test]
     fn test_any_path_in_hdd() {
         let disks = &[
-            Disk {
-                kind: DiskKind::SSD,
-                mount_point: "/",
-            },
-            Disk {
-                kind: DiskKind::HDD,
-                mount_point: "/home",
-            },
-            Disk {
-                kind: DiskKind::HDD,
-                mount_point: "/mnt/data",
-            },
-            Disk {
-                kind: DiskKind::SSD,
-                mount_point: "/mnt/repo",
-            },
-            Disk {
-                kind: DiskKind::HDD,
-                mount_point: "/mnt/data/repo",
-            },
+            Disk::new(DiskKind::SSD, "/"),
+            Disk::new(DiskKind::HDD, "/home"),
+            Disk::new(DiskKind::HDD, "/mnt/data"),
+            Disk::new(DiskKind::SSD, "/mnt/repo"),
+            Disk::new(DiskKind::HDD, "/mnt/data/repo"),
         ];
 
         for (paths, in_hdd) in [
