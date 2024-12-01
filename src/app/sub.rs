@@ -79,7 +79,6 @@ where
 
         let threads = match threads {
             Threads::Auto => {
-                // If one of the files is on HDD, set thread number to 1
                 let disks = Disks::new_with_refreshed_list();
                 if any_path_is_in_hdd::<hdd::RealApi>(&files, &disks) {
                     eprintln!("warning: HDD detected, the thread limit will be set to 1");
