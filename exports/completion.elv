@@ -24,6 +24,7 @@ set edit:completion:arg-completer[pdu] = {|@words|
             cand --total-width 'Width of the visualization'
             cand --column-width 'Maximum widths of the tree column and width of the bar column'
             cand --min-ratio 'Minimal size proportion required to appear'
+            cand --threads 'Set the maximum number of threads to spawn. Could be either "auto", "max", or a number'
             cand --json-input 'Read JSON data from stdin'
             cand --json-output 'Print JSON data instead of an ASCII chart'
             cand --top-down 'Print the tree top-down instead of bottom-up'

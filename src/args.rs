@@ -1,8 +1,10 @@
 pub mod fraction;
 pub mod quantity;
+pub mod threads;
 
 pub use fraction::Fraction;
 pub use quantity::Quantity;
+pub use threads::Threads;
 
 use crate::{bytes_format::BytesFormat, visualizer::ColumnWidthDistribution};
 use clap::{ColorChoice, Parser};
@@ -128,6 +130,10 @@ pub struct Args {
     /// Report progress being made at the expense of performance.
     #[clap(long)]
     pub progress: bool,
+
+    /// Set the maximum number of threads to spawn. Could be either "auto", "max", or a number.
+    #[clap(long, default_value_t = Threads::Auto)]
+    pub threads: Threads,
 }
 
 impl Args {

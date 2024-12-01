@@ -25,6 +25,7 @@ block-count\:"Count numbers of blocks"))' \
 '(--column-width)--total-width=[Width of the visualization]:TOTAL_WIDTH:_default' \
 '*--column-width=[Maximum widths of the tree column and width of the bar column]:TREE_WIDTH:_default:TREE_WIDTH:_default' \
 '--min-ratio=[Minimal size proportion required to appear]:MIN_RATIO:_default' \
+'--threads=[Set the maximum number of threads to spawn. Could be either "auto", "max", or a number]:THREADS:_default' \
 '(--quantity)--json-input[Read JSON data from stdin]' \
 '--json-output[Print JSON data instead of an ASCII chart]' \
 '--top-down[Print the tree top-down instead of bottom-up]' \
