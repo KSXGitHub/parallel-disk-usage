@@ -88,17 +88,17 @@ mod tests {
         let disks = &[
             Disk::new(DiskKind::SSD, "/"),
             Disk::new(DiskKind::HDD, "/home"),
-            Disk::new(DiskKind::HDD, "/mnt/data"),
-            Disk::new(DiskKind::SSD, "/mnt/repo"),
-            Disk::new(DiskKind::HDD, "/mnt/data/repo"),
+            Disk::new(DiskKind::HDD, "/mnt/hdd-data"),
+            Disk::new(DiskKind::SSD, "/mnt/ssd-data"),
+            Disk::new(DiskKind::HDD, "/mnt/hdd-data/repo"),
         ];
 
         for (path, in_hdd) in [
             ("/etc/fstab", false),
             ("/mnt/", false),
-            ("/mnt/data/repo/test", true),
-            ("/mnt/data/test/test", true),
-            ("/mnt/repo/test/test", false),
+            ("/mnt/hdd-data/repo/test", true),
+            ("/mnt/hdd-data/test/test", true),
+            ("/mnt/ssd-data/test/test", false),
         ] {
             println!("CASE: {path} → {in_hdd:?}");
             assert_eq!(path_is_in_hdd::<MockedApi>(Path::new(path), disks), in_hdd);
@@ -110,9 +110,9 @@ mod tests {
         let disks = &[
             Disk::new(DiskKind::SSD, "/"),
             Disk::new(DiskKind::HDD, "/home"),
-            Disk::new(DiskKind::HDD, "/mnt/data"),
-            Disk::new(DiskKind::SSD, "/mnt/repo"),
-            Disk::new(DiskKind::HDD, "/mnt/data/repo"),
+            Disk::new(DiskKind::HDD, "/mnt/hdd-data"),
+            Disk::new(DiskKind::SSD, "/mnt/ssd-data"),
+            Disk::new(DiskKind::HDD, "/mnt/hdd-data/repo"),
         ];
 
         let cases: &[(&[&str], bool)] = &[
@@ -120,19 +120,19 @@ mod tests {
             (&["/"], false),
             (&["/home"], true),
             (&["/mnt"], false),
-            (&["/mnt/repo"], false),
-            (&["/mnt/data"], true),
-            (&["/mnt/data/repo"], true),
+            (&["/mnt/ssd-data"], false),
+            (&["/mnt/hdd-data"], true),
+            (&["/mnt/hdd-data/repo"], true),
             (&["/etc/fstab"], false),
             (&["/home/usr/file"], true),
             (&["/home/data/repo/test"], true),
             (&["/usr/share"], false),
-            (&["/mnt/repo/test"], false),
+            (&["/mnt/ssd-data/test"], false),
             (&["/etc/fstab", "/home/user/file"], true),
-            (&["/mnt/data/file", "/mnt/data/repo/test"], true),
-            (&["/usr/share", "/mnt/repo/test"], false),
+            (&["/mnt/hdd-data/file", "/mnt/hdd-data/repo/test"], true),
+            (&["/usr/share", "/mnt/ssd-data/test"], false),
             (
-                &["/etc/fstab", "/home/user", "/mnt/data", "/usr/share"],
+                &["/etc/fstab", "/home/user", "/mnt/hdd-data", "/usr/share"],
                 true,
             ),
         ];
