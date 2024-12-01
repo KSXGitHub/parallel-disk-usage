@@ -41,6 +41,7 @@ impl TryFrom<f32> for Fraction {
     }
 }
 
+/// Error that occurs when converting a string into an instance of [`Fraction`].
 #[derive(Debug, Display, Clone, PartialEq, Eq, Error)]
 pub enum FromStrError {
     ParseFloatError(ParseFloatError),
