@@ -115,28 +115,51 @@ mod tests {
             Disk::new(DiskKind::HDD, "/mnt/data/repo"),
         ];
 
-        for (paths, in_hdd) in [
+        let cases: &[(&[PathBuf], bool)] = &[
+            (&[], false),
+            (&[PathBuf::from("/")], false),
+            (&[PathBuf::from("/home")], true),
+            (&[PathBuf::from("/mnt")], false),
+            (&[PathBuf::from("/mnt/repo")], false),
+            (&[PathBuf::from("/mnt/data")], true),
+            (&[PathBuf::from("/mnt/data/repo")], true),
+            (&[PathBuf::from("/etc/fstab")], false),
+            (&[PathBuf::from("/home/usr/file")], true),
+            (&[PathBuf::from("/home/data/repo/test")], true),
+            (&[PathBuf::from("/usr/share")], false),
+            (&[PathBuf::from("/mnt/repo/test")], false),
             (
-                [
+                &[
                     PathBuf::from("/etc/fstab"),
                     PathBuf::from("/home/user/file"),
                 ],
                 true,
             ),
             (
-                [
+                &[
                     PathBuf::from("/mnt/data/file"),
                     PathBuf::from("/mnt/data/repo/test"),
                 ],
                 true,
             ),
             (
-                [PathBuf::from("/usr/share"), PathBuf::from("/mnt/repo/test")],
+                &[PathBuf::from("/usr/share"), PathBuf::from("/mnt/repo/test")],
                 false,
             ),
-        ] {
+            (
+                &[
+                    PathBuf::from("/etc/fstab"),
+                    PathBuf::from("/home/user"),
+                    PathBuf::from("/mnt/data"),
+                    PathBuf::from("/usr/share"),
+                ],
+                true,
+            ),
+        ];
+
+        for (paths, in_hdd) in cases {
             println!("CASE: {paths:?} → {in_hdd:?}");
-            assert_eq!(any_path_is_in_hdd::<MockedApi>(&paths, disks), in_hdd);
+            assert_eq!(any_path_is_in_hdd::<MockedApi>(paths, disks), *in_hdd);
         }
     }
 }
