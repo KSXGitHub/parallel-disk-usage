@@ -31,7 +31,7 @@ mod tests {
             let all_mount_points = all_mount_points.map(Path::new);
             assert_eq!(
                 find_mount_point(Path::new(path), all_mount_points).unwrap(),
-                Path::new(expected_mount_point)
+                Path::new(expected_mount_point),
             );
         }
     }
