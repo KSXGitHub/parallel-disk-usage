@@ -84,28 +84,6 @@ mod tests {
     }
 
     #[test]
-    fn test_path_in_hdd() {
-        let disks = &[
-            Disk::new(DiskKind::SSD, "/"),
-            Disk::new(DiskKind::HDD, "/home"),
-            Disk::new(DiskKind::HDD, "/mnt/hdd-data"),
-            Disk::new(DiskKind::SSD, "/mnt/ssd-data"),
-            Disk::new(DiskKind::HDD, "/mnt/hdd-data/repo"),
-        ];
-
-        for (path, in_hdd) in [
-            ("/etc/fstab", false),
-            ("/mnt/", false),
-            ("/mnt/hdd-data/repo/test", true),
-            ("/mnt/hdd-data/test/test", true),
-            ("/mnt/ssd-data/test/test", false),
-        ] {
-            println!("CASE: {path} → {in_hdd:?}");
-            assert_eq!(path_is_in_hdd::<MockedApi>(Path::new(path), disks), in_hdd);
-        }
-    }
-
-    #[test]
     fn test_any_path_in_hdd() {
         let disks = &[
             Disk::new(DiskKind::SSD, "/"),
@@ -141,6 +119,28 @@ mod tests {
             let paths: Vec<_> = paths.iter().map(PathBuf::from).collect();
             println!("CASE: {paths:?} → {in_hdd:?}");
             assert_eq!(any_path_is_in_hdd::<MockedApi>(&paths, disks), *in_hdd);
+        }
+    }
+
+    #[test]
+    fn test_path_in_hdd() {
+        let disks = &[
+            Disk::new(DiskKind::SSD, "/"),
+            Disk::new(DiskKind::HDD, "/home"),
+            Disk::new(DiskKind::HDD, "/mnt/hdd-data"),
+            Disk::new(DiskKind::SSD, "/mnt/ssd-data"),
+            Disk::new(DiskKind::HDD, "/mnt/hdd-data/repo"),
+        ];
+
+        for (path, in_hdd) in [
+            ("/etc/fstab", false),
+            ("/mnt/", false),
+            ("/mnt/hdd-data/repo/test", true),
+            ("/mnt/hdd-data/test/test", true),
+            ("/mnt/ssd-data/test/test", false),
+        ] {
+            println!("CASE: {path} → {in_hdd:?}");
+            assert_eq!(path_is_in_hdd::<MockedApi>(Path::new(path), disks), in_hdd);
         }
     }
 }
