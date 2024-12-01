@@ -1,12 +1,13 @@
 use std::{ffi::OsStr, path::Path};
 
+/// Find a mount point that contains `absolute_path`.
 pub fn find_mount_point<'a>(
-    path: &Path,
-    mount_points: impl IntoIterator<Item = &'a Path>,
+    absolute_path: &Path,
+    all_mount_points: impl IntoIterator<Item = &'a Path>,
 ) -> Option<&'a Path> {
-    mount_points
+    all_mount_points
         .into_iter()
-        .filter(|mnt| path.starts_with(mnt))
+        .filter(|mnt| absolute_path.starts_with(mnt))
         .max_by_key(|mnt| AsRef::<OsStr>::as_ref(mnt).len()) // Mount points can be nested in each other
 }
 

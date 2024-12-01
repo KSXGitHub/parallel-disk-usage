@@ -6,6 +6,7 @@ use std::{
 };
 use sysinfo::{Disk, DiskKind};
 
+/// Mockable APIs to interact with the system.
 pub trait Api {
     type Disk;
     fn get_disk_kind(disk: &Self::Disk) -> DiskKind;
@@ -13,6 +14,7 @@ pub trait Api {
     fn canonicalize(path: &Path) -> io::Result<PathBuf>;
 }
 
+/// Implementation of [`Api`] that interacts with the real system.
 pub struct RealApi;
 impl Api for RealApi {
     type Disk = Disk;
@@ -30,6 +32,7 @@ impl Api for RealApi {
     }
 }
 
+/// Check if any path is in any HDD.
 pub fn any_path_is_in_hdd<Api: self::Api>(paths: &[PathBuf], disks: &[Api::Disk]) -> bool {
     paths
         .iter()
@@ -37,6 +40,7 @@ pub fn any_path_is_in_hdd<Api: self::Api>(paths: &[PathBuf], disks: &[Api::Disk]
         .any(|path| path_is_in_hdd::<Api>(&path, disks))
 }
 
+/// Check if path is in any HDD.
 fn path_is_in_hdd<Api: self::Api>(path: &Path, disks: &[Api::Disk]) -> bool {
     let Some(mount_point) = find_mount_point(path, disks.iter().map(Api::get_mount_point)) else {
         return false;
@@ -55,6 +59,7 @@ mod tests {
     use std::path::{Path, PathBuf};
     use sysinfo::DiskKind;
 
+    /// Fake disk for [`Api`].
     struct Disk {
         kind: DiskKind,
         mount_point: &'static str,
@@ -66,6 +71,7 @@ mod tests {
         }
     }
 
+    /// Mocked implementation of [`Api`] for testing purposes.
     struct MockedApi;
     impl Api for MockedApi {
         type Disk = Disk;
