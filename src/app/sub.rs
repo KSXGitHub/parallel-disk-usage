@@ -1,8 +1,5 @@
-mod hdd;
-mod mount_point;
-
 use crate::{
-    args::{Fraction, Threads},
+    args::Fraction,
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
@@ -14,10 +11,8 @@ use crate::{
     status_board::GLOBAL_STATUS_BOARD,
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
-use hdd::any_path_is_in_hdd;
 use serde::Serialize;
 use std::{io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
-use sysinfo::Disks;
 
 /// The sub program of the main application.
 pub struct Sub<Size, SizeGetter, Report>
@@ -47,8 +42,6 @@ where
     pub reporter: Report,
     /// Minimal size proportion required to appear.
     pub min_ratio: Fraction,
-    /// The number of threads [`rayon`] can use.
-    pub threads: Threads,
     /// Preserve order of entries.
     pub no_sort: bool,
 }
@@ -73,30 +66,8 @@ where
             size_getter,
             reporter,
             min_ratio,
-            threads,
             no_sort,
         } = self;
-
-        let threads = match threads {
-            Threads::Auto => {
-                let disks = Disks::new_with_refreshed_list();
-                if any_path_is_in_hdd::<hdd::RealApi>(&files, &disks) {
-                    eprintln!("warning: HDD detected, the thread limit will be set to 1");
-                    Some(1)
-                } else {
-                    None
-                }
-            }
-            Threads::Max => None,
-            Threads::Fixed(threads) => Some(threads),
-        };
-
-        if let Some(threads) = threads {
-            rayon::ThreadPoolBuilder::new()
-                .num_threads(threads)
-                .build_global()
-                .unwrap_or_else(|_| eprintln!("warning: Failed to set thread limit to {threads}"));
-        }
 
         let mut iter = files
             .into_iter()
