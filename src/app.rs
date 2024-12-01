@@ -46,27 +46,6 @@ impl App {
         //
         // The other operations which are invoked frequently should not utilize dynamic dispatch.
 
-        let threads = match self.args.threads {
-            Threads::Auto => {
-                let disks = Disks::new_with_refreshed_list();
-                if any_path_is_in_hdd::<hdd::RealApi>(&self.args.files, &disks) {
-                    eprintln!("warning: HDD detected, the thread limit will be set to 1");
-                    Some(1)
-                } else {
-                    None
-                }
-            }
-            Threads::Max => None,
-            Threads::Fixed(threads) => Some(threads),
-        };
-
-        if let Some(threads) = threads {
-            rayon::ThreadPoolBuilder::new()
-                .num_threads(threads)
-                .build_global()
-                .unwrap_or_else(|_| eprintln!("warning: Failed to set thread limit to {threads}"));
-        }
-
         let column_width_distribution = self.args.column_width_distribution();
 
         if self.args.json_input {
@@ -113,6 +92,27 @@ impl App {
 
             print!("{visualization}"); // it already ends with "\n", println! isn't needed here.
             return Ok(());
+        }
+
+        let threads = match self.args.threads {
+            Threads::Auto => {
+                let disks = Disks::new_with_refreshed_list();
+                if any_path_is_in_hdd::<hdd::RealApi>(&self.args.files, &disks) {
+                    eprintln!("warning: HDD detected, the thread limit will be set to 1");
+                    Some(1)
+                } else {
+                    None
+                }
+            }
+            Threads::Max => None,
+            Threads::Fixed(threads) => Some(threads),
+        };
+
+        if let Some(threads) = threads {
+            rayon::ThreadPoolBuilder::new()
+                .num_threads(threads)
+                .build_global()
+                .unwrap_or_else(|_| eprintln!("warning: Failed to set thread limit to {threads}"));
         }
 
         let report_error = if self.args.silent_errors {
