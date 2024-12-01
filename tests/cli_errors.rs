@@ -158,7 +158,6 @@ fn fs_errors() {
     let expected_stderr_lines = btreeset! {
         "[error] read_dir \"./nested/0\": Permission denied (os error 13)",
         "[error] read_dir \"./empty-dir\": Permission denied (os error 13)",
-        "warning: HDD detected, the thread limit will be set to 1", // TODO: fix this bug
     };
     assert_eq!(actual_stderr_lines, expected_stderr_lines);
 
