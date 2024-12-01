@@ -1,32 +1,46 @@
 use super::mount_point::find_mount_point;
 use std::{
+    fs::canonicalize,
     io,
     path::{Path, PathBuf},
 };
-use sysinfo::DiskKind;
+use sysinfo::{Disk, DiskKind};
 
-pub fn any_path_is_in_hdd<Disk>(
-    paths: &[PathBuf],
-    disks: &[Disk],
-    get_disk_kind: impl Fn(&Disk) -> DiskKind + Copy,
-    get_mount_point: impl Fn(&Disk) -> &Path + Copy,
-    canonicalize: impl Fn(&Path) -> io::Result<PathBuf>,
-) -> bool {
-    paths
-        .iter()
-        .filter_map(|file| canonicalize(file).ok())
-        .any(|path| path_is_in_hdd(&path, disks, get_disk_kind, get_mount_point))
+pub trait Api {
+    type Disk;
+    fn get_disk_kind(disk: &Self::Disk) -> DiskKind;
+    fn get_mount_point(disk: &Self::Disk) -> &Path;
+    fn canonicalize(path: &Path) -> io::Result<PathBuf>;
 }
 
-fn path_is_in_hdd<Disk>(
-    path: &Path,
-    disks: &[Disk],
-    get_disk_kind: impl Fn(&Disk) -> DiskKind,
-    get_mount_point: impl Fn(&Disk) -> &Path + Copy,
-) -> bool {
-    if let Some(mount_point) = find_mount_point(path, disks.iter().map(get_mount_point)) {
+pub struct RealApi;
+impl Api for RealApi {
+    type Disk = Disk;
+
+    fn get_disk_kind(disk: &Self::Disk) -> DiskKind {
+        disk.kind()
+    }
+
+    fn get_mount_point(disk: &Self::Disk) -> &Path {
+        disk.mount_point()
+    }
+
+    fn canonicalize(path: &Path) -> io::Result<PathBuf> {
+        canonicalize(path)
+    }
+}
+
+pub fn any_path_is_in_hdd<Api: self::Api>(paths: &[PathBuf], disks: &[Api::Disk]) -> bool {
+    paths
+        .iter()
+        .filter_map(|file| Api::canonicalize(file).ok())
+        .any(|path| path_is_in_hdd::<Api>(&path, disks))
+}
+
+fn path_is_in_hdd<Api: self::Api>(path: &Path, disks: &[Api::Disk]) -> bool {
+    if let Some(mount_point) = find_mount_point(path, disks.iter().map(Api::get_mount_point)) {
         disks.iter().any(|disk| {
-            get_disk_kind(disk) == DiskKind::HDD && get_mount_point(disk) == mount_point
+            Api::get_disk_kind(disk) == DiskKind::HDD && Api::get_mount_point(disk) == mount_point
         })
     } else {
         false
@@ -35,7 +49,8 @@ fn path_is_in_hdd<Disk>(
 
 #[cfg(test)]
 mod tests {
-    use super::{any_path_is_in_hdd, path_is_in_hdd};
+    use super::{any_path_is_in_hdd, path_is_in_hdd, Api};
+    use pipe_trait::Pipe;
     use pretty_assertions::assert_eq;
     use std::path::{Path, PathBuf};
     use sysinfo::DiskKind;
@@ -43,6 +58,23 @@ mod tests {
     struct Disk {
         kind: DiskKind,
         mount_point: &'static Path,
+    }
+
+    struct MockedApi;
+    impl Api for MockedApi {
+        type Disk = Disk;
+
+        fn get_disk_kind(disk: &Self::Disk) -> DiskKind {
+            disk.kind
+        }
+
+        fn get_mount_point(disk: &Self::Disk) -> &Path {
+            disk.mount_point
+        }
+
+        fn canonicalize(path: &Path) -> std::io::Result<PathBuf> {
+            path.to_path_buf().pipe(Ok)
+        }
     }
 
     #[test]
@@ -78,15 +110,7 @@ mod tests {
             ("/mnt/repo/test/test", false),
         ] {
             println!("CASE: {path} → {in_hdd:?}");
-            assert_eq!(
-                path_is_in_hdd(
-                    Path::new(path),
-                    disks,
-                    |disk| disk.kind,
-                    |disk| &disk.mount_point
-                ),
-                in_hdd
-            );
+            assert_eq!(path_is_in_hdd::<MockedApi>(Path::new(path), disks,), in_hdd);
         }
     }
 
@@ -136,16 +160,7 @@ mod tests {
             ),
         ] {
             println!("CASE: {paths:?} → {in_hdd:?}");
-            assert_eq!(
-                any_path_is_in_hdd(
-                    &paths,
-                    disks,
-                    |disk| disk.kind,
-                    |disk| &disk.mount_point,
-                    |path| Ok(path.to_path_buf()),
-                ),
-                in_hdd
-            );
+            assert_eq!(any_path_is_in_hdd::<MockedApi>(&paths, disks), in_hdd);
         }
     }
 }
