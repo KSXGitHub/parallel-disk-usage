@@ -57,7 +57,7 @@ mod tests {
 
     struct Disk {
         kind: DiskKind,
-        mount_point: &'static Path,
+        mount_point: &'static str,
     }
 
     struct MockedApi;
@@ -69,7 +69,7 @@ mod tests {
         }
 
         fn get_mount_point(disk: &Self::Disk) -> &Path {
-            disk.mount_point
+            Path::new(disk.mount_point)
         }
 
         fn canonicalize(path: &Path) -> std::io::Result<PathBuf> {
@@ -82,23 +82,23 @@ mod tests {
         let disks = &[
             Disk {
                 kind: DiskKind::SSD,
-                mount_point: Path::new("/"),
+                mount_point: "/",
             },
             Disk {
                 kind: DiskKind::HDD,
-                mount_point: Path::new("/home"),
+                mount_point: "/home",
             },
             Disk {
                 kind: DiskKind::HDD,
-                mount_point: Path::new("/mnt/data"),
+                mount_point: "/mnt/data",
             },
             Disk {
                 kind: DiskKind::SSD,
-                mount_point: Path::new("/mnt/repo"),
+                mount_point: "/mnt/repo",
             },
             Disk {
                 kind: DiskKind::HDD,
-                mount_point: Path::new("/mnt/data/repo"),
+                mount_point: "/mnt/data/repo",
             },
         ];
 
@@ -119,23 +119,23 @@ mod tests {
         let disks = &[
             Disk {
                 kind: DiskKind::SSD,
-                mount_point: Path::new("/"),
+                mount_point: "/",
             },
             Disk {
                 kind: DiskKind::HDD,
-                mount_point: Path::new("/home"),
+                mount_point: "/home",
             },
             Disk {
                 kind: DiskKind::HDD,
-                mount_point: Path::new("/mnt/data"),
+                mount_point: "/mnt/data",
             },
             Disk {
                 kind: DiskKind::SSD,
-                mount_point: Path::new("/mnt/repo"),
+                mount_point: "/mnt/repo",
             },
             Disk {
                 kind: DiskKind::HDD,
-                mount_point: Path::new("/mnt/data/repo"),
+                mount_point: "/mnt/data/repo",
             },
         ];
 
