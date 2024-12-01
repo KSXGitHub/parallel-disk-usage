@@ -141,6 +141,7 @@ impl App {
                     max_depth,
                     min_ratio,
                     no_sort,
+                    threads,
                     ..
                 } => Sub {
                     direction: Direction::from_top_down(top_down),
@@ -154,6 +155,7 @@ impl App {
                     max_depth,
                     min_ratio,
                     no_sort,
+                    threads,
                 }
                 .run(),
             )*} };

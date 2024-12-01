@@ -2,7 +2,7 @@ mod hdd;
 mod mount_point;
 
 use crate::{
-    args::Fraction,
+    args::{Fraction, Threads},
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
@@ -47,6 +47,8 @@ where
     pub reporter: Report,
     /// Minimal size proportion required to appear.
     pub min_ratio: Fraction,
+    /// The number of threads [`rayon`] can use.
+    pub threads: Threads,
     /// Preserve order of entries.
     pub no_sort: bool,
 }
@@ -71,18 +73,26 @@ where
             size_getter,
             reporter,
             min_ratio,
+            threads,
             no_sort,
         } = self;
 
-        // If one of the files is on HDD, set thread number to 1
-        let disks = Disks::new_with_refreshed_list();
+        let threads = match threads {
+            Threads::Auto => {
+                // If one of the files is on HDD, set thread number to 1
+                let disks = Disks::new_with_refreshed_list();
+                eprintln!("warning: HDD detected, the thread limit will be set to 1");
+                any_path_is_in_hdd::<hdd::RealApi>(&files, &disks).then_some(1)
+            }
+            Threads::Max => None,
+            Threads::Fixed(threads) => Some(threads),
+        };
 
-        if any_path_is_in_hdd::<hdd::RealApi>(&files, &disks) {
-            eprintln!("warning: HDD detected, the thread limit will be set to 1");
+        if let Some(threads) = threads {
             rayon::ThreadPoolBuilder::new()
-                .num_threads(1)
+                .num_threads(threads)
                 .build_global()
-                .unwrap_or_else(|_| eprintln!("warning: Failed to set thread limit to 1"));
+                .unwrap_or_else(|_| eprintln!("warning: Failed to set thread limit to {threads}"));
         }
 
         let mut iter = files

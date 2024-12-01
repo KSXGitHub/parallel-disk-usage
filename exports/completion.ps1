@@ -27,6 +27,7 @@ Register-ArgumentCompleter -Native -CommandName 'pdu' -ScriptBlock {
             [CompletionResult]::new('--total-width', '--total-width', [CompletionResultType]::ParameterName, 'Width of the visualization')
             [CompletionResult]::new('--column-width', '--column-width', [CompletionResultType]::ParameterName, 'Maximum widths of the tree column and width of the bar column')
             [CompletionResult]::new('--min-ratio', '--min-ratio', [CompletionResultType]::ParameterName, 'Minimal size proportion required to appear')
+            [CompletionResult]::new('--threads', '--threads', [CompletionResultType]::ParameterName, 'Set the maximum number of threads to spawn. Could be either "auto", "max", or a number')
             [CompletionResult]::new('--json-input', '--json-input', [CompletionResultType]::ParameterName, 'Read JSON data from stdin')
             [CompletionResult]::new('--json-output', '--json-output', [CompletionResultType]::ParameterName, 'Print JSON data instead of an ASCII chart')
             [CompletionResult]::new('--top-down', '--top-down', [CompletionResultType]::ParameterName, 'Print the tree top-down instead of bottom-up')
