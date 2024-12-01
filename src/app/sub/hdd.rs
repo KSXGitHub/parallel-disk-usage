@@ -115,51 +115,32 @@ mod tests {
             Disk::new(DiskKind::HDD, "/mnt/data/repo"),
         ];
 
-        let cases: &[(&[PathBuf], bool)] = &[
+        let cases: &[(&[&str], bool)] = &[
             (&[], false),
-            (&[PathBuf::from("/")], false),
-            (&[PathBuf::from("/home")], true),
-            (&[PathBuf::from("/mnt")], false),
-            (&[PathBuf::from("/mnt/repo")], false),
-            (&[PathBuf::from("/mnt/data")], true),
-            (&[PathBuf::from("/mnt/data/repo")], true),
-            (&[PathBuf::from("/etc/fstab")], false),
-            (&[PathBuf::from("/home/usr/file")], true),
-            (&[PathBuf::from("/home/data/repo/test")], true),
-            (&[PathBuf::from("/usr/share")], false),
-            (&[PathBuf::from("/mnt/repo/test")], false),
+            (&["/"], false),
+            (&["/home"], true),
+            (&["/mnt"], false),
+            (&["/mnt/repo"], false),
+            (&["/mnt/data"], true),
+            (&["/mnt/data/repo"], true),
+            (&["/etc/fstab"], false),
+            (&["/home/usr/file"], true),
+            (&["/home/data/repo/test"], true),
+            (&["/usr/share"], false),
+            (&["/mnt/repo/test"], false),
+            (&["/etc/fstab", "/home/user/file"], true),
+            (&["/mnt/data/file", "/mnt/data/repo/test"], true),
+            (&["/usr/share", "/mnt/repo/test"], false),
             (
-                &[
-                    PathBuf::from("/etc/fstab"),
-                    PathBuf::from("/home/user/file"),
-                ],
-                true,
-            ),
-            (
-                &[
-                    PathBuf::from("/mnt/data/file"),
-                    PathBuf::from("/mnt/data/repo/test"),
-                ],
-                true,
-            ),
-            (
-                &[PathBuf::from("/usr/share"), PathBuf::from("/mnt/repo/test")],
-                false,
-            ),
-            (
-                &[
-                    PathBuf::from("/etc/fstab"),
-                    PathBuf::from("/home/user"),
-                    PathBuf::from("/mnt/data"),
-                    PathBuf::from("/usr/share"),
-                ],
+                &["/etc/fstab", "/home/user", "/mnt/data", "/usr/share"],
                 true,
             ),
         ];
 
         for (paths, in_hdd) in cases {
+            let paths: Vec<_> = paths.iter().map(PathBuf::from).collect();
             println!("CASE: {paths:?} → {in_hdd:?}");
-            assert_eq!(any_path_is_in_hdd::<MockedApi>(paths, disks), *in_hdd);
+            assert_eq!(any_path_is_in_hdd::<MockedApi>(&paths, disks), *in_hdd);
         }
     }
 }
