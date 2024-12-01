@@ -443,7 +443,7 @@ dependencies = [
 
 [[package]]
 name = "parallel-disk-usage"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "assert-cmp",
  "build-fs-tree",
