@@ -38,13 +38,13 @@ pub fn any_path_is_in_hdd<Api: self::Api>(paths: &[PathBuf], disks: &[Api::Disk]
 }
 
 fn path_is_in_hdd<Api: self::Api>(path: &Path, disks: &[Api::Disk]) -> bool {
-    if let Some(mount_point) = find_mount_point(path, disks.iter().map(Api::get_mount_point)) {
-        disks.iter().any(|disk| {
-            Api::get_disk_kind(disk) == DiskKind::HDD && Api::get_mount_point(disk) == mount_point
-        })
-    } else {
-        false
-    }
+    let Some(mount_point) = find_mount_point(path, disks.iter().map(Api::get_mount_point)) else {
+        return false;
+    };
+    disks
+        .iter()
+        .filter(|disk| Api::get_disk_kind(disk) == DiskKind::HDD)
+        .any(|disk| Api::get_mount_point(disk) == mount_point)
 }
 
 #[cfg(test)]
