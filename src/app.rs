@@ -12,8 +12,10 @@ use crate::{
     visualizer::{BarAlignment, Direction, Visualizer},
 };
 use clap::Parser;
+use hdd::any_path_is_in_hdd;
 use pipe_trait::Pipe;
 use std::{io::stdin, time::Duration};
+use sysinfo::Disks;
 
 #[cfg(unix)]
 use crate::{
@@ -43,6 +45,18 @@ impl App {
         // impact on performance.
         //
         // The other operations which are invoked frequently should not utilize dynamic dispatch.
+
+        {
+            // If one of the files is on HDD, set thread number to 1
+            let disks = Disks::new_with_refreshed_list();
+            if any_path_is_in_hdd::<hdd::RealApi>(&self.args.files, &disks) {
+                eprintln!("warning: HDD detected, the thread limit will be set to 1");
+                rayon::ThreadPoolBuilder::new()
+                    .num_threads(1)
+                    .build_global()
+                    .unwrap_or_else(|_| eprintln!("warning: Failed to set thread limit to 1"));
+            }
+        }
 
         let column_width_distribution = self.args.column_width_distribution();
 
@@ -202,3 +216,6 @@ impl App {
         }
     }
 }
+
+mod hdd;
+mod mount_point;

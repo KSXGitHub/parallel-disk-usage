@@ -1,6 +1,3 @@
-mod hdd;
-mod mount_point;
-
 use crate::{
     args::Fraction,
     data_tree::{DataTree, DataTreeReflection},
@@ -14,10 +11,8 @@ use crate::{
     status_board::GLOBAL_STATUS_BOARD,
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
-use hdd::any_path_is_in_hdd;
 use serde::Serialize;
 use std::{io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
-use sysinfo::Disks;
 
 /// The sub program of the main application.
 pub struct Sub<Size, SizeGetter, Report>
@@ -73,17 +68,6 @@ where
             min_ratio,
             no_sort,
         } = self;
-
-        // If one of the files is on HDD, set thread number to 1
-        let disks = Disks::new_with_refreshed_list();
-
-        if any_path_is_in_hdd::<hdd::RealApi>(&files, &disks) {
-            eprintln!("warning: HDD detected, the thread limit will be set to 1");
-            rayon::ThreadPoolBuilder::new()
-                .num_threads(1)
-                .build_global()
-                .unwrap_or_else(|_| eprintln!("warning: Failed to set thread limit to 1"));
-        }
 
         let mut iter = files
             .into_iter()
