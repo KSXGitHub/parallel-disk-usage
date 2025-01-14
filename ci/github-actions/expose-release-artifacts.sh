@@ -1,4 +1,5 @@
 #! /bin/bash
+set -o errexit -o pipefail -o nounset
 mkdir ./flatten
 
 [ -d ./downloads ] || {
