@@ -156,13 +156,13 @@ cargo install parallel-disk-usage --bin pdu
 sudo pacman -S parallel-disk-usage
 ```
 
-#### From [Khải's Pacman Repository](https://github.com/KSXGitHub/pacman-repo)
+<!-- #### From [Khải's Pacman Repository](https://github.com/KSXGitHub/pacman-repo)
 
 Follow the [installation instruction](https://github.com/KSXGitHub/pacman-repo#installation) then run the following command:
 
 ```sh
 sudo pacman -S parallel-disk-usage
-```
+``` -->
 
 #### From [Arch Linux CN Repository](https://github.com/archlinuxcn/repo)
 
