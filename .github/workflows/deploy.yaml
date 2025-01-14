@@ -364,62 +364,6 @@ jobs:
           asset_name: sha512sum.txt
           asset_content_type: text/plain
 
-  publish_aur_package:
-    name: Publish AUR package
-
-    needs:
-      - create_release
-      - test
-      - build_linux
-      - upload_release_assets
-
-    if: needs.create_release.outputs.release_type == 'official'
-
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: true
-      matrix:
-        target:
-          - x86_64-unknown-linux-gnu
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download checksums
-        uses: actions/download-artifact@v4
-        with:
-          name: checksums
-          path: ./checksums
-
-      - name: Generate PKGBUILD
-        env:
-          TARGET: ${{ matrix.target }}
-          RELEASE_TAG: ${{ needs.create_release.outputs.release_tag }}
-        run: ./ci/github-actions/generate-pkgbuild.py3
-
-      - name: Publish parallel-disk-usage to the AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v3.0.1
-        with:
-          pkgname: parallel-disk-usage
-          pkgbuild: ./pkgbuild/parallel-disk-usage/PKGBUILD
-          commit_username: ${{ secrets.AUR_USERNAME }}
-          commit_email: ${{ secrets.AUR_EMAIL }}
-          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          commit_message: ${{ needs.create_release.outputs.release_tag }}
-          force_push: 'true'
-
-      - name: Publish parallel-disk-usage-bin to the AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v3.0.1
-        with:
-          pkgname: parallel-disk-usage-bin
-          pkgbuild: ./pkgbuild/parallel-disk-usage-bin/PKGBUILD
-          commit_username: ${{ secrets.AUR_USERNAME }}
-          commit_email: ${{ secrets.AUR_EMAIL }}
-          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          commit_message: ${{ needs.create_release.outputs.release_tag }}
-          force_push: 'true'
-
   publish_cargo_crate:
     name: Publish Cargo crate
 
@@ -455,7 +399,6 @@ jobs:
       - upload_generated_files
       - upload_release_assets
       - upload_checksums
-      - publish_aur_package
       - publish_cargo_crate
 
     if: needs.create_release.outputs.is_release == 'true'
