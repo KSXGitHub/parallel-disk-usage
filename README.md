@@ -150,17 +150,10 @@ cargo install parallel-disk-usage --bin pdu
 
 ### Arch Linux
 
-#### From the [Arch User Repository](https://aur.archlinux.org)
-
-**Prerequisites:**
-  * An AUR helper, such as [`paru`](https://github.com/Morganamilo/paru)
+#### From the [Official Repository](https://archlinux.org/packages/extra/x86_64/parallel-disk-usage/)
 
 ```sh
-paru -S parallel-disk-usage-bin
-```
-
-```sh
-paru -S parallel-disk-usage
+sudo pacman -S parallel-disk-usage
 ```
 
 #### From [Khải's Pacman Repository](https://github.com/KSXGitHub/pacman-repo)
