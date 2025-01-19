@@ -148,7 +148,7 @@ Go to the [GitHub Release Page](https://github.com/KSXGitHub/parallel-disk-usage
 cargo install parallel-disk-usage --bin pdu
 ```
 
-### Arch Linux
+<!-- ### Arch Linux
 
 #### From the [Official Repository](https://archlinux.org/packages/extra/x86_64/parallel-disk-usage/)
 
@@ -156,21 +156,13 @@ cargo install parallel-disk-usage --bin pdu
 sudo pacman -S parallel-disk-usage
 ```
 
-<!-- #### From [Khải's Pacman Repository](https://github.com/KSXGitHub/pacman-repo)
+#### From [Khải's Pacman Repository](https://github.com/KSXGitHub/pacman-repo)
 
 Follow the [installation instruction](https://github.com/KSXGitHub/pacman-repo#installation) then run the following command:
 
 ```sh
 sudo pacman -S parallel-disk-usage
 ``` -->
-
-#### From [Arch Linux CN Repository](https://github.com/archlinuxcn/repo)
-
-Follow the [installation instruction](https://github.com/archlinuxcn/repo#usage) then run the following command:
-
-```sh
-sudo pacman -S parallel-disk-usage
-```
 
 ## Distributions
 
