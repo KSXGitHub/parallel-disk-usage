@@ -57,7 +57,6 @@ text-block-macros = "^0.2.0"
 rounded-div = "^0.1.2"
 fmt-iter = "^0.2.1"
 itertools = "^0.13.0"
-assert-cmp = "^0.2.1"
 zero-copy-pads = "^0.2.0"
 terminal_size = "^0.4.0"
 clap = { version = "^4.3.8", optional = true }

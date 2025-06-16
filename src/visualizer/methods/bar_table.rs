@@ -1,6 +1,6 @@
 use super::{NodeInfo, TreeRow, TreeTable};
 use crate::{size, visualizer::ProportionBar};
-use assert_cmp::debug_assert_op;
+
 use derive_more::{Deref, DerefMut};
 use std::{collections::LinkedList, fmt::Display};
 
@@ -44,10 +44,10 @@ where
             let lv2_value = ancestor_value!(2, lv1_value);
             let lv3_value = ancestor_value!(1, lv2_value);
             let lv4_value = width;
-            debug_assert_op!(lv0_value <= lv1_value);
-            debug_assert_op!(lv1_value <= lv2_value);
-            debug_assert_op!(lv2_value <= lv3_value);
-            debug_assert_op!(lv3_value <= lv4_value);
+            debug_assert!(lv0_value <= lv1_value);
+            debug_assert!(lv1_value <= lv2_value);
+            debug_assert!(lv2_value <= lv3_value);
+            debug_assert!(lv3_value <= lv4_value);
 
             let lv0_visible = lv0_value;
             let lv1_visible = lv1_value - lv0_value;
@@ -59,10 +59,10 @@ where
             {
                 let actual_lv4_value = ancestor_value!(0, lv3_value);
                 if actual_lv4_value != 0 {
-                    debug_assert_op!(actual_lv4_value == width);
-                    assert_cmp::debug_assert_op_expr!(
-                        lv0_visible + lv1_visible + lv2_visible + lv3_visible + lv4_visible,
-                        ==,
+                    debug_assert!(actual_lv4_value == width);
+                    debug_assert!(
+                        lv0_visible + lv1_visible + lv2_visible + lv3_visible + lv4_visible
+                        ==
                         width
                     );
                 }

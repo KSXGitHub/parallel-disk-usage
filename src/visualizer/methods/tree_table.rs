@@ -5,7 +5,6 @@ use crate::{
         ChildPosition, Parenthood, TreeHorizontalSlice, TreeSkeletalComponent, Visualizer,
     },
 };
-use assert_cmp::{debug_assert_op, debug_assert_op_expr};
 use derive_more::{Deref, DerefMut};
 use pipe_trait::Pipe;
 use std::{
@@ -102,14 +101,14 @@ where
         })
         .collect();
 
-    debug_assert_op_expr!(intermediate_table.len(), ==, initial_data_len);
+    debug_assert!(intermediate_table.len() == initial_data_len);
     if cfg!(debug_assertions) {
         intermediate_table
             .iter()
             .map(|row| row.row_index)
             .enumerate()
             .for_each(|(expected_row_index, actual_row_index)| {
-                debug_assert_op!(actual_row_index == expected_row_index)
+                debug_assert!(actual_row_index == expected_row_index);
             });
     }
 
@@ -145,7 +144,7 @@ where
             .map(|parent_info| parent_info.row_index);
         if let Some(parent_row_index) = parent_row_index {
             let parent_row = &mut intermediate_table[parent_row_index];
-            debug_assert_op_expr!(parent_row.children_count, >, 0);
+            debug_assert!(parent_row.children_count > 0);
             if parent_row.children_count == 1 {
                 parent_row.children_count = 0;
                 parent_row

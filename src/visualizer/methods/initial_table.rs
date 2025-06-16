@@ -1,6 +1,6 @@
 use super::{NodeInfo, Table, BORDER_COLUMNS, PERCENTAGE_COLUMN_MAX_WIDTH};
 use crate::{data_tree::DataTree, size, visualizer::Visualizer};
-use assert_cmp::debug_assert_op;
+
 use derive_more::{Deref, DerefMut};
 use std::{cmp::max, fmt::Display, num::NonZeroUsize};
 
@@ -109,7 +109,7 @@ where
             let name = node.name();
             let node_data = node.size();
             let row_index = initial_table.len();
-            debug_assert_op!(remaining_depth > 0);
+            debug_assert!(remaining_depth > 0);
             let children_count = if remaining_depth != 1 {
                 node.children().len()
             } else {
@@ -124,8 +124,8 @@ where
             };
             let size = node.size().display(visualizer.bytes_format).to_string();
             let sibling_count = ancestors.last().map_or(1, |parent| parent.children_count);
-            debug_assert_op!(sibling_count != 0);
-            debug_assert_op!(index_as_child < sibling_count);
+            debug_assert!(sibling_count != 0);
+            debug_assert!(index_as_child < sibling_count);
             let sibling_count = unsafe { NonZeroUsize::new_unchecked(sibling_count) };
             let node_info = NodeInfo {
                 name,
