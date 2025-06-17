@@ -52,9 +52,9 @@ dependencies = [
 
 [[package]]
 name = "assert-cmp"
-version = "0.2.1"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "737bf4aa6df38f69a17efc233b4d0343cc5aa0d2c3b53e7007bd4c9866038ffd"
+checksum = "73a4ebf3897cf94a964581808aa2aba1cedf55ac6df387c2db0d90acffc5bf48"
 
 [[package]]
 name = "bitflags"
