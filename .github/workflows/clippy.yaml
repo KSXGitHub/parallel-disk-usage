@@ -36,10 +36,11 @@ jobs:
             ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-
 
       - name: Install Rust
+        shell: bash
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/install-rustup
-          chmod +x /tmp/install-rustup
-          /tmp/install-rustup --default-toolchain $(cat rust-toolchain) --component clippy -y
+          installer=$(mktemp -d)/install-rustup
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > $installer
+          bash $installer --default-toolchain $(cat rust-toolchain) --component clippy -y
 
       - name: Use clippy to lint code (dev)
         env:

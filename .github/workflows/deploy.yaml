@@ -23,10 +23,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Rust
+        shell: bash
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/install-rustup
-          chmod +x /tmp/install-rustup
-          /tmp/install-rustup --default-toolchain $(cat rust-toolchain) -y
+          installer=$(mktemp -d)/install-rustup
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > $installer
+          bash $installer --default-toolchain $(cat rust-toolchain) -y
 
       - name: Test (dev)
         env:
@@ -66,10 +67,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Rust
+        shell: bash
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/install-rustup
-          chmod +x /tmp/install-rustup
-          /tmp/install-rustup --default-toolchain $(cat rust-toolchain) -y
+          installer=$(mktemp -d)/install-rustup
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > $installer
+          bash $installer --default-toolchain $(cat rust-toolchain) -y
 
       - name: Install compilation target
         run: rustup target add ${{ matrix.target }}
@@ -102,10 +104,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Rust
+        shell: bash
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/install-rustup
-          chmod +x /tmp/install-rustup
-          /tmp/install-rustup --default-toolchain $(cat rust-toolchain) -y
+          installer=$(mktemp -d)/install-rustup
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > $installer
+          bash $installer --default-toolchain $(cat rust-toolchain) -y
 
       - name: Install compilation target
         run: rustup target add ${{ matrix.target }}
@@ -138,10 +141,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Rust
+        shell: bash
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/install-rustup
-          chmod +x /tmp/install-rustup
-          /tmp/install-rustup --default-toolchain $(cat rust-toolchain) -y
+          installer=$(mktemp -d)/install-rustup
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > $installer
+          bash $installer --default-toolchain $(cat rust-toolchain) -y
 
       - name: Install compilation target
         run: rustup target add ${{ matrix.target }}
@@ -393,10 +397,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Rust
+        shell: bash
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/install-rustup
-          chmod +x /tmp/install-rustup
-          /tmp/install-rustup --default-toolchain $(cat rust-toolchain) -y
+          installer=$(mktemp -d)/install-rustup
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > $installer
+          bash $installer --default-toolchain $(cat rust-toolchain) -y
 
       - name: Login
         run: cargo login ${{ secrets.CRATE_AUTH_TOKEN }}
@@ -442,10 +447,11 @@ jobs:
             ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-
 
       - name: Install Rust
+        shell: bash
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/install-rustup
-          chmod +x /tmp/install-rustup
-          /tmp/install-rustup --default-toolchain $(cat rust-toolchain) -y
+          installer=$(mktemp -d)/install-rustup
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > $installer
+          bash $installer --default-toolchain $(cat rust-toolchain) -y
 
       - name: Build pdu
         run: |
