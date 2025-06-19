@@ -13,9 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/install-rustup
+          chmod +x /tmp/install-rustup
+          /tmp/install-rustup --default-toolchain $(cat rust-toolchain) --component rustfmt -y
 
       - name: Check code formatting
         run: cargo fmt -- --check

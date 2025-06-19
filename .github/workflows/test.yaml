@@ -36,7 +36,11 @@ jobs:
             ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
             ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-
 
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/install-rustup
+          chmod +x /tmp/install-rustup
+          /tmp/install-rustup --default-toolchain $(cat rust-toolchain) -y
 
       - name: Test (dev)
         env:
