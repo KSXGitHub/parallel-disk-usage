@@ -60,8 +60,8 @@ itertools = "^0.13.0"
 assert-cmp = "^0.3.0"
 zero-copy-pads = "^0.2.0"
 terminal_size = "^0.4.0"
-clap = { version = "^4.3.8", optional = true }
-clap_complete = { version = "^4.5.36", optional = true }
+clap = { version = "^4.5.40", optional = true }
+clap_complete = { version = "^4.5.54", optional = true }
 clap-utilities = { version = "^0.2.0", optional = true }
 serde = { version = "^1.0.214", optional = true }
 serde_json = { version = "^1.0.132", optional = true }
