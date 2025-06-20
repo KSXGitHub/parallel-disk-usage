@@ -5,3 +5,6 @@ tmp.*
 .vscode
 *.sublime-*
 node_modules
+/perf.data
+/perf.data.*
+flamegraph.svg
