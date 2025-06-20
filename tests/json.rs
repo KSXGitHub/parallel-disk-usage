@@ -144,6 +144,11 @@ fn json_input() {
 
 #[test]
 fn json_output_json_input() {
+    #![allow(
+        clippy::zombie_processes,
+        reason = "can't wait without violating borrow rule"
+    )]
+
     let workspace = SampleWorkspace::default();
 
     let json_output = Command::new(PDU)

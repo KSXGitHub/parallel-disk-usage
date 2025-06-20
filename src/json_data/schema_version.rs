@@ -35,7 +35,7 @@ impl TryFrom<String> for SchemaVersion {
     }
 }
 
-impl<'a> From<SchemaVersion> for &'a str {
+impl From<SchemaVersion> for &str {
     fn from(_: SchemaVersion) -> Self {
         SCHEMA_VERSION
     }

@@ -121,7 +121,7 @@ where
         for excluded_row_index in excluded_row_indices.iter().copied() {
             let is_child = |row: &&TreeRow<&Name, Size>| {
                 row.parent()
-                    .map_or(false, |node_info| node_info.row_index == excluded_row_index)
+                    .is_some_and(|node_info| node_info.row_index == excluded_row_index)
             };
             intermediate_table
                 .index(excluded_row_index..)
@@ -167,7 +167,7 @@ where
         {
             let is_sibling = |row: &&TreeRow<&Name, Size>| {
                 row.parent()
-                    .map_or(false, |parent| parent.row_index == parent_row_index)
+                    .is_some_and(|parent| parent.row_index == parent_row_index)
             };
             let is_excluded =
                 |row: &TreeRow<&Name, Size>| excluded_row_indices.contains(&row.row_index);
