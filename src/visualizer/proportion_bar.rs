@@ -1,7 +1,7 @@
 use super::BarAlignment;
 use derive_more::{AsRef, Deref, Display, From, Into};
 use fmt_iter::repeat;
-use std::fmt::{Error, Formatter};
+use std::fmt::{Display, Error, Formatter};
 
 /// Block of proportion bar.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, AsRef, Deref, Display, Into)]

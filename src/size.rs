@@ -2,7 +2,8 @@ use super::bytes_format::{self, BytesFormat};
 use derive_more::{Add, AddAssign, From, Into, Sum};
 use std::{
     fmt::{Debug, Display},
-    ops::{Mul, MulAssign},
+    iter::Sum,
+    ops::{Add, AddAssign, Mul, MulAssign},
 };
 
 #[cfg(feature = "json")]
