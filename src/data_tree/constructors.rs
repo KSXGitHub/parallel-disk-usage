@@ -17,7 +17,7 @@ impl<Name, Size: size::Size> DataTree<Name, Size> {
         DataTree {
             name,
             size,
-            children: Vec::with_capacity(0),
+            children: Vec::new(),
         }
     }
 

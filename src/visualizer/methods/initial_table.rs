@@ -153,7 +153,7 @@ where
         Param {
             remaining_depth: visualizer.max_depth.get(),
             index_as_child: 0,
-            ancestors: Vec::with_capacity(0),
+            ancestors: Vec::new(),
             preceding_sibling: None,
         },
     );
