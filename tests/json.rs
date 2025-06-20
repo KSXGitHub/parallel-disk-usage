@@ -144,14 +144,9 @@ fn json_input() {
 
 #[test]
 fn json_output_json_input() {
-    #![allow(
-        clippy::zombie_processes,
-        reason = "can't wait without violating borrow rule"
-    )]
-
     let workspace = SampleWorkspace::default();
 
-    let json_output = Command::new(PDU)
+    let mut json_output = Command::new(PDU)
         .with_current_dir(&workspace)
         .with_arg("--json-output")
         .with_arg("--quantity=apparent-size")
@@ -170,6 +165,7 @@ fn json_output_json_input() {
         .with_stdin(
             json_output
                 .stdout
+                .take()
                 .expect("get stdout of command with --json-output")
                 .into(),
         )
@@ -196,4 +192,9 @@ fn json_output_json_input() {
     eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
+
+    let json_output_status = json_output
+        .wait()
+        .expect("wait for the command with --json-output to terminate");
+    assert!(json_output_status.success());
 }
