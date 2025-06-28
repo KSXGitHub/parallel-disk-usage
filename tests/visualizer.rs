@@ -7,7 +7,7 @@ use parallel_disk_usage::{
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pretty_assertions::assert_eq;
-use std::{cmp::Ordering, num::NonZeroUsize};
+use std::cmp::Ordering;
 use text_block_macros::text_block_fnl;
 use zero_copy_pads::Width;
 
@@ -33,10 +33,10 @@ macro_rules! test_case {
         $(#[$attributes])*
         #[test]
         fn $name() {
-            let tree = $tree;
+            let mut tree = $tree;
             let column_width_distribution =
                 ColumnWidthDistribution::$column_width_function($($column_width_arguments),+);
-            let _max_depth = NonZeroUsize::new($max_depth).expect("non-zero max_depth"); // TODO: remove later
+            tree.par_retain(|_, depth| depth + 1 < $max_depth);
             let actual = Visualizer {
                 column_width_distribution,
                 data_tree: &tree,

@@ -191,7 +191,7 @@ fn max_depth_2() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
+        max_depth: 2,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -229,7 +229,7 @@ fn max_depth_1() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
+        max_depth: 1,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
