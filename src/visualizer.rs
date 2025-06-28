@@ -38,7 +38,6 @@ use std::fmt::Display;
 ///     direction: Direction::BottomUp,
 ///     bar_alignment: BarAlignment::Right,
 ///     column_width_distribution: ColumnWidthDistribution::total(100),
-///     max_depth: std::num::NonZeroUsize::new(10).unwrap(),
 /// };
 /// println!("{visualizer}");
 /// # }
