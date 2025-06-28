@@ -43,11 +43,11 @@ where
             name,
             get_info,
             join_path,
-            max_depth: current_depth,
+            max_depth,
         } = builder;
 
         let Info { size, children } = get_info(&path);
-        let next_depth = current_depth.saturating_sub(1);
+        let max_depth = max_depth.saturating_sub(1);
 
         let children: Vec<_> = children
             .into_par_iter()
@@ -56,11 +56,11 @@ where
                 name,
                 get_info,
                 join_path,
-                max_depth: next_depth,
+                max_depth,
             })
             .map(Self::from)
             .collect();
 
-        DataTree::dir(name, size, children, current_depth)
+        DataTree::dir(name, size, children, max_depth)
     }
 }
