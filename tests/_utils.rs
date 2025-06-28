@@ -150,7 +150,7 @@ where
         FsTreeBuilder {
             size_getter,
             reporter: ErrorOnlyReporter::new(|error| {
-                panic!("Unexpected call to report_error: {:?}", error)
+                panic!("Unexpected call to report_error: {error:?}")
             }),
             root: root.join(suffix),
         }
@@ -293,9 +293,9 @@ impl<'a> CommandList<'a> {
     /// Make sure a flag name has valid syntax.
     fn assert_flag(name: &str) {
         match name.len() {
-            0 | 1 => panic!("{:?} is not a valid flag", name),
-            2 => assert!(name.starts_with('-'), "{:?} is not a valid flag", name),
-            _ => assert!(name.starts_with("--"), "{:?} is not a valid flag", name),
+            0 | 1 => panic!("{name:?} is not a valid flag"),
+            2 => assert!(name.starts_with('-'), "{name:?} is not a valid flag"),
+            _ => assert!(name.starts_with("--"), "{name:?} is not a valid flag"),
         }
     }
 }
@@ -312,8 +312,7 @@ pub fn stdout_text(
     inspect_stderr(&stderr);
     assert!(
         status.success(),
-        "progress exits with non-zero status: {:?}",
-        status
+        "progress exits with non-zero status: {status:?}",
     );
     stdout
         .pipe(String::from_utf8)

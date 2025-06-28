@@ -43,7 +43,7 @@ fn fs_permission(path: impl AsRef<Path>, permission: &'static str, recursive: bo
         .output()
         .expect("run chmod command");
     inspect_stderr(&stderr);
-    assert!(status.success(), "chmod fails {:?}", status);
+    assert!(status.success(), "chmod fails {status:?}");
 }
 
 #[test]
