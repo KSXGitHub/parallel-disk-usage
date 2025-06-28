@@ -144,7 +144,6 @@ where
             direction,
             bar_alignment,
             column_width_distribution,
-            max_depth,
         };
 
         print!("{visualizer}"); // visualizer already ends with "\n", println! isn't needed here.

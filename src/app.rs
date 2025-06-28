@@ -57,7 +57,6 @@ impl App {
                 bytes_format,
                 top_down,
                 align_right,
-                max_depth,
                 ..
             } = self.args;
             let direction = Direction::from_top_down(top_down);
@@ -79,7 +78,6 @@ impl App {
                         column_width_distribution,
                         direction,
                         bar_alignment,
-                        max_depth,
                     }
                     .to_string()
                 }};

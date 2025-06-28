@@ -15,7 +15,7 @@ pub use proportion_bar::{ProportionBar, ProportionBarBlock};
 pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
 
 use super::{data_tree::DataTree, size};
-use std::{fmt::Display, num::NonZeroUsize};
+use std::fmt::Display;
 
 /// Visualize a [`DataTree`].
 ///
@@ -59,8 +59,6 @@ where
     pub bar_alignment: BarAlignment,
     /// Distribution and total number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
-    /// Maximum number of levels that should be visualized.
-    pub max_depth: NonZeroUsize,
 }
 
 mod copy;

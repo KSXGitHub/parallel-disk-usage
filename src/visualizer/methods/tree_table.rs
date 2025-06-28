@@ -65,11 +65,7 @@ where
         .map(|initial_row| {
             let child_position =
                 ChildPosition::from_index(initial_row.index_as_child, initial_row.sibling_count);
-            let parenthood = if initial_row.remaining_depth == 0 {
-                Parenthood::Childless
-            } else {
-                Parenthood::from_children_count(initial_row.children_count)
-            };
+            let parenthood = Parenthood::from_children_count(initial_row.children_count);
             let skeletal_component = TreeSkeletalComponent {
                 child_position,
                 parenthood,

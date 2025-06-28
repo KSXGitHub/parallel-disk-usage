@@ -46,7 +46,6 @@ where
 {
     #[derive(Clone)]
     struct Param<Name, NodeData> {
-        remaining_depth: usize,
         index_as_child: usize,
         ancestors: Vec<NodeInfo<Name, NodeData>>,
         preceding_sibling: Option<NodeInfo<Name, NodeData>>,
@@ -69,11 +68,7 @@ where
         Size: size::Size,
         Act: FnMut(&'a DataTree<Name, Size>, Param<&'a Name, Size>) -> ActResult<&'a Name, Size>,
     {
-        if param.remaining_depth == 0 {
-            return None;
-        }
         let ActResult { node_info } = act(tree, param.clone());
-        let remaining_depth = param.remaining_depth - 1;
         let mut preceding_sibling = None;
         for (index_as_child, child) in tree.children().iter().enumerate() {
             let mut ancestors = Vec::with_capacity(param.ancestors.len() + 1);
@@ -83,7 +78,6 @@ where
                 child,
                 act,
                 Param {
-                    remaining_depth,
                     index_as_child,
                     ancestors,
                     preceding_sibling,
@@ -103,18 +97,12 @@ where
             let Param {
                 index_as_child,
                 ancestors,
-                remaining_depth,
                 preceding_sibling,
             } = param;
             let name = node.name();
             let node_data = node.size();
             let row_index = initial_table.len();
-            debug_assert_op!(remaining_depth > 0);
-            let children_count = if remaining_depth != 1 {
-                node.children().len()
-            } else {
-                0
-            };
+            let children_count = node.children().len();
             let fs_size = node.size().into();
             let percentage = if total_fs_size == 0 {
                 "0%".to_string()
@@ -134,7 +122,6 @@ where
                 sibling_count,
                 index_as_child,
                 children_count,
-                remaining_depth,
             };
 
             initial_table.column_width.size_column_width =
@@ -151,7 +138,6 @@ where
             ActResult { node_info }
         },
         Param {
-            remaining_depth: visualizer.max_depth.get(),
             index_as_child: 0,
             ancestors: Vec::new(),
             preceding_sibling: None,

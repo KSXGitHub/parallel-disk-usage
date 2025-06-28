@@ -36,9 +36,8 @@ macro_rules! test_case {
             let tree = $tree;
             let column_width_distribution =
                 ColumnWidthDistribution::$column_width_function($($column_width_arguments),+);
-            let max_depth = NonZeroUsize::new($max_depth).expect("non-zero max_depth");
+            let _max_depth = NonZeroUsize::new($max_depth).expect("non-zero max_depth"); // TODO: remove later
             let actual = Visualizer {
-                max_depth,
                 column_width_distribution,
                 data_tree: &tree,
                 bytes_format: $bytes_format,

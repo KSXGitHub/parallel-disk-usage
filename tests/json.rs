@@ -134,7 +134,6 @@ fn json_input() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
