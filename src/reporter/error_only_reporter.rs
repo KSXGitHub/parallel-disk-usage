@@ -1,5 +1,6 @@
 use super::{ErrorReport, Event, ParallelReporter, Reporter};
 use crate::size;
+use std::convert::Infallible;
 
 /// Only report errors.
 #[derive(Debug)]
@@ -33,7 +34,7 @@ where
     Size: size::Size,
     ReportError: Fn(ErrorReport),
 {
-    type DestructionError = (); // TODO: change this to `!` once it is stable.
+    type DestructionError = Infallible; // TODO: change this to `!` once it is stable.
     fn destroy(self) -> Result<(), Self::DestructionError> {
         Ok(())
     }
