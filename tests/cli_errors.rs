@@ -133,6 +133,7 @@ fn fs_errors() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());

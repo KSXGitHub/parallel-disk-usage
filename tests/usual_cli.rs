@@ -43,6 +43,7 @@ fn total_width() {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -81,6 +82,7 @@ fn column_width() {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -119,6 +121,7 @@ fn min_ratio_0() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
@@ -156,6 +159,7 @@ fn min_ratio() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.1);
@@ -194,6 +198,7 @@ fn max_depth_2() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -232,6 +237,7 @@ fn max_depth_1() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -269,6 +275,7 @@ fn top_down() {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -306,6 +313,7 @@ fn align_right() {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -343,6 +351,7 @@ fn quantity_apparent_size() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -381,6 +390,7 @@ fn quantity_block_size() {
         root: workspace.to_path_buf(),
         size_getter: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -419,6 +429,7 @@ fn quantity_block_count() {
         root: workspace.to_path_buf(),
         size_getter: GetBlockCount,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -458,6 +469,7 @@ fn bytes_format_plain() {
         root: workspace.to_path_buf(),
         size_getter: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -497,6 +509,7 @@ fn bytes_format_metric() {
         root: workspace.to_path_buf(),
         size_getter: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -536,6 +549,7 @@ fn bytes_format_binary() {
         root: workspace.to_path_buf(),
         size_getter: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -573,6 +587,7 @@ fn path_to_workspace() {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -615,6 +630,7 @@ fn multiple_names() {
                 root: workspace.to_path_buf().join(name),
                 size_getter: GetApparentSize,
                 reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+                max_depth: 10,
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
@@ -625,6 +641,7 @@ fn multiple_names() {
                 OsStringDisplay::os_string_from("(total)"),
                 0.into(),
                 children.collect(),
+                10,
             )
         })
         .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse());

@@ -404,7 +404,7 @@ fn nested_tree<Size: size::Size>(
 ) -> DataTree<&'static str, Size> {
     if let Some((head, tail)) = dir_names.split_first() {
         let child = nested_tree(tail, size_per_dir, file_name, file_size);
-        DataTree::dir(*head, size_per_dir, vec![child])
+        DataTree::dir(*head, size_per_dir, vec![child], 10)
     } else {
         DataTree::file(file_name, file_size)
     }
@@ -650,7 +650,7 @@ fn empty_dir<Size>(inode_size: Size) -> DataTree<&'static str, Size>
 where
     Size: size::Size + Ord + From<u64> + Send,
 {
-    DataTree::dir("empty directory", inode_size, Vec::new()).into_par_sorted(order_tree)
+    DataTree::dir("empty directory", inode_size, Vec::new(), 10).into_par_sorted(order_tree)
 }
 
 test_case! {

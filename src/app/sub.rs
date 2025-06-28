@@ -76,6 +76,7 @@ where
                     reporter: &reporter,
                     root,
                     size_getter,
+                    max_depth: max_depth.get() as u64,
                 }
                 .into()
             });
@@ -100,6 +101,7 @@ where
                 OsStringDisplay::os_string_from("(total)"),
                 Size::default(),
                 children,
+                max_depth.get() as u64,
             )
         };
 
