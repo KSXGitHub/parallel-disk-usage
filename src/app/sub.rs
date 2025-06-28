@@ -12,7 +12,7 @@ use crate::{
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use serde::Serialize;
-use std::{io::stdout, iter::once, num::NonZeroUsize, path::PathBuf};
+use std::{io::stdout, iter::once, num::NonZeroU64, path::PathBuf};
 
 /// The sub program of the main application.
 pub struct Sub<Size, SizeGetter, Report>
@@ -35,7 +35,7 @@ where
     /// Distribution and number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
     /// Maximum number of levels that should be visualized.
-    pub max_depth: NonZeroUsize,
+    pub max_depth: NonZeroU64,
     /// [Get the size](GetSize) of files/directories.
     pub size_getter: SizeGetter,
     /// Reports measurement progress.
@@ -76,7 +76,7 @@ where
                     reporter: &reporter,
                     root,
                     size_getter,
-                    max_depth: max_depth.get() as u64,
+                    max_depth: max_depth.get(),
                 }
                 .into()
             });
@@ -101,7 +101,7 @@ where
                 OsStringDisplay::os_string_from("(total)"),
                 Size::default(),
                 children,
-                max_depth.get() as u64,
+                max_depth.get(),
             )
         };
 
