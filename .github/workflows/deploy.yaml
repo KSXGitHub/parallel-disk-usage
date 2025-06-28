@@ -76,7 +76,6 @@ jobs:
       - name: Install compilation target
         run: rustup target add ${{ matrix.target }}
 
-
       - name: Build
         run: cargo build --target ${{ matrix.target }} --release --all-features
 
