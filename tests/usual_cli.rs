@@ -15,10 +15,7 @@ use parallel_disk_usage::{
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use std::{
-    convert::TryInto,
-    process::{Command, Stdio},
-};
+use std::process::{Command, Stdio};
 
 fn stdio(command: Command) -> Command {
     command
@@ -43,6 +40,7 @@ fn total_width() {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -54,7 +52,6 @@ fn total_width() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -81,6 +78,7 @@ fn column_width() {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -92,7 +90,6 @@ fn column_width() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::components(10, 90),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -119,6 +116,7 @@ fn min_ratio_0() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
@@ -129,7 +127,6 @@ fn min_ratio_0() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -156,6 +153,7 @@ fn min_ratio() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.1);
@@ -167,7 +165,6 @@ fn min_ratio() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -194,6 +191,7 @@ fn max_depth_2() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 2,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -205,7 +203,6 @@ fn max_depth_2() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 2.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -232,6 +229,7 @@ fn max_depth_1() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 1,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -243,7 +241,6 @@ fn max_depth_1() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 1.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -269,6 +266,7 @@ fn top_down() {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -280,7 +278,6 @@ fn top_down() {
         direction: Direction::TopDown,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -306,6 +303,7 @@ fn align_right() {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -317,7 +315,6 @@ fn align_right() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -343,6 +340,7 @@ fn quantity_apparent_size() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -354,7 +352,6 @@ fn quantity_apparent_size() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -381,6 +378,7 @@ fn quantity_block_size() {
         root: workspace.to_path_buf(),
         size_getter: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -392,7 +390,6 @@ fn quantity_block_size() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -419,6 +416,7 @@ fn quantity_block_count() {
         root: workspace.to_path_buf(),
         size_getter: GetBlockCount,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -430,7 +428,6 @@ fn quantity_block_count() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -458,6 +455,7 @@ fn bytes_format_plain() {
         root: workspace.to_path_buf(),
         size_getter: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -469,7 +467,6 @@ fn bytes_format_plain() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -497,6 +494,7 @@ fn bytes_format_metric() {
         root: workspace.to_path_buf(),
         size_getter: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -508,7 +506,6 @@ fn bytes_format_metric() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -536,6 +533,7 @@ fn bytes_format_binary() {
         root: workspace.to_path_buf(),
         size_getter: GetBlockSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -547,7 +545,6 @@ fn bytes_format_binary() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -573,6 +570,7 @@ fn path_to_workspace() {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -583,7 +581,6 @@ fn path_to_workspace() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -615,6 +612,7 @@ fn multiple_names() {
                 root: workspace.to_path_buf().join(name),
                 size_getter: GetApparentSize,
                 reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+                max_depth: 10,
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
@@ -625,6 +623,7 @@ fn multiple_names() {
                 OsStringDisplay::os_string_from("(total)"),
                 0.into(),
                 children.collect(),
+                10,
             )
         })
         .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse());
@@ -635,7 +634,6 @@ fn multiple_names() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();

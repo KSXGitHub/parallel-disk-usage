@@ -29,6 +29,7 @@ use std::{
 ///     root: std::env::current_dir().unwrap(),
 ///     size_getter: GetApparentSize,
 ///     reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+///     max_depth: 10,
 /// };
 /// let data_tree: DataTree<OsStringDisplay, Bytes> = builder.into();
 /// ```
@@ -45,6 +46,8 @@ where
     pub size_getter: SizeGetter,
     /// Reports progress to external system.
     pub reporter: Report,
+    /// Deepest level of descendent display in the graph. The sizes beyond the max depth still count toward total.
+    pub max_depth: u64,
 }
 
 impl<Size, SizeGetter, Report> From<FsTreeBuilder<Size, SizeGetter, Report>>
@@ -60,6 +63,7 @@ where
             root,
             size_getter,
             reporter,
+            max_depth,
         } = builder;
 
         TreeBuilder::<PathBuf, OsStringDisplay, Size, _, _> {
@@ -118,6 +122,8 @@ where
             },
 
             join_path: |prefix, name| prefix.join(&name.0),
+
+            max_depth,
         }
         .into()
     }

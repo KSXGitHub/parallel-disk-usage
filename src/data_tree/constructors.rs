@@ -3,8 +3,9 @@ use crate::size;
 
 impl<Name, Size: size::Size> DataTree<Name, Size> {
     /// Create a tree representation of a directory.
-    pub fn dir(name: Name, inode_size: Size, children: Vec<Self>) -> Self {
+    pub fn dir(name: Name, inode_size: Size, children: Vec<Self>, depth: u64) -> Self {
         let size = inode_size + children.iter().map(DataTree::size).sum();
+        let children = if depth > 0 { children } else { Vec::new() };
         DataTree {
             name,
             size,
@@ -26,6 +27,6 @@ impl<Name, Size: size::Size> DataTree<Name, Size> {
     where
         Size: Copy,
     {
-        move |name, children| DataTree::dir(name, inode_size, children)
+        move |name, children| DataTree::dir(name, inode_size, children, 1)
     }
 }

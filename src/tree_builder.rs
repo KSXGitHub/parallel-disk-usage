@@ -23,6 +23,8 @@ where
     pub get_info: GetInfo,
     /// Function to join parent's `path` with a child's name to make the child's `name`.
     pub join_path: JoinPath,
+    /// Deepest level of descendent to store as arrays. The sizes beyond the max depth still count toward total.
+    pub max_depth: u64,
 }
 
 impl<Path, Name, Size, GetInfo, JoinPath> From<TreeBuilder<Path, Name, Size, GetInfo, JoinPath>>
@@ -41,9 +43,11 @@ where
             name,
             get_info,
             join_path,
+            max_depth,
         } = builder;
 
         let Info { size, children } = get_info(&path);
+        let max_depth = max_depth.saturating_sub(1);
 
         let children: Vec<_> = children
             .into_par_iter()
@@ -52,10 +56,11 @@ where
                 name,
                 get_info,
                 join_path,
+                max_depth,
             })
             .map(Self::from)
             .collect();
 
-        DataTree::dir(name, size, children)
+        DataTree::dir(name, size, children, max_depth)
     }
 }

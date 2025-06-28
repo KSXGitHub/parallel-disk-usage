@@ -7,7 +7,7 @@ type SampleData = Bytes;
 type SampleTree = DataTree<SampleName, SampleData>;
 
 fn dir<const INODE_SIZE: u64>(name: &'static str, children: Vec<SampleTree>) -> SampleTree {
-    SampleTree::dir(name.to_string(), INODE_SIZE.into(), children)
+    SampleTree::dir(name.to_string(), INODE_SIZE.into(), children, 10)
 }
 
 fn file(name: &'static str, size: u64) -> SampleTree {
@@ -23,6 +23,7 @@ fn culled_dir<const INODE_SIZE: u64>(
         name.to_string(),
         (INODE_SIZE + culled_size).into(),
         children,
+        10,
     )
 }
 
@@ -156,7 +157,7 @@ fn edge_cases() {
             ),
         ],
     )
-    .into_par_retained(|descendant| descendant.name().starts_with('!').not())
+    .into_par_retained(|descendant, _| descendant.name().starts_with('!').not())
     .into_reflection();
     let expected = dir(
         "root",

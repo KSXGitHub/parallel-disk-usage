@@ -8,5 +8,4 @@ pub struct NodeInfo<Name, NodeData> {
     pub sibling_count: NonZeroUsize,
     pub index_as_child: usize,
     pub children_count: usize,
-    pub remaining_depth: usize,
 }

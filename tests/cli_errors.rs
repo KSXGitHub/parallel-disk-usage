@@ -18,7 +18,6 @@ use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use std::{
     collections::BTreeSet,
-    convert::TryInto,
     path::Path,
     process::{Command, Output, Stdio},
 };
@@ -133,6 +132,7 @@ fn fs_errors() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
@@ -143,7 +143,6 @@ fn fs_errors() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
-        max_depth: 10.try_into().unwrap(),
     };
     let expected_stdout = format!("{visualizer}");
     eprintln!("EXPECTED STDOUT:\n{}\n", &expected_stdout);

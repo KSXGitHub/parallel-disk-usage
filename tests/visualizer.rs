@@ -7,7 +7,7 @@ use parallel_disk_usage::{
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pretty_assertions::assert_eq;
-use std::{cmp::Ordering, num::NonZeroUsize};
+use std::cmp::Ordering;
 use text_block_macros::text_block_fnl;
 use zero_copy_pads::Width;
 
@@ -33,12 +33,11 @@ macro_rules! test_case {
         $(#[$attributes])*
         #[test]
         fn $name() {
-            let tree = $tree;
+            let mut tree = $tree;
             let column_width_distribution =
                 ColumnWidthDistribution::$column_width_function($($column_width_arguments),+);
-            let max_depth = NonZeroUsize::new($max_depth).expect("non-zero max_depth");
+            tree.par_retain(|_, depth| depth + 1 < $max_depth);
             let actual = Visualizer {
-                max_depth,
                 column_width_distribution,
                 data_tree: &tree,
                 bytes_format: $bytes_format,
@@ -404,7 +403,7 @@ fn nested_tree<Size: size::Size>(
 ) -> DataTree<&'static str, Size> {
     if let Some((head, tail)) = dir_names.split_first() {
         let child = nested_tree(tail, size_per_dir, file_name, file_size);
-        DataTree::dir(*head, size_per_dir, vec![child])
+        DataTree::dir(*head, size_per_dir, vec![child], 10)
     } else {
         DataTree::file(file_name, file_size)
     }
@@ -650,7 +649,7 @@ fn empty_dir<Size>(inode_size: Size) -> DataTree<&'static str, Size>
 where
     Size: size::Size + Ord + From<u64> + Send,
 {
-    DataTree::dir("empty directory", inode_size, Vec::new()).into_par_sorted(order_tree)
+    DataTree::dir("empty directory", inode_size, Vec::new(), 10).into_par_sorted(order_tree)
 }
 
 test_case! {

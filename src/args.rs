@@ -8,7 +8,7 @@ pub use threads::Threads;
 
 use crate::{bytes_format::BytesFormat, visualizer::ColumnWidthDistribution};
 use clap::{ColorChoice, Parser};
-use std::{num::NonZeroUsize, path::PathBuf};
+use std::{num::NonZeroU64, path::PathBuf};
 use terminal_size::{terminal_size, Width};
 use text_block_macros::text_block;
 
@@ -105,7 +105,7 @@ pub struct Args {
 
     /// Maximum depth to display the data (must be greater than 0).
     #[clap(long, default_value = "10")]
-    pub max_depth: NonZeroUsize,
+    pub max_depth: NonZeroU64,
 
     /// Width of the visualization.
     #[clap(long, conflicts_with = "column_width")]
