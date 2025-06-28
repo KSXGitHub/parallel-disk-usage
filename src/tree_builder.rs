@@ -23,7 +23,7 @@ where
     pub get_info: GetInfo,
     /// Function to join parent's `path` with a child's name to make the child's `name`.
     pub join_path: JoinPath,
-    /// Deepest level of descendent to store as arrays. The size still counts toward total beyond the depth.
+    /// Deepest level of descendent to store as arrays. The sizes beyond the max depth still count toward total.
     pub max_depth: u64,
 }
 

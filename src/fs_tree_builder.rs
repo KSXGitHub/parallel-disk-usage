@@ -46,7 +46,7 @@ where
     pub size_getter: SizeGetter,
     /// Reports progress to external system.
     pub reporter: Report,
-    /// Deepest level of descendent display in the graph. The size still counts toward total beyond the depth.
+    /// Deepest level of descendent display in the graph. The sizes beyond the max depth still count toward total.
     pub max_depth: u64,
 }
 
