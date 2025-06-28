@@ -39,7 +39,7 @@ export function parseSelfBenchmarkCategory(category: SelfBenchmarkCategory) {
 }
 
 export const RELEASED_PDU_VERSIONS = [
-  '0.10.0',
+  '0.12.0',
 ] as const
 
 export const ACCEPTABLE_PERFORMANCE_REGRESSION = 1.1 // 10%
