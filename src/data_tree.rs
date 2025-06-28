@@ -25,7 +25,7 @@ use super::size;
 pub struct DataTree<Name, Size: size::Size> {
     name: Name,
     size: Size,
-    children: Vec<Self>,
+    children: Vec<Self>, // TODO: turn this into a semi zero-sized type
 }
 
 mod constructors;
