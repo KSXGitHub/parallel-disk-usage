@@ -157,7 +157,7 @@ fn edge_cases() {
             ),
         ],
     )
-    .into_par_retained(|descendant| descendant.name().starts_with('!').not())
+    .into_par_retained(|descendant, _| descendant.name().starts_with('!').not())
     .into_reflection();
     let expected = dir(
         "root",
