@@ -39,6 +39,8 @@ export function parseSelfBenchmarkCategory(category: SelfBenchmarkCategory) {
 }
 
 export const RELEASED_PDU_VERSIONS = [
+  '0.10.0',
+  '0.11.1',
   '0.12.0',
 ] as const
 
