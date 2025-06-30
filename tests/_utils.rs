@@ -77,13 +77,13 @@ impl Default for SampleWorkspace {
         MergeableFileSystemTree::<&str, String>::from(dir! {
             "flat" => dir! {
                 "0" => file!("")
-                "1" => file!("a".repeat(1000))
-                "2" => file!("a".repeat(2000))
-                "3" => file!("a".repeat(3000))
+                "1" => file!("a".repeat(100000))
+                "2" => file!("a".repeat(200000))
+                "3" => file!("a".repeat(300000))
             }
             "nested" => dir! {
                 "0" => dir! {
-                    "1" => file!("a".repeat(5000))
+                    "1" => file!("a".repeat(500000))
                 }
             }
             "empty-dir" => dir! {}
