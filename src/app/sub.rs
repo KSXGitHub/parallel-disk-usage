@@ -101,7 +101,6 @@ where
                 OsStringDisplay::os_string_from("(total)"),
                 Size::default(),
                 children,
-                max_depth.get(),
             )
         };
 

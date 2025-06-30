@@ -59,8 +59,13 @@ where
                 max_depth,
             })
             .map(Self::from)
-            .collect();
+            .collect(); // TODO: this collect can be called into different types depending on whether `max_depth` is 0
 
-        DataTree::dir(name, size, children, max_depth)
+        let mut tree = DataTree::dir(name, size, children);
+        if max_depth == 0 {
+            // TODO: replace this with a more memory efficient method that doesn't require constructing `children` in the first place
+            tree.drop_children();
+        }
+        tree
     }
 }

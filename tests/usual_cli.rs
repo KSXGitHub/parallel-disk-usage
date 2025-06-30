@@ -623,7 +623,6 @@ fn multiple_names() {
                 OsStringDisplay::os_string_from("(total)"),
                 0.into(),
                 children.collect(),
-                10,
             )
         })
         .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse());
