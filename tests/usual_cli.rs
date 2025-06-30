@@ -623,7 +623,6 @@ fn multiple_names() {
                 OsStringDisplay::os_string_from("(total)"),
                 0.into(),
                 children.collect(),
-                10,
             )
         })
         .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse());
@@ -640,4 +639,132 @@ fn multiple_names() {
     eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
+
+    let mut lines = actual.lines();
+    assert!(lines.next().unwrap().contains("┌──1"));
+    assert!(lines.next().unwrap().contains("┌─┴0"));
+    assert!(lines.next().unwrap().contains("┌─┴nested"));
+    assert!(lines.next().unwrap().contains("│ ┌──1"));
+    assert!(lines.next().unwrap().contains("│ ├──2"));
+    assert!(lines.next().unwrap().contains("│ ├──3"));
+    assert!(lines.next().unwrap().contains("├─┴flat"));
+    assert!(lines.next().unwrap().contains("┌─┴(total)"));
+    assert_eq!(lines.next(), None);
+}
+
+#[test]
+fn multiple_names_max_depth_2() {
+    let workspace = SampleWorkspace::default();
+    let actual = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--quantity=apparent-size")
+        .with_arg("--total-width=100")
+        .with_arg("--max-depth=2")
+        .with_arg("nested")
+        .with_arg("flat")
+        .with_arg("empty-dir")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text);
+    eprintln!("ACTUAL:\n{actual}\n");
+
+    let mut data_tree = ["nested", "flat", "empty-dir"]
+        .iter()
+        .map(|name| {
+            let builder = FsTreeBuilder {
+                root: workspace.to_path_buf().join(name),
+                size_getter: GetApparentSize,
+                reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+                max_depth: 1,
+            };
+            let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+            *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
+            data_tree
+        })
+        .pipe(|children| {
+            DataTree::dir(
+                OsStringDisplay::os_string_from("(total)"),
+                0.into(),
+                children.collect(),
+            )
+        })
+        .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse());
+    data_tree.par_cull_insignificant_data(0.01);
+    let visualizer = Visualizer::<OsStringDisplay, _> {
+        data_tree: &data_tree,
+        bytes_format: BytesFormat::MetricUnits,
+        direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Left,
+        column_width_distribution: ColumnWidthDistribution::total(100),
+    };
+    let expected = format!("{visualizer}");
+    let expected = expected.trim_end();
+    eprintln!("EXPECTED:\n{expected}\n");
+
+    assert_eq!(actual, expected);
+
+    let mut lines = actual.lines();
+    assert!(lines.next().unwrap().contains("┌──nested"));
+    assert!(lines.next().unwrap().contains("├──flat"));
+    assert!(lines.next().unwrap().contains("┌─┴(total)"));
+    assert_eq!(lines.next(), None);
+}
+
+#[test]
+fn multiple_names_max_depth_1() {
+    let workspace = SampleWorkspace::default();
+    let actual = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--quantity=apparent-size")
+        .with_arg("--total-width=100")
+        .with_arg("--max-depth=1")
+        .with_arg("nested")
+        .with_arg("flat")
+        .with_arg("empty-dir")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text);
+    eprintln!("ACTUAL:\n{actual}\n");
+
+    let mut data_tree = ["nested", "flat", "empty-dir"]
+        .iter()
+        .map(|name| {
+            let builder = FsTreeBuilder {
+                root: workspace.to_path_buf().join(name),
+                size_getter: GetApparentSize,
+                reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+                max_depth: 10,
+            };
+            let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+            *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
+            data_tree
+        })
+        .pipe(|children| {
+            DataTree::dir(
+                OsStringDisplay::os_string_from("(total)"),
+                0.into(),
+                children.collect(),
+            )
+        })
+        .into_par_retained(|_, _| false)
+        .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse());
+    data_tree.par_cull_insignificant_data(0.01);
+    let visualizer = Visualizer::<OsStringDisplay, _> {
+        data_tree: &data_tree,
+        bytes_format: BytesFormat::MetricUnits,
+        direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Left,
+        column_width_distribution: ColumnWidthDistribution::total(100),
+    };
+    let expected = format!("{visualizer}");
+    let expected = expected.trim_end();
+    eprintln!("EXPECTED:\n{expected}\n");
+
+    assert_eq!(actual, expected);
+
+    let mut lines = actual.lines();
+    assert!(lines.next().unwrap().contains("┌──(total)"));
+    assert_eq!(lines.next(), None);
 }

@@ -30,7 +30,7 @@ type SampleTree = DataTree<SampleName, SampleData>;
 
 fn sample_tree() -> SampleTree {
     let dir = |name: &'static str, children: Vec<SampleTree>| {
-        SampleTree::dir(name.to_string(), 1024.into(), children, 10)
+        SampleTree::dir(name.to_string(), 1024.into(), children)
     };
     let file =
         |name: &'static str, size: u64| SampleTree::file(name.to_string(), Bytes::from(size));
