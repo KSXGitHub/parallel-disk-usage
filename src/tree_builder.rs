@@ -49,7 +49,7 @@ where
         let Info { size, children } = get_info(&path);
         let max_depth = max_depth.saturating_sub(1);
 
-        let children: Vec<_> = children
+        let children = children
             .into_par_iter()
             .map(|name| TreeBuilder {
                 path: join_path(&path, &name),
@@ -58,14 +58,13 @@ where
                 join_path,
                 max_depth,
             })
-            .map(Self::from)
-            .collect(); // TODO: this collect can be called into different types depending on whether `max_depth` is 0
+            .map(Self::from);
 
-        let mut tree = DataTree::dir(name, size, children);
-        if max_depth == 0 {
-            // TODO: replace this with a more memory efficient method that doesn't require constructing `children` in the first place
-            tree.drop_children();
+        if max_depth > 0 {
+            DataTree::dir(name, size, children.collect())
+        } else {
+            let size = size + children.map(|child| child.size()).sum();
+            DataTree::dir(name, size, Vec::new())
         }
-        tree
     }
 }
