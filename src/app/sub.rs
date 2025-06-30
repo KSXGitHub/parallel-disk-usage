@@ -96,12 +96,14 @@ where
         let data_tree = if iter.len() == 0 {
             data_tree
         } else {
+            let max_depth = max_depth.get();
             let children: Vec<_> = once(data_tree).chain(iter).collect();
             DataTree::dir(
                 OsStringDisplay::os_string_from("(total)"),
                 Size::default(),
                 children,
             )
+            .into_par_retained(|_, depth| depth + 1 < max_depth)
         };
 
         if reporter.destroy().is_err() {
