@@ -639,6 +639,17 @@ fn multiple_names() {
     eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
+
+    let mut lines = actual.lines();
+    assert!(lines.next().unwrap().contains("┌──1"));
+    assert!(lines.next().unwrap().contains("┌─┴0"));
+    assert!(lines.next().unwrap().contains("┌─┴nested"));
+    assert!(lines.next().unwrap().contains("│ ┌──1"));
+    assert!(lines.next().unwrap().contains("│ ├──2"));
+    assert!(lines.next().unwrap().contains("│ ├──3"));
+    assert!(lines.next().unwrap().contains("├─┴flat"));
+    assert!(lines.next().unwrap().contains("┌─┴(total)"));
+    assert_eq!(lines.next(), None);
 }
 
 #[test]
@@ -692,6 +703,12 @@ fn multiple_names_max_depth_2() {
     eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
+
+    let mut lines = actual.lines();
+    assert!(lines.next().unwrap().contains("┌──nested"));
+    assert!(lines.next().unwrap().contains("├──flat"));
+    assert!(lines.next().unwrap().contains("┌─┴(total)"));
+    assert_eq!(lines.next(), None);
 }
 
 #[test]
@@ -746,4 +763,8 @@ fn multiple_names_max_depth_1() {
     eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
+
+    let mut lines = actual.lines();
+    assert!(lines.next().unwrap().contains("┌──(total)"));
+    assert_eq!(lines.next(), None);
 }
