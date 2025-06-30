@@ -69,6 +69,8 @@ where
             no_sort,
         } = self;
 
+        let max_depth = max_depth.get();
+
         let mut iter = files
             .into_iter()
             .map(|root| -> DataTree<OsStringDisplay, Size> {
@@ -76,7 +78,7 @@ where
                     reporter: &reporter,
                     root,
                     size_getter,
-                    max_depth: max_depth.get(),
+                    max_depth,
                 }
                 .into()
             });
@@ -96,7 +98,6 @@ where
         let data_tree = if iter.len() == 0 {
             data_tree
         } else {
-            let max_depth = max_depth.get();
             let children: Vec<_> = once(data_tree).chain(iter).collect();
             DataTree::dir(
                 OsStringDisplay::os_string_from("(total)"),
