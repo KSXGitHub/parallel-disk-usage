@@ -58,6 +58,7 @@ where
         let children = children
             .into_iter()
             .pipe(Chunks::<64, _>::new)
+            .par_bridge()
             .map(|names: Vec<_>| -> Vec<_> {
                 names
                     .into_par_iter()
@@ -71,10 +72,7 @@ where
                     .map(Self::from)
                     .collect()
             })
-            .fold(Vec::new(), |mut a, b| {
-                a.extend(b);
-                a
-            });
+            .reduce(Vec::new, add_short_vec_to_long);
 
         if max_depth > 0 {
             DataTree::dir(name, size, children)
@@ -82,6 +80,17 @@ where
             let size = size + children.into_iter().map(|child| child.size()).sum();
             DataTree::dir(name, size, Vec::new())
         }
+    }
+}
+
+/// Concat 2 `Vec`s in any order with minimal copying.
+fn add_short_vec_to_long<Item>(mut a: Vec<Item>, mut b: Vec<Item>) -> Vec<Item> {
+    if a.len() > b.len() {
+        a.extend(b);
+        a
+    } else {
+        b.extend(a);
+        b
     }
 }
 
