@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 /// Intermediate format used for construction and inspection of
 /// [`DataTree`](crate::data_tree::DataTree)'s internal content.
 ///
-/// Unlike `Tree` where the fields are all private, the fields of `TreeReflection`
+/// Unlike `DataTree` where the fields are all private, the fields of `Reflection`
 /// are all public to allow construction in tests.
 ///
 /// **Conversion between `DataTree` and `Reflection`:**
