@@ -87,7 +87,7 @@ where
                     Ok(stats) => stats,
                 };
 
-                let children: Vec<_> = if stats.file_type().is_dir() {
+                let children: Vec<_> = if stats.is_dir() {
                     match read_dir(path) {
                         Err(error) => {
                             reporter.report(Event::EncounterError(ErrorReport {
