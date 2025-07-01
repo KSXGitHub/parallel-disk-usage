@@ -72,7 +72,7 @@ where
             path: root,
 
             get_info: |path| {
-                let stats = match symlink_metadata(path) {
+                let (is_dir, size) = match symlink_metadata(path) {
                     Err(error) => {
                         reporter.report(Event::EncounterError(ErrorReport {
                             operation: SymlinkMetadata,
@@ -84,10 +84,16 @@ where
                             children: Vec::new(),
                         };
                     }
-                    Ok(stats) => stats,
+                    Ok(stats) => {
+                        // `stats` should be dropped ASAP to avoid piling up kernel memory usage
+                        let is_dir = stats.is_dir();
+                        let size = size_getter.get_size(&stats);
+                        reporter.report(Event::ReceiveData(size));
+                        (is_dir, size)
+                    }
                 };
 
-                let children: Vec<_> = if stats.is_dir() {
+                let children: Vec<_> = if is_dir {
                     match read_dir(path) {
                         Err(error) => {
                             reporter.report(Event::EncounterError(ErrorReport {
@@ -114,9 +120,6 @@ where
                 } else {
                     Vec::new()
                 };
-
-                let size = size_getter.get_size(&stats);
-                reporter.report(Event::ReceiveData(size));
 
                 Info { size, children }
             },
