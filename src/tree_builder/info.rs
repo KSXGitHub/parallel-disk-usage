@@ -8,5 +8,5 @@ pub struct Info<Name, Size: size::Size> {
     /// Size associated with given `path`.
     pub size: Size,
     /// Direct descendants of given `path`.
-    pub children: Vec<Name>, // TODO: change this into an iterator
+    pub children: Vec<Name>,
 }
