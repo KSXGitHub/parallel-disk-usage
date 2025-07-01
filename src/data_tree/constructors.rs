@@ -28,9 +28,4 @@ impl<Name, Size: size::Size> DataTree<Name, Size> {
     {
         move |name, children| DataTree::dir(name, inode_size, children)
     }
-
-    /// Remove the children. Free memory usage.
-    pub(crate) fn drop_children(&mut self) {
-        self.children = Vec::new();
-    }
 }
