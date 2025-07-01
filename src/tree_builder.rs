@@ -3,6 +3,7 @@ pub mod info;
 pub use info::Info;
 
 use super::{data_tree::DataTree, size};
+use itertools::Itertools;
 use rayon::prelude::*;
 
 /// Collection of functions and starting points in order to build a [`DataTree`] with [`From`] or [`Into`].
@@ -55,20 +56,31 @@ where
 
         let children = children
             .into_iter()
-            .par_bridge()
-            .map(|name| TreeBuilder {
-                path: join_path(&path, &name),
-                name,
-                get_info,
-                join_path,
-                max_depth,
+            .chunks(64)
+            .into_iter()
+            .map(Vec::<NameIter::Item>::from_iter)
+            .map(|names| -> Vec<_> {
+                names
+                    .into_par_iter()
+                    .map(|name| TreeBuilder {
+                        path: join_path(&path, &name),
+                        name,
+                        get_info,
+                        join_path,
+                        max_depth,
+                    })
+                    .map(Self::from)
+                    .collect()
             })
-            .map(Self::from);
+            .fold(Vec::new(), |mut a, b| {
+                a.extend(b);
+                a
+            });
 
         if max_depth > 0 {
-            DataTree::dir(name, size, children.collect())
+            DataTree::dir(name, size, children)
         } else {
-            let size = size + children.map(|child| child.size()).sum();
+            let size = size + children.into_iter().map(|child| child.size()).sum();
             DataTree::dir(name, size, Vec::new())
         }
     }
