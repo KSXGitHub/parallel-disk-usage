@@ -5,8 +5,6 @@ pub enum Operation {
     SymlinkMetadata,
     /// Error is caused by calling [`std::fs::read_dir`].
     ReadDirectory,
-    /// Error when trying to access [`std::fs::DirEntry`] of one of the element of [`std::fs::read_dir`].
-    AccessEntry,
 }
 
 impl Operation {
@@ -16,7 +14,6 @@ impl Operation {
         match self {
             SymlinkMetadata => "symlink_metadata",
             ReadDirectory => "read_dir",
-            AccessEntry => "access entry",
         }
     }
 }
@@ -36,5 +33,4 @@ mod test_operation {
 
     name_display!(symlink_metadata, SymlinkMetadata, "symlink_metadata");
     name_display!(read_directory, ReadDirectory, "read_dir");
-    name_display!(access_entry, AccessEntry, "access entry");
 }

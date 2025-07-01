@@ -6,7 +6,6 @@ use super::{
     size,
     tree_builder::{Info, TreeBuilder},
 };
-use pipe_trait::Pipe;
 use std::{
     fs::{read_dir, symlink_metadata},
     path::PathBuf,
@@ -99,17 +98,9 @@ where
                         }
                         Ok(entries) => entries,
                     }
-                    .filter_map(|entry| match entry {
-                        Err(error) => {
-                            reporter.report(Event::EncounterError(ErrorReport {
-                                operation: AccessEntry,
-                                path,
-                                error,
-                            }));
-                            None
-                        }
-                        Ok(entry) => entry.file_name().pipe(OsStringDisplay::from).pipe(Some),
-                    })
+                    .flatten()
+                    .map(|entry| entry.file_name())
+                    .map(OsStringDisplay::from)
                     .collect()
                 } else {
                     Vec::new()
