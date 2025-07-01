@@ -12,7 +12,7 @@ pub enum RuntimeError {
     /// [DataTreeReflection](crate::data_tree::Reflection) from stdin.
     #[display("DeserializationFailure: {_0}")]
     DeserializationFailure(serde_json::Error),
-    /// When both `--json-input` and file names are both specified.
+    /// When `--json-input` and file names are both specified.
     #[display("JsonInputArgConflict: Arguments exist alongside --json-input")]
     JsonInputArgConflict,
     /// When input JSON data is not a valid tree.
