@@ -7,18 +7,20 @@ use rayon::prelude::*;
 
 /// Collection of functions and starting points in order to build a [`DataTree`] with [`From`] or [`Into`].
 #[derive(Debug)]
-pub struct TreeBuilder<Path, Name, Size, GetInfo, JoinPath>
+pub struct TreeBuilder<Path, NameIter, Size, GetInfo, JoinPath>
 where
     Path: Send + Sync,
-    Name: Send + Sync,
-    GetInfo: Fn(&Path) -> Info<Name, Size> + Copy + Send + Sync,
-    JoinPath: Fn(&Path, &Name) -> Path + Copy + Send + Sync,
+    NameIter: IntoIterator,
+    NameIter::IntoIter: Send,
+    NameIter::Item: Send,
+    GetInfo: Fn(&Path) -> Info<NameIter, Size> + Copy + Send + Sync,
+    JoinPath: Fn(&Path, &NameIter::Item) -> Path + Copy + Send + Sync,
     Size: size::Size + Send,
 {
     /// Path to the root.
     pub path: Path,
     /// Name of the root.
-    pub name: Name,
+    pub name: NameIter::Item,
     /// Function to extract necessary information from `path` (`size` and `children`).
     pub get_info: GetInfo,
     /// Function to join parent's `path` with a child's name to make the child's `name`.
@@ -27,17 +29,19 @@ where
     pub max_depth: u64,
 }
 
-impl<Path, Name, Size, GetInfo, JoinPath> From<TreeBuilder<Path, Name, Size, GetInfo, JoinPath>>
-    for DataTree<Name, Size>
+impl<Path, NameIter, Size, GetInfo, JoinPath>
+    From<TreeBuilder<Path, NameIter, Size, GetInfo, JoinPath>> for DataTree<NameIter::Item, Size>
 where
     Path: Send + Sync,
-    Name: Send + Sync,
-    GetInfo: Fn(&Path) -> Info<Name, Size> + Copy + Send + Sync,
-    JoinPath: Fn(&Path, &Name) -> Path + Copy + Send + Sync,
+    NameIter: IntoIterator,
+    NameIter::IntoIter: Send,
+    NameIter::Item: Send,
+    GetInfo: Fn(&Path) -> Info<NameIter, Size> + Copy + Send + Sync,
+    JoinPath: Fn(&Path, &NameIter::Item) -> Path + Copy + Send + Sync,
     Size: size::Size + Send,
 {
     /// Create a [`DataTree`] from a [`TreeBuilder`].
-    fn from(builder: TreeBuilder<Path, Name, Size, GetInfo, JoinPath>) -> Self {
+    fn from(builder: TreeBuilder<Path, NameIter, Size, GetInfo, JoinPath>) -> Self {
         let TreeBuilder {
             path,
             name,
@@ -50,7 +54,8 @@ where
         let max_depth = max_depth.saturating_sub(1);
 
         let children = children
-            .into_par_iter()
+            .into_iter()
+            .par_bridge()
             .map(|name| TreeBuilder {
                 path: join_path(&path, &name),
                 name,

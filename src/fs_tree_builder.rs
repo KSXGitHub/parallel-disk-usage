@@ -6,6 +6,7 @@ use super::{
     size,
     tree_builder::{Info, TreeBuilder},
 };
+use pipe_trait::Pipe;
 use std::{
     fs::{read_dir, symlink_metadata},
     path::PathBuf,
@@ -65,12 +66,19 @@ where
             max_depth,
         } = builder;
 
-        TreeBuilder::<PathBuf, OsStringDisplay, Size, _, _> {
+        TreeBuilder::<PathBuf, _, Size, _, _> {
             name: OsStringDisplay::os_string_from(&root),
 
             path: root,
 
             get_info: |path| {
+                let make_info = |size: Size, children: Option<_>| Info {
+                    size,
+                    children: children.into_iter().flatten(),
+                };
+
+                let empty_info = || make_info(Size::default(), None);
+
                 let stats = match symlink_metadata(path) {
                     Err(error) => {
                         reporter.report(Event::EncounterError(ErrorReport {
@@ -78,15 +86,12 @@ where
                             path,
                             error,
                         }));
-                        return Info {
-                            size: Size::default(),
-                            children: Vec::new(),
-                        };
+                        return empty_info();
                     }
                     Ok(stats) => stats,
                 };
 
-                let children: Vec<_> = if stats.is_dir() {
+                let children = if stats.is_dir() {
                     match read_dir(path) {
                         Err(error) => {
                             reporter.report(Event::EncounterError(ErrorReport {
@@ -94,22 +99,22 @@ where
                                 path,
                                 error,
                             }));
-                            return Info::default();
+                            return empty_info();
                         }
                         Ok(entries) => entries,
                     }
                     .flatten()
                     .map(|entry| entry.file_name())
                     .map(OsStringDisplay::from)
-                    .collect()
+                    .pipe(Some)
                 } else {
-                    Vec::new()
+                    None
                 };
 
                 let size = size_getter.get_size(&stats);
                 reporter.report(Event::ReceiveData(size));
 
-                Info { size, children }
+                make_info(size, children)
             },
 
             join_path: |prefix, name| prefix.join(&name.0),
