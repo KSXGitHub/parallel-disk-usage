@@ -3,8 +3,9 @@ pub mod info;
 pub use info::Info;
 
 use super::{data_tree::DataTree, size};
-use itertools::Itertools;
+use pipe_trait::Pipe;
 use rayon::prelude::*;
+use std::{marker::PhantomData, ops::Not};
 
 /// Collection of functions and starting points in order to build a [`DataTree`] with [`From`] or [`Into`].
 #[derive(Debug)]
@@ -56,10 +57,8 @@ where
 
         let children = children
             .into_iter()
-            .chunks(64)
-            .into_iter()
-            .map(Vec::<NameIter::Item>::from_iter)
-            .map(|names| -> Vec<_> {
+            .pipe(Chunks::<64, _>::new)
+            .map(|names: Vec<_>| -> Vec<_> {
                 names
                     .into_par_iter()
                     .map(|name| TreeBuilder {
@@ -83,5 +82,33 @@ where
             let size = size + children.into_iter().map(|child| child.size()).sum();
             DataTree::dir(name, size, Vec::new())
         }
+    }
+}
+
+/// Utility type to iterate over each `Vec` of at most `LEN` items.
+#[derive(Debug, Clone, Copy)]
+struct Chunks<const LEN: usize, Iter> {
+    iter: Iter,
+    _phantom: PhantomData<[(); LEN]>,
+}
+
+impl<const LEN: usize, Iter> Chunks<LEN, Iter> {
+    /// Start iterating chunks.
+    fn new(iter: Iter) -> Self {
+        Chunks {
+            iter,
+            _phantom: PhantomData,
+        }
+    }
+}
+
+impl<const LEN: usize, Iter> Iterator for Chunks<LEN, Iter>
+where
+    Iter: Iterator,
+{
+    type Item = Vec<Iter::Item>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let chunk: Vec<_> = self.iter.by_ref().take(LEN).collect();
+        chunk.is_empty().not().then_some(chunk)
     }
 }
