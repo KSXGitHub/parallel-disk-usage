@@ -121,23 +121,11 @@ fn invalid_conversion_excessive_children() {
     let expected = ConversionError::ExcessiveChildren {
         path: vec!["root", "b", "0"].into_iter().collect(),
         size: Bytes::new(321),
-        children: vec![
-            Reflection {
-                name: "abc",
-                size: Bytes::new(123),
-                children: vec![Reflection {
-                    name: "xyz",
-                    size: Bytes::new(4321),
-                    children: Vec::new(),
-                }],
-            },
-            Reflection {
-                name: "def",
-                size: Bytes::new(456),
-                children: Vec::new(),
-            },
-        ],
-        children_sum: Bytes::new(123 + 456),
+        child: Reflection {
+            name: "def",
+            size: Bytes::new(456),
+            children: Vec::new(),
+        },
     };
     assert_eq!(actual, expected);
 }
@@ -148,7 +136,7 @@ fn display_excessive_children() {
         .par_try_into_tree()
         .expect_err("create error")
         .to_string();
-    let expected = r#"ExcessiveChildren: "root/b/0": Bytes(321) is less than Bytes(579)"#;
+    let expected = r#"ExcessiveChildren: "root/b/0" (Bytes(321)) is less than a child named "def" (Bytes(456))"#;
     assert_eq!(actual, expected);
 }
 

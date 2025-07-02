@@ -15,14 +15,15 @@ where
             size,
             children,
         } = self;
-        let children_sum = children.iter().map(|child| child.size).sum();
-        if size < children_sum {
-            return Err(ConversionError::ExcessiveChildren {
-                path: once(name).collect(),
-                size,
-                children,
-                children_sum,
-            });
+        let excess_child = children
+            .iter()
+            .enumerate()
+            .find(|(_, child)| child.size > size);
+        if let Some((index, _)) = excess_child {
+            let path = once(name).collect();
+            let mut children = children;
+            let child = children.swap_remove(index); // this still does the unnecessary work of swapping the elements, how to skip it?
+            return Err(ConversionError::ExcessiveChildren { path, size, child });
         }
         let children: Result<Vec<_>, _> = children
             .into_par_iter()
@@ -33,16 +34,10 @@ where
             Err(ConversionError::ExcessiveChildren {
                 mut path,
                 size,
-                children,
-                children_sum,
+                child,
             }) => {
                 path.push_front(name);
-                return Err(ConversionError::ExcessiveChildren {
-                    path,
-                    size,
-                    children,
-                    children_sum,
-                });
+                return Err(ConversionError::ExcessiveChildren { path, size, child });
             }
         };
         Ok(DataTree {

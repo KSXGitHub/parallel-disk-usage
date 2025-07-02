@@ -44,16 +44,14 @@ pub struct Reflection<Name, Size: size::Size> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum ConversionError<Name, Size: size::Size> {
-    /// When a node's size is less than the sum of its children.
+    /// When a node's size is less than one of its children.
     ExcessiveChildren {
         /// Path from root to the node.
         path: VecDeque<Name>,
         /// Size hold by the node.
         size: Size,
-        /// Children of the node.
-        children: Vec<Reflection<Name, Size>>,
-        /// Sum of size hold by children of the node.
-        children_sum: Size,
+        /// The child whose size was greater than that of the node.
+        child: Reflection<Name, Size>,
     },
 }
 
@@ -65,19 +63,16 @@ where
     fn fmt(&self, formatter: &mut Formatter<'_>) -> Result<(), Error> {
         use ConversionError::*;
         match self {
-            ExcessiveChildren {
-                path,
-                size,
-                children_sum,
-                ..
-            } => {
+            ExcessiveChildren { path, size, child } => {
                 let path = path
                     .iter()
                     .map(PathBuf::from)
                     .fold(PathBuf::new(), |acc, x| acc.join(x));
                 write!(
                     formatter,
-                    "ExcessiveChildren: {path:?}: {size:?} is less than {children_sum:?}",
+                    "ExcessiveChildren: {path:?} ({size:?}) is less than a child named {child_name:?} ({child_size:?})",
+                    child_name = child.name,
+                    child_size = child.size,
                 )
             }
         }
