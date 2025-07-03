@@ -21,8 +21,7 @@ where
             .find(|(_, child)| child.size > size);
         if let Some((index, _)) = excess_child {
             let path = once(name).collect();
-            let mut children = children;
-            let child = children.swap_remove(index); // this still does the unnecessary work of swapping the elements, how to skip it?
+            let child = keep_one(children, index).expect("excess child");
             return Err(ConversionError::ExcessiveChildren { path, size, child });
         }
         let children: Result<Vec<_>, _> = children
@@ -88,4 +87,11 @@ where
                 .ok_or(name)
         })
     }
+}
+
+/// Extract an item at `index` if it exists. Then drop all remaining items.
+#[inline]
+fn keep_one<Item>(vec: Vec<Item>, index: usize) -> Option<Item> {
+    // Worry not about performance, for `std::vec::IntoIter::advanced_by` is overridden with O(1) algorithm!
+    vec.into_iter().nth(index)
 }
