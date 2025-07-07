@@ -30,5 +30,6 @@ pub struct DataTree<Name, Size: size::Size> {
 
 mod constructors;
 mod getters;
+mod hardlink;
 mod retain;
 mod sort;
