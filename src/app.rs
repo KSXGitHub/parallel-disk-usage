@@ -128,26 +128,36 @@ impl App {
 
         trait QuantityUtils<const INDEX: u8> {
             const QUANTITY: Quantity;
-            type SizeGetter;
+            type SizeGetter: GetSize<Size: size::Size>;
             const SIZE_GETTER: Self::SizeGetter;
+            fn formatter(
+                bytes_format: BytesFormat,
+            ) -> <<Self::SizeGetter as GetSize>::Size as size::Size>::DisplayFormat;
         }
 
         impl QuantityUtils<{ quantity_index::APPARENT_SIZE }> for () {
             const QUANTITY: Quantity = Quantity::ApparentSize;
             type SizeGetter = GetApparentSize;
             const SIZE_GETTER: Self::SizeGetter = GetApparentSize;
+            fn formatter(bytes_format: BytesFormat) -> BytesFormat {
+                bytes_format
+            }
         }
 
         impl QuantityUtils<{ quantity_index::BLOCK_SIZE }> for () {
             const QUANTITY: Quantity = Quantity::BlockSize;
             type SizeGetter = GetBlockSize;
             const SIZE_GETTER: Self::SizeGetter = GetBlockSize;
+            fn formatter(bytes_format: BytesFormat) -> BytesFormat {
+                bytes_format
+            }
         }
 
         impl QuantityUtils<{ quantity_index::BLOCK_COUNT }> for () {
             const QUANTITY: Quantity = Quantity::BlockCount;
             type SizeGetter = GetBlockCount;
             const SIZE_GETTER: Self::SizeGetter = GetBlockCount;
+            fn formatter(_: BytesFormat) {}
         }
 
         trait CreateReporter<const REPORT_PROGRESS: bool, Size> {
@@ -181,28 +191,6 @@ impl App {
             }
         }
 
-        trait GetSizeUtils: GetSize<Size: size::Size> {
-            fn formatter(bytes_format: BytesFormat) -> <Self::Size as size::Size>::DisplayFormat;
-        }
-
-        impl GetSizeUtils for GetApparentSize {
-            fn formatter(bytes_format: BytesFormat) -> BytesFormat {
-                bytes_format
-            }
-        }
-
-        #[cfg(unix)]
-        impl GetSizeUtils for GetBlockSize {
-            fn formatter(bytes_format: BytesFormat) -> BytesFormat {
-                bytes_format
-            }
-        }
-
-        #[cfg(unix)]
-        impl GetSizeUtils for GetBlockCount {
-            fn formatter(_: BytesFormat) {}
-        }
-
         macro_rules! run {
             ($(
                 $(#[$variant_attrs:meta])*
@@ -226,7 +214,7 @@ impl App {
                     bar_alignment: BarAlignment::from_align_right(align_right),
                     size_getter: <() as QuantityUtils<{ quantity_index::$quantity_index }>>::SIZE_GETTER,
                     reporter: <() as CreateReporter<$progress, <<() as QuantityUtils<{ quantity_index::$quantity_index }>>::SizeGetter as GetSize>::Size>>::create_reporter(report_error),
-                    bytes_format: <<() as QuantityUtils<{ quantity_index::$quantity_index }>>::SizeGetter as GetSizeUtils>::formatter(bytes_format),
+                    bytes_format: <() as QuantityUtils<{ quantity_index::$quantity_index }>>::formatter(bytes_format),
                     files,
                     json_output,
                     column_width_distribution,
