@@ -4,11 +4,12 @@ pub use sub::Sub;
 
 use crate::{
     args::{Args, Quantity, Threads},
-    get_size::GetApparentSize,
+    bytes_format::BytesFormat,
+    get_size::{GetApparentSize, GetSize},
     json_data::{JsonData, UnitAndTree},
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
-    size::{self, Bytes},
+    size,
     visualizer::{BarAlignment, Direction, Visualizer},
 };
 use clap::Parser;
@@ -18,10 +19,7 @@ use std::{io::stdin, time::Duration};
 use sysinfo::Disks;
 
 #[cfg(unix)]
-use crate::{
-    get_size::{GetBlockCount, GetBlockSize},
-    size::Blocks,
-};
+use crate::get_size::{GetBlockCount, GetBlockSize};
 
 /// The main application.
 pub struct App {
@@ -141,11 +139,36 @@ impl App {
             )
         }
 
+        trait GetSizeUtils: GetSize {
+            type FormatSizeOutput;
+            fn format_size(bytes_format: BytesFormat) -> Self::FormatSizeOutput;
+        }
+
+        impl GetSizeUtils for GetApparentSize {
+            type FormatSizeOutput = BytesFormat;
+            fn format_size(bytes_format: BytesFormat) -> Self::FormatSizeOutput {
+                bytes_format
+            }
+        }
+
+        #[cfg(unix)]
+        impl GetSizeUtils for GetBlockSize {
+            type FormatSizeOutput = BytesFormat;
+            fn format_size(bytes_format: BytesFormat) -> Self::FormatSizeOutput {
+                bytes_format
+            }
+        }
+
+        #[cfg(unix)]
+        impl GetSizeUtils for GetBlockCount {
+            type FormatSizeOutput = ();
+            fn format_size(_: BytesFormat) -> Self::FormatSizeOutput {}
+        }
+
         macro_rules! run {
             ($(
                 $(#[$variant_attrs:meta])*
                 {
-                    $size:ty => $format:expr;
                     $quantity:ident => $size_getter:ident;
                     $progress:literal => $create_reporter:ident;
                 }
@@ -167,8 +190,8 @@ impl App {
                     direction: Direction::from_top_down(top_down),
                     bar_alignment: BarAlignment::from_align_right(align_right),
                     size_getter: $size_getter,
-                    reporter: $create_reporter::<$size>(report_error),
-                    bytes_format: $format(bytes_format),
+                    reporter: $create_reporter::<<$size_getter as GetSize>::Size>(report_error),
+                    bytes_format: <$size_getter as GetSizeUtils>::format_size(bytes_format),
                     files,
                     json_output,
                     column_width_distribution,
@@ -182,41 +205,35 @@ impl App {
 
         run! {
             {
-                Bytes => |x| x;
                 ApparentSize => GetApparentSize;
                 false => error_only_reporter;
             }
 
             {
-                Bytes => |x| x;
                 ApparentSize => GetApparentSize;
                 true => progress_and_error_reporter;
             }
 
             #[cfg(unix)]
             {
-                Bytes => |x| x;
                 BlockSize => GetBlockSize;
                 false => error_only_reporter;
             }
 
             #[cfg(unix)]
             {
-                Bytes => |x| x;
                 BlockSize => GetBlockSize;
                 true => progress_and_error_reporter;
             }
 
             #[cfg(unix)]
             {
-                Blocks => |_| ();
                 BlockCount => GetBlockCount;
                 false => error_only_reporter;
             }
 
             #[cfg(unix)]
             {
-                Blocks => |_| ();
                 BlockCount => GetBlockCount;
                 true => progress_and_error_reporter;
             }
