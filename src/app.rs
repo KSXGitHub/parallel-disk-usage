@@ -126,13 +126,14 @@ impl App {
             pub const BLOCK_COUNT: u8 = 2;
         }
 
+        type SizeGetterToDisplayFormat<SizeGetter> =
+            <<SizeGetter as GetSize>::Size as size::Size>::DisplayFormat;
+
         trait QuantityUtils<const INDEX: u8> {
             const QUANTITY: Quantity;
             type SizeGetter: GetSize<Size: size::Size>;
             const SIZE_GETTER: Self::SizeGetter;
-            fn formatter(
-                bytes_format: BytesFormat,
-            ) -> <<Self::SizeGetter as GetSize>::Size as size::Size>::DisplayFormat;
+            fn formatter(bytes_format: BytesFormat) -> SizeGetterToDisplayFormat<Self::SizeGetter>;
         }
 
         impl QuantityUtils<{ quantity_index::APPARENT_SIZE }> for () {
