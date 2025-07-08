@@ -4,11 +4,12 @@ pub use sub::Sub;
 
 use crate::{
     args::{Args, Quantity, Threads},
-    get_size::GetApparentSize,
+    bytes_format::BytesFormat,
+    get_size::{GetApparentSize, GetSize},
     json_data::{JsonData, UnitAndTree},
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
-    size::{self, Bytes},
+    size,
     visualizer::{BarAlignment, Direction, Visualizer},
 };
 use clap::Parser;
@@ -18,10 +19,7 @@ use std::{io::stdin, time::Duration};
 use sysinfo::Disks;
 
 #[cfg(unix)]
-use crate::{
-    get_size::{GetBlockCount, GetBlockSize},
-    size::Blocks,
-};
+use crate::get_size::{GetBlockCount, GetBlockSize};
 
 /// The main application.
 pub struct App {
@@ -119,40 +117,97 @@ impl App {
             ErrorReport::TEXT
         };
 
-        #[allow(clippy::extra_unused_type_parameters)]
-        fn error_only_reporter<Size>(
-            report_error: fn(ErrorReport),
-        ) -> ErrorOnlyReporter<fn(ErrorReport)> {
-            ErrorOnlyReporter::new(report_error)
+        // we can't use `Quantity` directly as `const` parameter so we have to use numbers.
+        mod quantity_index {
+            pub const APPARENT_SIZE: u8 = 0;
+            #[cfg(unix)]
+            pub const BLOCK_SIZE: u8 = 1;
+            #[cfg(unix)]
+            pub const BLOCK_COUNT: u8 = 2;
         }
 
-        fn progress_and_error_reporter<Size>(
-            report_error: fn(ErrorReport),
-        ) -> ProgressAndErrorReporter<Size, fn(ErrorReport)>
+        type SizeGetterToDisplayFormat<SizeGetter> =
+            <<SizeGetter as GetSize>::Size as size::Size>::DisplayFormat;
+
+        trait QuantityUtils<const INDEX: u8> {
+            const QUANTITY: Quantity;
+            type SizeGetter: GetSize<Size: size::Size>;
+            const SIZE_GETTER: Self::SizeGetter;
+            fn formatter(bytes_format: BytesFormat) -> SizeGetterToDisplayFormat<Self::SizeGetter>;
+        }
+
+        impl QuantityUtils<{ quantity_index::APPARENT_SIZE }> for () {
+            const QUANTITY: Quantity = Quantity::ApparentSize;
+            type SizeGetter = GetApparentSize;
+            const SIZE_GETTER: Self::SizeGetter = GetApparentSize;
+            fn formatter(bytes_format: BytesFormat) -> BytesFormat {
+                bytes_format
+            }
+        }
+
+        #[cfg(unix)]
+        impl QuantityUtils<{ quantity_index::BLOCK_SIZE }> for () {
+            const QUANTITY: Quantity = Quantity::BlockSize;
+            type SizeGetter = GetBlockSize;
+            const SIZE_GETTER: Self::SizeGetter = GetBlockSize;
+            fn formatter(bytes_format: BytesFormat) -> BytesFormat {
+                bytes_format
+            }
+        }
+
+        #[cfg(unix)]
+        impl QuantityUtils<{ quantity_index::BLOCK_COUNT }> for () {
+            const QUANTITY: Quantity = Quantity::BlockCount;
+            type SizeGetter = GetBlockCount;
+            const SIZE_GETTER: Self::SizeGetter = GetBlockCount;
+            fn formatter(_: BytesFormat) {}
+        }
+
+        trait CreateReporter<const REPORT_PROGRESS: bool, const QUANTITY_INDEX: u8> {
+            type Reporter;
+            fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter;
+        }
+
+        type QuantityIndexToSizeType<const INDEX: u8> =
+            <<() as QuantityUtils<INDEX>>::SizeGetter as GetSize>::Size;
+
+        impl<const QUANTITY_INDEX: u8> CreateReporter<false, QUANTITY_INDEX> for ()
         where
-            Size: size::Size + Into<u64> + Send + Sync,
-            ProgressReport<Size>: Default + 'static,
-            u64: Into<Size>,
+            (): QuantityUtils<QUANTITY_INDEX>,
+            QuantityIndexToSizeType<QUANTITY_INDEX>: size::Size,
         {
-            ProgressAndErrorReporter::new(
-                ProgressReport::TEXT,
-                Duration::from_millis(100),
-                report_error,
-            )
+            type Reporter = ErrorOnlyReporter<fn(ErrorReport)>;
+            fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter {
+                ErrorOnlyReporter::new(report_error)
+            }
+        }
+
+        impl<const QUANTITY_INDEX: u8> CreateReporter<true, QUANTITY_INDEX> for ()
+        where
+            (): QuantityUtils<QUANTITY_INDEX>,
+            QuantityIndexToSizeType<QUANTITY_INDEX>: size::Size + Into<u64> + Send + Sync,
+            ProgressReport<QuantityIndexToSizeType<QUANTITY_INDEX>>: Default + 'static,
+            u64: Into<QuantityIndexToSizeType<QUANTITY_INDEX>>,
+        {
+            type Reporter =
+                ProgressAndErrorReporter<QuantityIndexToSizeType<QUANTITY_INDEX>, fn(ErrorReport)>;
+            fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter {
+                ProgressAndErrorReporter::new(
+                    ProgressReport::TEXT,
+                    Duration::from_millis(100),
+                    report_error,
+                )
+            }
         }
 
         macro_rules! run {
             ($(
                 $(#[$variant_attrs:meta])*
-                {
-                    $size:ty => $format:expr;
-                    $quantity:ident => $size_getter:ident;
-                    $progress:literal => $create_reporter:ident;
-                }
+                $quantity_index:ident, $progress:literal;
             )*) => { match self.args {$(
                 $(#[$variant_attrs])*
                 Args {
-                    quantity: Quantity::$quantity,
+                    quantity: <() as QuantityUtils<{ quantity_index::$quantity_index }>>::QUANTITY,
                     progress: $progress,
                     files,
                     json_output,
@@ -166,9 +221,9 @@ impl App {
                 } => Sub {
                     direction: Direction::from_top_down(top_down),
                     bar_alignment: BarAlignment::from_align_right(align_right),
-                    size_getter: $size_getter,
-                    reporter: $create_reporter::<$size>(report_error),
-                    bytes_format: $format(bytes_format),
+                    size_getter: <() as QuantityUtils<{ quantity_index::$quantity_index }>>::SIZE_GETTER,
+                    reporter: <() as CreateReporter<$progress, { quantity_index::$quantity_index }>>::create_reporter(report_error),
+                    bytes_format: <() as QuantityUtils<{ quantity_index::$quantity_index }>>::formatter(bytes_format),
                     files,
                     json_output,
                     column_width_distribution,
@@ -181,45 +236,12 @@ impl App {
         }
 
         run! {
-            {
-                Bytes => |x| x;
-                ApparentSize => GetApparentSize;
-                false => error_only_reporter;
-            }
-
-            {
-                Bytes => |x| x;
-                ApparentSize => GetApparentSize;
-                true => progress_and_error_reporter;
-            }
-
-            #[cfg(unix)]
-            {
-                Bytes => |x| x;
-                BlockSize => GetBlockSize;
-                false => error_only_reporter;
-            }
-
-            #[cfg(unix)]
-            {
-                Bytes => |x| x;
-                BlockSize => GetBlockSize;
-                true => progress_and_error_reporter;
-            }
-
-            #[cfg(unix)]
-            {
-                Blocks => |_| ();
-                BlockCount => GetBlockCount;
-                false => error_only_reporter;
-            }
-
-            #[cfg(unix)]
-            {
-                Blocks => |_| ();
-                BlockCount => GetBlockCount;
-                true => progress_and_error_reporter;
-            }
+            APPARENT_SIZE, false;
+            APPARENT_SIZE, true;
+            #[cfg(unix)] BLOCK_SIZE, false;
+            #[cfg(unix)] BLOCK_SIZE, true;
+            #[cfg(unix)] BLOCK_COUNT, false;
+            #[cfg(unix)] BLOCK_COUNT, true;
         }
     }
 }
