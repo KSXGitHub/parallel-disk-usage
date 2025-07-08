@@ -117,64 +117,44 @@ impl App {
             ErrorReport::TEXT
         };
 
-        // we can't use `Quantity` directly as `const` parameter so we have to use numbers.
-        mod quantity_index {
-            pub const APPARENT_SIZE: u8 = 0;
-            #[cfg(unix)]
-            pub const BLOCK_SIZE: u8 = 1;
-            #[cfg(unix)]
-            pub const BLOCK_COUNT: u8 = 2;
-        }
-
-        type SizeGetterToDisplayFormat<SizeGetter> =
-            <<SizeGetter as GetSize>::Size as size::Size>::DisplayFormat;
-
-        trait QuantityUtils<const INDEX: u8> {
+        trait GetSizeUtils: GetSize<Size: size::Size> {
+            const INSTANCE: Self;
             const QUANTITY: Quantity;
-            type SizeGetter: GetSize<Size: size::Size>;
-            const SIZE_GETTER: Self::SizeGetter;
-            fn formatter(bytes_format: BytesFormat) -> SizeGetterToDisplayFormat<Self::SizeGetter>;
+            fn formatter(bytes_format: BytesFormat) -> <Self::Size as size::Size>::DisplayFormat;
         }
 
-        impl QuantityUtils<{ quantity_index::APPARENT_SIZE }> for () {
+        impl GetSizeUtils for GetApparentSize {
+            const INSTANCE: Self = GetApparentSize;
             const QUANTITY: Quantity = Quantity::ApparentSize;
-            type SizeGetter = GetApparentSize;
-            const SIZE_GETTER: Self::SizeGetter = GetApparentSize;
             fn formatter(bytes_format: BytesFormat) -> BytesFormat {
                 bytes_format
             }
         }
 
         #[cfg(unix)]
-        impl QuantityUtils<{ quantity_index::BLOCK_SIZE }> for () {
+        impl GetSizeUtils for GetBlockSize {
+            const INSTANCE: Self = GetBlockSize;
             const QUANTITY: Quantity = Quantity::BlockSize;
-            type SizeGetter = GetBlockSize;
-            const SIZE_GETTER: Self::SizeGetter = GetBlockSize;
             fn formatter(bytes_format: BytesFormat) -> BytesFormat {
                 bytes_format
             }
         }
 
         #[cfg(unix)]
-        impl QuantityUtils<{ quantity_index::BLOCK_COUNT }> for () {
+        impl GetSizeUtils for GetBlockCount {
+            const INSTANCE: Self = GetBlockCount;
             const QUANTITY: Quantity = Quantity::BlockCount;
-            type SizeGetter = GetBlockCount;
-            const SIZE_GETTER: Self::SizeGetter = GetBlockCount;
             fn formatter(_: BytesFormat) {}
         }
 
-        trait CreateReporter<const REPORT_PROGRESS: bool, const QUANTITY_INDEX: u8> {
+        trait CreateReporter<const REPORT_PROGRESS: bool>: GetSizeUtils {
             type Reporter;
             fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter;
         }
 
-        type QuantityIndexToSizeType<const INDEX: u8> =
-            <<() as QuantityUtils<INDEX>>::SizeGetter as GetSize>::Size;
-
-        impl<const QUANTITY_INDEX: u8> CreateReporter<false, QUANTITY_INDEX> for ()
+        impl<SizeGetter> CreateReporter<false> for SizeGetter
         where
-            (): QuantityUtils<QUANTITY_INDEX>,
-            QuantityIndexToSizeType<QUANTITY_INDEX>: size::Size,
+            SizeGetter: GetSizeUtils,
         {
             type Reporter = ErrorOnlyReporter<fn(ErrorReport)>;
             fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter {
@@ -182,15 +162,14 @@ impl App {
             }
         }
 
-        impl<const QUANTITY_INDEX: u8> CreateReporter<true, QUANTITY_INDEX> for ()
+        impl<SizeGetter> CreateReporter<true> for SizeGetter
         where
-            (): QuantityUtils<QUANTITY_INDEX>,
-            QuantityIndexToSizeType<QUANTITY_INDEX>: size::Size + Into<u64> + Send + Sync,
-            ProgressReport<QuantityIndexToSizeType<QUANTITY_INDEX>>: Default + 'static,
-            u64: Into<QuantityIndexToSizeType<QUANTITY_INDEX>>,
+            SizeGetter: GetSizeUtils,
+            SizeGetter::Size: Into<u64> + Send + Sync,
+            ProgressReport<SizeGetter::Size>: Default + 'static,
+            u64: Into<SizeGetter::Size>,
         {
-            type Reporter =
-                ProgressAndErrorReporter<QuantityIndexToSizeType<QUANTITY_INDEX>, fn(ErrorReport)>;
+            type Reporter = ProgressAndErrorReporter<SizeGetter::Size, fn(ErrorReport)>;
             fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter {
                 ProgressAndErrorReporter::new(
                     ProgressReport::TEXT,
@@ -203,11 +182,11 @@ impl App {
         macro_rules! run {
             ($(
                 $(#[$variant_attrs:meta])*
-                $quantity_index:ident, $progress:literal;
+                $size_getter:ident, $progress:literal;
             )*) => { match self.args {$(
                 $(#[$variant_attrs])*
                 Args {
-                    quantity: <() as QuantityUtils<{ quantity_index::$quantity_index }>>::QUANTITY,
+                    quantity: <$size_getter as GetSizeUtils>::QUANTITY,
                     progress: $progress,
                     files,
                     json_output,
@@ -221,9 +200,9 @@ impl App {
                 } => Sub {
                     direction: Direction::from_top_down(top_down),
                     bar_alignment: BarAlignment::from_align_right(align_right),
-                    size_getter: <() as QuantityUtils<{ quantity_index::$quantity_index }>>::SIZE_GETTER,
-                    reporter: <() as CreateReporter<$progress, { quantity_index::$quantity_index }>>::create_reporter(report_error),
-                    bytes_format: <() as QuantityUtils<{ quantity_index::$quantity_index }>>::formatter(bytes_format),
+                    size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
+                    reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
+                    bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
                     files,
                     json_output,
                     column_width_distribution,
@@ -236,12 +215,12 @@ impl App {
         }
 
         run! {
-            APPARENT_SIZE, false;
-            APPARENT_SIZE, true;
-            #[cfg(unix)] BLOCK_SIZE, false;
-            #[cfg(unix)] BLOCK_SIZE, true;
-            #[cfg(unix)] BLOCK_COUNT, false;
-            #[cfg(unix)] BLOCK_COUNT, true;
+            GetApparentSize, false;
+            GetApparentSize, true;
+            #[cfg(unix)] GetBlockSize, false;
+            #[cfg(unix)] GetBlockSize, true;
+            #[cfg(unix)] GetBlockCount, false;
+            #[cfg(unix)] GetBlockCount, true;
         }
     }
 }
