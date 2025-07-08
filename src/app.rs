@@ -117,26 +117,35 @@ impl App {
             ErrorReport::TEXT
         };
 
-        #[allow(clippy::extra_unused_type_parameters)]
-        fn error_only_reporter<Size>(
-            report_error: fn(ErrorReport),
-        ) -> ErrorOnlyReporter<fn(ErrorReport)> {
-            ErrorOnlyReporter::new(report_error)
+        trait CreateReporter<const REPORT_PROGRESS: bool, Size> {
+            type Reporter;
+            fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter;
         }
 
-        fn progress_and_error_reporter<Size>(
-            report_error: fn(ErrorReport),
-        ) -> ProgressAndErrorReporter<Size, fn(ErrorReport)>
+        impl<Size> CreateReporter<false, Size> for ()
+        where
+            Size: size::Size,
+        {
+            type Reporter = ErrorOnlyReporter<fn(ErrorReport)>;
+            fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter {
+                ErrorOnlyReporter::new(report_error)
+            }
+        }
+
+        impl<Size> CreateReporter<true, Size> for ()
         where
             Size: size::Size + Into<u64> + Send + Sync,
             ProgressReport<Size>: Default + 'static,
             u64: Into<Size>,
         {
-            ProgressAndErrorReporter::new(
-                ProgressReport::TEXT,
-                Duration::from_millis(100),
-                report_error,
-            )
+            type Reporter = ProgressAndErrorReporter<Size, fn(ErrorReport)>;
+            fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter {
+                ProgressAndErrorReporter::new(
+                    ProgressReport::TEXT,
+                    Duration::from_millis(100),
+                    report_error,
+                )
+            }
         }
 
         trait GetSizeUtils: GetSize {
@@ -168,8 +177,7 @@ impl App {
         macro_rules! run {
             ($(
                 $(#[$variant_attrs:meta])*
-                $quantity:ident, $size_getter:ident,
-                $progress:literal, $create_reporter:ident;
+                $quantity:ident, $size_getter:ident, $progress:literal;
             )*) => { match self.args {$(
                 $(#[$variant_attrs])*
                 Args {
@@ -188,7 +196,7 @@ impl App {
                     direction: Direction::from_top_down(top_down),
                     bar_alignment: BarAlignment::from_align_right(align_right),
                     size_getter: $size_getter,
-                    reporter: $create_reporter::<<$size_getter as GetSize>::Size>(report_error),
+                    reporter: <() as CreateReporter<$progress, <$size_getter as GetSize>::Size>>::create_reporter(report_error),
                     bytes_format: <$size_getter as GetSizeUtils>::format_size(bytes_format),
                     files,
                     json_output,
@@ -202,12 +210,12 @@ impl App {
         }
 
         run! {
-            ApparentSize, GetApparentSize, false, error_only_reporter;
-            ApparentSize, GetApparentSize, true, progress_and_error_reporter;
-            #[cfg(unix)] BlockSize, GetBlockSize, false, error_only_reporter;
-            #[cfg(unix)] BlockSize, GetBlockSize, true, progress_and_error_reporter;
-            #[cfg(unix)] BlockCount, GetBlockCount, false, error_only_reporter;
-            #[cfg(unix)] BlockCount, GetBlockCount, true, progress_and_error_reporter;
+            ApparentSize, GetApparentSize, false;
+            ApparentSize, GetApparentSize, true;
+            #[cfg(unix)] BlockSize, GetBlockSize, false;
+            #[cfg(unix)] BlockSize, GetBlockSize, true;
+            #[cfg(unix)] BlockCount, GetBlockCount, false;
+            #[cfg(unix)] BlockCount, GetBlockCount, true;
         }
     }
 }
