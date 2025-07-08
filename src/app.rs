@@ -135,6 +135,9 @@ impl App {
             ) -> <<Self::SizeGetter as GetSize>::Size as size::Size>::DisplayFormat;
         }
 
+        type QuantityIndexToSizeType<const INDEX: u8> =
+            <<() as QuantityUtils<INDEX>>::SizeGetter as GetSize>::Size;
+
         impl QuantityUtils<{ quantity_index::APPARENT_SIZE }> for () {
             const QUANTITY: Quantity = Quantity::ApparentSize;
             type SizeGetter = GetApparentSize;
@@ -162,14 +165,15 @@ impl App {
             fn formatter(_: BytesFormat) {}
         }
 
-        trait CreateReporter<const REPORT_PROGRESS: bool, Size> {
+        trait CreateReporter<const REPORT_PROGRESS: bool, const QUANTITY_INDEX: u8> {
             type Reporter;
             fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter;
         }
 
-        impl<Size> CreateReporter<false, Size> for ()
+        impl<const QUANTITY_INDEX: u8> CreateReporter<false, QUANTITY_INDEX> for ()
         where
-            Size: size::Size,
+            (): QuantityUtils<QUANTITY_INDEX>,
+            QuantityIndexToSizeType<QUANTITY_INDEX>: size::Size,
         {
             type Reporter = ErrorOnlyReporter<fn(ErrorReport)>;
             fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter {
@@ -177,13 +181,15 @@ impl App {
             }
         }
 
-        impl<Size> CreateReporter<true, Size> for ()
+        impl<const QUANTITY_INDEX: u8> CreateReporter<true, QUANTITY_INDEX> for ()
         where
-            Size: size::Size + Into<u64> + Send + Sync,
-            ProgressReport<Size>: Default + 'static,
-            u64: Into<Size>,
+            (): QuantityUtils<QUANTITY_INDEX>,
+            QuantityIndexToSizeType<QUANTITY_INDEX>: size::Size + Into<u64> + Send + Sync,
+            ProgressReport<QuantityIndexToSizeType<QUANTITY_INDEX>>: Default + 'static,
+            u64: Into<QuantityIndexToSizeType<QUANTITY_INDEX>>,
         {
-            type Reporter = ProgressAndErrorReporter<Size, fn(ErrorReport)>;
+            type Reporter =
+                ProgressAndErrorReporter<QuantityIndexToSizeType<QUANTITY_INDEX>, fn(ErrorReport)>;
             fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter {
                 ProgressAndErrorReporter::new(
                     ProgressReport::TEXT,
@@ -215,7 +221,7 @@ impl App {
                     direction: Direction::from_top_down(top_down),
                     bar_alignment: BarAlignment::from_align_right(align_right),
                     size_getter: <() as QuantityUtils<{ quantity_index::$quantity_index }>>::SIZE_GETTER,
-                    reporter: <() as CreateReporter<$progress, <<() as QuantityUtils<{ quantity_index::$quantity_index }>>::SizeGetter as GetSize>::Size>>::create_reporter(report_error),
+                    reporter: <() as CreateReporter<$progress, { quantity_index::$quantity_index }>>::create_reporter(report_error),
                     bytes_format: <() as QuantityUtils<{ quantity_index::$quantity_index }>>::formatter(bytes_format),
                     files,
                     json_output,
