@@ -149,25 +149,25 @@ impl App {
         }
 
         trait GetSizeUtils: GetSize<Size: size::Size> {
-            fn format_size(bytes_format: BytesFormat) -> <Self::Size as size::Size>::DisplayFormat;
+            fn formatter(bytes_format: BytesFormat) -> <Self::Size as size::Size>::DisplayFormat;
         }
 
         impl GetSizeUtils for GetApparentSize {
-            fn format_size(bytes_format: BytesFormat) -> BytesFormat {
+            fn formatter(bytes_format: BytesFormat) -> BytesFormat {
                 bytes_format
             }
         }
 
         #[cfg(unix)]
         impl GetSizeUtils for GetBlockSize {
-            fn format_size(bytes_format: BytesFormat) -> BytesFormat {
+            fn formatter(bytes_format: BytesFormat) -> BytesFormat {
                 bytes_format
             }
         }
 
         #[cfg(unix)]
         impl GetSizeUtils for GetBlockCount {
-            fn format_size(_: BytesFormat) {}
+            fn formatter(_: BytesFormat) {}
         }
 
         macro_rules! run {
@@ -193,7 +193,7 @@ impl App {
                     bar_alignment: BarAlignment::from_align_right(align_right),
                     size_getter: $size_getter,
                     reporter: <() as CreateReporter<$progress, <$size_getter as GetSize>::Size>>::create_reporter(report_error),
-                    bytes_format: <$size_getter as GetSizeUtils>::format_size(bytes_format),
+                    bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
                     files,
                     json_output,
                     column_width_distribution,
