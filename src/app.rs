@@ -135,9 +135,6 @@ impl App {
             ) -> <<Self::SizeGetter as GetSize>::Size as size::Size>::DisplayFormat;
         }
 
-        type QuantityIndexToSizeType<const INDEX: u8> =
-            <<() as QuantityUtils<INDEX>>::SizeGetter as GetSize>::Size;
-
         impl QuantityUtils<{ quantity_index::APPARENT_SIZE }> for () {
             const QUANTITY: Quantity = Quantity::ApparentSize;
             type SizeGetter = GetApparentSize;
@@ -169,6 +166,9 @@ impl App {
             type Reporter;
             fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter;
         }
+
+        type QuantityIndexToSizeType<const INDEX: u8> =
+            <<() as QuantityUtils<INDEX>>::SizeGetter as GetSize>::Size;
 
         impl<const QUANTITY_INDEX: u8> CreateReporter<false, QUANTITY_INDEX> for ()
         where
