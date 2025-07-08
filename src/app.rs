@@ -148,30 +148,26 @@ impl App {
             }
         }
 
-        trait GetSizeUtils {
-            type FormatSizeOutput;
-            fn format_size(bytes_format: BytesFormat) -> Self::FormatSizeOutput;
+        trait GetSizeUtils: GetSize<Size: size::Size> {
+            fn format_size(bytes_format: BytesFormat) -> <Self::Size as size::Size>::DisplayFormat;
         }
 
         impl GetSizeUtils for GetApparentSize {
-            type FormatSizeOutput = BytesFormat;
-            fn format_size(bytes_format: BytesFormat) -> Self::FormatSizeOutput {
+            fn format_size(bytes_format: BytesFormat) -> BytesFormat {
                 bytes_format
             }
         }
 
         #[cfg(unix)]
         impl GetSizeUtils for GetBlockSize {
-            type FormatSizeOutput = BytesFormat;
-            fn format_size(bytes_format: BytesFormat) -> Self::FormatSizeOutput {
+            fn format_size(bytes_format: BytesFormat) -> BytesFormat {
                 bytes_format
             }
         }
 
         #[cfg(unix)]
         impl GetSizeUtils for GetBlockCount {
-            type FormatSizeOutput = ();
-            fn format_size(_: BytesFormat) -> Self::FormatSizeOutput {}
+            fn format_size(_: BytesFormat) {}
         }
 
         macro_rules! run {
