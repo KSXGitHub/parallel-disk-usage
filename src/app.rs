@@ -168,10 +168,8 @@ impl App {
         macro_rules! run {
             ($(
                 $(#[$variant_attrs:meta])*
-                {
-                    $quantity:ident => $size_getter:ident;
-                    $progress:literal => $create_reporter:ident;
-                }
+                $quantity:ident, $size_getter:ident,
+                $progress:literal, $create_reporter:ident;
             )*) => { match self.args {$(
                 $(#[$variant_attrs])*
                 Args {
@@ -204,39 +202,12 @@ impl App {
         }
 
         run! {
-            {
-                ApparentSize => GetApparentSize;
-                false => error_only_reporter;
-            }
-
-            {
-                ApparentSize => GetApparentSize;
-                true => progress_and_error_reporter;
-            }
-
-            #[cfg(unix)]
-            {
-                BlockSize => GetBlockSize;
-                false => error_only_reporter;
-            }
-
-            #[cfg(unix)]
-            {
-                BlockSize => GetBlockSize;
-                true => progress_and_error_reporter;
-            }
-
-            #[cfg(unix)]
-            {
-                BlockCount => GetBlockCount;
-                false => error_only_reporter;
-            }
-
-            #[cfg(unix)]
-            {
-                BlockCount => GetBlockCount;
-                true => progress_and_error_reporter;
-            }
+            ApparentSize, GetApparentSize, false, error_only_reporter;
+            ApparentSize, GetApparentSize, true, progress_and_error_reporter;
+            #[cfg(unix)] BlockSize, GetBlockSize, false, error_only_reporter;
+            #[cfg(unix)] BlockSize, GetBlockSize, true, progress_and_error_reporter;
+            #[cfg(unix)] BlockCount, GetBlockCount, false, error_only_reporter;
+            #[cfg(unix)] BlockCount, GetBlockCount, true, progress_and_error_reporter;
         }
     }
 }
