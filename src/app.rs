@@ -144,6 +144,7 @@ impl App {
             }
         }
 
+        #[cfg(unix)]
         impl QuantityUtils<{ quantity_index::BLOCK_SIZE }> for () {
             const QUANTITY: Quantity = Quantity::BlockSize;
             type SizeGetter = GetBlockSize;
@@ -153,6 +154,7 @@ impl App {
             }
         }
 
+        #[cfg(unix)]
         impl QuantityUtils<{ quantity_index::BLOCK_COUNT }> for () {
             const QUANTITY: Quantity = Quantity::BlockCount;
             type SizeGetter = GetBlockCount;
