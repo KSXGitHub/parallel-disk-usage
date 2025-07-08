@@ -148,7 +148,7 @@ impl App {
             }
         }
 
-        trait GetSizeUtils: GetSize {
+        trait GetSizeUtils {
             type FormatSizeOutput;
             fn format_size(bytes_format: BytesFormat) -> Self::FormatSizeOutput;
         }
