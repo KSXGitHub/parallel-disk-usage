@@ -126,25 +126,25 @@ impl App {
             pub const BLOCK_COUNT: u8 = 2;
         }
 
-        trait IndexToQuantity<const INDEX: u8> {
+        trait QuantityUtils<const INDEX: u8> {
             const QUANTITY: Quantity;
             type SizeGetter;
             const SIZE_GETTER: Self::SizeGetter;
         }
 
-        impl IndexToQuantity<{ quantity_index::APPARENT_SIZE }> for () {
+        impl QuantityUtils<{ quantity_index::APPARENT_SIZE }> for () {
             const QUANTITY: Quantity = Quantity::ApparentSize;
             type SizeGetter = GetApparentSize;
             const SIZE_GETTER: Self::SizeGetter = GetApparentSize;
         }
 
-        impl IndexToQuantity<{ quantity_index::BLOCK_SIZE }> for () {
+        impl QuantityUtils<{ quantity_index::BLOCK_SIZE }> for () {
             const QUANTITY: Quantity = Quantity::BlockSize;
             type SizeGetter = GetBlockSize;
             const SIZE_GETTER: Self::SizeGetter = GetBlockSize;
         }
 
-        impl IndexToQuantity<{ quantity_index::BLOCK_COUNT }> for () {
+        impl QuantityUtils<{ quantity_index::BLOCK_COUNT }> for () {
             const QUANTITY: Quantity = Quantity::BlockCount;
             type SizeGetter = GetBlockCount;
             const SIZE_GETTER: Self::SizeGetter = GetBlockCount;
@@ -210,7 +210,7 @@ impl App {
             )*) => { match self.args {$(
                 $(#[$variant_attrs])*
                 Args {
-                    quantity: <() as IndexToQuantity<{ quantity_index::$quantity_index }>>::QUANTITY,
+                    quantity: <() as QuantityUtils<{ quantity_index::$quantity_index }>>::QUANTITY,
                     progress: $progress,
                     files,
                     json_output,
@@ -224,9 +224,9 @@ impl App {
                 } => Sub {
                     direction: Direction::from_top_down(top_down),
                     bar_alignment: BarAlignment::from_align_right(align_right),
-                    size_getter: <() as IndexToQuantity<{ quantity_index::$quantity_index }>>::SIZE_GETTER,
-                    reporter: <() as CreateReporter<$progress, <<() as IndexToQuantity<{ quantity_index::$quantity_index }>>::SizeGetter as GetSize>::Size>>::create_reporter(report_error),
-                    bytes_format: <<() as IndexToQuantity<{ quantity_index::$quantity_index }>>::SizeGetter as GetSizeUtils>::formatter(bytes_format),
+                    size_getter: <() as QuantityUtils<{ quantity_index::$quantity_index }>>::SIZE_GETTER,
+                    reporter: <() as CreateReporter<$progress, <<() as QuantityUtils<{ quantity_index::$quantity_index }>>::SizeGetter as GetSize>::Size>>::create_reporter(report_error),
+                    bytes_format: <<() as QuantityUtils<{ quantity_index::$quantity_index }>>::SizeGetter as GetSizeUtils>::formatter(bytes_format),
                     files,
                     json_output,
                     column_width_distribution,
