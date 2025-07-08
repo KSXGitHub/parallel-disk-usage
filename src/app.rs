@@ -117,6 +117,39 @@ impl App {
             ErrorReport::TEXT
         };
 
+        // we can't use `Quantity` directly as `const` parameter so we have to use numbers.
+        mod quantity_index {
+            pub const APPARENT_SIZE: u8 = 0;
+            #[cfg(unix)]
+            pub const BLOCK_SIZE: u8 = 1;
+            #[cfg(unix)]
+            pub const BLOCK_COUNT: u8 = 2;
+        }
+
+        trait IndexToQuantity<const INDEX: u8> {
+            const QUANTITY: Quantity;
+            type SizeGetter;
+            const SIZE_GETTER: Self::SizeGetter;
+        }
+
+        impl IndexToQuantity<{ quantity_index::APPARENT_SIZE }> for () {
+            const QUANTITY: Quantity = Quantity::ApparentSize;
+            type SizeGetter = GetApparentSize;
+            const SIZE_GETTER: Self::SizeGetter = GetApparentSize;
+        }
+
+        impl IndexToQuantity<{ quantity_index::BLOCK_SIZE }> for () {
+            const QUANTITY: Quantity = Quantity::BlockSize;
+            type SizeGetter = GetBlockSize;
+            const SIZE_GETTER: Self::SizeGetter = GetBlockSize;
+        }
+
+        impl IndexToQuantity<{ quantity_index::BLOCK_COUNT }> for () {
+            const QUANTITY: Quantity = Quantity::BlockCount;
+            type SizeGetter = GetBlockCount;
+            const SIZE_GETTER: Self::SizeGetter = GetBlockCount;
+        }
+
         trait CreateReporter<const REPORT_PROGRESS: bool, Size> {
             type Reporter;
             fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter;
@@ -173,11 +206,11 @@ impl App {
         macro_rules! run {
             ($(
                 $(#[$variant_attrs:meta])*
-                $quantity:ident, $size_getter:ident, $progress:literal;
+                $quantity_index:ident, $progress:literal;
             )*) => { match self.args {$(
                 $(#[$variant_attrs])*
                 Args {
-                    quantity: Quantity::$quantity,
+                    quantity: <() as IndexToQuantity<{ quantity_index::$quantity_index }>>::QUANTITY,
                     progress: $progress,
                     files,
                     json_output,
@@ -191,9 +224,9 @@ impl App {
                 } => Sub {
                     direction: Direction::from_top_down(top_down),
                     bar_alignment: BarAlignment::from_align_right(align_right),
-                    size_getter: $size_getter,
-                    reporter: <() as CreateReporter<$progress, <$size_getter as GetSize>::Size>>::create_reporter(report_error),
-                    bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
+                    size_getter: <() as IndexToQuantity<{ quantity_index::$quantity_index }>>::SIZE_GETTER,
+                    reporter: <() as CreateReporter<$progress, <<() as IndexToQuantity<{ quantity_index::$quantity_index }>>::SizeGetter as GetSize>::Size>>::create_reporter(report_error),
+                    bytes_format: <<() as IndexToQuantity<{ quantity_index::$quantity_index }>>::SizeGetter as GetSizeUtils>::formatter(bytes_format),
                     files,
                     json_output,
                     column_width_distribution,
@@ -206,12 +239,12 @@ impl App {
         }
 
         run! {
-            ApparentSize, GetApparentSize, false;
-            ApparentSize, GetApparentSize, true;
-            #[cfg(unix)] BlockSize, GetBlockSize, false;
-            #[cfg(unix)] BlockSize, GetBlockSize, true;
-            #[cfg(unix)] BlockCount, GetBlockCount, false;
-            #[cfg(unix)] BlockCount, GetBlockCount, true;
+            APPARENT_SIZE, false;
+            APPARENT_SIZE, true;
+            #[cfg(unix)] BLOCK_SIZE, false;
+            #[cfg(unix)] BLOCK_SIZE, true;
+            #[cfg(unix)] BLOCK_COUNT, false;
+            #[cfg(unix)] BLOCK_COUNT, true;
         }
     }
 }
