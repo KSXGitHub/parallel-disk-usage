@@ -9,6 +9,13 @@ use std::{
 #[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};
 
+mod mul_traits {
+    use std::ops::{Mul, MulAssign};
+    pub trait MulAssignEx<Rhs>: Mul<Rhs, Output = Self> + MulAssign<Rhs> + Sized {}
+    impl<Lhs: Mul<Rhs, Output = Lhs> + MulAssign<Rhs>, Rhs> MulAssignEx<Rhs> for Lhs {}
+}
+use mul_traits::MulAssignEx;
+
 /// Types whose values can be used as disk usage statistic.
 pub trait Size:
     Debug
@@ -22,6 +29,10 @@ pub trait Size:
     + Add<Output = Self>
     + AddAssign
     + Sum
+    + MulAssignEx<u8>
+    + MulAssignEx<u16>
+    + MulAssignEx<u32>
+    + MulAssignEx<u64>
 {
     /// Underlying type
     type Inner: From<Self> + Into<Self> + Mul<Self, Output = Self>;
