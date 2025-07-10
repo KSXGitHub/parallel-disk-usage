@@ -29,7 +29,7 @@ use text_block_macros::text_block;
     },
 
     after_help = text_block! {
-        "EXAMPLES:"
+        "Examples:"
         "    $ pdu"
         "    $ pdu path/to/file/or/directory"
         "    $ pdu file.txt dir/"
@@ -43,7 +43,7 @@ use text_block_macros::text_block;
     },
 
     after_long_help = text_block! {
-        "EXAMPLES:"
+        "Examples:"
         "    Show disk usage chart of current working directory"
         "    $ pdu"
         ""
