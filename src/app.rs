@@ -4,11 +4,12 @@ pub use sub::Sub;
 
 use crate::{
     args::{Args, Quantity, Threads},
-    get_size::GetApparentSize,
+    bytes_format::BytesFormat,
+    get_size::{GetApparentSize, GetSize},
     json_data::{JsonData, UnitAndTree},
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
-    size::{self, Bytes},
+    size,
     visualizer::{BarAlignment, Direction, Visualizer},
 };
 use clap::Parser;
@@ -18,10 +19,7 @@ use std::{io::stdin, time::Duration};
 use sysinfo::Disks;
 
 #[cfg(unix)]
-use crate::{
-    get_size::{GetBlockCount, GetBlockSize},
-    size::Blocks,
-};
+use crate::get_size::{GetBlockCount, GetBlockSize};
 
 /// The main application.
 pub struct App {
@@ -119,40 +117,76 @@ impl App {
             ErrorReport::TEXT
         };
 
-        #[allow(clippy::extra_unused_type_parameters)]
-        fn error_only_reporter<Size>(
-            report_error: fn(ErrorReport),
-        ) -> ErrorOnlyReporter<fn(ErrorReport)> {
-            ErrorOnlyReporter::new(report_error)
+        trait GetSizeUtils: GetSize<Size: size::Size> {
+            const INSTANCE: Self;
+            const QUANTITY: Quantity;
+            fn formatter(bytes_format: BytesFormat) -> <Self::Size as size::Size>::DisplayFormat;
         }
 
-        fn progress_and_error_reporter<Size>(
-            report_error: fn(ErrorReport),
-        ) -> ProgressAndErrorReporter<Size, fn(ErrorReport)>
+        impl GetSizeUtils for GetApparentSize {
+            const INSTANCE: Self = GetApparentSize;
+            const QUANTITY: Quantity = Quantity::ApparentSize;
+            fn formatter(bytes_format: BytesFormat) -> BytesFormat {
+                bytes_format
+            }
+        }
+
+        #[cfg(unix)]
+        impl GetSizeUtils for GetBlockSize {
+            const INSTANCE: Self = GetBlockSize;
+            const QUANTITY: Quantity = Quantity::BlockSize;
+            fn formatter(bytes_format: BytesFormat) -> BytesFormat {
+                bytes_format
+            }
+        }
+
+        #[cfg(unix)]
+        impl GetSizeUtils for GetBlockCount {
+            const INSTANCE: Self = GetBlockCount;
+            const QUANTITY: Quantity = Quantity::BlockCount;
+            fn formatter(_: BytesFormat) {}
+        }
+
+        trait CreateReporter<const REPORT_PROGRESS: bool>: GetSizeUtils {
+            type Reporter;
+            fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter;
+        }
+
+        impl<SizeGetter> CreateReporter<false> for SizeGetter
         where
-            Size: size::Size + Into<u64> + Send + Sync,
-            ProgressReport<Size>: Default + 'static,
-            u64: Into<Size>,
+            SizeGetter: GetSizeUtils,
         {
-            ProgressAndErrorReporter::new(
-                ProgressReport::TEXT,
-                Duration::from_millis(100),
-                report_error,
-            )
+            type Reporter = ErrorOnlyReporter<fn(ErrorReport)>;
+            fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter {
+                ErrorOnlyReporter::new(report_error)
+            }
+        }
+
+        impl<SizeGetter> CreateReporter<true> for SizeGetter
+        where
+            SizeGetter: GetSizeUtils,
+            SizeGetter::Size: Into<u64> + Send + Sync,
+            ProgressReport<SizeGetter::Size>: Default + 'static,
+            u64: Into<SizeGetter::Size>,
+        {
+            type Reporter = ProgressAndErrorReporter<SizeGetter::Size, fn(ErrorReport)>;
+            fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter {
+                ProgressAndErrorReporter::new(
+                    ProgressReport::TEXT,
+                    Duration::from_millis(100),
+                    report_error,
+                )
+            }
         }
 
         macro_rules! run {
             ($(
                 $(#[$variant_attrs:meta])*
-                {
-                    $size:ty => $format:expr;
-                    $quantity:ident => $size_getter:ident;
-                    $progress:literal => $create_reporter:ident;
-                }
+                $size_getter:ident, $progress:literal;
             )*) => { match self.args {$(
                 $(#[$variant_attrs])*
                 Args {
-                    quantity: Quantity::$quantity,
+                    quantity: <$size_getter as GetSizeUtils>::QUANTITY,
                     progress: $progress,
                     files,
                     json_output,
@@ -166,9 +200,9 @@ impl App {
                 } => Sub {
                     direction: Direction::from_top_down(top_down),
                     bar_alignment: BarAlignment::from_align_right(align_right),
-                    size_getter: $size_getter,
-                    reporter: $create_reporter::<$size>(report_error),
-                    bytes_format: $format(bytes_format),
+                    size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
+                    reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
+                    bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
                     files,
                     json_output,
                     column_width_distribution,
@@ -181,45 +215,12 @@ impl App {
         }
 
         run! {
-            {
-                Bytes => |x| x;
-                ApparentSize => GetApparentSize;
-                false => error_only_reporter;
-            }
-
-            {
-                Bytes => |x| x;
-                ApparentSize => GetApparentSize;
-                true => progress_and_error_reporter;
-            }
-
-            #[cfg(unix)]
-            {
-                Bytes => |x| x;
-                BlockSize => GetBlockSize;
-                false => error_only_reporter;
-            }
-
-            #[cfg(unix)]
-            {
-                Bytes => |x| x;
-                BlockSize => GetBlockSize;
-                true => progress_and_error_reporter;
-            }
-
-            #[cfg(unix)]
-            {
-                Blocks => |_| ();
-                BlockCount => GetBlockCount;
-                false => error_only_reporter;
-            }
-
-            #[cfg(unix)]
-            {
-                Blocks => |_| ();
-                BlockCount => GetBlockCount;
-                true => progress_and_error_reporter;
-            }
+            GetApparentSize, false;
+            GetApparentSize, true;
+            #[cfg(unix)] GetBlockSize, false;
+            #[cfg(unix)] GetBlockSize, true;
+            #[cfg(unix)] GetBlockCount, false;
+            #[cfg(unix)] GetBlockCount, true;
         }
     }
 }
