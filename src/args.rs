@@ -19,6 +19,8 @@ use text_block_macros::text_block;
 
     version,
 
+    about = "Summarize disk usage of the set of files, recursively for directories.",
+
     long_about = text_block! {
         "Summarize disk usage of the set of files, recursively for directories."
         ""
