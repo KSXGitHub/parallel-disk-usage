@@ -1,13 +1,20 @@
 use super::bytes_format::{self, BytesFormat};
-use derive_more::{Add, AddAssign, From, Into, Sum};
+use derive_more::{Add, AddAssign, From, Into, Sub, SubAssign, Sum};
 use std::{
     fmt::{Debug, Display},
     iter::Sum,
-    ops::{Add, AddAssign, Mul, MulAssign},
+    ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
 #[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};
+
+mod mul_traits {
+    use std::ops::{Mul, MulAssign};
+    pub trait MulAssignEx<Rhs>: Mul<Rhs, Output = Self> + MulAssign<Rhs> + Sized {}
+    impl<Lhs: Mul<Rhs, Output = Lhs> + MulAssign<Rhs>, Rhs> MulAssignEx<Rhs> for Lhs {}
+}
+use mul_traits::MulAssignEx;
 
 /// Types whose values can be used as disk usage statistic.
 pub trait Size:
@@ -21,7 +28,13 @@ pub trait Size:
     + Ord
     + Add<Output = Self>
     + AddAssign
+    + Sub<Output = Self>
+    + SubAssign
     + Sum
+    + MulAssignEx<u8>
+    + MulAssignEx<u16>
+    + MulAssignEx<u32>
+    + MulAssignEx<u64>
 {
     /// Underlying type
     type Inner: From<Self> + Into<Self> + Mul<Self, Output = Self>;
@@ -33,6 +46,36 @@ pub trait Size:
     fn display(self, input: Self::DisplayFormat) -> Self::DisplayOutput;
 }
 
+macro_rules! impl_mul {
+    ($name:ident: $inner:ident *= $($num_type:ident)+) => {
+        $(
+            impl Mul<$num_type> for $name {
+                type Output = Self;
+                fn mul(self, rhs: $num_type) -> Self::Output {
+                    self.0.mul(rhs as $inner).into()
+                }
+            }
+
+            impl Mul<$name> for $num_type {
+                type Output = $name;
+                fn mul(self, rhs: $name) -> Self::Output {
+                    rhs * self
+                }
+            }
+
+            impl MulAssign<$num_type> for $name {
+                fn mul_assign(&mut self, rhs: $num_type) {
+                    self.0 *= rhs as $inner;
+                }
+            }
+        )+
+    };
+
+    ($name:ident: u64) => {
+        impl_mul!($name: u64 *= u8 u16 u32 u64);
+    };
+}
+
 macro_rules! newtype {
     (
         $(#[$attribute:meta])*
@@ -40,7 +83,7 @@ macro_rules! newtype {
         display: ($display_format:ty) -> $display_output:ty = $display_impl:expr;
     ) => {
         #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-        #[derive(From, Into, Add, AddAssign, Sum)]
+        #[derive(From, Into, Add, AddAssign, Sub, SubAssign, Sum)]
         #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
         $(#[$attribute])*
         pub struct $name($inner);
@@ -65,25 +108,7 @@ macro_rules! newtype {
             }
         }
 
-        impl Mul<$inner> for $name {
-            type Output = Self;
-            fn mul(self, rhs: $inner) -> Self::Output {
-                self.0.mul(rhs).into()
-            }
-        }
-
-        impl Mul<$name> for $inner {
-            type Output = $name;
-            fn mul(self, rhs: $name) -> Self::Output {
-                rhs * self
-            }
-        }
-
-        impl MulAssign<$inner> for $name {
-            fn mul_assign(&mut self, rhs: $inner) {
-                self.0 *= rhs;
-            }
-        }
+        impl_mul!($name: u64);
     };
 }
 
