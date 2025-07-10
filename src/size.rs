@@ -1,9 +1,9 @@
 use super::bytes_format::{self, BytesFormat};
-use derive_more::{Add, AddAssign, From, Into, Sum};
+use derive_more::{Add, AddAssign, From, Into, Sub, SubAssign, Sum};
 use std::{
     fmt::{Debug, Display},
     iter::Sum,
-    ops::{Add, AddAssign, Mul, MulAssign},
+    ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
 #[cfg(feature = "json")]
@@ -28,6 +28,8 @@ pub trait Size:
     + Ord
     + Add<Output = Self>
     + AddAssign
+    + Sub<Output = Self>
+    + SubAssign
     + Sum
     + MulAssignEx<u8>
     + MulAssignEx<u16>
@@ -81,7 +83,7 @@ macro_rules! newtype {
         display: ($display_format:ty) -> $display_output:ty = $display_impl:expr;
     ) => {
         #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-        #[derive(From, Into, Add, AddAssign, Sum)]
+        #[derive(From, Into, Add, AddAssign, Sub, SubAssign, Sum)]
         #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
         $(#[$attribute])*
         pub struct $name($inner);
