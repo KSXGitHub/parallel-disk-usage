@@ -203,6 +203,7 @@ impl App {
                     bar_alignment: BarAlignment::from_align_right(align_right),
                     size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
                     hook: hook::DoNothing, // TODO: change this
+                    hardlink_record: (), // TODO: change this
                     reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
                     bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
                     files,

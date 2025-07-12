@@ -21,7 +21,7 @@ where
     Report: ParallelReporter<Size> + Sync,
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
-    Hook: hook::Hook<Size> + Copy + Sync,
+    Hook: hook::Hook<Size> + DeduplicateHardlinkSizes<Size> + Copy + Sync,
     DataTreeReflection<String, Size>: Into<UnitAndTree>,
 {
     /// List of files and/or directories.
@@ -42,6 +42,8 @@ where
     pub size_getter: SizeGetter,
     /// Hook to run after [`Self::size_getter`].
     pub hook: Hook,
+    /// Record of detected hardlinks.
+    pub hardlink_record: Hook::HardlinkRecord,
     /// Reports measurement progress.
     pub reporter: Report,
     /// Minimal size proportion required to appear.
@@ -55,7 +57,7 @@ where
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     Report: ParallelReporter<Size> + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
-    Hook: hook::Hook<Size> + Copy + Sync,
+    Hook: hook::Hook<Size> + DeduplicateHardlinkSizes<Size> + Copy + Sync,
     DataTreeReflection<String, Size>: Into<UnitAndTree>,
 {
     /// Run the sub program.
@@ -70,6 +72,7 @@ where
             max_depth,
             size_getter,
             hook,
+            hardlink_record,
             reporter,
             min_ratio,
             no_sort,
@@ -96,6 +99,7 @@ where
             return Sub {
                 files: vec![".".into()],
                 hook,
+                hardlink_record,
                 reporter,
                 ..self
             }
@@ -120,7 +124,7 @@ where
         }
 
         let min_ratio: f32 = min_ratio.into();
-        let data_tree = {
+        let (data_tree, deduplication_record) = {
             let mut data_tree = data_tree;
             if min_ratio > 0.0 {
                 data_tree.par_cull_insignificant_data(min_ratio);
@@ -128,7 +132,9 @@ where
             if !no_sort {
                 data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
             }
-            data_tree
+            let deduplication_record =
+                Hook::deduplicate_hardlink_sizes(&mut data_tree, hardlink_record);
+            (data_tree, deduplication_record)
         };
 
         GLOBAL_STATUS_BOARD.clear_line(0);
@@ -157,6 +163,64 @@ where
         };
 
         print!("{visualizer}"); // visualizer already ends with "\n", println! isn't needed here.
+        Hook::report_deduplication_results(deduplication_record);
         Ok(())
     }
+}
+
+/// Subroutines used by [`Sub`] to deduplicate sizes of detected hardlinks and report about it.
+pub trait DeduplicateHardlinkSizes<Size: size::Size> {
+    /// Record of detected hardlinks.
+    type HardlinkRecord;
+    /// Report created by [`DeduplicateHardlinkSizes::deduplicate_hardlink_sizes`].
+    type DeduplicationReport;
+    /// Deduplicate the sizes of detected hardlinks and return a report object.
+    fn deduplicate_hardlink_sizes(
+        data_tree: &mut DataTree<OsStringDisplay, Size>,
+        record: Self::HardlinkRecord,
+    ) -> Self::DeduplicationReport;
+    /// Handle the report.
+    fn report_deduplication_results(report: Self::DeduplicationReport);
+}
+
+#[cfg(unix)]
+impl<'a, Size> DeduplicateHardlinkSizes<Size> for hook::RecordHardLink<'a, Size>
+where
+    DataTree<OsStringDisplay, Size>: Send,
+    Size: size::Size + Sync,
+{
+    type HardlinkRecord = &'a dashmap::DashMap<u64, (Size, Vec<PathBuf>)>;
+    type DeduplicationReport = (); // TODO
+
+    fn deduplicate_hardlink_sizes(
+        data_tree: &mut DataTree<OsStringDisplay, Size>,
+        record: Self::HardlinkRecord,
+    ) -> Self::DeduplicationReport {
+        use std::path::{Path, PathBuf};
+        let hardlink_info: Vec<(Size, Vec<PathBuf>)> = record
+            .iter()
+            .map(|values| (values.0, values.1.clone()))
+            .collect();
+        let hardlink_info: Vec<(Size, Vec<&Path>)> = hardlink_info
+            .iter()
+            .map(|(size, paths)| (*size, paths.iter().map(AsRef::as_ref).collect()))
+            .collect();
+        data_tree.par_deduplicate_hardlinks(&hardlink_info);
+    }
+    fn report_deduplication_results((): Self::DeduplicationReport) {} // TODO
+}
+
+impl<Size> DeduplicateHardlinkSizes<Size> for hook::DoNothing
+where
+    DataTree<OsStringDisplay, Size>: Send,
+    Size: size::Size + Sync,
+{
+    type HardlinkRecord = ();
+    type DeduplicationReport = ();
+    fn deduplicate_hardlink_sizes(
+        _: &mut DataTree<OsStringDisplay, Size>,
+        _: Self::HardlinkRecord,
+    ) -> Self::DeduplicationReport {
+    }
+    fn report_deduplication_results((): Self::DeduplicationReport) {}
 }

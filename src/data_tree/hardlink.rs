@@ -11,7 +11,7 @@ where
     Size: size::Size + Sync,
 {
     /// Reduce the size of the directories that have hardlinks.
-    pub fn par_deduplicate_hardlinks(&mut self, hardlink_info: &[(Size, Vec<&Path>)]) {
+    pub(crate) fn par_deduplicate_hardlinks(&mut self, hardlink_info: &[(Size, Vec<&Path>)]) {
         if hardlink_info.is_empty() {
             return;
         }
