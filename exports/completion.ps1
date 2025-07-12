@@ -30,6 +30,7 @@ Register-ArgumentCompleter -Native -CommandName 'pdu' -ScriptBlock {
             [CompletionResult]::new('--threads', '--threads', [CompletionResultType]::ParameterName, 'Set the maximum number of threads to spawn. Could be either "auto", "max", or a number')
             [CompletionResult]::new('--json-input', '--json-input', [CompletionResultType]::ParameterName, 'Read JSON data from stdin')
             [CompletionResult]::new('--json-output', '--json-output', [CompletionResultType]::ParameterName, 'Print JSON data instead of an ASCII chart')
+            [CompletionResult]::new('--deduplicate-hardlinks', '--deduplicate-hardlinks', [CompletionResultType]::ParameterName, 'Detect duplicated hardlinks and remove their sizes from total')
             [CompletionResult]::new('--top-down', '--top-down', [CompletionResultType]::ParameterName, 'Print the tree top-down instead of bottom-up')
             [CompletionResult]::new('--align-right', '--align-right', [CompletionResultType]::ParameterName, 'Set the root of the bars to the right')
             [CompletionResult]::new('--no-sort', '--no-sort', [CompletionResultType]::ParameterName, 'Preserve order of entries')
