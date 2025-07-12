@@ -6,6 +6,7 @@ use crate::{
     args::{Args, Quantity, Threads},
     bytes_format::BytesFormat,
     get_size::{GetApparentSize, GetSize},
+    hook,
     json_data::{JsonData, UnitAndTree},
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
@@ -179,15 +180,54 @@ impl App {
             }
         }
 
+        trait HardlinkDeduplicationSystem<const DEDUPLICATE_HARDLINKS: bool>: GetSizeUtils {
+            type Hook: hook::Hook<Self::Size> + sub::DeduplicateHardlinkSizes<Self::Size>;
+            fn create_hook(
+                record: <Self::Hook as sub::DeduplicateHardlinkSizes<Self::Size>>::HardlinkRecord,
+            ) -> Self::Hook;
+            fn init_hardlink_record(
+            ) -> <Self::Hook as sub::DeduplicateHardlinkSizes<Self::Size>>::HardlinkRecord;
+        }
+
+        impl<SizeGetter> HardlinkDeduplicationSystem<false> for SizeGetter
+        where
+            SizeGetter: GetSizeUtils,
+            SizeGetter::Size: Send + Sync,
+        {
+            type Hook = hook::DoNothing;
+            fn create_hook((): ()) -> Self::Hook {
+                hook::DoNothing
+            }
+            fn init_hardlink_record() {}
+        }
+
+        #[cfg(unix)]
+        impl<SizeGetter> HardlinkDeduplicationSystem<true> for SizeGetter
+        where
+            SizeGetter: GetSizeUtils,
+            SizeGetter::Size: Send + Sync + 'static,
+        {
+            type Hook = hook::RecordHardLink<'static, Self::Size>;
+            fn create_hook(record: &'static hook::RecordHardLinkStorage<Self::Size>) -> Self::Hook {
+                hook::RecordHardLink::new(record)
+            }
+            fn init_hardlink_record() -> &'static hook::RecordHardLinkStorage<Self::Size> {
+                hook::RecordHardLinkStorage::new()
+                    .pipe(Box::new)
+                    .pipe(Box::leak)
+            }
+        }
+
         macro_rules! run {
             ($(
                 $(#[$variant_attrs:meta])*
-                $size_getter:ident, $progress:literal;
+                $size_getter:ident, $progress:literal, $deduplicate_hardlinks:ident;
             )*) => { match self.args {$(
                 $(#[$variant_attrs])*
                 Args {
                     quantity: <$size_getter as GetSizeUtils>::QUANTITY,
                     progress: $progress,
+                    #[cfg(unix)] deduplicate_hardlinks: $deduplicate_hardlinks,
                     files,
                     json_output,
                     bytes_format,
@@ -197,30 +237,44 @@ impl App {
                     min_ratio,
                     no_sort,
                     ..
-                } => Sub {
-                    direction: Direction::from_top_down(top_down),
-                    bar_alignment: BarAlignment::from_align_right(align_right),
-                    size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
-                    reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
-                    bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
-                    files,
-                    json_output,
-                    column_width_distribution,
-                    max_depth,
-                    min_ratio,
-                    no_sort,
-                }
-                .run(),
+                } => {
+                    const DEDUPLICATE_HARDLINKS: bool = cfg!(unix) && $deduplicate_hardlinks;
+                    let hardlink_record = <$size_getter as HardlinkDeduplicationSystem<DEDUPLICATE_HARDLINKS>>::init_hardlink_record();
+                    let hook = <$size_getter as HardlinkDeduplicationSystem<DEDUPLICATE_HARDLINKS>>::create_hook(hardlink_record);
+
+                    Sub {
+                        direction: Direction::from_top_down(top_down),
+                        bar_alignment: BarAlignment::from_align_right(align_right),
+                        size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
+                        hook,
+                        hardlink_record,
+                        reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
+                        bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
+                        files,
+                        json_output,
+                        column_width_distribution,
+                        max_depth,
+                        min_ratio,
+                        no_sort,
+                    }
+                    .run()
+                },
             )*} };
         }
 
         run! {
-            GetApparentSize, false;
-            GetApparentSize, true;
-            #[cfg(unix)] GetBlockSize, false;
-            #[cfg(unix)] GetBlockSize, true;
-            #[cfg(unix)] GetBlockCount, false;
-            #[cfg(unix)] GetBlockCount, true;
+            GetApparentSize, false, false;
+            GetApparentSize, true, false;
+            #[cfg(unix)] GetBlockSize, false, false;
+            #[cfg(unix)] GetBlockSize, true, false;
+            #[cfg(unix)] GetBlockCount, false, false;
+            #[cfg(unix)] GetBlockCount, true, false;
+            #[cfg(unix)] GetApparentSize, false, true;
+            #[cfg(unix)] GetApparentSize, true, true;
+            #[cfg(unix)] GetBlockSize, false, true;
+            #[cfg(unix)] GetBlockSize, true, true;
+            #[cfg(unix)] GetBlockCount, false, true;
+            #[cfg(unix)] GetBlockCount, true, true;
         }
     }
 }
