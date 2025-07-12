@@ -16,7 +16,7 @@ use rand::{distr::Alphanumeric, rng, Rng};
 use rayon::prelude::*;
 use std::{
     env::temp_dir,
-    fs::{create_dir, metadata, remove_dir_all},
+    fs::{create_dir, metadata, remove_dir_all, symlink_metadata},
     io::Error,
     path::{Path, PathBuf},
     process::{Command, Output},
@@ -91,6 +91,28 @@ impl Default for SampleWorkspace {
         })
         .build(&temp)
         .expect("build the filesystem tree for the sample workspace");
+
+        SampleWorkspace(temp)
+    }
+}
+
+/// POSIX-exclusive functions
+#[cfg(unix)]
+impl SampleWorkspace {
+    /// Set up a temporary directory for tests.
+    ///
+    /// This directory would have a single file being hard-linked multiple times.
+    pub fn multiple_hardlinks_to_a_single_file() -> Self {
+        use std::fs::{hard_link, write as write_file};
+        let temp = Temp::new_dir().expect("create working directory for sample workspace");
+
+        let file_path = temp.join("file.txt");
+        write_file(&file_path, "a".repeat(100_000)).expect("create file.txt");
+
+        for num in 0..10 {
+            hard_link(&file_path, temp.join(format!("link.{num}")))
+                .unwrap_or_else(|error| panic!("Failed to create 'link.{num}': {error}"));
+        }
 
         SampleWorkspace(temp)
     }
@@ -331,4 +353,11 @@ pub fn inspect_stderr(stderr: &[u8]) {
     if !text.is_empty() {
         eprintln!("STDERR:\n{text}\n");
     }
+}
+
+/// Read [apparent size](std::fs::Metadata::len) of a path.
+pub fn read_apparent_size(path: &Path) -> u64 {
+    path.pipe(symlink_metadata)
+        .unwrap_or_else(|error| panic!("Can't read metadata at {path:?}: {error}"))
+        .len()
 }
