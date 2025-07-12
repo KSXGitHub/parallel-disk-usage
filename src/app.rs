@@ -206,7 +206,6 @@ impl App {
         where
             SizeGetter: GetSizeUtils,
             SizeGetter::Size: Send + Sync + 'static,
-            u64: Into<SizeGetter::Size>, // TODO: remove this line after implementing `Size::ZERO`
         {
             type Hook = hook::RecordHardLink<'static, Self::Size>;
             fn create_hook(record: &'static hook::RecordHardLinkStorage<Self::Size>) -> Self::Hook {
