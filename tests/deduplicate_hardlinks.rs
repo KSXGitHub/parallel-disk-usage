@@ -27,7 +27,8 @@ fn stdio(command: Command) -> Command {
 
 #[test]
 fn deduplicate_multiple_hardlinks_to_a_single_file() {
-    let workspace = SampleWorkspace::multiple_hardlinks_to_a_single_file();
+    let links = 10;
+    let workspace = SampleWorkspace::multiple_hardlinks_to_a_single_file(100_000, links);
 
     let json = Command::new(PDU)
         .with_current_dir(&workspace)
@@ -63,7 +64,7 @@ fn deduplicate_multiple_hardlinks_to_a_single_file() {
         children
     };
     let expected_children: Vec<_> = {
-        let links = (0..10).map(|num| format!("link.{num}"));
+        let links = (0..links).map(|num| format!("link.{num}"));
         let node = |name| Reflection {
             name,
             size: file_size,
@@ -81,7 +82,8 @@ fn deduplicate_multiple_hardlinks_to_a_single_file() {
 
 #[test]
 fn do_not_deduplicate_multiple_hardlinks_to_a_single_file() {
-    let workspace = SampleWorkspace::multiple_hardlinks_to_a_single_file();
+    let links = 10;
+    let workspace = SampleWorkspace::multiple_hardlinks_to_a_single_file(100_000, links);
 
     let json = Command::new(PDU)
         .with_current_dir(&workspace)
@@ -102,7 +104,7 @@ fn do_not_deduplicate_multiple_hardlinks_to_a_single_file() {
     let expected_size = workspace
         .join("file.txt")
         .pipe_as_ref(read_apparent_size)
-        .mul(11)
+        .mul(links + 1)
         .add(read_apparent_size(&workspace))
         .pipe(Bytes::new);
 

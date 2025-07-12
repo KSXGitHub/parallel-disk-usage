@@ -102,14 +102,14 @@ impl SampleWorkspace {
     /// Set up a temporary directory for tests.
     ///
     /// This directory would have a single file being hard-linked multiple times.
-    pub fn multiple_hardlinks_to_a_single_file() -> Self {
+    pub fn multiple_hardlinks_to_a_single_file(bytes: usize, links: u64) -> Self {
         use std::fs::{hard_link, write as write_file};
         let temp = Temp::new_dir().expect("create working directory for sample workspace");
 
         let file_path = temp.join("file.txt");
-        write_file(&file_path, "a".repeat(100_000)).expect("create file.txt");
+        write_file(&file_path, "a".repeat(bytes)).expect("create file.txt");
 
-        for num in 0..10 {
+        for num in 0..links {
             hard_link(&file_path, temp.join(format!("link.{num}")))
                 .unwrap_or_else(|error| panic!("Failed to create 'link.{num}': {error}"));
         }
