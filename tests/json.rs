@@ -10,6 +10,7 @@ use parallel_disk_usage::{
     data_tree::{DataTree, Reflection},
     fs_tree_builder::FsTreeBuilder,
     get_size::GetApparentSize,
+    hook,
     json_data::{JsonData, SchemaVersion},
     reporter::{ErrorOnlyReporter, ErrorReport},
     size::Bytes,
@@ -81,6 +82,7 @@ fn json_output() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
+        hook: hook::DoNothing,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };

@@ -67,6 +67,9 @@ serde = { version = "^1.0.219", optional = true }
 serde_json = { version = "^1.0.140", optional = true }
 sysinfo = "^0.35.2"
 
+[target.'cfg(unix)'.dependencies]
+dashmap = "^6.1.0"
+
 [dev-dependencies]
 build-fs-tree = "^0.7.1"
 command-extra = "^1.0.0"
