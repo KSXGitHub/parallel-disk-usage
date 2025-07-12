@@ -8,7 +8,7 @@ pub struct HookArgument<'a, Size> {
     pub size: Size,
 }
 
-/// Hook to run with a [`Path`] and its corresponding [`Metadata`].
+/// Hook to run with a [`Path`] and its corresponding [`Metadata`] and size.
 pub trait Hook<Size> {
     fn run_hook(&self, argument: HookArgument<Size>);
 }
