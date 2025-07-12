@@ -16,11 +16,12 @@ use serde::Serialize;
 use std::{io::stdout, iter::once, num::NonZeroU64, path::PathBuf};
 
 /// The sub program of the main application.
-pub struct Sub<Size, SizeGetter, Report>
+pub struct Sub<Size, SizeGetter, Hook, Report>
 where
     Report: ParallelReporter<Size> + Sync,
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
+    Hook: hook::Hook<Size> + Copy + Sync,
     DataTreeReflection<String, Size>: Into<UnitAndTree>,
 {
     /// List of files and/or directories.
@@ -39,6 +40,8 @@ where
     pub max_depth: NonZeroU64,
     /// [Get the size](GetSize) of files/directories.
     pub size_getter: SizeGetter,
+    /// Hook to run after [`Self::size_getter`].
+    pub hook: Hook,
     /// Reports measurement progress.
     pub reporter: Report,
     /// Minimal size proportion required to appear.
@@ -47,11 +50,12 @@ where
     pub no_sort: bool,
 }
 
-impl<Size, SizeGetter, Report> Sub<Size, SizeGetter, Report>
+impl<Size, SizeGetter, Hook, Report> Sub<Size, SizeGetter, Hook, Report>
 where
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     Report: ParallelReporter<Size> + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
+    Hook: hook::Hook<Size> + Copy + Sync,
     DataTreeReflection<String, Size>: Into<UnitAndTree>,
 {
     /// Run the sub program.
@@ -65,6 +69,7 @@ where
             column_width_distribution,
             max_depth,
             size_getter,
+            hook,
             reporter,
             min_ratio,
             no_sort,
@@ -79,7 +84,7 @@ where
                     reporter: &reporter,
                     root,
                     size_getter,
-                    hook: hook::DoNothing, // TODO: change this
+                    hook,
                     max_depth,
                 }
                 .into()
@@ -90,6 +95,7 @@ where
         } else {
             return Sub {
                 files: vec![".".into()],
+                hook,
                 reporter,
                 ..self
             }
