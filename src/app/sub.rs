@@ -190,7 +190,8 @@ pub trait DeduplicateHardlinkSizes<Size: size::Size> {
 impl<'a, Size> DeduplicateHardlinkSizes<Size> for hook::RecordHardLink<'a, Size>
 where
     DataTree<OsStringDisplay, Size>: Send,
-    Size: size::Size + From<u64> + Sync,
+    Size: size::Size + Sync,
+    u64: Into<Size>, // TODO: replace `0.into()` with `Size::ZERO`
 {
     type HardlinkRecord = &'a hook::RecordHardLinkStorage<Size>;
     type DeduplicationReport = &'a hook::RecordHardLinkStorage<Size>;
@@ -225,7 +226,7 @@ where
                 Some((*size, links))
             })
             .fold(
-                (0, 0, Size::from(0)),
+                (0, 0, 0.into()),
                 |(inodes, total_links, total_size), (size, links)| {
                     (inodes + 1, total_links + links, total_size + size)
                 },
