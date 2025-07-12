@@ -189,7 +189,7 @@ where
     DataTree<OsStringDisplay, Size>: Send,
     Size: size::Size + Sync,
 {
-    type HardlinkRecord = &'a dashmap::DashMap<u64, (Size, Vec<PathBuf>)>;
+    type HardlinkRecord = &'a hook::RecordHardLinkStorage<Size>;
     type DeduplicationReport = (); // TODO
 
     fn deduplicate_hardlink_sizes(

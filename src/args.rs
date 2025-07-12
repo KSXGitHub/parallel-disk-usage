@@ -94,6 +94,7 @@ pub struct Args {
     pub bytes_format: BytesFormat,
 
     /// Detect duplicated hardlinks and remove their sizes from total.
+    #[cfg(unix)]
     #[clap(long)]
     pub deduplicate_hardlinks: bool,
 

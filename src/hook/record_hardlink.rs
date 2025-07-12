@@ -3,7 +3,7 @@ use dashmap::DashMap;
 use std::{fmt::Debug, os::unix::fs::MetadataExt, path::PathBuf};
 
 /// Map an inode number to its size and detected paths.
-type RecordHardLinkStorage<Size> = DashMap<u64, (Size, Vec<PathBuf>)>; // TODO: benchmark against Mutex<HashMap<u64, (Size, Vec<PathBuf>)>>
+pub type RecordHardLinkStorage<Size> = DashMap<u64, (Size, Vec<PathBuf>)>; // TODO: benchmark against Mutex<HashMap<u64, (Size, Vec<PathBuf>)>>
 
 /// A [hook](Hook) that record files with more than 1 links.
 #[derive(Debug, Clone, Copy)]

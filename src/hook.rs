@@ -30,4 +30,7 @@ impl<Size> Hook<Size> for DoNothing {
 #[cfg(unix)]
 mod record_hardlink;
 #[cfg(unix)]
-pub use record_hardlink::*;
+pub use record_hardlink::RecordHardLink;
+#[cfg(unix)]
+#[cfg(feature = "cli")]
+pub(crate) use record_hardlink::RecordHardLinkStorage;
