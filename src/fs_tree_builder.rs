@@ -42,7 +42,7 @@ where
     Report: Reporter<Size> + Sync,
     Size: size::Size + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Sync,
-    Hook: hook::Hook<Size>,
+    Hook: hook::Hook<Size> + Sync,
 {
     /// Root of the directory tree.
     pub root: PathBuf,
