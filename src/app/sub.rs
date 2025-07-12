@@ -163,7 +163,7 @@ where
         };
 
         print!("{visualizer}"); // visualizer already ends with "\n", println! isn't needed here.
-        Hook::report_deduplication_results(deduplication_record, bytes_format);
+        Hook::report_deduplication_results(deduplication_record?, bytes_format)?;
         Ok(())
     }
 }
@@ -178,12 +178,12 @@ pub trait DeduplicateHardlinkSizes<Size: size::Size> {
     fn deduplicate_hardlink_sizes(
         data_tree: &mut DataTree<OsStringDisplay, Size>,
         record: Self::HardlinkRecord,
-    ) -> Self::DeduplicationReport;
+    ) -> Result<Self::DeduplicationReport, RuntimeError>;
     /// Handle the report.
     fn report_deduplication_results(
         report: Self::DeduplicationReport,
         bytes_format: Size::DisplayFormat,
-    );
+    ) -> Result<(), RuntimeError>;
 }
 
 #[cfg(unix)]
@@ -198,7 +198,7 @@ where
     fn deduplicate_hardlink_sizes(
         data_tree: &mut DataTree<OsStringDisplay, Size>,
         record: Self::HardlinkRecord,
-    ) -> Self::DeduplicationReport {
+    ) -> Result<Self::DeduplicationReport, RuntimeError> {
         use std::path::{Path, PathBuf};
         let hardlink_info: Box<[(Size, Vec<PathBuf>)]> = record
             .iter()
@@ -209,13 +209,13 @@ where
             .map(|(size, paths)| (*size, paths.iter().map(AsRef::as_ref).collect()))
             .collect();
         data_tree.par_deduplicate_hardlinks(&hardlink_info);
-        record
+        Ok(record)
     }
 
     fn report_deduplication_results(
         report: Self::DeduplicationReport,
         bytes_format: Size::DisplayFormat,
-    ) {
+    ) -> Result<(), RuntimeError> {
         let (inodes, links, size): (usize, usize, Size) = report
             .iter()
             .filter_map(|ref_multi| {
@@ -234,6 +234,7 @@ where
             let size = size.display(bytes_format);
             println!("Detected {links} hardlinks for {inodes} unique files (total: {size})");
         }
+        Ok(())
     }
 }
 
@@ -244,10 +245,18 @@ where
 {
     type HardlinkRecord = ();
     type DeduplicationReport = ();
+
     fn deduplicate_hardlink_sizes(
         _: &mut DataTree<OsStringDisplay, Size>,
         _: Self::HardlinkRecord,
-    ) -> Self::DeduplicationReport {
+    ) -> Result<Self::DeduplicationReport, RuntimeError> {
+        Ok(())
     }
-    fn report_deduplication_results((): Self::DeduplicationReport, _: Size::DisplayFormat) {}
+
+    fn report_deduplication_results(
+        (): Self::DeduplicationReport,
+        _: Size::DisplayFormat,
+    ) -> Result<(), RuntimeError> {
+        Ok(())
+    }
 }
