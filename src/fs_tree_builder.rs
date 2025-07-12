@@ -25,9 +25,11 @@ use std::{
 ///     os_string_display::OsStringDisplay,
 ///     reporter::{ErrorOnlyReporter, ErrorReport},
 ///     size::Bytes,
+///     hook,
 /// };
 /// let builder = FsTreeBuilder {
 ///     root: std::env::current_dir().unwrap(),
+///     hook: hook::DoNothing,
 ///     size_getter: GetApparentSize,
 ///     reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
 ///     max_depth: 10,
