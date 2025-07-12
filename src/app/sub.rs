@@ -197,11 +197,11 @@ where
         record: Self::HardlinkRecord,
     ) -> Self::DeduplicationReport {
         use std::path::{Path, PathBuf};
-        let hardlink_info: Vec<(Size, Vec<PathBuf>)> = record
+        let hardlink_info: Box<[(Size, Vec<PathBuf>)]> = record
             .iter()
             .map(|values| (values.0, values.1.clone()))
             .collect();
-        let hardlink_info: Vec<(Size, Vec<&Path>)> = hardlink_info
+        let hardlink_info: Box<[(Size, Vec<&Path>)]> = hardlink_info
             .iter()
             .map(|(size, paths)| (*size, paths.iter().map(AsRef::as_ref).collect()))
             .collect();
