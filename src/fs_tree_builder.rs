@@ -1,6 +1,7 @@
 use super::{
     data_tree::DataTree,
     get_size::GetSize,
+    hook::{self, HookArgument},
     os_string_display::OsStringDisplay,
     reporter::{error_report::Operation::*, ErrorReport, Event, Reporter},
     size,
@@ -34,34 +35,39 @@ use std::{
 /// let data_tree: DataTree<OsStringDisplay, Bytes> = builder.into();
 /// ```
 #[derive(Debug)]
-pub struct FsTreeBuilder<Size, SizeGetter, Report>
+pub struct FsTreeBuilder<Size, SizeGetter, Hook, Report>
 where
     Report: Reporter<Size> + Sync,
     Size: size::Size + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Sync,
+    Hook: hook::Hook<Size>,
 {
     /// Root of the directory tree.
     pub root: PathBuf,
     /// Returns size of an item.
     pub size_getter: SizeGetter,
+    /// Hook to run after [`Self::size_getter`].
+    pub hook: Hook,
     /// Reports progress to external system.
     pub reporter: Report,
     /// Deepest level of descendent display in the graph. The sizes beyond the max depth still count toward total.
     pub max_depth: u64,
 }
 
-impl<Size, SizeGetter, Report> From<FsTreeBuilder<Size, SizeGetter, Report>>
+impl<Size, SizeGetter, Hook, Report> From<FsTreeBuilder<Size, SizeGetter, Hook, Report>>
     for DataTree<OsStringDisplay, Size>
 where
     Report: Reporter<Size> + Sync,
     Size: size::Size + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Sync,
+    Hook: hook::Hook<Size> + Sync,
 {
     /// Create a [`DataTree`] from an [`FsTreeBuilder`].
-    fn from(builder: FsTreeBuilder<Size, SizeGetter, Report>) -> Self {
+    fn from(builder: FsTreeBuilder<Size, SizeGetter, Hook, Report>) -> Self {
         let FsTreeBuilder {
             root,
             size_getter,
+            hook,
             reporter,
             max_depth,
         } = builder;
@@ -89,6 +95,7 @@ where
                         let is_dir = stats.is_dir();
                         let size = size_getter.get_size(&stats);
                         reporter.report(Event::ReceiveData(size));
+                        hook.run_hook(HookArgument::new(path, &stats, size));
                         (is_dir, size)
                     }
                 };

@@ -3,6 +3,7 @@ use crate::{
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
+    hook,
     json_data::{BinaryVersion, JsonData, SchemaVersion, UnitAndTree},
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
@@ -78,6 +79,7 @@ where
                     reporter: &reporter,
                     root,
                     size_getter,
+                    hook: hook::DoNothing, // TODO: change this
                     max_depth,
                 }
                 .into()
