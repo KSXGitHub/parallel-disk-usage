@@ -4,7 +4,7 @@ use std::{fs::Metadata, path::Path};
 #[derive(Debug, Clone, Copy)]
 pub struct HookArgument<'a, Size> {
     pub path: &'a Path,
-    pub metadata: &'a Metadata,
+    pub stats: &'a Metadata,
     pub size: Size,
 }
 
