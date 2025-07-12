@@ -93,6 +93,10 @@ pub struct Args {
     #[clap(long, value_enum, default_value_t = BytesFormat::MetricUnits)]
     pub bytes_format: BytesFormat,
 
+    /// Detect duplicated hardlinks and remove their sizes from total.
+    #[clap(long)]
+    pub deduplicate_hardlinks: bool,
+
     /// Print the tree top-down instead of bottom-up.
     #[clap(long)]
     pub top_down: bool,
