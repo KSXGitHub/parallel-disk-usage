@@ -21,18 +21,14 @@ impl<'a, Size> RecordHardLink<'a, Size> {
 
 impl<'a, Size: Eq + Debug> Hook<Size> for RecordHardLink<'a, Size> {
     fn run_hook(&self, argument: HookArgument<Size>) {
-        let HookArgument {
-            path,
-            metadata,
-            size,
-        } = argument;
+        let HookArgument { path, stats, size } = argument;
 
-        if metadata.is_dir() || metadata.nlink() <= 1 {
+        if stats.is_dir() || stats.nlink() <= 1 {
             return;
         }
 
         self.storage
-            .entry(metadata.ino())
+            .entry(stats.ino())
             .and_modify(|(expected_size, paths)| {
                 assert_eq!(
                     size, *expected_size,
