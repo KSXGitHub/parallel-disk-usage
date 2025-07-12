@@ -2,13 +2,13 @@ use super::DataTree;
 use crate::size;
 use assert_cmp::debug_assert_op;
 use rayon::prelude::*;
-use std::{ffi::OsStr, ops::Mul, path::Path};
+use std::{ffi::OsStr, path::Path};
 
 impl<Name, Size> DataTree<Name, Size>
 where
     Self: Send,
     Name: AsRef<OsStr>,
-    Size: size::Size + Mul<u64, Output = Size> + Sync,
+    Size: size::Size + Sync,
 {
     /// Reduce the size of the directories that have hardlinks.
     pub fn par_deduplicate_hardlinks(&mut self, hardlink_info: &[(Size, Vec<&Path>)]) {
