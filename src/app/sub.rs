@@ -163,7 +163,7 @@ where
         };
 
         print!("{visualizer}"); // visualizer already ends with "\n", println! isn't needed here.
-        Hook::report_deduplication_results(deduplication_record);
+        Hook::report_deduplication_results(deduplication_record, bytes_format);
         Ok(())
     }
 }
@@ -180,17 +180,20 @@ pub trait DeduplicateHardlinkSizes<Size: size::Size> {
         record: Self::HardlinkRecord,
     ) -> Self::DeduplicationReport;
     /// Handle the report.
-    fn report_deduplication_results(report: Self::DeduplicationReport);
+    fn report_deduplication_results(
+        report: Self::DeduplicationReport,
+        bytes_format: Size::DisplayFormat,
+    );
 }
 
 #[cfg(unix)]
 impl<'a, Size> DeduplicateHardlinkSizes<Size> for hook::RecordHardLink<'a, Size>
 where
     DataTree<OsStringDisplay, Size>: Send,
-    Size: size::Size + Sync,
+    Size: size::Size + From<u64> + Sync,
 {
     type HardlinkRecord = &'a hook::RecordHardLinkStorage<Size>;
-    type DeduplicationReport = (); // TODO
+    type DeduplicationReport = &'a hook::RecordHardLinkStorage<Size>;
 
     fn deduplicate_hardlink_sizes(
         data_tree: &mut DataTree<OsStringDisplay, Size>,
@@ -206,8 +209,32 @@ where
             .map(|(size, paths)| (*size, paths.iter().map(AsRef::as_ref).collect()))
             .collect();
         data_tree.par_deduplicate_hardlinks(&hardlink_info);
+        record
     }
-    fn report_deduplication_results((): Self::DeduplicationReport) {} // TODO
+
+    fn report_deduplication_results(
+        report: Self::DeduplicationReport,
+        bytes_format: Size::DisplayFormat,
+    ) {
+        let (inodes, links, size): (usize, usize, Size) = report
+            .iter()
+            .filter_map(|ref_multi| {
+                let (size, links) = &*ref_multi;
+                let links = links.len();
+                (links > 1).then_some(())?;
+                Some((*size, links))
+            })
+            .fold(
+                (0, 0, Size::from(0)),
+                |(inodes, total_links, total_size), (size, links)| {
+                    (inodes + 1, total_links + links, total_size + size)
+                },
+            );
+        if inodes > 0 {
+            let size = size.display(bytes_format);
+            println!("Detected {links} hardlinks for {inodes} unique files (total: {size})");
+        }
+    }
 }
 
 impl<Size> DeduplicateHardlinkSizes<Size> for hook::DoNothing
@@ -222,5 +249,5 @@ where
         _: Self::HardlinkRecord,
     ) -> Self::DeduplicationReport {
     }
-    fn report_deduplication_results((): Self::DeduplicationReport) {}
+    fn report_deduplication_results((): Self::DeduplicationReport, _: Size::DisplayFormat) {}
 }

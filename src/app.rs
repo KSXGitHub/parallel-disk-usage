@@ -205,7 +205,7 @@ impl App {
         impl<SizeGetter> HardlinkDeduplicationSystem<true> for SizeGetter
         where
             SizeGetter: GetSizeUtils,
-            SizeGetter::Size: Send + Sync + 'static,
+            SizeGetter::Size: From<u64> + Send + Sync + 'static,
         {
             type Hook = hook::RecordHardLink<'static, Self::Size>;
             fn create_hook(record: &'static hook::RecordHardLinkStorage<Self::Size>) -> Self::Hook {
