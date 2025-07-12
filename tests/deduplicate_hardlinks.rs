@@ -47,7 +47,6 @@ fn deduplicate_multiple_hardlinks_to_a_single_file() {
     let expected_size = workspace
         .join("file.txt")
         .pipe_as_ref(read_apparent_size)
-        .mul(2) // TODO: fix the algorithm and remove this line
         .add(read_apparent_size(&workspace))
         .pipe(Bytes::new);
 

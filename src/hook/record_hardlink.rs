@@ -36,6 +36,6 @@ impl<'a, Size: Eq + Debug> Hook<Size> for RecordHardLink<'a, Size> {
                 );
                 paths.push(path.to_path_buf());
             })
-            .or_insert_with(|| (size, Vec::new()));
+            .or_insert_with(|| (size, vec![path.to_path_buf()]));
     }
 }
