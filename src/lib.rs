@@ -28,6 +28,8 @@ pub use clap;
 pub use clap_complete;
 #[cfg(feature = "cli")]
 pub use clap_utilities;
+#[cfg(unix)]
+pub use dashmap;
 
 pub mod bytes_format;
 pub mod data_tree;
