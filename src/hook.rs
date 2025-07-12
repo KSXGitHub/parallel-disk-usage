@@ -8,6 +8,12 @@ pub struct HookArgument<'a, Size> {
     pub size: Size,
 }
 
+impl<'a, Size> HookArgument<'a, Size> {
+    pub(crate) fn new(path: &'a Path, stats: &'a Metadata, size: Size) -> Self {
+        HookArgument { path, stats, size }
+    }
+}
+
 /// Hook to run with a [`Path`] and its corresponding [`Metadata`] and size.
 pub trait Hook<Size> {
     fn run_hook(&self, argument: HookArgument<Size>);
