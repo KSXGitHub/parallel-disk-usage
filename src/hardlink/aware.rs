@@ -12,19 +12,21 @@ use std::{fmt::Debug, os::unix::fs::MetadataExt};
 /// Deduplicate them (remove duplicated size) from total size to
 /// accurately reflect the real size of their containers.
 #[derive(Debug, Clone, Copy)]
-pub struct HardlinkAware<'a, Size> {
+pub struct Aware<'a, Size> {
     /// Map an inode number to its size and detected paths.
     record: &'a HardlinkList<Size>,
 }
 
-impl<'a, Size> HardlinkAware<'a, Size> {
+pub use Aware as HardlinkAware;
+
+impl<'a, Size> Aware<'a, Size> {
     /// Create a detector/recorder of hardlinks.
     pub fn new(record: &'a HardlinkList<Size>) -> Self {
-        HardlinkAware { record }
+        Aware { record }
     }
 }
 
-impl<'a, Size, Report> RecordHardlinks<Size, Report> for HardlinkAware<'a, Size>
+impl<'a, Size, Report> RecordHardlinks<Size, Report> for Aware<'a, Size>
 where
     Size: size::Size + Eq + Debug,
     Report: Reporter<Size> + ?Sized,

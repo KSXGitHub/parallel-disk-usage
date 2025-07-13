@@ -2,21 +2,23 @@ use std::{fs::Metadata, path::Path};
 
 /// Argument to pass to [`RecordHardlinks::record_hardlinks`].
 #[derive(Debug, Clone, Copy)]
-pub struct RecordHardlinksArgument<'a, Size, Report: ?Sized> {
+pub struct Argument<'a, Size, Report: ?Sized> {
     pub path: &'a Path,
     pub stats: &'a Metadata,
     pub size: Size,
     pub reporter: &'a Report,
 }
 
-impl<'a, Size, Report: ?Sized> RecordHardlinksArgument<'a, Size, Report> {
+pub use Argument as RecordHardlinksArgument;
+
+impl<'a, Size, Report: ?Sized> Argument<'a, Size, Report> {
     pub(crate) fn new(
         path: &'a Path,
         stats: &'a Metadata,
         size: Size,
         reporter: &'a Report,
     ) -> Self {
-        RecordHardlinksArgument {
+        Argument {
             path,
             stats,
             size,
@@ -28,7 +30,7 @@ impl<'a, Size, Report: ?Sized> RecordHardlinksArgument<'a, Size, Report> {
 /// Ability to detect and record hardlinks.
 pub trait RecordHardlinks<Size, Reporter: ?Sized> {
     /// Perform hardlinks detection and recording.
-    fn record_hardlinks(&self, argument: RecordHardlinksArgument<Size, Reporter>);
+    fn record_hardlinks(&self, argument: Argument<Size, Reporter>);
 }
 
 /// Do detect and record hardlinks.
