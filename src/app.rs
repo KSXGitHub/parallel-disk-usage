@@ -86,8 +86,8 @@ impl App {
             }
 
             let visualization = match unit_and_tree {
-                UnitAndTree::Bytes(tree) => visualize!(tree.data, bytes_format),
-                UnitAndTree::Blocks(tree) => visualize!(tree.data, ()),
+                UnitAndTree::Bytes(tree) => visualize!(tree.tree, bytes_format),
+                UnitAndTree::Blocks(tree) => visualize!(tree.tree, ()),
             };
 
             print!("{visualization}"); // it already ends with "\n", println! isn't needed here.

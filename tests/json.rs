@@ -77,7 +77,7 @@ fn json_output() {
         .unit_and_tree
         .pipe(TryInto::<SampleJsonTree>::try_into)
         .expect("extract reflection")
-        .data
+        .tree
         .pipe(sanitize_tree_reflection);
     dbg!(&actual);
     let builder = FsTreeBuilder {
@@ -100,7 +100,7 @@ fn json_output() {
 #[test]
 fn json_input() {
     let json_tree = JsonTree {
-        data: sample_tree().into_reflection(),
+        tree: sample_tree().into_reflection(),
         shared_inodes: None,
     };
     let json_data = JsonData {

@@ -22,8 +22,7 @@ pub struct JsonTree<Size: size::Size> {
     /// The main data of the tree.
     #[deref]
     #[deref_mut]
-    #[cfg_attr(feature = "json", serde(flatten))]
-    pub data: DataTreeReflection<String, Size>,
+    pub tree: DataTreeReflection<String, Size>,
     /// Optional list of shared inodes, their sizes, and their many links.
     #[cfg_attr(feature = "json", serde(skip_serializing_if = "Option::is_none"))]
     pub shared_inodes: Option<HardlinkListReflection<Size>>,
@@ -32,7 +31,7 @@ pub struct JsonTree<Size: size::Size> {
 /// The `"unit"` field and the `"tree"` field of [`JsonData`].
 #[derive(Debug, Clone, From, TryInto)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
-#[cfg_attr(feature = "json", serde(tag = "unit", content = "tree"))]
+#[cfg_attr(feature = "json", serde(tag = "unit"))]
 #[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]
 pub enum UnitAndTree {
     /// Tree where size is [bytes](Bytes).
