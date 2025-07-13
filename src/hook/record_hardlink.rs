@@ -4,6 +4,7 @@ pub use storage::RecordHardLinkStorage;
 
 use super::{Hook, HookArgument};
 use crate::{
+    inode::InodeNumber,
     reporter::{event::EncounterHardlink, Event, Reporter},
     size,
 };
@@ -52,6 +53,7 @@ where
             links,
         }));
 
-        self.storage.add(stats.ino(), size, path).unwrap(); // TODO: propagate the error
+        let ino = InodeNumber::get(stats);
+        self.storage.add(ino, size, path).unwrap(); // TODO: propagate the error
     }
 }

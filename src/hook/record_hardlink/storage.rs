@@ -1,4 +1,4 @@
-use crate::{hardlink::LinkPathList, size};
+use crate::{hardlink::LinkPathList, inode::InodeNumber, size};
 use dashmap::{iter::Iter as DashIter, mapref::multiple::RefMulti, DashMap};
 use derive_more::{Display, Error};
 use pipe_trait::Pipe;
@@ -8,7 +8,7 @@ use std::{fmt::Debug, path::Path};
 #[derive(Debug, Clone)]
 pub struct RecordHardLinkStorage<Size>(
     /// Map an inode number to its size and detected paths.
-    DashMap<u64, (Size, LinkPathList)>, // TODO: benchmark against Mutex<HashMap<u64, (Size, LinkPathList)>>
+    DashMap<InodeNumber, (Size, LinkPathList)>, // TODO: benchmark against Mutex<HashMap<InodeNumber, (Size, LinkPathList)>>
 );
 
 impl<Size> RecordHardLinkStorage<Size> {
@@ -34,7 +34,7 @@ impl<Size> Default for RecordHardLinkStorage<Size> {
 #[display(bound(Size: Debug))]
 #[display("Size for inode {ino} changed from {recorded:?} to {detected:?}")]
 pub struct SizeConflictError<Size> {
-    pub ino: u64, // TODO: define a newtype of ino.
+    pub ino: InodeNumber,
     pub recorded: Size,
     pub detected: Size,
 }
@@ -52,7 +52,12 @@ where
     Size: size::Size,
 {
     /// Add an entry to the record.
-    pub(crate) fn add(&self, ino: u64, size: Size, path: &Path) -> Result<(), AddError<Size>> {
+    pub(crate) fn add(
+        &self,
+        ino: InodeNumber,
+        size: Size,
+        path: &Path,
+    ) -> Result<(), AddError<Size>> {
         let mut size_assertion = Ok(());
         self.0
             .entry(ino)
@@ -77,13 +82,13 @@ where
 #[derive(derive_more::Debug)]
 #[debug(bound())]
 #[debug("Iter(..)")]
-pub struct Iter<'a, Size>(DashIter<'a, u64, (Size, LinkPathList)>);
+pub struct Iter<'a, Size>(DashIter<'a, InodeNumber, (Size, LinkPathList)>);
 
 /// [Item](Iterator::Item) of [`Iter`].
 #[derive(derive_more::Debug)]
 #[debug(bound())]
 #[debug("IterItem(..)")]
-pub struct IterItem<'a, Size>(RefMulti<'a, u64, (Size, LinkPathList)>);
+pub struct IterItem<'a, Size>(RefMulti<'a, InodeNumber, (Size, LinkPathList)>);
 
 impl<'a, Size> Iterator for Iter<'a, Size> {
     type Item = IterItem<'a, Size>;
@@ -94,7 +99,7 @@ impl<'a, Size> Iterator for Iter<'a, Size> {
 
 impl<'a, Size> IterItem<'a, Size> {
     /// Number of the inode.
-    pub fn ino(&self) -> u64 {
+    pub fn ino(&self) -> InodeNumber {
         *self.0.key()
     }
 
