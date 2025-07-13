@@ -200,8 +200,8 @@ impl App {
         impl<const REPORT_PROGRESS: bool, SizeGetter>
             HardlinkDeduplicationSystem<false, REPORT_PROGRESS> for SizeGetter
         where
-            SizeGetter: CreateReporter<REPORT_PROGRESS>,
-            SizeGetter::Size: Send + Sync,
+            Self: CreateReporter<REPORT_PROGRESS>,
+            Self::Size: Send + Sync,
         {
             type HardlinksHandler = hardlink::HardlinkIgnorant;
             fn create_hardlinks_handler() -> Self::HardlinksHandler {
@@ -213,9 +213,9 @@ impl App {
         impl<const REPORT_PROGRESS: bool, SizeGetter>
             HardlinkDeduplicationSystem<true, REPORT_PROGRESS> for SizeGetter
         where
-            SizeGetter: CreateReporter<REPORT_PROGRESS>,
-            SizeGetter::Size: Send + Sync + 'static,
-            SizeGetter::Reporter: crate::reporter::Reporter<SizeGetter::Size>,
+            Self: CreateReporter<REPORT_PROGRESS>,
+            Self::Size: Send + Sync + 'static,
+            Self::Reporter: crate::reporter::Reporter<Self::Size>,
         {
             type HardlinksHandler = hardlink::HardlinkAware<Self::Size>;
             fn create_hardlinks_handler() -> Self::HardlinksHandler {
