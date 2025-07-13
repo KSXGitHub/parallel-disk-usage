@@ -1,4 +1,4 @@
-use super::record::{RecordHardlinks, RecordHardlinksArgument};
+use super::{RecordHardlinks, RecordHardlinksArgument};
 
 /// Be ignorant of hardlinks. Treat them as real files.
 /// Do not detect it. Do not deduplicate it.

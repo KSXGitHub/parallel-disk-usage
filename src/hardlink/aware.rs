@@ -1,4 +1,4 @@
-use super::record::{RecordHardlinks, RecordHardlinksArgument};
+use super::{RecordHardlinks, RecordHardlinksArgument};
 use crate::{
     hardlink::HardlinkList,
     inode::InodeNumber,

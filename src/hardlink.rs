@@ -13,4 +13,4 @@ pub mod record;
 
 pub use hardlink_list::{HardlinkList, HardlinkListReflection};
 pub use link_path_list::{LinkPathList, LinkPathListReflection};
-pub use record::RecordHardlinks;
+pub use record::{RecordHardlinks, RecordHardlinksArgument};

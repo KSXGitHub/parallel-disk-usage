@@ -1,7 +1,7 @@
 use super::{
     data_tree::DataTree,
     get_size::GetSize,
-    hardlink::record::{RecordHardlinks, RecordHardlinksArgument},
+    hardlink::{RecordHardlinks, RecordHardlinksArgument},
     os_string_display::OsStringDisplay,
     reporter::{error_report::Operation::*, ErrorReport, Event, Reporter},
     size,
