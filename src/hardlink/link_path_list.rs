@@ -1,7 +1,15 @@
+mod reflection;
+
+pub use reflection::Reflection;
+
 use pipe_trait::Pipe;
 use std::{iter::FusedIterator, path::PathBuf, slice};
 
 /// List of different hardlinks to the same file.
+///
+/// **Serialization and deserialization:** _(feature: `json`)_ `LinkPathList` does not implement
+/// `Serialize` and `Deserialize` traits directly, instead, it can be converted into/from a
+/// [`Reflection`] which implements these traits.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct LinkPathList(
     Vec<PathBuf>, // TODO: benchmark against LinkedList<PathBuf>

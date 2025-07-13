@@ -1,3 +1,7 @@
+pub mod reflection;
+
+pub use reflection::Reflection;
+
 use crate::{hardlink::LinkPathList, inode::InodeNumber, size};
 use dashmap::{iter::Iter as DashIter, mapref::multiple::RefMulti, DashMap};
 use derive_more::{Display, Error};
@@ -5,6 +9,10 @@ use pipe_trait::Pipe;
 use std::{fmt::Debug, path::Path};
 
 /// Storage to be used by [`crate::hook::RecordHardlink`].
+///
+/// **Serialization and deserialization:** _(feature: `json`)_ `HardlinkList` does not implement
+/// `Serialize` and `Deserialize` traits directly, instead, it can be converted into/from a
+/// [`Reflection`] which implements these traits.
 #[derive(Debug, Clone)]
 pub struct HardlinkList<Size>(
     /// Map an inode number to its size and detected paths.

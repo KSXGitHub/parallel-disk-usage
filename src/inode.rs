@@ -1,9 +1,13 @@
 use derive_more::{Display, From, Into, LowerHex, Octal, UpperHex};
 
+#[cfg(feature = "json")]
+use serde::{Deserialize, Serialize};
+
 /// The inode number of a file or directory.
 #[derive(
     Debug, Display, LowerHex, UpperHex, Octal, Clone, Copy, PartialEq, Eq, Hash, From, Into,
 )]
+#[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 pub struct InodeNumber(u64);
 
 /// POSIX-exclusive functions.
