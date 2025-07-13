@@ -24,9 +24,9 @@ use std::{
 };
 
 type SampleName = String;
-type SampleData = Bytes;
-type SampleReflection = Reflection<SampleName, SampleData>;
-type SampleTree = DataTree<SampleName, SampleData>;
+type SampleSize = Bytes;
+type SampleReflection = Reflection<SampleName, SampleSize>;
+type SampleTree = DataTree<SampleName, SampleSize>;
 
 fn sample_tree() -> SampleTree {
     let dir = |name: &'static str, children: Vec<SampleTree>| {
