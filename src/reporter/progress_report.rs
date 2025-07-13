@@ -13,7 +13,7 @@ pub struct ProgressReport<Size: size::Size> {
     /// Total number of detected hardlinks.
     pub linked: u64,
     /// Total size of detected hardlinks.
-    pub shared: u64,
+    pub shared: Size,
 }
 
 impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
@@ -37,6 +37,7 @@ impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
         if linked != 0 {
             write!(text, ", linked {linked}").unwrap();
         }
+        let shared = shared.into();
         if shared != 0 {
             write!(text, ", shared {shared}").unwrap();
         }

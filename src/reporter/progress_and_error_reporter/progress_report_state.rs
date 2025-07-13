@@ -43,7 +43,7 @@ impl ProgressReportState {
         let total = load!(total).into();
         let errors = load!(errors);
         let linked = load!(linked);
-        let shared = load!(shared);
+        let shared = load!(shared).into();
         ControlFlow::Continue(ProgressReport {
             items,
             total,
