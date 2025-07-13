@@ -21,7 +21,7 @@ where
     Report: ParallelReporter<Size> + Sync,
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
-    Hook: hook::Hook<Size> + DeduplicateHardlinkSizes<Size> + Copy + Sync,
+    Hook: hook::Hook<Size, Report> + DeduplicateHardlinkSizes<Size> + Copy + Sync,
     DataTreeReflection<String, Size>: Into<UnitAndTree>,
 {
     /// List of files and/or directories.
@@ -57,7 +57,7 @@ where
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     Report: ParallelReporter<Size> + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
-    Hook: hook::Hook<Size> + DeduplicateHardlinkSizes<Size> + Copy + Sync,
+    Hook: hook::Hook<Size, Report> + DeduplicateHardlinkSizes<Size> + Copy + Sync,
     DataTreeReflection<String, Size>: Into<UnitAndTree>,
 {
     /// Run the sub program.

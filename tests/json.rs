@@ -83,7 +83,7 @@ fn json_output() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         hook: hook::DoNothing,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let expected = builder

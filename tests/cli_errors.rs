@@ -133,7 +133,7 @@ fn fs_errors() {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
         hook: hook::DoNothing,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();

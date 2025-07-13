@@ -180,8 +180,13 @@ impl App {
             }
         }
 
-        trait HardlinkDeduplicationSystem<const DEDUPLICATE_HARDLINKS: bool>: GetSizeUtils {
-            type Hook: hook::Hook<Self::Size> + sub::DeduplicateHardlinkSizes<Self::Size>;
+        trait HardlinkDeduplicationSystem<
+            const DEDUPLICATE_HARDLINKS: bool,
+            const REPORT_PROGRESS: bool,
+        >: CreateReporter<REPORT_PROGRESS>
+        {
+            type Hook: hook::Hook<Self::Size, Self::Reporter>
+                + sub::DeduplicateHardlinkSizes<Self::Size>;
             fn create_hook(
                 record: <Self::Hook as sub::DeduplicateHardlinkSizes<Self::Size>>::HardlinkRecord,
             ) -> Self::Hook;
@@ -189,9 +194,10 @@ impl App {
             ) -> <Self::Hook as sub::DeduplicateHardlinkSizes<Self::Size>>::HardlinkRecord;
         }
 
-        impl<SizeGetter> HardlinkDeduplicationSystem<false> for SizeGetter
+        impl<const REPORT_PROGRESS: bool, SizeGetter>
+            HardlinkDeduplicationSystem<false, REPORT_PROGRESS> for SizeGetter
         where
-            SizeGetter: GetSizeUtils,
+            SizeGetter: CreateReporter<REPORT_PROGRESS>,
             SizeGetter::Size: Send + Sync,
         {
             type Hook = hook::DoNothing;
@@ -202,10 +208,12 @@ impl App {
         }
 
         #[cfg(unix)]
-        impl<SizeGetter> HardlinkDeduplicationSystem<true> for SizeGetter
+        impl<const REPORT_PROGRESS: bool, SizeGetter>
+            HardlinkDeduplicationSystem<true, REPORT_PROGRESS> for SizeGetter
         where
-            SizeGetter: GetSizeUtils,
+            SizeGetter: CreateReporter<REPORT_PROGRESS>,
             SizeGetter::Size: Send + Sync + 'static,
+            SizeGetter::Reporter: crate::reporter::Reporter<SizeGetter::Size>,
         {
             type Hook = hook::RecordHardLink<'static, Self::Size>;
             fn create_hook(record: &'static hook::RecordHardLinkStorage<Self::Size>) -> Self::Hook {
@@ -239,8 +247,8 @@ impl App {
                     ..
                 } => {
                     const DEDUPLICATE_HARDLINKS: bool = cfg!(unix) && $deduplicate_hardlinks;
-                    let hardlink_record = <$size_getter as HardlinkDeduplicationSystem<DEDUPLICATE_HARDLINKS>>::init_hardlink_record();
-                    let hook = <$size_getter as HardlinkDeduplicationSystem<DEDUPLICATE_HARDLINKS>>::create_hook(hardlink_record);
+                    let hardlink_record = <$size_getter as HardlinkDeduplicationSystem<DEDUPLICATE_HARDLINKS, $progress>>::init_hardlink_record();
+                    let hook = <$size_getter as HardlinkDeduplicationSystem<DEDUPLICATE_HARDLINKS, $progress>>::create_hook(hardlink_record);
 
                     Sub {
                         direction: Direction::from_top_down(top_down),

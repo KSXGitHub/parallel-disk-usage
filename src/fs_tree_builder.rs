@@ -31,18 +31,18 @@ use std::{
 ///     root: std::env::current_dir().unwrap(),
 ///     hook: hook::DoNothing,
 ///     size_getter: GetApparentSize,
-///     reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+///     reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
 ///     max_depth: 10,
 /// };
 /// let data_tree: DataTree<OsStringDisplay, Bytes> = builder.into();
 /// ```
 #[derive(Debug)]
-pub struct FsTreeBuilder<Size, SizeGetter, Hook, Report>
+pub struct FsTreeBuilder<'a, Size, SizeGetter, Hook, Report>
 where
-    Report: Reporter<Size> + Sync,
+    Report: Reporter<Size> + Sync + ?Sized,
     Size: size::Size + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Sync,
-    Hook: hook::Hook<Size> + Sync,
+    Hook: hook::Hook<Size, Report> + Sync,
 {
     /// Root of the directory tree.
     pub root: PathBuf,
@@ -51,18 +51,18 @@ where
     /// Hook to run after [`Self::size_getter`].
     pub hook: Hook,
     /// Reports progress to external system.
-    pub reporter: Report,
+    pub reporter: &'a Report,
     /// Deepest level of descendent display in the graph. The sizes beyond the max depth still count toward total.
     pub max_depth: u64,
 }
 
-impl<Size, SizeGetter, Hook, Report> From<FsTreeBuilder<Size, SizeGetter, Hook, Report>>
+impl<'a, Size, SizeGetter, Hook, Report> From<FsTreeBuilder<'a, Size, SizeGetter, Hook, Report>>
     for DataTree<OsStringDisplay, Size>
 where
-    Report: Reporter<Size> + Sync,
+    Report: Reporter<Size> + Sync + ?Sized,
     Size: size::Size + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Sync,
-    Hook: hook::Hook<Size> + Sync,
+    Hook: hook::Hook<Size, Report> + Sync,
 {
     /// Create a [`DataTree`] from an [`FsTreeBuilder`].
     fn from(builder: FsTreeBuilder<Size, SizeGetter, Hook, Report>) -> Self {
@@ -97,7 +97,7 @@ where
                         let is_dir = stats.is_dir();
                         let size = size_getter.get_size(&stats);
                         reporter.report(Event::ReceiveData(size));
-                        hook.run_hook(HookArgument::new(path, &stats, size));
+                        hook.run_hook(HookArgument::new(path, &stats, size, reporter));
                         (is_dir, size)
                     }
                 };

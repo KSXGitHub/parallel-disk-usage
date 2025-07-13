@@ -10,6 +10,10 @@ pub struct ProgressReport<Size: size::Size> {
     pub total: Size,
     /// Number of occurred errors.
     pub errors: u64,
+    /// Total number of detected hardlinks.
+    pub linked: u64,
+    /// Total size of detected hardlinks.
+    pub shared: u64,
 }
 
 impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
@@ -19,6 +23,8 @@ impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
             items,
             total,
             errors,
+            linked,
+            shared,
         } = report;
         let mut text = String::new();
         write!(
@@ -30,6 +36,12 @@ impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
         .unwrap();
         if errors != 0 {
             write!(text, ", erred {errors}").unwrap();
+        }
+        if linked != 0 {
+            write!(text, ", linked {linked}").unwrap();
+        }
+        if shared != 0 {
+            write!(text, ", shared {shared}").unwrap();
         }
         write!(text, ")").unwrap();
         GLOBAL_STATUS_BOARD.temporary_message(&text);

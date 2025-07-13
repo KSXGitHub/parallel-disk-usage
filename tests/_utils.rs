@@ -173,7 +173,7 @@ where
         FsTreeBuilder {
             size_getter,
             hook: hook::DoNothing,
-            reporter: ErrorOnlyReporter::new(|error| {
+            reporter: &ErrorOnlyReporter::new(|error| {
                 panic!("Unexpected call to report_error: {error:?}")
             }),
             root: root.join(suffix),

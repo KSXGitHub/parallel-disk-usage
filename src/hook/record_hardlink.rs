@@ -1,4 +1,8 @@
 use super::{Hook, HookArgument};
+use crate::{
+    reporter::{event::EncounterHardlink, Event, Reporter},
+    size,
+};
 use dashmap::DashMap;
 use std::{fmt::Debug, os::unix::fs::MetadataExt, path::PathBuf};
 
@@ -19,13 +23,34 @@ impl<'a, Size> RecordHardLink<'a, Size> {
     }
 }
 
-impl<'a, Size: Eq + Debug> Hook<Size> for RecordHardLink<'a, Size> {
-    fn run_hook(&self, argument: HookArgument<Size>) {
-        let HookArgument { path, stats, size } = argument;
+impl<'a, Size, Report> Hook<Size, Report> for RecordHardLink<'a, Size>
+where
+    Size: size::Size + Eq + Debug,
+    Report: Reporter<Size> + ?Sized,
+{
+    fn run_hook(&self, argument: HookArgument<Size, Report>) {
+        let HookArgument {
+            path,
+            stats,
+            size,
+            reporter,
+        } = argument;
 
-        if stats.is_dir() || stats.nlink() <= 1 {
+        if stats.is_dir() {
             return;
         }
+
+        let links = stats.nlink();
+        if links <= 1 {
+            return;
+        }
+
+        reporter.report(Event::EncounterHardlink(EncounterHardlink {
+            path,
+            stats,
+            size,
+            links,
+        }));
 
         self.storage
             .entry(stats.ino())
