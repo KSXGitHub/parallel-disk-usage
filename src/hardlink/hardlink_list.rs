@@ -39,7 +39,7 @@ pub struct SizeConflictError<Size> {
     pub detected: Size,
 }
 
-/// Error that occurs when it fails to add an item to [`RecordHardlinkStorage`].
+/// Error that occurs when it fails to add an item to [`HardlinkList`].
 #[derive(Debug, Display, Error)]
 #[display(bound(Size: Debug))]
 #[non_exhaustive]
@@ -78,7 +78,7 @@ where
     }
 }
 
-/// Iterator over entries in [`RecordHardlinkStorage`].
+/// Iterator over entries in [`HardlinkList`].
 #[derive(derive_more::Debug)]
 #[debug(bound())]
 #[debug("Iter(..)")]
