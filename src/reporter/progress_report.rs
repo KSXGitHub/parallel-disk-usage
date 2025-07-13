@@ -34,14 +34,14 @@ impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
             total = total.into(),
         )
         .unwrap();
-        if errors != 0 {
-            write!(text, ", erred {errors}").unwrap();
-        }
         if linked != 0 {
             write!(text, ", linked {linked}").unwrap();
         }
         if shared != 0 {
             write!(text, ", shared {shared}").unwrap();
+        }
+        if errors != 0 {
+            write!(text, ", erred {errors}").unwrap();
         }
         write!(text, ")").unwrap();
         GLOBAL_STATUS_BOARD.temporary_message(&text);
