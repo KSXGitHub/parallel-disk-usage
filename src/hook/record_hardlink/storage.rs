@@ -4,17 +4,17 @@ use derive_more::{Display, Error};
 use pipe_trait::Pipe;
 use std::{fmt::Debug, path::Path};
 
-/// Storage to be used by [`crate::hook::RecordHardLink`].
+/// Storage to be used by [`crate::hook::RecordHardlink`].
 #[derive(Debug, Clone)]
-pub struct RecordHardLinkStorage<Size>(
+pub struct HardlinkList<Size>(
     /// Map an inode number to its size and detected paths.
     DashMap<InodeNumber, (Size, LinkPathList)>, // TODO: benchmark against Mutex<HashMap<InodeNumber, (Size, LinkPathList)>>
 );
 
-impl<Size> RecordHardLinkStorage<Size> {
+impl<Size> HardlinkList<Size> {
     /// Create a new record.
     pub fn new() -> Self {
-        RecordHardLinkStorage(DashMap::new())
+        HardlinkList(DashMap::new())
     }
 
     /// Iterate over the recorded entries.
@@ -23,9 +23,9 @@ impl<Size> RecordHardLinkStorage<Size> {
     }
 }
 
-impl<Size> Default for RecordHardLinkStorage<Size> {
+impl<Size> Default for HardlinkList<Size> {
     fn default() -> Self {
-        RecordHardLinkStorage::new()
+        HardlinkList::new()
     }
 }
 
@@ -39,7 +39,7 @@ pub struct SizeConflictError<Size> {
     pub detected: Size,
 }
 
-/// Error that occurs when it fails to add an item to [`RecordHardLinkStorage`].
+/// Error that occurs when it fails to add an item to [`RecordHardlinkStorage`].
 #[derive(Debug, Display, Error)]
 #[display(bound(Size: Debug))]
 #[non_exhaustive]
@@ -47,7 +47,7 @@ pub enum AddError<Size> {
     SizeConflict(SizeConflictError<Size>),
 }
 
-impl<Size> RecordHardLinkStorage<Size>
+impl<Size> HardlinkList<Size>
 where
     Size: size::Size,
 {
@@ -78,7 +78,7 @@ where
     }
 }
 
-/// Iterator over entries in [`RecordHardLinkStorage`].
+/// Iterator over entries in [`RecordHardlinkStorage`].
 #[derive(derive_more::Debug)]
 #[debug(bound())]
 #[debug("Iter(..)")]

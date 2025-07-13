@@ -187,13 +187,13 @@ pub trait DeduplicateHardlinkSizes<Size: size::Size> {
 }
 
 #[cfg(unix)]
-impl<'a, Size> DeduplicateHardlinkSizes<Size> for hook::RecordHardLink<'a, Size>
+impl<'a, Size> DeduplicateHardlinkSizes<Size> for hook::RecordHardlink<'a, Size>
 where
     DataTree<OsStringDisplay, Size>: Send,
     Size: size::Size + Sync,
 {
-    type HardlinkRecord = &'a hook::RecordHardLinkStorage<Size>;
-    type DeduplicationReport = &'a hook::RecordHardLinkStorage<Size>;
+    type HardlinkRecord = &'a hook::HardlinkList<Size>;
+    type DeduplicationReport = &'a hook::HardlinkList<Size>;
 
     fn deduplicate_hardlink_sizes(
         data_tree: &mut DataTree<OsStringDisplay, Size>,

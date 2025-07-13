@@ -1,6 +1,6 @@
 pub mod storage;
 
-pub use storage::RecordHardLinkStorage;
+pub use storage::HardlinkList;
 
 use super::{Hook, HookArgument};
 use crate::{
@@ -12,19 +12,19 @@ use std::{fmt::Debug, os::unix::fs::MetadataExt};
 
 /// A [hook](Hook) that record files with more than 1 links.
 #[derive(Debug, Clone, Copy)]
-pub struct RecordHardLink<'a, Size> {
+pub struct RecordHardlink<'a, Size> {
     /// Map an inode number to its size and detected paths.
-    storage: &'a RecordHardLinkStorage<Size>,
+    storage: &'a HardlinkList<Size>,
 }
 
-impl<'a, Size> RecordHardLink<'a, Size> {
+impl<'a, Size> RecordHardlink<'a, Size> {
     /// Create a [hook](Hook) to record files with more than 1 links.
-    pub fn new(storage: &'a RecordHardLinkStorage<Size>) -> Self {
-        RecordHardLink { storage }
+    pub fn new(storage: &'a HardlinkList<Size>) -> Self {
+        RecordHardlink { storage }
     }
 }
 
-impl<'a, Size, Report> Hook<Size, Report> for RecordHardLink<'a, Size>
+impl<'a, Size, Report> Hook<Size, Report> for RecordHardlink<'a, Size>
 where
     Size: size::Size + Eq + Debug,
     Report: Reporter<Size> + ?Sized,

@@ -215,14 +215,12 @@ impl App {
             SizeGetter::Size: Send + Sync + 'static,
             SizeGetter::Reporter: crate::reporter::Reporter<SizeGetter::Size>,
         {
-            type Hook = hook::RecordHardLink<'static, Self::Size>;
-            fn create_hook(record: &'static hook::RecordHardLinkStorage<Self::Size>) -> Self::Hook {
-                hook::RecordHardLink::new(record)
+            type Hook = hook::RecordHardlink<'static, Self::Size>;
+            fn create_hook(record: &'static hook::HardlinkList<Self::Size>) -> Self::Hook {
+                hook::RecordHardlink::new(record)
             }
-            fn init_hardlink_record() -> &'static hook::RecordHardLinkStorage<Self::Size> {
-                hook::RecordHardLinkStorage::new()
-                    .pipe(Box::new)
-                    .pipe(Box::leak)
+            fn init_hardlink_record() -> &'static hook::HardlinkList<Self::Size> {
+                hook::HardlinkList::new().pipe(Box::new).pipe(Box::leak)
             }
         }
 

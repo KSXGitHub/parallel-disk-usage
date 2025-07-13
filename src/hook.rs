@@ -41,6 +41,6 @@ impl<Size, Reporter> Hook<Size, Reporter> for DoNothing {
 #[cfg(unix)]
 pub mod record_hardlink;
 #[cfg(unix)]
-pub use record_hardlink::RecordHardLink;
+pub use record_hardlink::HardlinkList;
 #[cfg(unix)]
-pub use record_hardlink::RecordHardLinkStorage;
+pub use record_hardlink::RecordHardlink;
