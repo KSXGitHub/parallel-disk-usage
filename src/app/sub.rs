@@ -202,7 +202,7 @@ where
         use std::path::{Path, PathBuf};
         let hardlink_info: Box<[(Size, Vec<PathBuf>)]> = record
             .iter()
-            .map(|values| (values.0, values.1.clone()))
+            .map(|values| (*values.size(), values.links().to_vec()))
             .collect();
         let hardlink_info: Box<[(Size, Vec<&Path>)]> = hardlink_info
             .iter()
@@ -218,9 +218,9 @@ where
     ) -> Result<(), RuntimeError> {
         let (inodes, links, size): (usize, usize, Size) = report
             .iter()
-            .filter_map(|ref_multi| {
-                let (size, links) = &*ref_multi;
-                let links = links.len();
+            .filter_map(|values| {
+                let size = values.size();
+                let links = values.links().len();
                 (links > 1).then_some(())?;
                 Some((*size, links))
             })
