@@ -5,8 +5,8 @@ pub use binary_version::BinaryVersion;
 pub use schema_version::SchemaVersion;
 
 use crate::{
-    data_tree,
-    hardlink::hardlink_list,
+    data_tree::DataTreeReflection,
+    hardlink::HardlinkListReflection,
     size::{self, Blocks, Bytes},
 };
 use derive_more::{Deref, DerefMut, From, TryInto};
@@ -23,10 +23,10 @@ pub struct JsonTree<Size: size::Size> {
     #[deref]
     #[deref_mut]
     #[cfg_attr(feature = "json", serde(flatten))]
-    pub data: data_tree::Reflection<String, Size>,
+    pub data: DataTreeReflection<String, Size>,
     /// Optional list of shared inodes, their sizes, and their many links.
     #[cfg_attr(feature = "json", serde(skip_serializing_if = "Option::is_none"))]
-    pub shared_inodes: Option<hardlink_list::Reflection<Size>>,
+    pub shared_inodes: Option<HardlinkListReflection<Size>>,
 }
 
 /// The `"unit"` field and the `"tree"` field of [`JsonData`].

@@ -1,6 +1,6 @@
 use super::HardlinkList;
 use crate::{
-    hardlink::{link_path_list, LinkPathList},
+    hardlink::{LinkPathList, LinkPathListReflection},
     inode::InodeNumber,
 };
 use dashmap::DashMap;
@@ -26,7 +26,7 @@ pub struct Reflection<Size>(pub HashMap<InodeNumber, Value<Size>>);
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 pub struct Value<Size> {
     pub size: Size,
-    pub links: link_path_list::Reflection,
+    pub links: LinkPathListReflection,
 }
 
 impl<Size> Value<Size> {
@@ -36,7 +36,7 @@ impl<Size> Value<Size> {
         Value { size, links }
     }
 
-    /// Convert the internal [`link_path_list::Reflection`] into a [`LinkPathList`].
+    /// Convert the internal [`LinkPathListReflection`] into a [`LinkPathList`].
     fn into_list(self) -> (Size, LinkPathList) {
         let Value { size, links } = self;
         (size, links.into())

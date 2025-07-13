@@ -2,6 +2,8 @@ mod reflection;
 
 pub use reflection::Reflection;
 
+pub use Reflection as LinkPathListReflection;
+
 use pipe_trait::Pipe;
 use std::{iter::FusedIterator, path::PathBuf, slice};
 

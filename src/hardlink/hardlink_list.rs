@@ -2,6 +2,8 @@ pub mod reflection;
 
 pub use reflection::Reflection;
 
+pub use Reflection as HardlinkListReflection;
+
 use crate::{hardlink::LinkPathList, inode::InodeNumber, size};
 use dashmap::{iter::Iter as DashIter, mapref::multiple::RefMulti, DashMap};
 use derive_more::{Display, Error};
