@@ -8,12 +8,12 @@ use std::{fs::Metadata, path::Path};
 pub enum Event<'a, Size: size::Size> {
     ReceiveData(Size),
     EncounterError(ErrorReport<'a>),
-    EncounterHardlink(EncounterHardlink<'a, Size>),
+    DetectHardlink(HardlinkDetection<'a, Size>),
 }
 
-/// Data of [`Event::EncounterHardlink`].
+/// Data of [`Event::DetectHardlink`].
 #[derive(Debug, Clone, Copy)]
-pub struct EncounterHardlink<'a, Size: size::Size> {
+pub struct HardlinkDetection<'a, Size: size::Size> {
     /// Path of the detected hardlink.
     pub path: &'a Path,
     /// Stats of the detected hardlink.

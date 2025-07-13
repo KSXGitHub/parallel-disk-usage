@@ -5,7 +5,7 @@ pub use storage::RecordHardLinkStorage;
 use super::{Hook, HookArgument};
 use crate::{
     inode::InodeNumber,
-    reporter::{event::EncounterHardlink, Event, Reporter},
+    reporter::{event::HardlinkDetection, Event, Reporter},
     size,
 };
 use std::{fmt::Debug, os::unix::fs::MetadataExt};
@@ -46,7 +46,7 @@ where
             return;
         }
 
-        reporter.report(Event::EncounterHardlink(EncounterHardlink {
+        reporter.report(Event::DetectHardlink(HardlinkDetection {
             path,
             stats,
             size,
