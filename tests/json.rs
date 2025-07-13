@@ -73,7 +73,7 @@ fn json_output() {
         .pipe(stdout_text)
         .pipe_as_ref(serde_json::from_str::<JsonData>)
         .expect("parse stdout as JsonData")
-        .unit_and_tree
+        .body
         .pipe(TryInto::<SampleReflection>::try_into)
         .expect("extract reflection")
         .pipe(sanitize_tree_reflection);
@@ -99,7 +99,7 @@ fn json_input() {
     let json_data = JsonData {
         schema_version: SchemaVersion,
         binary_version: None,
-        unit_and_tree: sample_tree().into_reflection().into(),
+        body: sample_tree().into_reflection().into(),
     };
     let json = serde_json::to_string_pretty(&json_data).expect("convert sample tree to JSON");
     eprintln!("JSON: {json}\n");

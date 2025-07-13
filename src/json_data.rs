@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "json", serde(tag = "unit", content = "tree"))]
 #[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]
-pub enum UnitAndTree {
+pub enum JsonDataBody {
     /// Tree where size is [bytes](Bytes).
     Bytes(Reflection<String, Bytes>),
     /// Tree where size is [blocks](Blocks).
@@ -38,5 +38,5 @@ pub struct JsonData {
     pub binary_version: Option<BinaryVersion>,
     /// The `"unit"` field and the `"tree"` field.
     #[cfg_attr(feature = "json", serde(flatten))]
-    pub unit_and_tree: UnitAndTree,
+    pub body: JsonDataBody,
 }

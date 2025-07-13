@@ -3,7 +3,7 @@ use crate::{
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
-    json_data::{BinaryVersion, JsonData, SchemaVersion, UnitAndTree},
+    json_data::{BinaryVersion, JsonData, JsonDataBody, SchemaVersion},
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
     runtime_error::RuntimeError,
@@ -20,7 +20,7 @@ where
     Report: ParallelReporter<Size> + Sync,
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
-    DataTreeReflection<String, Size>: Into<UnitAndTree>,
+    DataTreeReflection<String, Size>: Into<JsonDataBody>,
 {
     /// List of files and/or directories.
     pub files: Vec<PathBuf>,
@@ -51,7 +51,7 @@ where
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     Report: ParallelReporter<Size> + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
-    DataTreeReflection<String, Size>: Into<UnitAndTree>,
+    DataTreeReflection<String, Size>: Into<JsonDataBody>,
 {
     /// Run the sub program.
     pub fn run(self) -> Result<(), RuntimeError> {
@@ -126,7 +126,7 @@ where
         GLOBAL_STATUS_BOARD.clear_line(0);
 
         if json_output {
-            let unit_and_tree: UnitAndTree = data_tree
+            let body: JsonDataBody = data_tree
                 .into_reflection() // I really want to use std::mem::transmute here but can't.
                 .par_convert_names_to_utf8() // TODO: allow non-UTF8 somehow.
                 .expect("convert all names from raw string to UTF-8")
@@ -134,7 +134,7 @@ where
             let json_data = JsonData {
                 schema_version: SchemaVersion,
                 binary_version: Some(BinaryVersion::current()),
-                unit_and_tree,
+                body,
             };
             return serde_json::to_writer(stdout(), &json_data)
                 .map_err(RuntimeError::SerializationFailure);
