@@ -38,10 +38,8 @@ impl<Size> ReflectionEntry<Size> {
 }
 
 impl<Size> From<HardlinkList<Size>> for Reflection<Size> {
-    fn from(value: HardlinkList<Size>) -> Self {
-        value
-            .0
-            .into_iter()
+    fn from(HardlinkList(list): HardlinkList<Size>) -> Self {
+        list.into_iter()
             .map(|(ino, (size, links))| ReflectionEntry::new(ino, size, links))
             .collect::<Vec<_>>()
             .pipe(Reflection)
