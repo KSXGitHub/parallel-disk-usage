@@ -199,10 +199,11 @@ where
         data_tree: &mut DataTree<OsStringDisplay, Size>,
         record: Self::HardlinkRecord,
     ) -> Result<Self::DeduplicationReport, RuntimeError> {
-        use std::path::{Path, PathBuf};
-        let hardlink_info: Box<[(Size, Vec<PathBuf>)]> = record
+        use crate::hardlink::LinkPathList;
+        use std::path::Path;
+        let hardlink_info: Box<[(Size, LinkPathList)]> = record
             .iter()
-            .map(|values| (*values.size(), values.links().to_vec()))
+            .map(|values| (*values.size(), values.links().clone()))
             .collect();
         let hardlink_info: Box<[(Size, Vec<&Path>)]> = hardlink_info
             .iter()

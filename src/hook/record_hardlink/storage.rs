@@ -1,17 +1,14 @@
-use crate::size;
+use crate::{hardlink::LinkPathList, size};
 use dashmap::{iter::Iter as DashIter, mapref::multiple::RefMulti, DashMap};
 use derive_more::{Display, Error};
 use pipe_trait::Pipe;
-use std::{
-    fmt::Debug,
-    path::{Path, PathBuf},
-};
+use std::{fmt::Debug, path::Path};
 
 /// Storage to be used by [`crate::hook::RecordHardLink`].
 #[derive(Debug, Clone)]
 pub struct RecordHardLinkStorage<Size>(
     /// Map an inode number to its size and detected paths.
-    DashMap<u64, (Size, Vec<PathBuf>)>, // TODO: benchmark against Mutex<HashMap<u64, (Size, Vec<PathBuf>)>>
+    DashMap<u64, (Size, LinkPathList)>, // TODO: benchmark against Mutex<HashMap<u64, (Size, LinkPathList)>>
 );
 
 impl<Size> RecordHardLinkStorage<Size> {
@@ -62,7 +59,7 @@ where
             .and_modify(|(recorded, paths)| {
                 let (detected, recorded) = (size, *recorded);
                 if size == recorded {
-                    paths.push(path.to_path_buf());
+                    paths.add(path.to_path_buf());
                 } else {
                     size_assertion = Err(SizeConflictError {
                         ino,
@@ -71,7 +68,7 @@ where
                     });
                 }
             })
-            .or_insert_with(|| (size, vec![path.to_path_buf()]));
+            .or_insert_with(|| (size, path.to_path_buf().pipe(LinkPathList::single)));
         size_assertion.map_err(AddError::SizeConflict)
     }
 }
@@ -80,13 +77,13 @@ where
 #[derive(derive_more::Debug)]
 #[debug(bound())]
 #[debug("Iter(..)")]
-pub struct Iter<'a, Size>(DashIter<'a, u64, (Size, Vec<PathBuf>)>);
+pub struct Iter<'a, Size>(DashIter<'a, u64, (Size, LinkPathList)>);
 
 /// [Item](Iterator::Item) of [`Iter`].
 #[derive(derive_more::Debug)]
 #[debug(bound())]
 #[debug("IterItem(..)")]
-pub struct IterItem<'a, Size>(RefMulti<'a, u64, (Size, Vec<PathBuf>)>);
+pub struct IterItem<'a, Size>(RefMulti<'a, u64, (Size, LinkPathList)>);
 
 impl<'a, Size> Iterator for Iter<'a, Size> {
     type Item = IterItem<'a, Size>;
@@ -107,7 +104,7 @@ impl<'a, Size> IterItem<'a, Size> {
     }
 
     /// Links of the inode.
-    pub fn links(&self) -> &[PathBuf] {
+    pub fn links(&self) -> &LinkPathList {
         &self.0.value().1
     }
 }
