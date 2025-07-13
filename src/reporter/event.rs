@@ -4,6 +4,7 @@ use std::{fs::Metadata, path::Path};
 
 /// Report trigger event.
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum Event<'a, Size: size::Size> {
     ReceiveData(Size),
     EncounterError(ErrorReport<'a>),
