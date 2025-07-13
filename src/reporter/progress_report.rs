@@ -21,17 +21,12 @@ impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
             errors,
         } = report;
         let mut text = String::new();
-        write!(
-            text,
-            "\r(scanned {items}, total {total}",
-            items = items,
-            total = total.into(),
-        )
-        .unwrap();
+        let total: u64 = total.into();
+        write!(text, "\r(scanned {items}, total {total}").unwrap();
         if errors != 0 {
             write!(text, ", erred {errors}").unwrap();
         }
-        write!(text, ")").unwrap();
+        text.push(')');
         GLOBAL_STATUS_BOARD.temporary_message(&text);
     };
 }
