@@ -187,18 +187,16 @@ impl App {
             }
         }
 
-        trait HardlinkDeduplicationSystem<
-            const DEDUPLICATE_HARDLINKS: bool,
-            const REPORT_PROGRESS: bool,
-        >: CreateReporter<REPORT_PROGRESS>
+        trait CreateHardlinksHandler<const DEDUPLICATE_HARDLINKS: bool, const REPORT_PROGRESS: bool>:
+            CreateReporter<REPORT_PROGRESS>
         {
             type HardlinksHandler: hardlink::RecordHardlinks<Self::Size, Self::Reporter>
                 + sub::DeduplicateHardlinkSizes<Self::Size>;
             fn create_hardlinks_handler() -> Self::HardlinksHandler;
         }
 
-        impl<const REPORT_PROGRESS: bool, SizeGetter>
-            HardlinkDeduplicationSystem<false, REPORT_PROGRESS> for SizeGetter
+        impl<const REPORT_PROGRESS: bool, SizeGetter> CreateHardlinksHandler<false, REPORT_PROGRESS>
+            for SizeGetter
         where
             Self: CreateReporter<REPORT_PROGRESS>,
             Self::Size: Send + Sync,
@@ -210,8 +208,8 @@ impl App {
         }
 
         #[cfg(unix)]
-        impl<const REPORT_PROGRESS: bool, SizeGetter>
-            HardlinkDeduplicationSystem<true, REPORT_PROGRESS> for SizeGetter
+        impl<const REPORT_PROGRESS: bool, SizeGetter> CreateHardlinksHandler<true, REPORT_PROGRESS>
+            for SizeGetter
         where
             Self: CreateReporter<REPORT_PROGRESS>,
             Self::Size: Send + Sync + 'static,
@@ -247,7 +245,7 @@ impl App {
                     direction: Direction::from_top_down(top_down),
                     bar_alignment: BarAlignment::from_align_right(align_right),
                     size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
-                    hardlinks_handler: <$size_getter as HardlinkDeduplicationSystem<{ cfg!(unix) && $deduplicate_hardlinks }, $progress>>::create_hardlinks_handler(),
+                    hardlinks_handler: <$size_getter as CreateHardlinksHandler<{ cfg!(unix) && $deduplicate_hardlinks }, $progress>>::create_hardlinks_handler(),
                     reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
                     bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
                     files,
