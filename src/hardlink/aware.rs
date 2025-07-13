@@ -5,28 +5,35 @@ use crate::{
     reporter::{event::HardlinkDetection, Event, Reporter},
     size,
 };
+use derive_more::{AsMut, AsRef, From, Into};
+use pipe_trait::Pipe;
+use smart_default::SmartDefault;
 use std::{fmt::Debug, os::unix::fs::MetadataExt};
 
 /// Be aware of hardlinks. Treat them as links that share space.
 /// Detect files with more than 1 links and record them.
 /// Deduplicate them (remove duplicated size) from total size to
 /// accurately reflect the real size of their containers.
-#[derive(Debug, Clone, Copy)]
-pub struct Aware<'a, Size> {
+#[derive(Debug, SmartDefault, Clone, AsRef, AsMut, From, Into)]
+pub struct Aware<Size> {
     /// Map an inode number to its size and detected paths.
-    record: &'a HardlinkList<Size>,
+    record: HardlinkList<Size>,
 }
 
 pub use Aware as HardlinkAware;
 
-impl<'a, Size> Aware<'a, Size> {
+impl<Size> Aware<Size> {
+    pub fn new() -> Self {
+        HardlinkList::default().pipe(Aware::from)
+    }
+
     /// Create a detector/recorder of hardlinks.
-    pub fn new(record: &'a HardlinkList<Size>) -> Self {
-        Aware { record }
+    pub fn from_record(record: HardlinkList<Size>) -> Self {
+        Aware::from(record)
     }
 }
 
-impl<'a, Size, Report> RecordHardlinks<Size, Report> for Aware<'a, Size>
+impl<Size, Report> RecordHardlinks<Size, Report> for Aware<Size>
 where
     Size: size::Size + Eq + Debug,
     Report: Reporter<Size> + ?Sized,

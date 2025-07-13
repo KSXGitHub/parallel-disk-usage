@@ -20,10 +20,7 @@ use std::{io::stdin, time::Duration};
 use sysinfo::Disks;
 
 #[cfg(unix)]
-use crate::{
-    get_size::{GetBlockCount, GetBlockSize},
-    hardlink::HardlinkList,
-};
+use crate::get_size::{GetBlockCount, GetBlockSize};
 
 /// The main application.
 pub struct App {
@@ -197,11 +194,7 @@ impl App {
         {
             type HardlinksHandler: hardlink::RecordHardlinks<Self::Size, Self::Reporter>
                 + sub::DeduplicateHardlinkSizes<Self::Size>;
-            fn create_hardlinks_handler(
-                record: <Self::HardlinksHandler as sub::DeduplicateHardlinkSizes<Self::Size>>::HardlinkRecord,
-            ) -> Self::HardlinksHandler;
-            fn init_hardlink_record(
-            ) -> <Self::HardlinksHandler as sub::DeduplicateHardlinkSizes<Self::Size>>::HardlinkRecord;
+            fn create_hardlinks_handler() -> Self::HardlinksHandler;
         }
 
         impl<const REPORT_PROGRESS: bool, SizeGetter>
@@ -211,10 +204,9 @@ impl App {
             SizeGetter::Size: Send + Sync,
         {
             type HardlinksHandler = hardlink::HardlinkIgnorant;
-            fn create_hardlinks_handler((): ()) -> Self::HardlinksHandler {
+            fn create_hardlinks_handler() -> Self::HardlinksHandler {
                 hardlink::HardlinkIgnorant
             }
-            fn init_hardlink_record() {}
         }
 
         #[cfg(unix)]
@@ -225,14 +217,9 @@ impl App {
             SizeGetter::Size: Send + Sync + 'static,
             SizeGetter::Reporter: crate::reporter::Reporter<SizeGetter::Size>,
         {
-            type HardlinksHandler = hardlink::HardlinkAware<'static, Self::Size>;
-            fn create_hardlinks_handler(
-                record: &'static HardlinkList<Self::Size>,
-            ) -> Self::HardlinksHandler {
-                hardlink::HardlinkAware::new(record)
-            }
-            fn init_hardlink_record() -> &'static HardlinkList<Self::Size> {
-                HardlinkList::new().pipe(Box::new).pipe(Box::leak)
+            type HardlinksHandler = hardlink::HardlinkAware<Self::Size>;
+            fn create_hardlinks_handler() -> Self::HardlinksHandler {
+                hardlink::HardlinkAware::new()
             }
         }
 
@@ -256,30 +243,21 @@ impl App {
                     min_ratio,
                     no_sort,
                     ..
-                } => {
-                    const DEDUPLICATE_HARDLINKS: bool = cfg!(unix) && $deduplicate_hardlinks;
-                    let hardlink_record = <$size_getter as HardlinkDeduplicationSystem<DEDUPLICATE_HARDLINKS, $progress>>::init_hardlink_record();
-                    let hardlinks_handler = <
-                        $size_getter as HardlinkDeduplicationSystem<DEDUPLICATE_HARDLINKS, $progress>
-                    >::create_hardlinks_handler(hardlink_record);
-
-                    Sub {
-                        direction: Direction::from_top_down(top_down),
-                        bar_alignment: BarAlignment::from_align_right(align_right),
-                        size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
-                        hardlinks_handler,
-                        hardlink_record,
-                        reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
-                        bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
-                        files,
-                        json_output,
-                        column_width_distribution,
-                        max_depth,
-                        min_ratio,
-                        no_sort,
-                    }
-                    .run()
-                },
+                } => Sub {
+                    direction: Direction::from_top_down(top_down),
+                    bar_alignment: BarAlignment::from_align_right(align_right),
+                    size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
+                    hardlinks_handler: <$size_getter as HardlinkDeduplicationSystem<{ cfg!(unix) && $deduplicate_hardlinks }, $progress>>::create_hardlinks_handler(),
+                    reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
+                    bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
+                    files,
+                    json_output,
+                    column_width_distribution,
+                    max_depth,
+                    min_ratio,
+                    no_sort,
+                }
+                .run(),
             )*} };
         }
 

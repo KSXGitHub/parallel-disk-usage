@@ -22,7 +22,7 @@ where
     Report: ParallelReporter<Size> + Sync,
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
-    HardlinksHandler: RecordHardlinks<Size, Report> + DeduplicateHardlinkSizes<Size> + Copy + Sync,
+    HardlinksHandler: RecordHardlinks<Size, Report> + DeduplicateHardlinkSizes<Size> + Sync,
     JsonTree<Size>: Into<JsonDataBody>,
 {
     /// List of files and/or directories.
@@ -43,8 +43,6 @@ where
     pub size_getter: SizeGetter,
     /// Handle to detect, record, and deduplicate hardlinks.
     pub hardlinks_handler: HardlinksHandler,
-    /// Record of detected hardlinks.
-    pub hardlink_record: HardlinksHandler::HardlinkRecord,
     /// Reports measurement progress.
     pub reporter: Report,
     /// Minimal size proportion required to appear.
@@ -58,7 +56,7 @@ where
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     Report: ParallelReporter<Size> + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
-    HardlinksHandler: RecordHardlinks<Size, Report> + DeduplicateHardlinkSizes<Size> + Copy + Sync,
+    HardlinksHandler: RecordHardlinks<Size, Report> + DeduplicateHardlinkSizes<Size> + Sync,
     JsonTree<Size>: Into<JsonDataBody>,
 {
     /// Run the sub program.
@@ -73,7 +71,6 @@ where
             max_depth,
             size_getter,
             hardlinks_handler,
-            hardlink_record,
             reporter,
             min_ratio,
             no_sort,
@@ -88,7 +85,7 @@ where
                     reporter: &reporter,
                     root,
                     size_getter,
-                    hardlinks_recorder: hardlinks_handler,
+                    hardlinks_recorder: &hardlinks_handler,
                     max_depth,
                 }
                 .into()
@@ -100,7 +97,6 @@ where
             return Sub {
                 files: vec![".".into()],
                 hardlinks_handler,
-                hardlink_record,
                 reporter,
                 ..self
             }
@@ -133,8 +129,7 @@ where
             if !no_sort {
                 data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
             }
-            let deduplication_record =
-                HardlinksHandler::deduplicate_hardlink_sizes(&mut data_tree, hardlink_record);
+            let deduplication_record = hardlinks_handler.deduplicate_hardlink_sizes(&mut data_tree);
             (data_tree, deduplication_record)
         };
 
@@ -172,15 +167,13 @@ where
 }
 
 /// Subroutines used by [`Sub`] to deduplicate sizes of detected hardlinks and report about it.
-pub trait DeduplicateHardlinkSizes<Size: size::Size> {
-    /// Record of detected hardlinks.
-    type HardlinkRecord;
+pub trait DeduplicateHardlinkSizes<Size: size::Size>: Sized {
     /// Report created by [`DeduplicateHardlinkSizes::deduplicate_hardlink_sizes`].
     type DeduplicationReport;
     /// Deduplicate the sizes of detected hardlinks and return a report object.
     fn deduplicate_hardlink_sizes(
+        self,
         data_tree: &mut DataTree<OsStringDisplay, Size>,
-        record: Self::HardlinkRecord,
     ) -> Result<Self::DeduplicationReport, RuntimeError>;
     /// Handle the report.
     fn report_deduplication_results(
@@ -194,20 +187,20 @@ pub trait DeduplicateHardlinkSizes<Size: size::Size> {
 }
 
 #[cfg(unix)]
-impl<'a, Size> DeduplicateHardlinkSizes<Size> for crate::hardlink::HardlinkAware<'a, Size>
+impl<Size> DeduplicateHardlinkSizes<Size> for crate::hardlink::HardlinkAware<Size>
 where
     DataTree<OsStringDisplay, Size>: Send,
     Size: size::Size + Sync,
 {
-    type HardlinkRecord = &'a crate::hardlink::HardlinkList<Size>;
-    type DeduplicationReport = &'a crate::hardlink::HardlinkList<Size>;
+    type DeduplicationReport = crate::hardlink::HardlinkList<Size>;
 
     fn deduplicate_hardlink_sizes(
+        self,
         data_tree: &mut DataTree<OsStringDisplay, Size>,
-        record: Self::HardlinkRecord,
     ) -> Result<Self::DeduplicationReport, RuntimeError> {
         use crate::hardlink::LinkPathList;
         use std::path::Path;
+        let record: Self::DeduplicationReport = self.into();
         let hardlink_info: Box<[(Size, LinkPathList)]> = record
             .iter()
             .map(|values| (*values.size(), values.links().clone()))
@@ -248,11 +241,7 @@ where
     fn reflect_deduplication_results(
         report: Self::DeduplicationReport,
     ) -> Result<Option<HardlinkListReflection<Size>>, RuntimeError> {
-        if report.is_empty() {
-            Ok(None)
-        } else {
-            report.clone().into_reflection().pipe(Some).pipe(Ok)
-        }
+        report.into_reflection().pipe(Some).pipe(Ok)
     }
 }
 
@@ -261,12 +250,11 @@ where
     DataTree<OsStringDisplay, Size>: Send,
     Size: size::Size + Sync,
 {
-    type HardlinkRecord = ();
     type DeduplicationReport = ();
 
     fn deduplicate_hardlink_sizes(
+        self,
         _: &mut DataTree<OsStringDisplay, Size>,
-        _: Self::HardlinkRecord,
     ) -> Result<Self::DeduplicationReport, RuntimeError> {
         Ok(())
     }

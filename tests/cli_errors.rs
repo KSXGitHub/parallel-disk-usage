@@ -132,7 +132,7 @@ fn fs_errors() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        hardlinks_recorder: HardlinkIgnorant,
+        hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };

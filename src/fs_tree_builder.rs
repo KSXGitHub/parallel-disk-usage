@@ -29,7 +29,7 @@ use std::{
 /// };
 /// let builder = FsTreeBuilder {
 ///     root: std::env::current_dir().unwrap(),
-///     hardlinks_recorder: HardlinkIgnorant,
+///     hardlinks_recorder: &HardlinkIgnorant,
 ///     size_getter: GetApparentSize,
 ///     reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
 ///     max_depth: 10,
@@ -42,14 +42,14 @@ where
     Report: Reporter<Size> + Sync + ?Sized,
     Size: size::Size + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Sync,
-    HardlinksRecorder: RecordHardlinks<Size, Report> + Sync,
+    HardlinksRecorder: RecordHardlinks<Size, Report> + Sync + ?Sized,
 {
     /// Root of the directory tree.
     pub root: PathBuf,
     /// Returns size of an item.
     pub size_getter: SizeGetter,
     /// Handle to detect and record hardlinks.
-    pub hardlinks_recorder: HardlinksRecorder,
+    pub hardlinks_recorder: &'a HardlinksRecorder,
     /// Reports progress to external system.
     pub reporter: &'a Report,
     /// Deepest level of descendent display in the graph. The sizes beyond the max depth still count toward total.
@@ -63,7 +63,7 @@ where
     Report: Reporter<Size> + Sync + ?Sized,
     Size: size::Size + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Sync,
-    HardlinksRecorder: RecordHardlinks<Size, Report> + Sync,
+    HardlinksRecorder: RecordHardlinks<Size, Report> + Sync + ?Sized,
 {
     /// Create a [`DataTree`] from an [`FsTreeBuilder`].
     fn from(builder: FsTreeBuilder<Size, SizeGetter, HardlinksRecorder, Report>) -> Self {

@@ -34,6 +34,6 @@ pub trait RecordHardlinks<Size, Reporter: ?Sized> {
 }
 
 /// Do detect and record hardlinks.
-pub type Do<'a, Size> = super::HardlinkAware<'a, Size>;
+pub type Do<Size> = super::HardlinkAware<Size>;
 /// Do not detect nor record hardlinks.
 pub type DoNot = super::HardlinkIgnorant;

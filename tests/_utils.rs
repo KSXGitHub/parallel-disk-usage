@@ -172,7 +172,7 @@ where
     let measure = |suffix: &str| {
         FsTreeBuilder {
             size_getter,
-            hardlinks_recorder: HardlinkIgnorant,
+            hardlinks_recorder: &HardlinkIgnorant,
             reporter: &ErrorOnlyReporter::new(|error| {
                 panic!("Unexpected call to report_error: {error:?}")
             }),
