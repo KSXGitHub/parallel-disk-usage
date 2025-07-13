@@ -39,7 +39,7 @@ pub struct SizeConflictError<Size> {
     pub detected: Size,
 }
 
-/// Error type of [`RecordHardLinkStorage::add`].
+/// Error that occurs when it fails to add an item to [`RecordHardLinkStorage`].
 #[derive(Debug, Display, Error)]
 #[display(bound(Size: Debug))]
 #[non_exhaustive]
