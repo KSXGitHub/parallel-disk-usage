@@ -17,16 +17,24 @@ pub struct ProgressReport<Size: size::Size> {
 }
 
 impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
-    /// Print progress to stderr.
-    pub const TEXT: fn(Self) = |report| {
+    /// Maximum extend by which the progress text may extend.
+    ///
+    /// This constant is used as capacity in [`Self::TEXT`] to prevent
+    /// performance penalty from string resizing.
+    ///
+    /// The value of this function is made correct by a unit test.
+    const TEXT_MAX_LEN: usize = 145;
+
+    /// Create a text to be used in [`Self::TEXT`].
+    fn text(self) -> String {
         let ProgressReport {
             items,
             total,
             errors,
             linked,
             shared,
-        } = report;
-        let mut text = String::new();
+        } = self;
+        let mut text = String::with_capacity(Self::TEXT_MAX_LEN);
         let total: u64 = total.into();
         write!(text, "\r(scanned {items}, total {total}").unwrap();
         if linked != 0 {
@@ -40,6 +48,26 @@ impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
             write!(text, ", erred {errors}").unwrap();
         }
         text.push(')');
-        GLOBAL_STATUS_BOARD.temporary_message(&text);
+        text
+    }
+
+    /// Print progress to stderr.
+    pub const TEXT: fn(Self) = |report| {
+        GLOBAL_STATUS_BOARD.temporary_message(&report.text());
     };
+}
+
+#[test]
+fn text_max_len() {
+    use crate::size::Bytes;
+    let correct_value = ProgressReport::<Bytes> {
+        items: u64::MAX,
+        total: u64::MAX.into(),
+        errors: u64::MAX,
+        linked: u64::MAX,
+        shared: u64::MAX.into(),
+    }
+    .text()
+    .len();
+    assert_eq!(ProgressReport::<Bytes>::TEXT_MAX_LEN, correct_value);
 }
