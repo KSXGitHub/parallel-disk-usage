@@ -30,3 +30,8 @@ pub trait RecordHardlinks<Size, Reporter: ?Sized> {
     /// Perform hardlinks detection and recording.
     fn record_hardlinks(&self, argument: RecordHardlinksArgument<Size, Reporter>);
 }
+
+/// Do detect and record hardlinks.
+pub type Do<'a, Size> = super::HardlinkAware<'a, Size>;
+/// Do not detect nor record hardlinks.
+pub type DoNot = super::HardlinkIgnorant;
