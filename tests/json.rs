@@ -25,9 +25,9 @@ use std::{
 };
 
 type SampleName = String;
-type SampleData = Bytes;
-type SampleJsonTree = JsonTree<SampleData>;
-type SampleTree = DataTree<SampleName, SampleData>;
+type SampleSize = Bytes;
+type SampleJsonTree = JsonTree<SampleSize>;
+type SampleTree = DataTree<SampleName, SampleSize>;
 
 fn sample_tree() -> SampleTree {
     let dir = |name: &'static str, children: Vec<SampleTree>| {
