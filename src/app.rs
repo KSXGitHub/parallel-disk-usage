@@ -162,7 +162,7 @@ impl App {
 
         impl<SizeGetter> CreateReporter<false> for SizeGetter
         where
-            SizeGetter: GetSizeUtils,
+            Self: GetSizeUtils,
         {
             type Reporter = ErrorOnlyReporter<fn(ErrorReport)>;
             fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter {
@@ -172,12 +172,12 @@ impl App {
 
         impl<SizeGetter> CreateReporter<true> for SizeGetter
         where
-            SizeGetter: GetSizeUtils,
-            SizeGetter::Size: Into<u64> + Send + Sync,
-            ProgressReport<SizeGetter::Size>: Default + 'static,
-            u64: Into<SizeGetter::Size>,
+            Self: GetSizeUtils,
+            Self::Size: Into<u64> + Send + Sync,
+            ProgressReport<Self::Size>: Default + 'static,
+            u64: Into<Self::Size>,
         {
-            type Reporter = ProgressAndErrorReporter<SizeGetter::Size, fn(ErrorReport)>;
+            type Reporter = ProgressAndErrorReporter<Self::Size, fn(ErrorReport)>;
             fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter {
                 ProgressAndErrorReporter::new(
                     ProgressReport::TEXT,
