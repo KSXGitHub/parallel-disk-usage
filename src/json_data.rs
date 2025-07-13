@@ -14,7 +14,7 @@ use derive_more::{Deref, DerefMut, From, TryInto};
 #[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};
 
-/// The `"tree"` field and the `"shared-inodes"` field of [`JsonData`].
+/// The `"tree"` field and the `"shared"` field of [`JsonData`].
 #[derive(Debug, Clone, Deref, DerefMut)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]
@@ -25,7 +25,7 @@ pub struct JsonTree<Size: size::Size> {
     pub tree: DataTreeReflection<String, Size>,
     /// Optional list of shared inodes, their sizes, and their many links.
     #[cfg_attr(feature = "json", serde(skip_serializing_if = "Option::is_none"))]
-    pub shared_inodes: Option<HardlinkListReflection<Size>>,
+    pub shared: Option<HardlinkListReflection<Size>>,
 }
 
 /// The `"unit"` field, the `"tree"` field, and the `"shared-inodes"` field of [`JsonData`].
@@ -51,7 +51,7 @@ pub struct JsonData {
     /// The `"pdu"` field.
     #[cfg_attr(feature = "json", serde(rename = "pdu"))]
     pub binary_version: Option<BinaryVersion>,
-    /// The `"unit"` field, the `"tree"` field, and the `"shared-inodes"` field.
+    /// The `"unit"` field, the `"tree"` field, and the `"shared"` field.
     #[cfg_attr(feature = "json", serde(flatten))]
     pub body: JsonDataBody,
 }
