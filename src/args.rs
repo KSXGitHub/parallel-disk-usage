@@ -94,8 +94,8 @@ pub struct Args {
     pub bytes_format: BytesFormat,
 
     /// Detect duplicated hardlinks and remove their sizes from total.
-    #[cfg(unix)]
     #[clap(long)]
+    #[cfg_attr(not(unix), clap(hide = true))]
     pub deduplicate_hardlinks: bool,
 
     /// Print the tree top-down instead of bottom-up.

@@ -94,6 +94,13 @@ impl App {
             return Ok(());
         }
 
+        #[cfg(not(unix))]
+        if self.args.deduplicate_hardlinks {
+            return crate::runtime_error::UnsupportedFeature::DeduplicateHardlink
+                .pipe(RuntimeError::UnsupportedFeature)
+                .pipe(Err);
+        }
+
         let threads = match self.args.threads {
             Threads::Auto => {
                 let disks = Disks::new_with_refreshed_list();
@@ -237,6 +244,7 @@ impl App {
                     quantity: <$size_getter as GetSizeUtils>::QUANTITY,
                     progress: $progress,
                     #[cfg(unix)] deduplicate_hardlinks: $deduplicate_hardlinks,
+                    #[cfg(not(unix))] deduplicate_hardlinks: _,
                     files,
                     json_output,
                     bytes_format,
