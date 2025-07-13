@@ -3,6 +3,7 @@ use crate::{
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
+    hardlink::HardlinkListReflection,
     hook,
     json_data::{BinaryVersion, JsonData, JsonTree, SchemaVersion, UnitAndTree},
     os_string_display::OsStringDisplay,
@@ -12,6 +13,7 @@ use crate::{
     status_board::GLOBAL_STATUS_BOARD,
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
+use pipe_trait::Pipe;
 use serde::Serialize;
 use std::{io::stdout, iter::once, num::NonZeroU64, path::PathBuf};
 
@@ -144,9 +146,10 @@ where
                 .into_reflection() // I really want to use std::mem::transmute here but can't.
                 .par_convert_names_to_utf8() // TODO: allow non-UTF8 somehow.
                 .expect("convert all names from raw string to UTF-8");
+            let shared_inodes = deduplication_record?.pipe(Hook::reflect_deduplication_results)?;
             let json_tree = JsonTree {
                 data,
-                shared_inodes: None, // TODO: somehow get data from `deduplication_record` above
+                shared_inodes,
             };
             let json_data = JsonData {
                 schema_version: SchemaVersion,
@@ -187,6 +190,10 @@ pub trait DeduplicateHardlinkSizes<Size: size::Size> {
         report: Self::DeduplicationReport,
         bytes_format: Size::DisplayFormat,
     ) -> Result<(), RuntimeError>;
+    /// Create a JSON serializable object from the report.
+    fn reflect_deduplication_results(
+        report: Self::DeduplicationReport,
+    ) -> Result<Option<HardlinkListReflection<Size>>, RuntimeError>;
 }
 
 #[cfg(unix)]
@@ -240,6 +247,16 @@ where
         }
         Ok(())
     }
+
+    fn reflect_deduplication_results(
+        report: Self::DeduplicationReport,
+    ) -> Result<Option<HardlinkListReflection<Size>>, RuntimeError> {
+        if report.is_empty() {
+            Ok(None)
+        } else {
+            report.clone().into_reflection().pipe(Some).pipe(Ok)
+        }
+    }
 }
 
 impl<Size> DeduplicateHardlinkSizes<Size> for hook::DoNothing
@@ -262,5 +279,11 @@ where
         _: Size::DisplayFormat,
     ) -> Result<(), RuntimeError> {
         Ok(())
+    }
+
+    fn reflect_deduplication_results(
+        (): Self::DeduplicationReport,
+    ) -> Result<Option<HardlinkListReflection<Size>>, RuntimeError> {
+        Ok(None)
     }
 }
