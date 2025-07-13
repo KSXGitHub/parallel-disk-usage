@@ -34,7 +34,6 @@ pub mod data_tree;
 pub mod fs_tree_builder;
 pub mod get_size;
 pub mod hardlink;
-pub mod hook;
 pub mod inode;
 pub mod json_data;
 pub mod os_string_display;

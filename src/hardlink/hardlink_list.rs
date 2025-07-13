@@ -10,7 +10,7 @@ use derive_more::{Display, Error};
 use pipe_trait::Pipe;
 use std::{fmt::Debug, path::Path};
 
-/// Storage to be used by [`crate::hook::RecordHardlink`].
+/// Storage to be used by [`crate::hardlink::RecordHardlinks`].
 ///
 /// **Serialization and deserialization:** _(feature: `json`)_ `HardlinkList` does not implement
 /// `Serialize` and `Deserialize` traits directly, instead, it can be converted into/from a

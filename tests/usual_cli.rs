@@ -9,7 +9,7 @@ use parallel_disk_usage::{
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     get_size::{GetApparentSize, GetBlockCount, GetBlockSize},
-    hook,
+    hardlink::HardlinkIgnorant,
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
@@ -40,7 +40,7 @@ fn total_width() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -79,7 +79,7 @@ fn column_width() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -118,7 +118,7 @@ fn min_ratio_0() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -156,7 +156,7 @@ fn min_ratio() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -195,7 +195,7 @@ fn max_depth_2() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 2,
     };
@@ -234,7 +234,7 @@ fn max_depth_1() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 1,
     };
@@ -272,7 +272,7 @@ fn top_down() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -310,7 +310,7 @@ fn align_right() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -348,7 +348,7 @@ fn quantity_apparent_size() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -387,7 +387,7 @@ fn quantity_block_size() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetBlockSize,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -426,7 +426,7 @@ fn quantity_block_count() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetBlockCount,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -466,7 +466,7 @@ fn bytes_format_plain() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetBlockSize,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -506,7 +506,7 @@ fn bytes_format_metric() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetBlockSize,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -546,7 +546,7 @@ fn bytes_format_binary() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetBlockSize,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -584,7 +584,7 @@ fn path_to_workspace() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
-        hook: hook::DoNothing,
+        hardlinks_recorder: HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -627,7 +627,7 @@ fn multiple_names() {
             let builder = FsTreeBuilder {
                 root: workspace.to_path_buf().join(name),
                 size_getter: GetApparentSize,
-                hook: hook::DoNothing,
+                hardlinks_recorder: HardlinkIgnorant,
                 reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
                 max_depth: 10,
             };
@@ -692,7 +692,7 @@ fn multiple_names_max_depth_2() {
             let builder = FsTreeBuilder {
                 root: workspace.to_path_buf().join(name),
                 size_getter: GetApparentSize,
-                hook: hook::DoNothing,
+                hardlinks_recorder: HardlinkIgnorant,
                 reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
                 max_depth: 1,
             };
@@ -752,7 +752,7 @@ fn multiple_names_max_depth_1() {
             let builder = FsTreeBuilder {
                 root: workspace.to_path_buf().join(name),
                 size_getter: GetApparentSize,
-                hook: hook::DoNothing,
+                hardlinks_recorder: HardlinkIgnorant,
                 reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
                 max_depth: 10,
             };

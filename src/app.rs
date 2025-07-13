@@ -6,7 +6,7 @@ use crate::{
     args::{Args, Quantity, Threads},
     bytes_format::BytesFormat,
     get_size::{GetApparentSize, GetSize},
-    hook,
+    hardlink,
     json_data::{JsonData, JsonDataBody},
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
@@ -195,13 +195,13 @@ impl App {
             const REPORT_PROGRESS: bool,
         >: CreateReporter<REPORT_PROGRESS>
         {
-            type Hook: hook::Hook<Self::Size, Self::Reporter>
+            type HardlinksHandler: hardlink::RecordHardlinks<Self::Size, Self::Reporter>
                 + sub::DeduplicateHardlinkSizes<Self::Size>;
-            fn create_hook(
-                record: <Self::Hook as sub::DeduplicateHardlinkSizes<Self::Size>>::HardlinkRecord,
-            ) -> Self::Hook;
+            fn create_hardlinks_handler(
+                record: <Self::HardlinksHandler as sub::DeduplicateHardlinkSizes<Self::Size>>::HardlinkRecord,
+            ) -> Self::HardlinksHandler;
             fn init_hardlink_record(
-            ) -> <Self::Hook as sub::DeduplicateHardlinkSizes<Self::Size>>::HardlinkRecord;
+            ) -> <Self::HardlinksHandler as sub::DeduplicateHardlinkSizes<Self::Size>>::HardlinkRecord;
         }
 
         impl<const REPORT_PROGRESS: bool, SizeGetter>
@@ -210,9 +210,9 @@ impl App {
             SizeGetter: CreateReporter<REPORT_PROGRESS>,
             SizeGetter::Size: Send + Sync,
         {
-            type Hook = hook::DoNothing;
-            fn create_hook((): ()) -> Self::Hook {
-                hook::DoNothing
+            type HardlinksHandler = hardlink::HardlinkIgnorant;
+            fn create_hardlinks_handler((): ()) -> Self::HardlinksHandler {
+                hardlink::HardlinkIgnorant
             }
             fn init_hardlink_record() {}
         }
@@ -225,9 +225,11 @@ impl App {
             SizeGetter::Size: Send + Sync + 'static,
             SizeGetter::Reporter: crate::reporter::Reporter<SizeGetter::Size>,
         {
-            type Hook = hook::RecordHardlink<'static, Self::Size>;
-            fn create_hook(record: &'static HardlinkList<Self::Size>) -> Self::Hook {
-                hook::RecordHardlink::new(record)
+            type HardlinksHandler = hardlink::HardlinkAware<'static, Self::Size>;
+            fn create_hardlinks_handler(
+                record: &'static HardlinkList<Self::Size>,
+            ) -> Self::HardlinksHandler {
+                hardlink::HardlinkAware::new(record)
             }
             fn init_hardlink_record() -> &'static HardlinkList<Self::Size> {
                 HardlinkList::new().pipe(Box::new).pipe(Box::leak)
@@ -257,13 +259,15 @@ impl App {
                 } => {
                     const DEDUPLICATE_HARDLINKS: bool = cfg!(unix) && $deduplicate_hardlinks;
                     let hardlink_record = <$size_getter as HardlinkDeduplicationSystem<DEDUPLICATE_HARDLINKS, $progress>>::init_hardlink_record();
-                    let hook = <$size_getter as HardlinkDeduplicationSystem<DEDUPLICATE_HARDLINKS, $progress>>::create_hook(hardlink_record);
+                    let hardlinks_handler = <
+                        $size_getter as HardlinkDeduplicationSystem<DEDUPLICATE_HARDLINKS, $progress>
+                    >::create_hardlinks_handler(hardlink_record);
 
                     Sub {
                         direction: Direction::from_top_down(top_down),
                         bar_alignment: BarAlignment::from_align_right(align_right),
                         size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
-                        hook,
+                        hardlinks_handler,
                         hardlink_record,
                         reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
                         bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),

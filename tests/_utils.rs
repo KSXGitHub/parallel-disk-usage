@@ -5,7 +5,7 @@ use parallel_disk_usage::{
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
     get_size::{self, GetSize},
-    hook,
+    hardlink::HardlinkIgnorant,
     os_string_display::OsStringDisplay,
     reporter::ErrorOnlyReporter,
     size,
@@ -172,7 +172,7 @@ where
     let measure = |suffix: &str| {
         FsTreeBuilder {
             size_getter,
-            hook: hook::DoNothing,
+            hardlinks_recorder: HardlinkIgnorant,
             reporter: &ErrorOnlyReporter::new(|error| {
                 panic!("Unexpected call to report_error: {error:?}")
             }),

@@ -3,8 +3,7 @@ use crate::{
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
-    hardlink::HardlinkListReflection,
-    hook,
+    hardlink::{HardlinkIgnorant, HardlinkListReflection, RecordHardlinks},
     json_data::{BinaryVersion, JsonData, JsonDataBody, JsonTree, SchemaVersion},
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
@@ -18,12 +17,12 @@ use serde::Serialize;
 use std::{io::stdout, iter::once, num::NonZeroU64, path::PathBuf};
 
 /// The sub program of the main application.
-pub struct Sub<Size, SizeGetter, Hook, Report>
+pub struct Sub<Size, SizeGetter, HardlinksHandler, Report>
 where
     Report: ParallelReporter<Size> + Sync,
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
-    Hook: hook::Hook<Size, Report> + DeduplicateHardlinkSizes<Size> + Copy + Sync,
+    HardlinksHandler: RecordHardlinks<Size, Report> + DeduplicateHardlinkSizes<Size> + Copy + Sync,
     JsonTree<Size>: Into<JsonDataBody>,
 {
     /// List of files and/or directories.
@@ -42,10 +41,10 @@ where
     pub max_depth: NonZeroU64,
     /// [Get the size](GetSize) of files/directories.
     pub size_getter: SizeGetter,
-    /// Hook to run after [`Self::size_getter`].
-    pub hook: Hook,
+    /// Handle to detect, record, and deduplicate hardlinks.
+    pub hardlinks_handler: HardlinksHandler,
     /// Record of detected hardlinks.
-    pub hardlink_record: Hook::HardlinkRecord,
+    pub hardlink_record: HardlinksHandler::HardlinkRecord,
     /// Reports measurement progress.
     pub reporter: Report,
     /// Minimal size proportion required to appear.
@@ -54,12 +53,12 @@ where
     pub no_sort: bool,
 }
 
-impl<Size, SizeGetter, Hook, Report> Sub<Size, SizeGetter, Hook, Report>
+impl<Size, SizeGetter, HardlinksHandler, Report> Sub<Size, SizeGetter, HardlinksHandler, Report>
 where
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     Report: ParallelReporter<Size> + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
-    Hook: hook::Hook<Size, Report> + DeduplicateHardlinkSizes<Size> + Copy + Sync,
+    HardlinksHandler: RecordHardlinks<Size, Report> + DeduplicateHardlinkSizes<Size> + Copy + Sync,
     JsonTree<Size>: Into<JsonDataBody>,
 {
     /// Run the sub program.
@@ -73,7 +72,7 @@ where
             column_width_distribution,
             max_depth,
             size_getter,
-            hook,
+            hardlinks_handler,
             hardlink_record,
             reporter,
             min_ratio,
@@ -89,7 +88,7 @@ where
                     reporter: &reporter,
                     root,
                     size_getter,
-                    hook,
+                    hardlinks_recorder: hardlinks_handler,
                     max_depth,
                 }
                 .into()
@@ -100,7 +99,7 @@ where
         } else {
             return Sub {
                 files: vec![".".into()],
-                hook,
+                hardlinks_handler,
                 hardlink_record,
                 reporter,
                 ..self
@@ -135,7 +134,7 @@ where
                 data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
             }
             let deduplication_record =
-                Hook::deduplicate_hardlink_sizes(&mut data_tree, hardlink_record);
+                HardlinksHandler::deduplicate_hardlink_sizes(&mut data_tree, hardlink_record);
             (data_tree, deduplication_record)
         };
 
@@ -146,7 +145,8 @@ where
                 .into_reflection() // I really want to use std::mem::transmute here but can't.
                 .par_convert_names_to_utf8() // TODO: allow non-UTF8 somehow.
                 .expect("convert all names from raw string to UTF-8");
-            let shared = deduplication_record?.pipe(Hook::reflect_deduplication_results)?;
+            let shared =
+                deduplication_record?.pipe(HardlinksHandler::reflect_deduplication_results)?;
             let json_tree = JsonTree { tree, shared };
             let json_data = JsonData {
                 schema_version: SchemaVersion,
@@ -166,7 +166,7 @@ where
         };
 
         print!("{visualizer}"); // visualizer already ends with "\n", println! isn't needed here.
-        Hook::report_deduplication_results(deduplication_record?, bytes_format)?;
+        HardlinksHandler::report_deduplication_results(deduplication_record?, bytes_format)?;
         Ok(())
     }
 }
@@ -194,7 +194,7 @@ pub trait DeduplicateHardlinkSizes<Size: size::Size> {
 }
 
 #[cfg(unix)]
-impl<'a, Size> DeduplicateHardlinkSizes<Size> for hook::RecordHardlink<'a, Size>
+impl<'a, Size> DeduplicateHardlinkSizes<Size> for crate::hardlink::HardlinkAware<'a, Size>
 where
     DataTree<OsStringDisplay, Size>: Send,
     Size: size::Size + Sync,
@@ -256,7 +256,7 @@ where
     }
 }
 
-impl<Size> DeduplicateHardlinkSizes<Size> for hook::DoNothing
+impl<Size> DeduplicateHardlinkSizes<Size> for HardlinkIgnorant
 where
     DataTree<OsStringDisplay, Size>: Send,
     Size: size::Size + Sync,
