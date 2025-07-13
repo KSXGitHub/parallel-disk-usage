@@ -4,7 +4,7 @@ use crate::{
     inode::InodeNumber,
 };
 use dashmap::DashMap;
-use derive_more::{Display, Error, From, Into, IntoIterator};
+use derive_more::{Display, Error, Into, IntoIterator};
 use pipe_trait::Pipe;
 
 #[cfg(feature = "json")]
@@ -13,12 +13,15 @@ use serde::{Deserialize, Serialize};
 /// Intermediate format used for construction and inspection of
 /// [`HardlinkList`]'s internal content.
 ///
+/// **Guarantees:**
+/// * The internal list is always sorted by inode numbers.
+///
 /// **Serialization and deserialization:** _(feature: `json`)_ `Reflection` implements
 /// `Serialize` and `Deserialize` traits, this allows functions in `serde_json` to convert
 /// a `Reflection` into/from JSON.
-#[derive(Debug, Clone, PartialEq, Eq, From, Into, IntoIterator)]
+#[derive(Debug, Clone, PartialEq, Eq, Into, IntoIterator)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
-pub struct Reflection<Size>(pub Vec<ReflectionEntry<Size>>);
+pub struct Reflection<Size>(Vec<ReflectionEntry<Size>>);
 
 /// An entry in [`Reflection`].
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -37,12 +40,20 @@ impl<Size> ReflectionEntry<Size> {
     }
 }
 
+impl<Size> From<Vec<ReflectionEntry<Size>>> for Reflection<Size> {
+    /// Sort the list by inode numbers, then create the reflection.
+    fn from(mut list: Vec<ReflectionEntry<Size>>) -> Self {
+        list.sort_by_key(|entry| u64::from(entry.ino));
+        Reflection(list)
+    }
+}
+
 impl<Size> From<HardlinkList<Size>> for Reflection<Size> {
     fn from(HardlinkList(list): HardlinkList<Size>) -> Self {
         list.into_iter()
             .map(|(ino, (size, links))| ReflectionEntry::new(ino, size, links))
             .collect::<Vec<_>>()
-            .pipe(Reflection)
+            .pipe(Reflection::from)
     }
 }
 
