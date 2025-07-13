@@ -5,7 +5,7 @@ use crate::{
     get_size::GetSize,
     hardlink::HardlinkListReflection,
     hook,
-    json_data::{BinaryVersion, JsonData, JsonTree, SchemaVersion, UnitAndTree},
+    json_data::{BinaryVersion, JsonData, JsonDataBody, JsonTree, SchemaVersion},
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
     runtime_error::RuntimeError,
@@ -24,7 +24,7 @@ where
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
     Hook: hook::Hook<Size, Report> + DeduplicateHardlinkSizes<Size> + Copy + Sync,
-    JsonTree<Size>: Into<UnitAndTree>,
+    JsonTree<Size>: Into<JsonDataBody>,
 {
     /// List of files and/or directories.
     pub files: Vec<PathBuf>,
@@ -60,7 +60,7 @@ where
     Report: ParallelReporter<Size> + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
     Hook: hook::Hook<Size, Report> + DeduplicateHardlinkSizes<Size> + Copy + Sync,
-    JsonTree<Size>: Into<UnitAndTree>,
+    JsonTree<Size>: Into<JsonDataBody>,
 {
     /// Run the sub program.
     pub fn run(self) -> Result<(), RuntimeError> {
@@ -154,7 +154,7 @@ where
             let json_data = JsonData {
                 schema_version: SchemaVersion,
                 binary_version: Some(BinaryVersion::current()),
-                unit_and_tree: json_tree.into(),
+                body: json_tree.into(),
             };
             return serde_json::to_writer(stdout(), &json_data)
                 .map_err(RuntimeError::SerializationFailure);

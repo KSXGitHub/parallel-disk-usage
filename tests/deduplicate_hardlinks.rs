@@ -7,7 +7,7 @@ pub use _utils::*;
 use command_extra::CommandExtra;
 use parallel_disk_usage::{
     data_tree::Reflection,
-    json_data::{JsonData, UnitAndTree},
+    json_data::{JsonData, JsonDataBody},
     size::Bytes,
 };
 use pipe_trait::Pipe;
@@ -42,8 +42,8 @@ fn deduplicate_multiple_hardlinks_to_a_single_file() {
         .pipe_as_ref(serde_json::from_str::<JsonData>)
         .expect("parse stdout as JsonData");
 
-    let UnitAndTree::Bytes(tree) = &json.unit_and_tree else {
-        panic!("expecting Bytes but got {:?}", &json.unit_and_tree);
+    let JsonDataBody::Bytes(tree) = &json.body else {
+        panic!("expecting Bytes but got {:?}", &json.body);
     };
 
     let file_size = workspace
@@ -96,9 +96,9 @@ fn do_not_deduplicate_multiple_hardlinks_to_a_single_file() {
         .pipe_as_ref(serde_json::from_str::<JsonData>)
         .expect("parse stdout as JsonData");
 
-    let actual_size = match &json.unit_and_tree {
-        UnitAndTree::Blocks(_) => panic!("expecting Bytes, but got {:?}", &json.unit_and_tree),
-        UnitAndTree::Bytes(tree) => tree.size,
+    let actual_size = match &json.body {
+        JsonDataBody::Blocks(_) => panic!("expecting Bytes, but got {:?}", &json.body),
+        JsonDataBody::Bytes(tree) => tree.size,
     };
 
     let expected_size = workspace

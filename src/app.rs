@@ -7,7 +7,7 @@ use crate::{
     bytes_format::BytesFormat,
     get_size::{GetApparentSize, GetSize},
     hook,
-    json_data::{JsonData, UnitAndTree},
+    json_data::{JsonData, JsonDataBody},
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
     size,
@@ -64,10 +64,10 @@ impl App {
             let direction = Direction::from_top_down(top_down);
             let bar_alignment = BarAlignment::from_align_right(align_right);
 
-            let unit_and_tree = stdin()
+            let body = stdin()
                 .pipe(serde_json::from_reader::<_, JsonData>)
                 .map_err(RuntimeError::DeserializationFailure)?
-                .unit_and_tree;
+                .body;
 
             macro_rules! visualize {
                 ($reflection:expr, $bytes_format: expr) => {{
@@ -85,9 +85,9 @@ impl App {
                 }};
             }
 
-            let visualization = match unit_and_tree {
-                UnitAndTree::Bytes(tree) => visualize!(tree.tree, bytes_format),
-                UnitAndTree::Blocks(tree) => visualize!(tree.tree, ()),
+            let visualization = match body {
+                JsonDataBody::Bytes(tree) => visualize!(tree.tree, bytes_format),
+                JsonDataBody::Blocks(tree) => visualize!(tree.tree, ()),
             };
 
             print!("{visualization}"); // it already ends with "\n", println! isn't needed here.

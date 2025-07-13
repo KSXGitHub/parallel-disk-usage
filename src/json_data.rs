@@ -14,7 +14,7 @@ use derive_more::{Deref, DerefMut, From, TryInto};
 #[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};
 
-/// The `"tree"` field of [`JsonData`].
+/// The `"tree"` field and the `"shared-inodes"` field of [`JsonData`].
 #[derive(Debug, Clone, Deref, DerefMut)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]
@@ -28,12 +28,12 @@ pub struct JsonTree<Size: size::Size> {
     pub shared_inodes: Option<HardlinkListReflection<Size>>,
 }
 
-/// The `"unit"` field and the `"tree"` field of [`JsonData`].
+/// The `"unit"` field, the `"tree"` field, and the `"shared-inodes"` field of [`JsonData`].
 #[derive(Debug, Clone, From, TryInto)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "json", serde(tag = "unit"))]
 #[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]
-pub enum UnitAndTree {
+pub enum JsonDataBody {
     /// Tree where size is [bytes](Bytes).
     Bytes(JsonTree<Bytes>),
     /// Tree where size is [blocks](Blocks).
@@ -51,7 +51,7 @@ pub struct JsonData {
     /// The `"pdu"` field.
     #[cfg_attr(feature = "json", serde(rename = "pdu"))]
     pub binary_version: Option<BinaryVersion>,
-    /// The `"unit"` field and the `"tree"` field.
+    /// The `"unit"` field, the `"tree"` field, and the `"shared-inodes"` field.
     #[cfg_attr(feature = "json", serde(flatten))]
-    pub unit_and_tree: UnitAndTree,
+    pub body: JsonDataBody,
 }
