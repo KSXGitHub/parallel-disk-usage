@@ -27,24 +27,19 @@ impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
             shared,
         } = report;
         let mut text = String::new();
-        write!(
-            text,
-            "\r(scanned {items}, total {total}",
-            items = items,
-            total = total.into(),
-        )
-        .unwrap();
+        let total: u64 = total.into();
+        write!(text, "\r(scanned {items}, total {total}").unwrap();
         if linked != 0 {
             write!(text, ", linked {linked}").unwrap();
         }
-        let shared = shared.into();
+        let shared: u64 = shared.into();
         if shared != 0 {
             write!(text, ", shared {shared}").unwrap();
         }
         if errors != 0 {
             write!(text, ", erred {errors}").unwrap();
         }
-        write!(text, ")").unwrap();
+        text.push(')');
         GLOBAL_STATUS_BOARD.temporary_message(&text);
     };
 }
