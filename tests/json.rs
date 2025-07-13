@@ -7,11 +7,11 @@ pub use _utils::*;
 use command_extra::CommandExtra;
 use parallel_disk_usage::{
     bytes_format::BytesFormat,
-    data_tree::{DataTree, Reflection},
+    data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetApparentSize,
     hook,
-    json_data::{JsonData, SchemaVersion},
+    json_data::{JsonData, JsonTree, SchemaVersion},
     reporter::{ErrorOnlyReporter, ErrorReport},
     size::Bytes,
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
@@ -26,7 +26,7 @@ use std::{
 
 type SampleName = String;
 type SampleData = Bytes;
-type SampleReflection = Reflection<SampleName, SampleData>;
+type SampleJsonTree = JsonTree<SampleData>;
 type SampleTree = DataTree<SampleName, SampleData>;
 
 fn sample_tree() -> SampleTree {
@@ -75,8 +75,9 @@ fn json_output() {
         .pipe_as_ref(serde_json::from_str::<JsonData>)
         .expect("parse stdout as JsonData")
         .unit_and_tree
-        .pipe(TryInto::<SampleReflection>::try_into)
+        .pipe(TryInto::<SampleJsonTree>::try_into)
         .expect("extract reflection")
+        .data
         .pipe(sanitize_tree_reflection);
     dbg!(&actual);
     let builder = FsTreeBuilder {
@@ -98,10 +99,14 @@ fn json_output() {
 
 #[test]
 fn json_input() {
+    let json_tree = JsonTree {
+        data: sample_tree().into_reflection(),
+        shared_inodes: None,
+    };
     let json_data = JsonData {
         schema_version: SchemaVersion,
         binary_version: None,
-        unit_and_tree: sample_tree().into_reflection().into(),
+        unit_and_tree: json_tree.into(),
     };
     let json = serde_json::to_string_pretty(&json_data).expect("convert sample tree to JSON");
     eprintln!("JSON: {json}\n");
