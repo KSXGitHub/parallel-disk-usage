@@ -224,13 +224,13 @@ impl App {
         macro_rules! run {
             ($(
                 $(#[$variant_attrs:meta])*
-                $size_getter:ident, $progress:literal, $deduplicate_hardlinks:ident;
+                $size_getter:ident, $progress:literal, $hardlinks:ident;
             )*) => { match self.args {$(
                 $(#[$variant_attrs])*
                 Args {
                     quantity: <$size_getter as GetSizeUtils>::QUANTITY,
                     progress: $progress,
-                    #[cfg(unix)] deduplicate_hardlinks: $deduplicate_hardlinks,
+                    #[cfg(unix)] deduplicate_hardlinks: $hardlinks,
                     #[cfg(not(unix))] deduplicate_hardlinks: _,
                     files,
                     json_output,
@@ -245,7 +245,7 @@ impl App {
                     direction: Direction::from_top_down(top_down),
                     bar_alignment: BarAlignment::from_align_right(align_right),
                     size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
-                    hardlinks_handler: <$size_getter as CreateHardlinksHandler<{ cfg!(unix) && $deduplicate_hardlinks }, $progress>>::create_hardlinks_handler(),
+                    hardlinks_handler: <$size_getter as CreateHardlinksHandler<{ cfg!(unix) && $hardlinks }, $progress>>::create_hardlinks_handler(),
                     reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
                     bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
                     files,
