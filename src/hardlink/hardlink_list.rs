@@ -31,6 +31,11 @@ impl<Size> HardlinkList<Size> {
     pub fn iter(&self) -> Iter<Size> {
         self.0.iter().pipe(Iter)
     }
+
+    /// Create reflection.
+    pub fn into_reflection(self) -> Reflection<Size> {
+        self.into()
+    }
 }
 
 impl<Size> Default for HardlinkList<Size> {

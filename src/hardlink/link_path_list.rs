@@ -42,6 +42,11 @@ impl LinkPathList {
     pub fn iter(&self) -> Iter {
         self.0.iter().pipe(Iter)
     }
+
+    /// Create reflection.
+    pub fn into_reflection(self) -> Reflection {
+        self.into()
+    }
 }
 
 /// [Iterator] over the paths inside a [`LinkPathList`].
