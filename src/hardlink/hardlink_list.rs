@@ -27,6 +27,16 @@ impl<Size> HardlinkList<Size> {
         HardlinkList(DashMap::new())
     }
 
+    /// Get the number of entries in the list.
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    /// Check whether the list is empty.
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
     /// Iterate over the recorded entries.
     pub fn iter(&self) -> Iter<Size> {
         self.0.iter().pipe(Iter)
