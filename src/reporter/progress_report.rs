@@ -23,7 +23,7 @@ impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
     /// performance penalty from string resizing.
     ///
     /// The value of this function is made correct by a unit test.
-    const TEXT_MAX_LEN: usize = 145;
+    const TEXT_MAX_LEN: usize = 87;
 
     /// Create a text to be used in [`Self::TEXT`].
     fn text(self) -> String {
