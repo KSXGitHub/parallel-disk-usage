@@ -29,7 +29,7 @@ pub struct JsonTree<Size: size::Size> {
     pub shared_inodes: Option<HardlinkListReflection<Size>>,
 }
 
-/// The `"unit"` field and the `"tree"` field of [`JsonData`].
+/// The `"unit"` field of [`JsonData`] and the root node of the tree.
 #[derive(Debug, Clone, From, TryInto)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "json", serde(tag = "unit", content = "tree"))]
