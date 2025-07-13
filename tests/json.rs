@@ -75,7 +75,11 @@ fn json_output() {
         .pipe_as_ref(serde_json::from_str::<JsonData>)
         .expect("parse stdout as JsonData")
         .body
+<<<<<<< HEAD
         .pipe(TryInto::<SampleJsonTree>::try_into)
+=======
+        .pipe(TryInto::<SampleReflection>::try_into)
+>>>>>>> master
         .expect("extract reflection")
         .tree
         .pipe(sanitize_tree_reflection);
