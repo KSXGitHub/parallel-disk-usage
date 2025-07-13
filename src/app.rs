@@ -20,7 +20,10 @@ use std::{io::stdin, time::Duration};
 use sysinfo::Disks;
 
 #[cfg(unix)]
-use crate::get_size::{GetBlockCount, GetBlockSize};
+use crate::{
+    get_size::{GetBlockCount, GetBlockSize},
+    hardlink::HardlinkList,
+};
 
 /// The main application.
 pub struct App {
@@ -216,11 +219,11 @@ impl App {
             SizeGetter::Reporter: crate::reporter::Reporter<SizeGetter::Size>,
         {
             type Hook = hook::RecordHardlink<'static, Self::Size>;
-            fn create_hook(record: &'static hook::HardlinkList<Self::Size>) -> Self::Hook {
+            fn create_hook(record: &'static HardlinkList<Self::Size>) -> Self::Hook {
                 hook::RecordHardlink::new(record)
             }
-            fn init_hardlink_record() -> &'static hook::HardlinkList<Self::Size> {
-                hook::HardlinkList::new().pipe(Box::new).pipe(Box::leak)
+            fn init_hardlink_record() -> &'static HardlinkList<Self::Size> {
+                HardlinkList::new().pipe(Box::new).pipe(Box::leak)
             }
         }
 

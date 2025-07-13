@@ -192,8 +192,8 @@ where
     DataTree<OsStringDisplay, Size>: Send,
     Size: size::Size + Sync,
 {
-    type HardlinkRecord = &'a hook::HardlinkList<Size>;
-    type DeduplicationReport = &'a hook::HardlinkList<Size>;
+    type HardlinkRecord = &'a crate::hardlink::HardlinkList<Size>;
+    type DeduplicationReport = &'a crate::hardlink::HardlinkList<Size>;
 
     fn deduplicate_hardlink_sizes(
         data_tree: &mut DataTree<OsStringDisplay, Size>,

@@ -1,9 +1,6 @@
-pub mod storage;
-
-pub use storage::HardlinkList;
-
 use super::{Hook, HookArgument};
 use crate::{
+    hardlink::HardlinkList,
     inode::InodeNumber,
     reporter::{event::HardlinkDetection, Event, Reporter},
     size,
