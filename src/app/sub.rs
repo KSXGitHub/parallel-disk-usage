@@ -3,7 +3,7 @@ use crate::{
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
-    hardlink::{HardlinkIgnorant, HardlinkListReflection, RecordHardlinks},
+    hardlink::{DeduplicateSharedSize, HardlinkIgnorant, HardlinkListReflection, RecordHardlinks},
     json_data::{BinaryVersion, JsonData, JsonDataBody, JsonTree, SchemaVersion},
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
@@ -22,7 +22,7 @@ where
     Report: ParallelReporter<Size> + Sync,
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
-    HardlinksHandler: RecordHardlinks<Size, Report> + DeduplicateHardlinkSizes<Size> + Sync,
+    HardlinksHandler: RecordHardlinks<Size, Report> + HardlinkSubroutines<Size> + Sync,
     JsonTree<Size>: Into<JsonDataBody>,
 {
     /// List of files and/or directories.
@@ -56,7 +56,7 @@ where
     Size: size::Size + Into<u64> + Serialize + Send + Sync,
     Report: ParallelReporter<Size> + Sync,
     SizeGetter: GetSize<Size = Size> + Copy + Sync,
-    HardlinksHandler: RecordHardlinks<Size, Report> + DeduplicateHardlinkSizes<Size> + Sync,
+    HardlinksHandler: RecordHardlinks<Size, Report> + HardlinkSubroutines<Size> + Sync,
     JsonTree<Size>: Into<JsonDataBody>,
 {
     /// Run the sub program.
@@ -129,7 +129,7 @@ where
             if !no_sort {
                 data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
             }
-            let deduplication_record = hardlinks_handler.deduplicate_hardlink_sizes(&mut data_tree);
+            let deduplication_record = hardlinks_handler.deduplicate(&mut data_tree);
             (data_tree, deduplication_record)
         };
 
@@ -140,8 +140,9 @@ where
                 .into_reflection() // I really want to use std::mem::transmute here but can't.
                 .par_convert_names_to_utf8() // TODO: allow non-UTF8 somehow.
                 .expect("convert all names from raw string to UTF-8");
-            let shared =
-                deduplication_record?.pipe(HardlinksHandler::reflect_deduplication_results)?;
+            let shared = deduplication_record
+                .map_err(HardlinksHandler::convert_error)?
+                .pipe(HardlinksHandler::serializable_report)?;
             let json_tree = JsonTree { tree, shared };
             let json_data = JsonData {
                 schema_version: SchemaVersion,
@@ -161,60 +162,41 @@ where
         };
 
         print!("{visualizer}"); // visualizer already ends with "\n", println! isn't needed here.
-        HardlinksHandler::report_deduplication_results(deduplication_record?, bytes_format)?;
+
+        let deduplication_record = deduplication_record.map_err(HardlinksHandler::convert_error)?;
+        HardlinksHandler::print_report(deduplication_record, bytes_format)?;
+
         Ok(())
     }
 }
 
 /// Subroutines used by [`Sub`] to deduplicate sizes of detected hardlinks and report about it.
-pub trait DeduplicateHardlinkSizes<Size: size::Size>: Sized {
-    /// Report created by [`DeduplicateHardlinkSizes::deduplicate_hardlink_sizes`].
-    type DeduplicationReport;
-    /// Deduplicate the sizes of detected hardlinks and return a report object.
-    fn deduplicate_hardlink_sizes(
-        self,
-        data_tree: &mut DataTree<OsStringDisplay, Size>,
-    ) -> Result<Self::DeduplicationReport, RuntimeError>;
+pub trait HardlinkSubroutines<Size: size::Size>: DeduplicateSharedSize<Size> {
+    /// Convert the error to runtime error.
+    fn convert_error(error: Self::Error) -> RuntimeError;
     /// Handle the report.
-    fn report_deduplication_results(
-        report: Self::DeduplicationReport,
+    fn print_report(
+        report: Self::Report,
         bytes_format: Size::DisplayFormat,
     ) -> Result<(), RuntimeError>;
     /// Create a JSON serializable object from the report.
-    fn reflect_deduplication_results(
-        report: Self::DeduplicationReport,
+    fn serializable_report(
+        report: Self::Report,
     ) -> Result<Option<HardlinkListReflection<Size>>, RuntimeError>;
 }
 
 #[cfg(unix)]
-impl<Size> DeduplicateHardlinkSizes<Size> for crate::hardlink::HardlinkAware<Size>
+impl<Size> HardlinkSubroutines<Size> for crate::hardlink::HardlinkAware<Size>
 where
     DataTree<OsStringDisplay, Size>: Send,
     Size: size::Size + Sync,
 {
-    type DeduplicationReport = crate::hardlink::HardlinkList<Size>;
-
-    fn deduplicate_hardlink_sizes(
-        self,
-        data_tree: &mut DataTree<OsStringDisplay, Size>,
-    ) -> Result<Self::DeduplicationReport, RuntimeError> {
-        use crate::hardlink::LinkPathList;
-        use std::path::Path;
-        let record: Self::DeduplicationReport = self.into();
-        let hardlink_info: Box<[(Size, LinkPathList)]> = record
-            .iter()
-            .map(|values| (*values.size(), values.links().clone()))
-            .collect();
-        let hardlink_info: Box<[(Size, Vec<&Path>)]> = hardlink_info
-            .iter()
-            .map(|(size, paths)| (*size, paths.iter().map(AsRef::as_ref).collect()))
-            .collect();
-        data_tree.par_deduplicate_hardlinks(&hardlink_info);
-        Ok(record)
+    fn convert_error(error: Self::Error) -> RuntimeError {
+        match error {}
     }
 
-    fn report_deduplication_results(
-        report: Self::DeduplicationReport,
+    fn print_report(
+        report: Self::Report,
         bytes_format: Size::DisplayFormat,
     ) -> Result<(), RuntimeError> {
         let (inodes, links, size): (usize, usize, Size) = report
@@ -238,36 +220,28 @@ where
         Ok(())
     }
 
-    fn reflect_deduplication_results(
-        report: Self::DeduplicationReport,
+    fn serializable_report(
+        report: Self::Report,
     ) -> Result<Option<HardlinkListReflection<Size>>, RuntimeError> {
         report.into_reflection().pipe(Some).pipe(Ok)
     }
 }
 
-impl<Size> DeduplicateHardlinkSizes<Size> for HardlinkIgnorant
+impl<Size> HardlinkSubroutines<Size> for HardlinkIgnorant
 where
     DataTree<OsStringDisplay, Size>: Send,
     Size: size::Size + Sync,
 {
-    type DeduplicationReport = ();
+    fn convert_error(error: Self::Error) -> RuntimeError {
+        match error {}
+    }
 
-    fn deduplicate_hardlink_sizes(
-        self,
-        _: &mut DataTree<OsStringDisplay, Size>,
-    ) -> Result<Self::DeduplicationReport, RuntimeError> {
+    fn print_report((): Self::Report, _: Size::DisplayFormat) -> Result<(), RuntimeError> {
         Ok(())
     }
 
-    fn report_deduplication_results(
-        (): Self::DeduplicationReport,
-        _: Size::DisplayFormat,
-    ) -> Result<(), RuntimeError> {
-        Ok(())
-    }
-
-    fn reflect_deduplication_results(
-        (): Self::DeduplicationReport,
+    fn serializable_report(
+        (): Self::Report,
     ) -> Result<Option<HardlinkListReflection<Size>>, RuntimeError> {
         Ok(None)
     }

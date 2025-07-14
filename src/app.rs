@@ -191,7 +191,7 @@ impl App {
             CreateReporter<REPORT_PROGRESS>
         {
             type HardlinksHandler: hardlink::RecordHardlinks<Self::Size, Self::Reporter>
-                + sub::DeduplicateHardlinkSizes<Self::Size>;
+                + sub::HardlinkSubroutines<Self::Size>;
             fn create_hardlinks_handler() -> Self::HardlinksHandler;
         }
 

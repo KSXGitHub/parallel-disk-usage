@@ -1,14 +1,17 @@
-use super::{RecordHardlinks, RecordHardlinksArgument};
+use super::{
+    DeduplicateSharedSize, HardlinkList, LinkPathList, RecordHardlinks, RecordHardlinksArgument,
+};
 use crate::{
-    hardlink::HardlinkList,
+    data_tree::DataTree,
     inode::InodeNumber,
+    os_string_display::OsStringDisplay,
     reporter::{event::HardlinkDetection, Event, Reporter},
     size,
 };
 use derive_more::{AsMut, AsRef, From, Into};
 use pipe_trait::Pipe;
 use smart_default::SmartDefault;
-use std::{fmt::Debug, os::unix::fs::MetadataExt};
+use std::{convert::Infallible, fmt::Debug, os::unix::fs::MetadataExt, path::Path};
 
 /// Be aware of hardlinks. Treat them as links that share space.
 /// Detect files with more than 1 links and record them.
@@ -65,5 +68,30 @@ where
 
         let ino = InodeNumber::get(stats);
         self.record.add(ino, size, path).unwrap(); // TODO: propagate the error
+    }
+}
+
+impl<Size> DeduplicateSharedSize<Size> for Aware<Size>
+where
+    DataTree<OsStringDisplay, Size>: Send,
+    Size: size::Size + Sync,
+{
+    type Report = HardlinkList<Size>;
+    type Error = Infallible;
+    fn deduplicate(
+        self,
+        data_tree: &mut DataTree<OsStringDisplay, Size>,
+    ) -> Result<Self::Report, Self::Error> {
+        let record: Self::Report = self.into();
+        let hardlink_info: Box<[(Size, LinkPathList)]> = record
+            .iter()
+            .map(|values| (*values.size(), values.links().clone()))
+            .collect();
+        let hardlink_info: Box<[(Size, Vec<&Path>)]> = hardlink_info
+            .iter()
+            .map(|(size, paths)| (*size, paths.iter().map(AsRef::as_ref).collect()))
+            .collect();
+        data_tree.par_deduplicate_hardlinks(&hardlink_info);
+        Ok(record)
     }
 }
