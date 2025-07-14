@@ -12,9 +12,26 @@ use serde::{Deserialize, Serialize};
 /// **Serialization and deserialization:** _(feature: `json`)_ `Reflection` implements
 /// `Serialize` and `Deserialize` traits, this allows functions in `serde_json` to convert
 /// a `Reflection` into/from JSON.
-#[derive(Debug, Clone, PartialEq, Eq, From, Into, IntoIterator)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, From, Into, IntoIterator)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 pub struct Reflection(pub HashSet<PathBuf>);
+
+impl Reflection {
+    /// Create an empty reflection.
+    pub fn new() -> Self {
+        Reflection::default()
+    }
+
+    /// Get the number of paths in the reflection.
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    /// Check whether the reflection has any path.
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
 
 impl From<LinkPathList> for Reflection {
     fn from(value: LinkPathList) -> Self {
