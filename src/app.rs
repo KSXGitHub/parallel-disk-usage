@@ -7,7 +7,7 @@ use crate::{
     bytes_format::BytesFormat,
     get_size::{GetApparentSize, GetSize},
     hardlink,
-    json_data::{JsonData, JsonDataBody},
+    json_data::{JsonData, JsonDataBody, JsonShared, JsonTree},
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
     size,
@@ -66,25 +66,37 @@ impl App {
                 .map_err(RuntimeError::DeserializationFailure)?
                 .body;
 
-            macro_rules! visualize {
-                ($reflection:expr, $bytes_format: expr) => {{
-                    let data_tree = $reflection
+            macro_rules! extract {
+                ($tree:expr, $bytes_format: expr) => {{
+                    let JsonTree { tree, shared } = $tree;
+
+                    let data_tree = tree
                         .par_try_into_tree()
                         .map_err(|error| RuntimeError::InvalidInputReflection(error.to_string()))?;
-                    Visualizer {
+                    let visualizer = Visualizer {
                         data_tree: &data_tree,
                         bytes_format: $bytes_format,
                         column_width_distribution,
                         direction,
                         bar_alignment,
+                    };
+
+                    let JsonShared { details, summary } = shared;
+                    let summary = summary.or_else(|| details.map(|details| details.summarize()));
+
+                    if let Some(summary) = summary {
+                        let summary = summary.display($bytes_format);
+                        // visualizer already ends with "\n"
+                        format!("{visualizer}{summary}\n")
+                    } else {
+                        visualizer.to_string()
                     }
-                    .to_string()
                 }};
             }
 
             let visualization = match body {
-                JsonDataBody::Bytes(tree) => visualize!(tree.tree, bytes_format),
-                JsonDataBody::Blocks(tree) => visualize!(tree.tree, ()),
+                JsonDataBody::Bytes(tree) => extract!(tree, bytes_format),
+                JsonDataBody::Blocks(tree) => extract!(tree, ()),
             };
 
             print!("{visualization}"); // it already ends with "\n", println! isn't needed here.
