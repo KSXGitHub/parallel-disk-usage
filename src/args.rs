@@ -84,7 +84,11 @@ pub struct Args {
     pub files: Vec<PathBuf>,
 
     /// Read JSON data from stdin.
-    #[clap(long, conflicts_with = "quantity")]
+    #[clap(
+        long,
+        conflicts_with = "quantity",
+        conflicts_with = "deduplicate_hardlinks"
+    )]
     pub json_input: bool,
 
     /// Print JSON data instead of an ASCII chart.
