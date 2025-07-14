@@ -23,6 +23,13 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 pub struct Reflection<Size>(Vec<ReflectionEntry<Size>>);
 
+impl<Size> Reflection<Size> {
+    /// Iterate over the entries.
+    pub fn iter(&self) -> impl Iterator<Item = &ReflectionEntry<Size>> + Clone {
+        self.0.iter()
+    }
+}
+
 /// An entry in [`Reflection`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
