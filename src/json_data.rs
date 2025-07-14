@@ -34,6 +34,7 @@ pub struct JsonShared<Size: size::Size> {
     pub summary: Option<SharedLinkSummary<Size>>,
 }
 
+#[cfg(feature = "json")]
 impl<Size: size::Size> JsonShared<Size> {
     /// Decide whether to skip serializing [`JsonShared::details`].
     fn skip_details(details: &Option<HardlinkListReflection<Size>>) -> bool {
