@@ -6,12 +6,15 @@ use clap::ValueEnum;
 #[cfg_attr(feature = "cli", derive(ValueEnum))]
 pub enum Quantity {
     /// Measure apparent sizes.
+    #[cfg_attr(feature = "cli", clap(alias = "len"))]
     ApparentSize,
     /// Measure block sizes (block-count * 512B).
     #[cfg(unix)]
+    #[cfg_attr(feature = "cli", clap(alias = "blksize"))]
     BlockSize,
     /// Count numbers of blocks.
     #[cfg(unix)]
+    #[cfg_attr(feature = "cli", clap(alias = "blocks"))]
     BlockCount,
 }
 

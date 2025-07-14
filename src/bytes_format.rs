@@ -19,7 +19,11 @@ pub enum BytesFormat {
     /// Display the value as-is.
     #[cfg_attr(
         feature = "cli",
-        clap(name = "plain", help = "Display plain number of bytes without units")
+        clap(
+            name = "plain",
+            help = "Display plain number of bytes without units",
+            alias = "1"
+        )
     )]
     PlainNumber,
     /// Display the value with a unit suffix in [metric scale](formatter::METRIC).
@@ -28,6 +32,7 @@ pub enum BytesFormat {
         clap(
             name = "metric",
             help = "Use metric scale, i.e. 1K = 1000B, 1M = 1000K, and so on",
+            alias = "1000"
         )
     )]
     MetricUnits,
@@ -37,6 +42,7 @@ pub enum BytesFormat {
         clap(
             name = "binary",
             help = "Use binary scale, i.e. 1K = 1024B, 1M = 1024K, and so on",
+            alias = "1024"
         )
     )]
     BinaryUnits,
