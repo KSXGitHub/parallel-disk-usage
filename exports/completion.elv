@@ -30,6 +30,8 @@ set edit:completion:arg-completer[pdu] = {|@words|
             cand --json-input 'Read JSON data from stdin'
             cand --json-output 'Print JSON data instead of an ASCII chart'
             cand --deduplicate-hardlinks 'Detect duplicated hardlinks and remove their sizes from total'
+            cand --detect-links 'Detect duplicated hardlinks and remove their sizes from total'
+            cand --dedupe-links 'Detect duplicated hardlinks and remove their sizes from total'
             cand --top-down 'Print the tree top-down instead of bottom-up'
             cand --align-right 'Set the root of the bars to the right'
             cand --no-sort 'Preserve order of entries'

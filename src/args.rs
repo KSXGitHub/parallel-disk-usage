@@ -100,7 +100,7 @@ pub struct Args {
     pub bytes_format: BytesFormat,
 
     /// Detect duplicated hardlinks and remove their sizes from total.
-    #[clap(long, aliases = ["detect-links", "dedupe-links"])]
+    #[clap(long, visible_aliases = ["detect-links", "dedupe-links"])]
     #[cfg_attr(not(unix), clap(hide = true))]
     pub deduplicate_hardlinks: bool,
 
