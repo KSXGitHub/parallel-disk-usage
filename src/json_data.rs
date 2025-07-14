@@ -65,7 +65,10 @@ pub struct JsonTree<Size: size::Size> {
     #[deref_mut]
     pub tree: DataTreeReflection<String, Size>,
     /// Optional list of shared inodes, their sizes, and their many links.
-    #[cfg_attr(feature = "json", serde(skip_serializing_if = "JsonShared::skip"))]
+    #[cfg_attr(
+        feature = "json",
+        serde(default, skip_serializing_if = "JsonShared::skip")
+    )]
     pub shared: JsonShared<Size>,
 }
 
