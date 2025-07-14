@@ -101,7 +101,7 @@ fn json_output() {
 fn json_input() {
     let json_tree = JsonTree {
         tree: sample_tree().into_reflection(),
-        shared: None,
+        shared: Default::default(),
     };
     let json_data = JsonData {
         schema_version: SchemaVersion,
