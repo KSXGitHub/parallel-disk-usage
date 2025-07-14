@@ -11,7 +11,7 @@ pub mod link_path_list;
 pub mod record;
 
 pub use deduplicate::DeduplicateSharedSize;
-pub use hardlink_list::{HardlinkList, HardlinkListReflection};
+pub use hardlink_list::{HardlinkList, HardlinkListReflection, SharedLinkSummary};
 pub use ignorant::HardlinkIgnorant;
 pub use link_path_list::{LinkPathList, LinkPathListReflection};
 pub use record::{RecordHardlinks, RecordHardlinksArgument};

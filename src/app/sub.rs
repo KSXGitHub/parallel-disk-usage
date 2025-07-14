@@ -4,7 +4,7 @@ use crate::{
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
     hardlink::{DeduplicateSharedSize, HardlinkIgnorant, HardlinkListReflection, RecordHardlinks},
-    json_data::{BinaryVersion, JsonData, JsonDataBody, JsonTree, SchemaVersion},
+    json_data::{BinaryVersion, JsonData, JsonDataBody, JsonShared, JsonTree, SchemaVersion},
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
     runtime_error::RuntimeError,
@@ -140,9 +140,13 @@ where
                 .into_reflection() // I really want to use std::mem::transmute here but can't.
                 .par_convert_names_to_utf8() // TODO: allow non-UTF8 somehow.
                 .expect("convert all names from raw string to UTF-8");
-            let shared = deduplication_record
+            let details = deduplication_record
                 .map_err(HardlinksHandler::convert_error)?
                 .pipe(HardlinksHandler::serializable_report)?;
+            let shared = JsonShared {
+                details,
+                summary: None, // TODO
+            };
             let json_tree = JsonTree { tree, shared };
             let json_data = JsonData {
                 schema_version: SchemaVersion,
