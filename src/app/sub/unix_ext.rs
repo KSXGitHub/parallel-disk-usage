@@ -18,23 +18,9 @@ where
         report: Self::Report,
         bytes_format: Size::DisplayFormat,
     ) -> Result<(), RuntimeError> {
-        let (inodes, links, size): (usize, usize, Size) = report
-            .iter()
-            .filter_map(|values| {
-                let size = values.size();
-                let links = values.links().len();
-                (links > 1).then_some(())?;
-                Some((*size, links))
-            })
-            .fold(
-                (0, 0, Size::default()),
-                |(inodes, total_links, total_size), (size, links)| {
-                    (inodes + 1, total_links + links, total_size + size)
-                },
-            );
-        if inodes > 0 {
-            let size = size.display(bytes_format);
-            println!("Detected {links} hardlinks for {inodes} unique files (total: {size})");
+        let summary = report.summarize();
+        if summary.inodes > 0 {
+            println!("{}", summary.display(bytes_format));
         }
         Ok(())
     }

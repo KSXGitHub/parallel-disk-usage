@@ -1,8 +1,11 @@
 pub mod reflection;
+pub mod summary;
 
 pub use reflection::Reflection;
+pub use summary::Summary;
 
 pub use Reflection as HardlinkListReflection;
+pub use Summary as SharedLinkSummary;
 
 use crate::{hardlink::LinkPathList, inode::InodeNumber, size};
 use dashmap::{iter::Iter as DashIter, mapref::multiple::RefMulti, DashMap};
