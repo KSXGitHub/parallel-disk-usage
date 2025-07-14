@@ -86,8 +86,7 @@ pub struct Args {
     /// Read JSON data from stdin.
     #[clap(
         long,
-        conflicts_with = "quantity",
-        conflicts_with = "deduplicate_hardlinks"
+        conflicts_with_all = ["quantity", "deduplicate_hardlinks"]
     )]
     pub json_input: bool,
 
@@ -101,7 +100,7 @@ pub struct Args {
     pub bytes_format: BytesFormat,
 
     /// Detect duplicated hardlinks and remove their sizes from total.
-    #[clap(long, alias = "detect-links", alias = "dedupe-links")]
+    #[clap(long, aliases = ["detect-links", "dedupe-links"])]
     #[cfg_attr(not(unix), clap(hide = true))]
     pub deduplicate_hardlinks: bool,
 
