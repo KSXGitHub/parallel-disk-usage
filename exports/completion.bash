@@ -23,7 +23,7 @@ _pdu() {
 
     case "${cmd}" in
         pdu)
-            opts="-h -V --json-input --json-output --bytes-format --top-down --align-right --quantity --max-depth --total-width --column-width --min-ratio --no-sort --silent-errors --progress --threads --help --version [FILES]..."
+            opts="-h -V --json-input --json-output --bytes-format --top-down --align-right --quantity --depth --max-depth --width --total-width --column-width --min-ratio --no-sort --no-errors --silent-errors --progress --threads --help --version [FILES]..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -41,7 +41,15 @@ _pdu() {
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
+                --depth)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
                 --total-width)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --width)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;

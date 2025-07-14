@@ -110,12 +110,12 @@ pub struct Args {
     pub quantity: Quantity,
 
     /// Maximum depth to display the data (must be greater than 0).
-    #[clap(long, default_value = "10")]
+    #[clap(long, default_value = "10", visible_alias = "depth")]
     #[default(_code = "10.try_into().unwrap()")]
     pub max_depth: NonZeroU64,
 
     /// Width of the visualization.
-    #[clap(long, conflicts_with = "column_width")]
+    #[clap(long, conflicts_with = "column_width", visible_alias = "width")]
     pub total_width: Option<usize>,
 
     /// Maximum widths of the tree column and width of the bar column.
@@ -131,7 +131,7 @@ pub struct Args {
     pub no_sort: bool,
 
     /// Prevent filesystem error messages from appearing in stderr.
-    #[clap(long)]
+    #[clap(long, visible_alias = "no-errors")]
     pub silent_errors: bool,
 
     /// Report progress being made at the expense of performance.
