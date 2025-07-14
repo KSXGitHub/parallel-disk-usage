@@ -36,6 +36,8 @@ Register-ArgumentCompleter -Native -CommandName 'pdu' -ScriptBlock {
             [CompletionResult]::new('--no-sort', '--no-sort', [CompletionResultType]::ParameterName, 'Preserve order of entries')
             [CompletionResult]::new('--silent-errors', '--silent-errors', [CompletionResultType]::ParameterName, 'Prevent filesystem error messages from appearing in stderr')
             [CompletionResult]::new('--progress', '--progress', [CompletionResultType]::ParameterName, 'Report progress being made at the expense of performance')
+            [CompletionResult]::new('--omit-json-shared-details', '--omit-json-shared-details', [CompletionResultType]::ParameterName, 'Do not output `.shared.details` in the JSON output')
+            [CompletionResult]::new('--omit-json-shared-summary', '--omit-json-shared-summary', [CompletionResultType]::ParameterName, 'Do not output `.shared.summary` in the JSON output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             [CompletionResult]::new('-V', '-V ', [CompletionResultType]::ParameterName, 'Print version')

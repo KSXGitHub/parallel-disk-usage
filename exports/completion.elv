@@ -33,6 +33,8 @@ set edit:completion:arg-completer[pdu] = {|@words|
             cand --no-sort 'Preserve order of entries'
             cand --silent-errors 'Prevent filesystem error messages from appearing in stderr'
             cand --progress 'Report progress being made at the expense of performance'
+            cand --omit-json-shared-details 'Do not output `.shared.details` in the JSON output'
+            cand --omit-json-shared-summary 'Do not output `.shared.summary` in the JSON output'
             cand -h 'Print help (see more with ''--help'')'
             cand --help 'Print help (see more with ''--help'')'
             cand -V 'Print version'

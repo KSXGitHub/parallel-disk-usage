@@ -26,7 +26,7 @@ block-count\:"Count numbers of blocks"))' \
 '*--column-width=[Maximum widths of the tree column and width of the bar column]:TREE_WIDTH:_default:TREE_WIDTH:_default' \
 '--min-ratio=[Minimal size proportion required to appear]:MIN_RATIO:_default' \
 '--threads=[Set the maximum number of threads to spawn. Could be either "auto", "max", or a number]:THREADS:_default' \
-'(--quantity)--json-input[Read JSON data from stdin]' \
+'(--quantity --deduplicate-hardlinks)--json-input[Read JSON data from stdin]' \
 '--json-output[Print JSON data instead of an ASCII chart]' \
 '--deduplicate-hardlinks[Detect duplicated hardlinks and remove their sizes from total]' \
 '--top-down[Print the tree top-down instead of bottom-up]' \
@@ -34,6 +34,8 @@ block-count\:"Count numbers of blocks"))' \
 '--no-sort[Preserve order of entries]' \
 '--silent-errors[Prevent filesystem error messages from appearing in stderr]' \
 '--progress[Report progress being made at the expense of performance]' \
+'--omit-json-shared-details[Do not output \`.shared.details\` in the JSON output]' \
+'--omit-json-shared-summary[Do not output \`.shared.summary\` in the JSON output]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '-V[Print version]' \
