@@ -24,6 +24,16 @@ use serde::{Deserialize, Serialize};
 pub struct Reflection<Size>(Vec<ReflectionEntry<Size>>);
 
 impl<Size> Reflection<Size> {
+    /// Get the number of entries inside the reflection.
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    /// Check whether the reflection has any entry.
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
     /// Iterate over the entries.
     pub fn iter(&self) -> impl Iterator<Item = &ReflectionEntry<Size>> + Clone {
         self.0.iter()
