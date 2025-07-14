@@ -8,6 +8,7 @@ use crate::{hardlink::LinkPathList, inode::InodeNumber, size};
 use dashmap::{iter::Iter as DashIter, mapref::multiple::RefMulti, DashMap};
 use derive_more::{Display, Error};
 use pipe_trait::Pipe;
+use smart_default::SmartDefault;
 use std::{fmt::Debug, path::Path};
 
 /// Storage to be used by [`crate::hardlink::RecordHardlinks`].
@@ -15,7 +16,7 @@ use std::{fmt::Debug, path::Path};
 /// **Serialization and deserialization:** _(feature: `json`)_ `HardlinkList` does not implement
 /// `Serialize` and `Deserialize` traits directly, instead, it can be converted into/from a
 /// [`Reflection`] which implements these traits.
-#[derive(Debug, Clone)]
+#[derive(Debug, SmartDefault, Clone)]
 pub struct HardlinkList<Size>(
     /// Map an inode number to its size and detected paths.
     DashMap<InodeNumber, (Size, LinkPathList)>, // TODO: benchmark against Mutex<HashMap<InodeNumber, (Size, LinkPathList)>>
@@ -24,7 +25,7 @@ pub struct HardlinkList<Size>(
 impl<Size> HardlinkList<Size> {
     /// Create a new record.
     pub fn new() -> Self {
-        HardlinkList(DashMap::new())
+        HardlinkList::default()
     }
 
     /// Get the number of entries in the list.
@@ -45,12 +46,6 @@ impl<Size> HardlinkList<Size> {
     /// Create reflection.
     pub fn into_reflection(self) -> Reflection<Size> {
         self.into()
-    }
-}
-
-impl<Size> Default for HardlinkList<Size> {
-    fn default() -> Self {
-        HardlinkList::new()
     }
 }
 
