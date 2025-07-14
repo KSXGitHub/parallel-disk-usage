@@ -1,6 +1,6 @@
 use super::HardlinkSubroutines;
 use crate::{
-    data_tree::DataTree, hardlink::HardlinkListReflection, os_string_display::OsStringDisplay,
+    data_tree::DataTree, json_data::JsonShared, os_string_display::OsStringDisplay,
     runtime_error::RuntimeError, size,
 };
 use pipe_trait::Pipe;
@@ -25,9 +25,9 @@ where
         Ok(())
     }
 
-    fn serializable_report(
-        report: Self::Report,
-    ) -> Result<Option<HardlinkListReflection<Size>>, RuntimeError> {
-        report.into_reflection().pipe(Some).pipe(Ok)
+    fn serializable_report(report: Self::Report) -> Result<Option<JsonShared<Size>>, RuntimeError> {
+        let summary = report.summarize().pipe(Some);
+        let details = report.into_reflection().pipe(Some);
+        Ok(Some(JsonShared { details, summary }))
     }
 }
