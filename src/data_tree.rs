@@ -34,5 +34,4 @@ mod retain;
 mod sort;
 
 #[cfg(unix)] // for now, it is only available on unix
-#[cfg(feature = "cli")] // this module export a single function that is only used by cli modules
 mod hardlink;
