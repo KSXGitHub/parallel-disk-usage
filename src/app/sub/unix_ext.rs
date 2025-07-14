@@ -25,7 +25,7 @@ where
         Ok(())
     }
 
-    fn serializable_report(report: Self::Report) -> Result<Option<JsonShared<Size>>, RuntimeError> {
+    fn json_report(report: Self::Report) -> Result<Option<JsonShared<Size>>, RuntimeError> {
         let summary = report.summarize().pipe(Some);
         let details = report.into_reflection().pipe(Some);
         Ok(Some(JsonShared { details, summary }))

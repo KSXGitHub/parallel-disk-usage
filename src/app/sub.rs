@@ -142,7 +142,7 @@ where
                 .expect("convert all names from raw string to UTF-8");
             let shared = deduplication_record
                 .map_err(HardlinksHandler::convert_error)?
-                .pipe(HardlinksHandler::serializable_report)?
+                .pipe(HardlinksHandler::json_report)?
                 .unwrap_or_default();
             let json_tree = JsonTree { tree, shared };
             let json_data = JsonData {
@@ -181,7 +181,7 @@ pub trait HardlinkSubroutines<Size: size::Size>: DeduplicateSharedSize<Size> {
         bytes_format: Size::DisplayFormat,
     ) -> Result<(), RuntimeError>;
     /// Create a JSON serializable object from the report.
-    fn serializable_report(report: Self::Report) -> Result<Option<JsonShared<Size>>, RuntimeError>;
+    fn json_report(report: Self::Report) -> Result<Option<JsonShared<Size>>, RuntimeError>;
 }
 
 impl<Size> HardlinkSubroutines<Size> for HardlinkIgnorant
@@ -197,7 +197,7 @@ where
         Ok(())
     }
 
-    fn serializable_report((): Self::Report) -> Result<Option<JsonShared<Size>>, RuntimeError> {
+    fn json_report((): Self::Report) -> Result<Option<JsonShared<Size>>, RuntimeError> {
         Ok(None)
     }
 }
