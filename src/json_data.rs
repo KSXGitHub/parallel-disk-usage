@@ -10,12 +10,13 @@ use crate::{
     size::{self, Blocks, Bytes},
 };
 use derive_more::{Deref, DerefMut, From, TryInto};
+use smart_default::SmartDefault;
 
 #[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};
 
 /// The `"shared"` field of [`JsonData`].
-#[derive(Debug, Clone)]
+#[derive(Debug, SmartDefault, Clone)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]
 pub struct JsonShared<Size: size::Size> {
