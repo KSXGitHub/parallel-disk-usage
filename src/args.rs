@@ -146,6 +146,14 @@ pub struct Args {
     /// Set the maximum number of threads to spawn. Could be either "auto", "max", or a number.
     #[clap(long, default_value_t = Threads::Auto)]
     pub threads: Threads,
+
+    /// Do not output `.shared.details` in the JSON output.
+    #[clap(long, requires = "json_output", requires = "deduplicate_hardlinks")]
+    pub omit_json_shared_details: bool,
+
+    /// Do not output `.shared.summary` in the JSON output.
+    #[clap(long, requires = "json_output", requires = "deduplicate_hardlinks")]
+    pub omit_json_shared_summary: bool,
 }
 
 impl Args {

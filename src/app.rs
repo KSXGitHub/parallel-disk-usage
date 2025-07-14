@@ -252,6 +252,8 @@ impl App {
                     max_depth,
                     min_ratio,
                     no_sort,
+                    omit_json_shared_details,
+                    omit_json_shared_summary,
                     ..
                 } => Sub {
                     direction: Direction::from_top_down(top_down),
@@ -266,6 +268,8 @@ impl App {
                     max_depth,
                     min_ratio,
                     no_sort,
+                    omit_json_shared_details,
+                    omit_json_shared_summary,
                 }
                 .run(),
             )*} };

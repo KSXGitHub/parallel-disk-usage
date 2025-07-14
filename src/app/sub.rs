@@ -49,6 +49,10 @@ where
     pub min_ratio: Fraction,
     /// Preserve order of entries.
     pub no_sort: bool,
+    /// Do not output `.shared.details` in the JSON output.
+    pub omit_json_shared_details: bool,
+    /// Do not output `.shared.summary` in the JSON output.
+    pub omit_json_shared_summary: bool,
 }
 
 impl<Size, SizeGetter, HardlinksHandler, Report> Sub<Size, SizeGetter, HardlinksHandler, Report>
@@ -74,6 +78,8 @@ where
             reporter,
             min_ratio,
             no_sort,
+            omit_json_shared_details,
+            omit_json_shared_summary,
         } = self;
 
         let max_depth = max_depth.get();
@@ -140,10 +146,21 @@ where
                 .into_reflection() // I really want to use std::mem::transmute here but can't.
                 .par_convert_names_to_utf8() // TODO: allow non-UTF8 somehow.
                 .expect("convert all names from raw string to UTF-8");
-            let shared = deduplication_record
-                .map_err(HardlinksHandler::convert_error)?
-                .pipe(HardlinksHandler::json_report)?
-                .unwrap_or_default();
+            let shared = if omit_json_shared_details && omit_json_shared_summary {
+                JsonShared::default()
+            } else {
+                let mut shared = deduplication_record
+                    .map_err(HardlinksHandler::convert_error)?
+                    .pipe(HardlinksHandler::json_report)?
+                    .unwrap_or_default();
+                if omit_json_shared_details {
+                    shared.details = None;
+                }
+                if omit_json_shared_summary {
+                    shared.summary = None;
+                }
+                shared
+            };
             let json_tree = JsonTree { tree, shared };
             let json_data = JsonData {
                 schema_version: SchemaVersion,
