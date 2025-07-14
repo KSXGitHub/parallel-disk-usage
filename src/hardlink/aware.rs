@@ -23,6 +23,7 @@ pub struct Aware<Size> {
 pub use Aware as HardlinkAware;
 
 impl<Size> Aware<Size> {
+    /// Create new hardlinks handler.
     pub fn new() -> Self {
         HardlinkList::default().pipe(Aware::from)
     }
