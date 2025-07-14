@@ -8,12 +8,13 @@ pub use threads::Threads;
 
 use crate::{bytes_format::BytesFormat, visualizer::ColumnWidthDistribution};
 use clap::{ColorChoice, Parser};
+use smart_default::SmartDefault;
 use std::{num::NonZeroU64, path::PathBuf};
 use terminal_size::{terminal_size, Width};
 use text_block_macros::text_block;
 
 /// The CLI arguments.
-#[derive(Debug, Clone, Parser)]
+#[derive(Debug, SmartDefault, Clone, Parser)]
 #[clap(
     name = "pdu",
 
@@ -77,6 +78,7 @@ use text_block_macros::text_block;
 
     color = ColorChoice::Never,
 )]
+#[non_exhaustive]
 pub struct Args {
     /// List of files and/or directories.
     pub files: Vec<PathBuf>,
@@ -91,6 +93,7 @@ pub struct Args {
 
     /// How to display the numbers of bytes.
     #[clap(long, value_enum, default_value_t = BytesFormat::MetricUnits)]
+    #[default(BytesFormat::MetricUnits)]
     pub bytes_format: BytesFormat,
 
     /// Detect duplicated hardlinks and remove their sizes from total.
@@ -108,10 +111,12 @@ pub struct Args {
 
     /// Aspect of the files/directories to be measured.
     #[clap(long, value_enum, default_value_t = Quantity::DEFAULT)]
+    #[default(Quantity::DEFAULT)]
     pub quantity: Quantity,
 
     /// Maximum depth to display the data (must be greater than 0).
     #[clap(long, default_value = "10")]
+    #[default(_code = "10.try_into().unwrap()")]
     pub max_depth: NonZeroU64,
 
     /// Width of the visualization.
