@@ -28,7 +28,7 @@ where
     /// List of files and/or directories.
     pub files: Vec<PathBuf>,
     /// Print JSON data instead of an ASCII chart.
-    pub json_output: bool,
+    pub json_output: Option<JsonOutputParam>,
     /// Format to be used to [`display`](size::Size::display) the sizes returned by [`size_getter`](Self::size_getter).
     pub bytes_format: Size::DisplayFormat,
     /// The direction of the visualization.
@@ -49,10 +49,6 @@ where
     pub min_ratio: Fraction,
     /// Preserve order of entries.
     pub no_sort: bool,
-    /// Do not output `.shared.details` in the JSON output.
-    pub omit_json_shared_details: bool,
-    /// Do not output `.shared.summary` in the JSON output.
-    pub omit_json_shared_summary: bool,
 }
 
 impl<Size, SizeGetter, HardlinksHandler, Report> Sub<Size, SizeGetter, HardlinksHandler, Report>
@@ -78,8 +74,6 @@ where
             reporter,
             min_ratio,
             no_sort,
-            omit_json_shared_details,
-            omit_json_shared_summary,
         } = self;
 
         let max_depth = max_depth.get();
@@ -141,22 +135,26 @@ where
 
         GLOBAL_STATUS_BOARD.clear_line(0);
 
-        if json_output {
+        if let Some(json_output) = json_output {
+            let JsonOutputParam {
+                shared_details,
+                shared_summary,
+            } = json_output;
             let tree = data_tree
                 .into_reflection() // I really want to use std::mem::transmute here but can't.
                 .par_convert_names_to_utf8() // TODO: allow non-UTF8 somehow.
                 .expect("convert all names from raw string to UTF-8");
-            let shared = if omit_json_shared_details && omit_json_shared_summary {
+            let shared = if !shared_details && !shared_summary {
                 JsonShared::default()
             } else {
                 let mut shared = deduplication_record
                     .map_err(HardlinksHandler::convert_error)?
                     .pipe(HardlinksHandler::json_report)?
                     .unwrap_or_default();
-                if omit_json_shared_details {
+                if !shared_details {
                     shared.details = None;
                 }
-                if omit_json_shared_summary {
+                if !shared_summary {
                     shared.summary = None;
                 }
                 shared
@@ -185,6 +183,30 @@ where
         HardlinksHandler::print_report(deduplication_record, bytes_format)?;
 
         Ok(())
+    }
+}
+
+/// Value to pass to [`Sub::json_output`] to decide how much details should be
+/// put in the output JSON object.
+#[derive(Debug, Clone, Copy)]
+pub struct JsonOutputParam {
+    /// Whether to include `.shared.details` in the JSON output.
+    pub shared_details: bool,
+    /// Whether to include `.shared.summary` in the JSON output.
+    pub shared_summary: bool,
+}
+
+impl JsonOutputParam {
+    /// Infer from the CLI flags.
+    pub(super) fn from_cli_flags(
+        output_json: bool,
+        omit_shared_details: bool,
+        omit_shared_summary: bool,
+    ) -> Option<Self> {
+        output_json.then_some(JsonOutputParam {
+            shared_details: !omit_shared_details,
+            shared_summary: !omit_shared_summary,
+        })
     }
 }
 

@@ -17,6 +17,7 @@ use clap::Parser;
 use hdd::any_path_is_in_hdd;
 use pipe_trait::Pipe;
 use std::{io::stdin, time::Duration};
+use sub::JsonOutputParam;
 use sysinfo::Disks;
 
 #[cfg(unix)]
@@ -263,13 +264,11 @@ impl App {
                     reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
                     bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
                     files,
-                    json_output,
+                    json_output: JsonOutputParam::from_cli_flags(json_output, omit_json_shared_details, omit_json_shared_summary),
                     column_width_distribution,
                     max_depth,
                     min_ratio,
                     no_sort,
-                    omit_json_shared_details,
-                    omit_json_shared_summary,
                 }
                 .run(),
             )*} };
