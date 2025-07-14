@@ -1,6 +1,8 @@
+pub mod iter;
 pub mod reflection;
 pub mod summary;
 
+pub use iter::Iter;
 pub use reflection::Reflection;
 pub use summary::Summary;
 
@@ -8,7 +10,7 @@ pub use Reflection as HardlinkListReflection;
 pub use Summary as SharedLinkSummary;
 
 use crate::{hardlink::LinkPathList, inode::InodeNumber, size};
-use dashmap::{iter::Iter as DashIter, mapref::multiple::RefMulti, DashMap};
+use dashmap::DashMap;
 use derive_more::{Display, Error};
 use pipe_trait::Pipe;
 use smart_default::SmartDefault;
@@ -39,11 +41,6 @@ impl<Size> HardlinkList<Size> {
     /// Check whether the list is empty.
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
-    }
-
-    /// Iterate over the recorded entries.
-    pub fn iter(&self) -> Iter<Size> {
-        self.0.iter().pipe(Iter)
     }
 
     /// Create reflection.
@@ -98,41 +95,5 @@ where
             })
             .or_insert_with(|| (size, path.to_path_buf().pipe(LinkPathList::single)));
         size_assertion.map_err(AddError::SizeConflict)
-    }
-}
-
-/// Iterator over entries in [`HardlinkList`].
-#[derive(derive_more::Debug)]
-#[debug(bound())]
-#[debug("Iter(..)")]
-pub struct Iter<'a, Size>(DashIter<'a, InodeNumber, (Size, LinkPathList)>);
-
-/// [Item](Iterator::Item) of [`Iter`].
-#[derive(derive_more::Debug)]
-#[debug(bound())]
-#[debug("IterItem(..)")]
-pub struct IterItem<'a, Size>(RefMulti<'a, InodeNumber, (Size, LinkPathList)>);
-
-impl<'a, Size> Iterator for Iter<'a, Size> {
-    type Item = IterItem<'a, Size>;
-    fn next(&mut self) -> Option<Self::Item> {
-        self.0.next().map(IterItem)
-    }
-}
-
-impl<'a, Size> IterItem<'a, Size> {
-    /// Number of the inode.
-    pub fn ino(&self) -> InodeNumber {
-        *self.0.key()
-    }
-
-    /// Size of the inode.
-    pub fn size(&self) -> &Size {
-        &self.0.value().0
-    }
-
-    /// Links of the inode.
-    pub fn links(&self) -> &LinkPathList {
-        &self.0.value().1
     }
 }

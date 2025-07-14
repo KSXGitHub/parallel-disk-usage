@@ -1,4 +1,4 @@
-use super::{reflection::ReflectionEntry, HardlinkList, IterItem, Reflection};
+use super::{iter::Item as IterItem, reflection::ReflectionEntry, HardlinkList, Reflection};
 use crate::size;
 use derive_more::{Add, AddAssign, Sum};
 use std::fmt::{self, Display};
