@@ -1,4 +1,4 @@
-use super::{DeduplicateSharedSize, RecordHardlinks, RecordHardlinksArgument};
+use super::{deduplicate, DeduplicateSharedSize, RecordHardlinks, RecordHardlinksArgument};
 use crate::{data_tree::DataTree, os_string_display::OsStringDisplay, size};
 use std::convert::Infallible;
 
@@ -37,8 +37,8 @@ where
     /// Do nothing.
     fn deduplicate(
         self,
-        _: &mut DataTree<OsStringDisplay, Size>,
-    ) -> Result<Self::Report, Self::Error> {
-        Ok(())
+        data_tree: DataTree<OsStringDisplay, Size>,
+    ) -> deduplicate::Result<Size, Self::Report, Self::Error> {
+        Ok((data_tree, ()))
     }
 }
