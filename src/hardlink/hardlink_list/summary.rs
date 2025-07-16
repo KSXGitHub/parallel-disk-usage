@@ -20,7 +20,7 @@ pub struct Summary<Size> {
     /// Number of [shared inodes](Self::inodes) that don't have links outside the measured tree.
     ///
     /// This number is expected to be less than or equal to [`Self::inodes`].
-    pub owned_inodes: usize,
+    pub exclusive_inodes: usize,
 
     /// Totality of the numbers of links of all [shared inodes](Self::inodes).
     pub all_links: u64,
@@ -33,7 +33,7 @@ pub struct Summary<Size> {
     /// Total number of links of [shared inodes](Self::inodes) that don't have links outside the measured tree.
     ///
     /// This number is expected to be less than or equal to [`Self::all_links`].
-    pub owned_links: usize,
+    pub exclusive_links: usize,
 
     /// Totality of the sizes of all [shared inodes](Self::inodes).
     pub shared_size: Size,
@@ -41,7 +41,7 @@ pub struct Summary<Size> {
     /// Totality of the sizes of all [shared inodes](Self::inodes) that don't have links outside the measured tree.
     ///
     /// This number is expected to be less than or equal to [`Self::all_links`].
-    pub owned_shared_size: Size,
+    pub exclusive_shared_size: Size,
 }
 
 /// Ability to summarize into a [`Summary`].
@@ -82,9 +82,9 @@ where
             match links.cmp(&(paths as u64)) {
                 Ordering::Greater => {}
                 Ordering::Equal => {
-                    summary.owned_inodes += 1;
-                    summary.owned_links += paths; // `links` and `paths` are both fine, but `paths` doesn't require type cast
-                    summary.owned_shared_size += size;
+                    summary.exclusive_inodes += 1;
+                    summary.exclusive_links += paths; // `links` and `paths` are both fine, but `paths` doesn't require type cast
+                    summary.exclusive_shared_size += size;
                 }
                 Ordering::Less => {
                     panic!("Impossible! Total of nlink ({links}) is less than detected paths ({paths}). Something must have gone wrong!");
@@ -135,16 +135,16 @@ impl<Size: size::Size> Display for SummaryDisplay<'_, Size> {
         let SummaryDisplay { format, summary } = self;
         let Summary {
             inodes,
-            owned_inodes,
+            exclusive_inodes,
             all_links,
             detected_links,
-            owned_links,
+            exclusive_links,
             shared_size,
-            owned_shared_size,
+            exclusive_shared_size,
         } = summary;
 
         let shared_size = shared_size.display(*format);
-        let owned_shared_size = owned_shared_size.display(*format);
+        let exclusive_shared_size = exclusive_shared_size.display(*format);
 
         macro_rules! ln {
             ($($args:tt)*) => {
@@ -153,21 +153,21 @@ impl<Size: size::Size> Display for SummaryDisplay<'_, Size> {
         }
 
         write!(f, "Hardlinks detected! ")?;
-        if owned_inodes == inodes {
+        if exclusive_inodes == inodes {
             ln!("No files have links outside this tree")?;
             ln!("* Number of shared inodes: {inodes}")?;
             ln!("* Total number of links: {all_links}")?;
             ln!("* Total shared size: {shared_size}")?;
-        } else if owned_inodes == &0 {
+        } else if exclusive_inodes == &0 {
             ln!("All hardlinks within this tree have links without")?;
             ln!("* Number of shared inodes: {inodes}")?;
             ln!("* Total number of links: {all_links} total, {detected_links} detected")?;
             ln!("* Total shared size: {shared_size}")?;
         } else {
             ln!("Some files have links outside this tree")?;
-            ln!("* Number of shared inodes: {inodes} total, {owned_inodes} exclusive")?;
-            ln!("* Total number of links: {all_links} total, {detected_links} detected, {owned_links} exclusive")?;
-            ln!("* Total shared size: {shared_size} total, {owned_shared_size} exclusive")?;
+            ln!("* Number of shared inodes: {inodes} total, {exclusive_inodes} exclusive")?;
+            ln!("* Total number of links: {all_links} total, {detected_links} detected, {exclusive_links} exclusive")?;
+            ln!("* Total shared size: {shared_size} total, {exclusive_shared_size} exclusive")?;
         }
 
         Ok(())
