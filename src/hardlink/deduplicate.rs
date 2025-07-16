@@ -1,11 +1,9 @@
 use crate::{data_tree::DataTree, os_string_display::OsStringDisplay, size};
 
 // TODO:
-// Consider changing `deduplicate` into taking owned `DataTree` and returning `Result<(DataTree, Self::Report), Self::Error>`.
-
-// TODO:
-// Consider changing `deduplicate` into one that transforms `HardlinkDuplicated<DataTree>` into `DataTree`.
-// `HardlinkDuplicated` (name is non-final) cannot be constructed manually and is the only type accepted by `deduplicate`.
+// Problem: It is possible for the users to call deduplicate twice on 1 data tree, which is unsound.
+// Potential solution #1: Consider adding the data tree to the deduplication record as hidden field until it is processed.
+// Potential solution #2: Perhaps the deduplication should be done in FsTreeBuilder itself.
 
 /// Ability to correct the sizes in a [`DataTree`] by reducing the size of recorded shared links.
 ///
