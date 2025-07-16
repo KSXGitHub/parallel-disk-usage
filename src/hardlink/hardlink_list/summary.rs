@@ -32,7 +32,7 @@ pub struct Summary<Size> {
 
     /// Total number of links of [shared inodes](Self::inodes) that don't have links outside the measured tree.
     ///
-    /// This number is expected to be less than or equal to [`Self::all_links`].
+    /// This number is expected to be less than or equal to [`Self::detected_links`].
     pub exclusive_links: usize,
 
     /// Totality of the sizes of all [shared inodes](Self::inodes).
