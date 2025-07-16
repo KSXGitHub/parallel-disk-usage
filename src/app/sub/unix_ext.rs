@@ -20,7 +20,7 @@ where
     ) -> Result<(), RuntimeError> {
         let summary = report.summarize();
         if summary.inodes > 0 {
-            println!("{}", summary.display(bytes_format));
+            print!("{}", summary.display(bytes_format)); // the summary already ends with "\n", println! isn't needed here.
         }
         Ok(())
     }
