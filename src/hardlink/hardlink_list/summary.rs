@@ -83,7 +83,7 @@ where
                     summary.owned_shared_size += size;
                 }
                 Ordering::Less => {
-                    panic!("Impossible! Total of nlink ({links}) is less than detected paths ({paths}). Something must have went wrong!");
+                    panic!("Impossible! Total of nlink ({links}) is less than detected paths ({paths}). Something must have gone wrong!");
                 }
             }
         }
