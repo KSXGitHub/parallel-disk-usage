@@ -1,8 +1,5 @@
-use super::HardlinkList;
-use crate::{
-    hardlink::{LinkPathList, LinkPathListReflection},
-    inode::InodeNumber,
-};
+use super::{HardlinkList, Value};
+use crate::{hardlink::LinkPathListReflection, inode::InodeNumber};
 use dashmap::DashMap;
 use derive_more::{Display, Error, Into, IntoIterator};
 use pipe_trait::Pipe;
@@ -44,16 +41,38 @@ impl<Size> Reflection<Size> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 pub struct ReflectionEntry<Size> {
+    /// The inode number of the file.
     pub ino: InodeNumber,
+    /// Size of the file.
     pub size: Size,
-    pub links: LinkPathListReflection,
+    /// Total number of links of the file, both listed (in [`Self::paths`]) and unlisted.
+    pub links: u64,
+    /// Paths to the detected links of the file.
+    pub paths: LinkPathListReflection,
 }
 
 impl<Size> ReflectionEntry<Size> {
-    /// Create a new value.
-    fn new(ino: InodeNumber, size: Size, links: LinkPathList) -> Self {
-        let links = links.into();
-        ReflectionEntry { ino, size, links }
+    /// Create a new entry.
+    fn new(ino: InodeNumber, Value { size, links, paths }: Value<Size>) -> Self {
+        let paths = paths.into();
+        ReflectionEntry {
+            ino,
+            size,
+            links,
+            paths,
+        }
+    }
+
+    /// Dissolve [`ReflectionEntry`] into a pair of [`InodeNumber`] and [`Value`].
+    fn dissolve(self) -> (InodeNumber, Value<Size>) {
+        let ReflectionEntry {
+            ino,
+            size,
+            links,
+            paths,
+        } = self;
+        let paths = paths.into();
+        (ino, Value { size, links, paths })
     }
 }
 
@@ -68,7 +87,7 @@ impl<Size> From<Vec<ReflectionEntry<Size>>> for Reflection<Size> {
 impl<Size> From<HardlinkList<Size>> for Reflection<Size> {
     fn from(HardlinkList(list): HardlinkList<Size>) -> Self {
         list.into_iter()
-            .map(|(ino, (size, links))| ReflectionEntry::new(ino, size, links))
+            .map(|(ino, value)| ReflectionEntry::new(ino, value))
             .collect::<Vec<_>>()
             .pipe(Reflection::from)
     }
@@ -89,9 +108,9 @@ impl<Size> TryFrom<Reflection<Size>> for HardlinkList<Size> {
     fn try_from(Reflection(entries): Reflection<Size>) -> Result<Self, Self::Error> {
         let map = DashMap::with_capacity(entries.len());
 
-        for ReflectionEntry { ino, size, links } in entries {
-            let links = links.into();
-            if map.insert(ino, (size, links)).is_some() {
+        for entry in entries {
+            let (ino, value) = entry.dissolve();
+            if map.insert(ino, value).is_some() {
                 return ino.pipe(ConversionError::DuplicatedInode).pipe(Err);
             }
         }

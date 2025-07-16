@@ -1,4 +1,4 @@
-use super::HardlinkList;
+use super::{HardlinkList, Value};
 use crate::{hardlink::LinkPathList, inode::InodeNumber};
 use dashmap::{iter::Iter as DashIter, mapref::multiple::RefMulti};
 use pipe_trait::Pipe;
@@ -7,7 +7,7 @@ use pipe_trait::Pipe;
 #[derive(derive_more::Debug)]
 #[debug(bound())]
 #[debug("Iter(..)")]
-pub struct Iter<'a, Size>(DashIter<'a, InodeNumber, (Size, LinkPathList)>);
+pub struct Iter<'a, Size>(DashIter<'a, InodeNumber, Value<Size>>);
 
 impl<Size> HardlinkList<Size> {
     /// Iterate over the recorded entries.
@@ -20,7 +20,7 @@ impl<Size> HardlinkList<Size> {
 #[derive(derive_more::Debug)]
 #[debug(bound())]
 #[debug("Item(..)")]
-pub struct Item<'a, Size>(RefMulti<'a, InodeNumber, (Size, LinkPathList)>);
+pub struct Item<'a, Size>(RefMulti<'a, InodeNumber, Value<Size>>);
 
 impl<'a, Size> Iterator for Iter<'a, Size> {
     type Item = Item<'a, Size>;
@@ -30,18 +30,23 @@ impl<'a, Size> Iterator for Iter<'a, Size> {
 }
 
 impl<'a, Size> Item<'a, Size> {
-    /// Number of the inode.
+    /// The inode number of the file.
     pub fn ino(&self) -> InodeNumber {
         *self.0.key()
     }
 
-    /// Size of the inode.
+    /// Size of the file.
     pub fn size(&self) -> &Size {
-        &self.0.value().0
+        &self.0.value().size
     }
 
-    /// Links of the inode.
-    pub fn links(&self) -> &LinkPathList {
-        &self.0.value().1
+    /// Total number of links of the file, both listed (in [`Self::paths`]) and unlisted.
+    pub fn links(&self) -> u64 {
+        self.0.value().links
+    }
+
+    /// Paths to the detected links of the file.
+    pub fn paths(&self) -> &LinkPathList {
+        &self.0.value().paths
     }
 }

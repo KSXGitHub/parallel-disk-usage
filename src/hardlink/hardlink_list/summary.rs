@@ -146,7 +146,7 @@ impl<Size: Copy> From<ReflectionEntry<Size>> for SingleInodeSummary<Size> {
 impl<'r, Size: Copy> From<&'r ReflectionEntry<Size>> for SingleInodeSummary<Size> {
     fn from(reflection: &'r ReflectionEntry<Size>) -> Self {
         SingleInodeSummary {
-            links: reflection.links.len(),
+            links: reflection.paths.len(),
             size: reflection.size,
         }
     }
@@ -161,7 +161,7 @@ impl<'a, Size: Copy> From<IterItem<'a, Size>> for SingleInodeSummary<Size> {
 impl<'r, 'a, Size: Copy> From<&'r IterItem<'a, Size>> for SingleInodeSummary<Size> {
     fn from(value: &'r IterItem<'a, Size>) -> Self {
         SingleInodeSummary {
-            links: value.links().len(),
+            links: value.paths().len(),
             size: *value.size(),
         }
     }

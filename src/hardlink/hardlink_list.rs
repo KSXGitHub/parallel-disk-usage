@@ -16,6 +16,17 @@ use pipe_trait::Pipe;
 use smart_default::SmartDefault;
 use std::{fmt::Debug, path::Path};
 
+/// Map value in [`HardlinkList`].
+#[derive(Debug, Clone)]
+struct Value<Size> {
+    /// The size of the file.
+    size: Size,
+    /// Total number of links of the file, both listed (in [`Self::paths`]) and unlisted.
+    links: u64,
+    /// Paths to the detected links of the file.
+    paths: LinkPathList,
+}
+
 /// Storage to be used by [`crate::hardlink::RecordHardlinks`].
 ///
 /// **Serialization and deserialization:** _(feature: `json`)_ `HardlinkList` does not implement
@@ -23,8 +34,8 @@ use std::{fmt::Debug, path::Path};
 /// [`Reflection`] which implements these traits.
 #[derive(Debug, SmartDefault, Clone)]
 pub struct HardlinkList<Size>(
-    /// Map an inode number to its size and detected paths.
-    DashMap<InodeNumber, (Size, LinkPathList)>, // TODO: benchmark against Mutex<HashMap<InodeNumber, (Size, LinkPathList)>>
+    /// Map an inode number to its size, number of links, and detected paths.
+    DashMap<InodeNumber, Value<Size>>, // TODO: benchmark against Mutex<HashMap<InodeNumber, Value<Size>>>
 );
 
 impl<Size> HardlinkList<Size> {
@@ -76,24 +87,27 @@ where
         &self,
         ino: InodeNumber,
         size: Size,
+        links: u64,
         path: &Path,
     ) -> Result<(), AddError<Size>> {
         let mut size_assertion = Ok(());
         self.0
             .entry(ino)
-            .and_modify(|(recorded, paths)| {
-                let (detected, recorded) = (size, *recorded);
-                if size == recorded {
-                    paths.add(path.to_path_buf());
+            .and_modify(|recorded| {
+                if size == recorded.size {
+                    recorded.paths.add(path.to_path_buf());
                 } else {
                     size_assertion = Err(SizeConflictError {
                         ino,
-                        recorded,
-                        detected,
+                        recorded: recorded.size,
+                        detected: size,
                     });
                 }
             })
-            .or_insert_with(|| (size, path.to_path_buf().pipe(LinkPathList::single)));
+            .or_insert_with(|| {
+                let paths = path.to_path_buf().pipe(LinkPathList::single);
+                Value { size, links, paths }
+            });
         size_assertion.map_err(AddError::SizeConflict)
     }
 }

@@ -83,7 +83,7 @@ where
 
         let ino = InodeNumber::get(stats);
         self.record
-            .add(ino, size, path)
+            .add(ino, size, links, path)
             .map_err(ReportHardlinksError::AddToRecord)
     }
 }
@@ -102,7 +102,7 @@ where
         let record: Self::Report = self.into();
         let hardlink_info: Box<[(Size, LinkPathList)]> = record
             .iter()
-            .map(|values| (*values.size(), values.links().clone()))
+            .map(|values| (*values.size(), values.paths().clone()))
             .collect();
         let hardlink_info: Box<[(Size, Vec<&Path>)]> = hardlink_info
             .iter()
