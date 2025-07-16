@@ -98,9 +98,11 @@ where
                         let is_dir = stats.is_dir();
                         let size = size_getter.get_size(&stats);
                         reporter.report(Event::ReceiveData(size));
-                        hardlinks_recorder.record_hardlinks(RecordHardlinksArgument::new(
-                            path, &stats, size, reporter,
-                        ));
+                        hardlinks_recorder
+                            .record_hardlinks(RecordHardlinksArgument::new(
+                                path, &stats, size, reporter,
+                            ))
+                            .ok(); // ignore the error for now
                         (is_dir, size)
                     }
                 };

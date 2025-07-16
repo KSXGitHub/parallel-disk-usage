@@ -1,5 +1,6 @@
 use super::{
-    DeduplicateSharedSize, HardlinkList, LinkPathList, RecordHardlinks, RecordHardlinksArgument,
+    hardlink_list, DeduplicateSharedSize, HardlinkList, LinkPathList, RecordHardlinks,
+    RecordHardlinksArgument,
 };
 use crate::{
     data_tree::DataTree,
@@ -8,7 +9,7 @@ use crate::{
     reporter::{event::HardlinkDetection, Event, Reporter},
     size,
 };
-use derive_more::{AsMut, AsRef, From, Into};
+use derive_more::{AsMut, AsRef, Display, Error, From, Into};
 use pipe_trait::Pipe;
 use smart_default::SmartDefault;
 use std::{convert::Infallible, fmt::Debug, os::unix::fs::MetadataExt, path::Path};
@@ -37,12 +38,26 @@ impl<Size> Aware<Size> {
     }
 }
 
+/// Error that occurs when [`Aware::record_hardlinks`] fails.
+#[derive(Debug, Display, Error)]
+#[non_exhaustive]
+pub enum ReportHardlinksError<Size> {
+    /// Fail to add an entry to the record.
+    #[display("Fail to add an entry to record: {_0}")]
+    AddToRecord(hardlink_list::AddError<Size>),
+}
+
 impl<Size, Report> RecordHardlinks<Size, Report> for Aware<Size>
 where
     Size: size::Size + Eq + Debug,
     Report: Reporter<Size> + ?Sized,
 {
-    fn record_hardlinks(&self, argument: RecordHardlinksArgument<Size, Report>) {
+    type Error = ReportHardlinksError<Size>;
+
+    fn record_hardlinks(
+        &self,
+        argument: RecordHardlinksArgument<Size, Report>,
+    ) -> Result<(), Self::Error> {
         let RecordHardlinksArgument {
             path,
             stats,
@@ -51,12 +66,12 @@ where
         } = argument;
 
         if stats.is_dir() {
-            return;
+            return Ok(());
         }
 
         let links = stats.nlink();
         if links <= 1 {
-            return;
+            return Ok(());
         }
 
         reporter.report(Event::DetectHardlink(HardlinkDetection {
@@ -67,7 +82,9 @@ where
         }));
 
         let ino = InodeNumber::get(stats);
-        self.record.add(ino, size, path).unwrap(); // TODO: propagate the error
+        self.record
+            .add(ino, size, path)
+            .map_err(ReportHardlinksError::AddToRecord)
     }
 }
 

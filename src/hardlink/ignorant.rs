@@ -12,8 +12,16 @@ pub use Ignorant as HardlinkIgnorant;
 
 /// Do nothing to detect nor record any hardlink.
 impl<Size, Reporter> RecordHardlinks<Size, Reporter> for Ignorant {
+    /// Doing nothing cannot fail.
+    type Error = Infallible;
+
     /// Do nothing.
-    fn record_hardlinks(&self, _: RecordHardlinksArgument<Size, Reporter>) {}
+    fn record_hardlinks(
+        &self,
+        _: RecordHardlinksArgument<Size, Reporter>,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
 }
 
 /// Do nothing to deduplicate the sizes of hardlinks.

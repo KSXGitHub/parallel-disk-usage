@@ -29,8 +29,10 @@ impl<'a, Size, Report: ?Sized> Argument<'a, Size, Report> {
 
 /// Ability to detect and record hardlinks.
 pub trait RecordHardlinks<Size, Reporter: ?Sized> {
+    /// Error when [`RecordHardlinks::record_hardlinks`] fails.
+    type Error;
     /// Perform hardlinks detection and recording.
-    fn record_hardlinks(&self, argument: Argument<Size, Reporter>);
+    fn record_hardlinks(&self, argument: Argument<Size, Reporter>) -> Result<(), Self::Error>;
 }
 
 /// Do detect and record hardlinks.
