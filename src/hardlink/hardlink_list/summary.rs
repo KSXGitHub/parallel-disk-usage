@@ -46,8 +46,10 @@ pub struct Summary<Size> {
 
 /// Ability to summarize into a [`Summary`].
 pub trait SummarizeHardlinks<Size>: Sized {
+    /// The result of [`SummarizeHardlinks::summarize_hardlinks`].
+    type Summary;
     /// Summarize into a summary of shared links and size.
-    fn summarize_hardlinks(self) -> Summary<Size>;
+    fn summarize_hardlinks(self) -> Self::Summary;
 }
 
 /// Summary of a single unique file.
@@ -65,12 +67,14 @@ impl<Size, Iter> SummarizeHardlinks<Size> for Iter
 where
     Size: size::Size,
     Iter: IntoIterator,
-    Iter::Item: Into<SingleInodeSummary<Size>>,
+    Iter::Item: SummarizeHardlinks<Size>,
+    <Iter::Item as SummarizeHardlinks<Size>>::Summary: Into<SingleInodeSummary<Size>>,
 {
-    fn summarize_hardlinks(self) -> Summary<Size> {
+    type Summary = Summary<Size>;
+    fn summarize_hardlinks(self) -> Self::Summary {
         let mut summary = Summary::default();
         for item in self {
-            let SingleInodeSummary { links, paths, size } = item.into();
+            let SingleInodeSummary { links, paths, size } = item.summarize_hardlinks().into();
             summary.inodes += 1;
             summary.all_links += links;
             summary.detected_links += paths;
@@ -95,7 +99,8 @@ where
 impl<Size, Item> FromIterator<Item> for Summary<Size>
 where
     Size: size::Size,
-    Item: Into<SingleInodeSummary<Size>>,
+    Item: SummarizeHardlinks<Size>,
+    Item::Summary: Into<SingleInodeSummary<Size>>,
 {
     /// Create a summary of shared links and size from an iterator.
     fn from_iter<Iter: IntoIterator<Item = Item>>(iter: Iter) -> Self {
@@ -111,7 +116,8 @@ impl<Size: size::Size> HardlinkList<Size> {
 }
 
 impl<Size: size::Size> SummarizeHardlinks<Size> for &HardlinkList<Size> {
-    fn summarize_hardlinks(self) -> Summary<Size> {
+    type Summary = Summary<Size>;
+    fn summarize_hardlinks(self) -> Self::Summary {
         self.summarize()
     }
 }
@@ -124,7 +130,8 @@ impl<Size: size::Size> Reflection<Size> {
 }
 
 impl<Size: size::Size> SummarizeHardlinks<Size> for &Reflection<Size> {
-    fn summarize_hardlinks(self) -> Summary<Size> {
+    type Summary = Summary<Size>;
+    fn summarize_hardlinks(self) -> Self::Summary {
         self.summarize()
     }
 }
@@ -190,34 +197,62 @@ impl<Size: size::Size> Summary<Size> {
     }
 }
 
+impl<Size: Copy> SummarizeHardlinks<Size> for ReflectionEntry<Size> {
+    type Summary = SingleInodeSummary<Size>;
+    fn summarize_hardlinks(self) -> Self::Summary {
+        (&self).summarize_hardlinks()
+    }
+}
+
 impl<Size: Copy> From<ReflectionEntry<Size>> for SingleInodeSummary<Size> {
     fn from(reflection: ReflectionEntry<Size>) -> Self {
-        (&reflection).into()
+        reflection.summarize_hardlinks()
+    }
+}
+
+impl<Size: Copy> SummarizeHardlinks<Size> for &ReflectionEntry<Size> {
+    type Summary = SingleInodeSummary<Size>;
+    fn summarize_hardlinks(self) -> Self::Summary {
+        SingleInodeSummary {
+            links: self.links,
+            paths: self.paths.len(),
+            size: self.size,
+        }
     }
 }
 
 impl<'r, Size: Copy> From<&'r ReflectionEntry<Size>> for SingleInodeSummary<Size> {
     fn from(reflection: &'r ReflectionEntry<Size>) -> Self {
-        SingleInodeSummary {
-            links: reflection.links,
-            paths: reflection.paths.len(),
-            size: reflection.size,
-        }
+        reflection.summarize_hardlinks()
+    }
+}
+
+impl<'a, Size: Copy> SummarizeHardlinks<Size> for IterItem<'a, Size> {
+    type Summary = SingleInodeSummary<Size>;
+    fn summarize_hardlinks(self) -> Self::Summary {
+        (&self).summarize_hardlinks()
     }
 }
 
 impl<'a, Size: Copy> From<IterItem<'a, Size>> for SingleInodeSummary<Size> {
     fn from(value: IterItem<'a, Size>) -> Self {
-        (&value).into()
+        value.summarize_hardlinks()
+    }
+}
+
+impl<'a, Size: Copy> SummarizeHardlinks<Size> for &IterItem<'a, Size> {
+    type Summary = SingleInodeSummary<Size>;
+    fn summarize_hardlinks(self) -> Self::Summary {
+        SingleInodeSummary {
+            links: self.links(),
+            paths: self.paths().len(),
+            size: *self.size(),
+        }
     }
 }
 
 impl<'r, 'a, Size: Copy> From<&'r IterItem<'a, Size>> for SingleInodeSummary<Size> {
     fn from(value: &'r IterItem<'a, Size>) -> Self {
-        SingleInodeSummary {
-            links: value.links(),
-            paths: value.paths().len(),
-            size: *value.size(),
-        }
+        value.summarize_hardlinks()
     }
 }
