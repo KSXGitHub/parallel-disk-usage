@@ -1,7 +1,10 @@
 use super::{iter::Item as IterItem, reflection::ReflectionEntry, HardlinkList, Reflection};
 use crate::size;
 use derive_more::{Add, AddAssign, Sum};
-use std::fmt::{self, Display};
+use std::{
+    cmp::Ordering,
+    fmt::{self, Display},
+};
 
 #[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};
@@ -11,23 +14,34 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 #[non_exhaustive]
 pub struct Summary<Size> {
-    /// Number of unique files, each with more than 1 links.
+    /// Number of shared inodes, each with more than 1 links (i.e. `nlink > 1`).
     pub inodes: usize,
-    /// Total number of links of all the unique files as counted by [`Summary::inodes`].
-    pub links: usize,
-    /// Total size of all the unique files.
-    pub size: Size,
-}
 
-impl<Size> Summary<Size> {
-    /// Create a new summary.
-    pub fn new(inodes: usize, links: usize, size: Size) -> Self {
-        Summary {
-            inodes,
-            links,
-            size,
-        }
-    }
+    /// Number of [shared inodes](Self::inodes) that don't have links outside the measured tree.
+    ///
+    /// This number is expected to be less than or equal to [`Self::inodes`].
+    pub owned_inodes: usize,
+
+    /// Totality of the numbers of links of all [shared inodes](Self::inodes).
+    pub all_links: u64,
+
+    /// Total number of links of [shared inodes](Self::inodes) that were detected within the measured tree.
+    ///
+    /// This number is expected to be less than or equal to [`Self::all_links`].
+    pub detected_links: usize,
+
+    /// Total number of links of [shared inodes](Self::inodes) that don't have links outside the measured tree.
+    ///
+    /// This number is expected to be less than or equal to [`Self::all_links`].
+    pub owned_links: usize,
+
+    /// Totality of the sizes of all [shared inodes](Self::inodes).
+    pub shared_size: Size,
+
+    /// Totality of the sizes of all [shared inodes](Self::inodes) that don't have links outside the measured tree.
+    ///
+    /// This number is expected to be less than or equal to [`Self::all_links`].
+    pub owned_shared_size: Size,
 }
 
 /// Ability to summarize into a [`Summary`].
@@ -39,8 +53,10 @@ pub trait SummarizeHardlinks<Size>: Sized {
 /// Summary of a single unique file.
 #[derive(Debug, Clone, Copy)]
 pub struct SingleInodeSummary<Size> {
+    /// Total number of all links to the file.
+    links: u64,
     /// Number of detected links to the file.
-    links: usize,
+    paths: usize,
     /// Size of the file.
     size: Size,
 }
@@ -54,13 +70,22 @@ where
     fn summarize_hardlinks(self) -> Summary<Size> {
         let mut summary = Summary::default();
         for item in self {
-            let SingleInodeSummary { links, size } = item.into();
-            if links <= 1 {
-                continue;
-            }
+            let SingleInodeSummary { links, paths, size } = item.into();
             summary.inodes += 1;
-            summary.links += links;
-            summary.size += size;
+            summary.all_links += links;
+            summary.detected_links += paths;
+            summary.shared_size += size;
+            match links.cmp(&(paths as u64)) {
+                Ordering::Greater => {}
+                Ordering::Equal => {
+                    summary.owned_inodes += 1;
+                    summary.owned_links += paths; // `links` and `paths` are both fine, but `paths` doesn't require type cast
+                    summary.owned_shared_size += size;
+                }
+                Ordering::Less => {
+                    panic!("Impossible! Total of nlink ({links}) is less than detected paths ({paths}). Something must have went wrong!");
+                }
+            }
         }
         summary
     }
@@ -116,14 +141,42 @@ impl<Size: size::Size> Display for SummaryDisplay<'_, Size> {
         let SummaryDisplay { format, summary } = self;
         let Summary {
             inodes,
-            links,
-            size,
+            owned_inodes,
+            all_links,
+            detected_links,
+            owned_links,
+            shared_size,
+            owned_shared_size,
         } = summary;
-        let size = size.display(*format);
-        write!(
-            f,
-            "Detected {links} hardlinks for {inodes} unique files (total: {size})"
-        )
+
+        let shared_size = shared_size.display(*format);
+        let owned_shared_size = owned_shared_size.display(*format);
+
+        macro_rules! ln {
+            ($($args:tt)*) => {
+                writeln!(f, $($args)*)
+            };
+        }
+
+        write!(f, "Hardlinks detected! ")?;
+        if owned_inodes == inodes {
+            ln!("No files have links outside this tree")?;
+            ln!("* Number of shared inodes: {inodes}")?;
+            ln!("* Total number of links: {all_links}")?;
+            ln!("* Total shared size: {shared_size}")?;
+        } else if owned_inodes == &0 {
+            ln!("All hardlinks within this tree have links without")?;
+            ln!("* Number of shared inodes: {inodes}")?;
+            ln!("* Total number of links: {all_links}, {detected_links} detected")?;
+            ln!("* Total shared size: {shared_size}")?;
+        } else {
+            ln!("Some files have links outside this tree")?;
+            ln!("* Number of shared inodes: {inodes} total, {owned_inodes} exclusive")?;
+            ln!("* Total number of links: {all_links} total, {detected_links} detected, {owned_links} exclusive")?;
+            ln!("* Total shared size: {shared_size} total, {owned_shared_size} exclusive")?;
+        }
+
+        Ok(())
     }
 }
 
@@ -146,7 +199,8 @@ impl<Size: Copy> From<ReflectionEntry<Size>> for SingleInodeSummary<Size> {
 impl<'r, Size: Copy> From<&'r ReflectionEntry<Size>> for SingleInodeSummary<Size> {
     fn from(reflection: &'r ReflectionEntry<Size>) -> Self {
         SingleInodeSummary {
-            links: reflection.paths.len(),
+            links: reflection.links,
+            paths: reflection.paths.len(),
             size: reflection.size,
         }
     }
@@ -161,7 +215,8 @@ impl<'a, Size: Copy> From<IterItem<'a, Size>> for SingleInodeSummary<Size> {
 impl<'r, 'a, Size: Copy> From<&'r IterItem<'a, Size>> for SingleInodeSummary<Size> {
     fn from(value: &'r IterItem<'a, Size>) -> Self {
         SingleInodeSummary {
-            links: value.paths().len(),
+            links: value.links(),
+            paths: value.paths().len(),
             size: *value.size(),
         }
     }
