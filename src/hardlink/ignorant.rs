@@ -21,7 +21,9 @@ impl<Size> DeduplicateSharedSize<Size> for HardlinkIgnorant
 where
     Size: size::Size + Sync,
 {
+    /// Return nothing.
     type Report = ();
+    /// Doing nothing cannot fail.
     type Error = Infallible;
 
     /// Do nothing.
