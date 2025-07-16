@@ -148,29 +148,42 @@ where
                 .into_reflection() // I really want to use std::mem::transmute here but can't.
                 .par_convert_names_to_utf8() // TODO: allow non-UTF8 somehow.
                 .expect("convert all names from raw string to UTF-8");
-            let shared = if !shared_details && !shared_summary {
-                JsonShared::default()
+
+            let deduplication_result = if !shared_details && !shared_summary {
+                Ok(JsonShared::default())
             } else {
-                let mut shared = deduplication_record
-                    .map_err(HardlinksHandler::convert_error)?
-                    .pipe(HardlinksHandler::json_report)?
-                    .unwrap_or_default();
-                if !shared_details {
-                    shared.details = None;
-                }
-                if !shared_summary {
-                    shared.summary = None;
-                }
-                shared
+                // `try` expression would be extremely useful right now but it sadly requires nightly
+                || -> Result<_, RuntimeError> {
+                    let mut shared = deduplication_record
+                        .map_err(HardlinksHandler::convert_error)?
+                        .pipe(HardlinksHandler::json_report)?
+                        .unwrap_or_default();
+                    if !shared_details {
+                        shared.details = None;
+                    }
+                    if !shared_summary {
+                        shared.summary = None;
+                    }
+                    Ok(shared)
+                }()
             };
+
+            // errors caused by failing deduplication shouldn't prevent the JSON data from being printed
+            let (shared, deduplication_result) = match deduplication_result {
+                Ok(shared) => (shared, Ok(())),
+                Err(error) => (JsonShared::default(), Err(error)),
+            };
+
             let json_tree = JsonTree { tree, shared };
             let json_data = JsonData {
                 schema_version: SchemaVersion,
                 binary_version: Some(BinaryVersion::current()),
                 body: json_tree.into(),
             };
+
             return serde_json::to_writer(stdout(), &json_data)
-                .map_err(RuntimeError::SerializationFailure);
+                .map_err(RuntimeError::SerializationFailure)
+                .or(deduplication_result);
         }
 
         let visualizer = Visualizer {
