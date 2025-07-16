@@ -1,5 +1,5 @@
 use super::{
-    deduplicate, hardlink_list, DeduplicateSharedSize, HardlinkList, LinkPathList, RecordHardlinks,
+    hardlink_list, DeduplicateSharedSize, HardlinkList, LinkPathList, RecordHardlinks,
     RecordHardlinksArgument,
 };
 use crate::{
@@ -97,8 +97,8 @@ where
     type Error = Infallible;
     fn deduplicate(
         self,
-        mut data_tree: DataTree<OsStringDisplay, Size>,
-    ) -> deduplicate::Result<Size, Self::Report, Self::Error> {
+        data_tree: &mut DataTree<OsStringDisplay, Size>,
+    ) -> Result<Self::Report, Self::Error> {
         let record: Self::Report = self.into();
         let hardlink_info: Box<[(Size, LinkPathList)]> = record
             .iter()
@@ -109,6 +109,6 @@ where
             .map(|(size, paths)| (*size, paths.iter().map(AsRef::as_ref).collect()))
             .collect();
         data_tree.par_deduplicate_hardlinks(&hardlink_info);
-        Ok((data_tree, record))
+        Ok(record)
     }
 }

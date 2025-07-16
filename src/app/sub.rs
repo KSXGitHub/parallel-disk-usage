@@ -129,12 +129,8 @@ where
             if !no_sort {
                 data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
             }
-
-            // errors caused by failing deduplication shouldn't prevent data_tree from being visualized
-            match hardlinks_handler.deduplicate(data_tree) {
-                Ok((data_tree, record)) => (data_tree, Ok(record)),
-                Err((data_tree, error)) => (data_tree, Err(error)),
-            }
+            let deduplication_record = hardlinks_handler.deduplicate(&mut data_tree);
+            (data_tree, deduplication_record)
         };
 
         GLOBAL_STATUS_BOARD.clear_line(0);
