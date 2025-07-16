@@ -167,7 +167,7 @@ impl<Size: size::Size> Display for SummaryDisplay<'_, Size> {
         } else if owned_inodes == &0 {
             ln!("All hardlinks within this tree have links without")?;
             ln!("* Number of shared inodes: {inodes}")?;
-            ln!("* Total number of links: {all_links}, {detected_links} detected")?;
+            ln!("* Total number of links: {all_links} total, {detected_links} detected")?;
             ln!("* Total shared size: {shared_size}")?;
         } else {
             ln!("Some files have links outside this tree")?;
