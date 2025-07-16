@@ -95,19 +95,6 @@ where
     }
 }
 
-/// Summarize an iterator.
-impl<Size, Item> FromIterator<Item> for Summary<Size>
-where
-    Size: size::Size,
-    Item: SummarizeHardlinks<Size>,
-    Item::Summary: Into<SingleInodeSummary<Size>>,
-{
-    /// Create a summary of shared links and size from an iterator.
-    fn from_iter<Iter: IntoIterator<Item = Item>>(iter: Iter) -> Self {
-        iter.summarize_hardlinks()
-    }
-}
-
 impl<Size: size::Size> HardlinkList<Size> {
     /// Create summary for the shared links and size.
     pub fn summarize(&self) -> Summary<Size> {
@@ -204,12 +191,6 @@ impl<Size: Copy> SummarizeHardlinks<Size> for ReflectionEntry<Size> {
     }
 }
 
-impl<Size: Copy> From<ReflectionEntry<Size>> for SingleInodeSummary<Size> {
-    fn from(reflection: ReflectionEntry<Size>) -> Self {
-        reflection.summarize_hardlinks()
-    }
-}
-
 impl<Size: Copy> SummarizeHardlinks<Size> for &ReflectionEntry<Size> {
     type Summary = SingleInodeSummary<Size>;
     fn summarize_hardlinks(self) -> Self::Summary {
@@ -221,22 +202,10 @@ impl<Size: Copy> SummarizeHardlinks<Size> for &ReflectionEntry<Size> {
     }
 }
 
-impl<'r, Size: Copy> From<&'r ReflectionEntry<Size>> for SingleInodeSummary<Size> {
-    fn from(reflection: &'r ReflectionEntry<Size>) -> Self {
-        reflection.summarize_hardlinks()
-    }
-}
-
 impl<'a, Size: Copy> SummarizeHardlinks<Size> for IterItem<'a, Size> {
     type Summary = SingleInodeSummary<Size>;
     fn summarize_hardlinks(self) -> Self::Summary {
         (&self).summarize_hardlinks()
-    }
-}
-
-impl<'a, Size: Copy> From<IterItem<'a, Size>> for SingleInodeSummary<Size> {
-    fn from(value: IterItem<'a, Size>) -> Self {
-        value.summarize_hardlinks()
     }
 }
 
@@ -248,11 +217,5 @@ impl<'a, Size: Copy> SummarizeHardlinks<Size> for &IterItem<'a, Size> {
             paths: self.paths().len(),
             size: *self.size(),
         }
-    }
-}
-
-impl<'r, 'a, Size: Copy> From<&'r IterItem<'a, Size>> for SingleInodeSummary<Size> {
-    fn from(value: &'r IterItem<'a, Size>) -> Self {
-        value.summarize_hardlinks()
     }
 }
