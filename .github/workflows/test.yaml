@@ -70,7 +70,6 @@ jobs:
           echo CARGO $HOME/.cargo
           ls -lA $HOME/.cargo
           ls -lA $HOME/.cargo/registry
-          ls -lA $HOME/.cargo/git
           echo
           echo
 
