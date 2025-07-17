@@ -1,13 +1,13 @@
 pub mod _utils;
 pub use _utils::*;
 
-use parallel_disk_usage::{
-    get_size::{GetApparentSize, GetBlockCount, GetBlockSize},
-    size::Bytes,
-};
+use parallel_disk_usage::{get_size::GetApparentSize, size::Bytes};
 
 #[cfg(unix)]
-use parallel_disk_usage::size::Blocks;
+use parallel_disk_usage::{
+    get_size::{GetBlockCount, GetBlockSize},
+    size::Blocks,
+};
 
 #[test]
 fn len_as_bytes() {
