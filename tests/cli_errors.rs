@@ -29,7 +29,7 @@ use std::{collections::BTreeSet, path::Path};
 #[cfg(windows)]
 fn test_path_join_absolute() {
     let path = std::path::PathBuf::from(".").join("C:\\");
-    dbg!(path);
+    dbg!(&path);
     assert_eq!(path, std::path::PathBuf::from("C:\\"));
 }
 
