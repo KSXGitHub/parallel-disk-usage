@@ -1,5 +1,4 @@
 #![cfg(feature = "cli")]
-#![cfg_attr(not(unix), allow(unused))] // TODO: remove this after merging from master
 
 pub mod _utils;
 pub use _utils::*;
