@@ -136,7 +136,14 @@ fn display_excessive_children() {
         .par_try_into_tree()
         .expect_err("create error")
         .to_string();
-    let expected = r#"ExcessiveChildren: "root/b/0" (Bytes(321)) is less than a child named "def" (Bytes(456))"#;
+    let expected = if cfg!(unix) {
+        r#"ExcessiveChildren: "root/b/0" (Bytes(321)) is less than a child named "def" (Bytes(456))"#
+    } else if cfg!(windows) {
+        r#"ExcessiveChildren: "root\b\0" (Bytes(321)) is less than a child named "def" (Bytes(456))"#
+    } else {
+        eprintln!("ACTUAL: {actual}");
+        panic!("This platform isn't supported!");
+    };
     assert_eq!(actual, expected);
 }
 
