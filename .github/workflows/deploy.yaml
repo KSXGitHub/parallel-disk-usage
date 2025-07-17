@@ -30,6 +30,7 @@ jobs:
           bash $installer --default-toolchain $(cat rust-toolchain) -y
 
       - name: Test (dev)
+        shell: bash
         env:
           FMT: 'true'
           LINT: 'true'
@@ -41,6 +42,7 @@ jobs:
         run: ./test.sh
 
       - name: Test (release)
+        shell: bash
         env:
           FMT: 'true'
           LINT: 'true'
