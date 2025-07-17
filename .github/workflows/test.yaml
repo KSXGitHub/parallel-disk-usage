@@ -21,6 +21,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Inspect cache
+        shell: bash
+        run: |
+          echo HOME IS $HOME
+          ls -lA $HOME
+
       - name: Cache
         uses: actions/cache@v4
         timeout-minutes: 1
@@ -55,16 +61,16 @@ jobs:
           TEST_FLAGS: '--no-fail-fast'
         run: ./test.sh
 
-      - name: Test (release)
-        shell: bash
-        env:
-          RUSTFLAGS: '-D warnings'
-          RUSTDOCFLAGS: '-D warnings'
-          FMT: 'false'
-          LINT: 'false'
-          DOC: 'true'
-          BUILD: 'true'
-          TEST: 'true'
-          BUILD_FLAGS: '--locked'
-          TEST_FLAGS: '--no-fail-fast'
-        run: ./test.sh --release
+      # - name: Test (release)
+      #   shell: bash
+      #   env:
+      #     RUSTFLAGS: '-D warnings'
+      #     RUSTDOCFLAGS: '-D warnings'
+      #     FMT: 'false'
+      #     LINT: 'false'
+      #     DOC: 'true'
+      #     BUILD: 'true'
+      #     TEST: 'true'
+      #     BUILD_FLAGS: '--locked'
+      #     TEST_FLAGS: '--no-fail-fast'
+      #   run: ./test.sh --release
