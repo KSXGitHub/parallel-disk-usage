@@ -139,7 +139,8 @@ fn display_excessive_children() {
     let expected = if cfg!(unix) {
         r#"ExcessiveChildren: "root/b/0" (Bytes(321)) is less than a child named "def" (Bytes(456))"#
     } else if cfg!(windows) {
-        r#"ExcessiveChildren: "root\b\0" (Bytes(321)) is less than a child named "def" (Bytes(456))"#
+        // TODO: stop using debug format
+        r#"ExcessiveChildren: "root\\b\\0" (Bytes(321)) is less than a child named "def" (Bytes(456))"#
     } else {
         eprintln!("ACTUAL: {actual}");
         panic!("This platform isn't supported!");
