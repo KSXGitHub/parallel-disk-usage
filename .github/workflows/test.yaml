@@ -21,12 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Inspect cache
-        shell: bash
-        run: |
-          echo HOME IS $HOME
-          ls -lA $HOME
-
       - name: Cache
         uses: actions/cache@v4
         timeout-minutes: 1
@@ -49,17 +43,40 @@ jobs:
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > $installer
           bash $installer --default-toolchain $(cat rust-toolchain) -y
 
-      - name: Test (dev)
+      # - name: Test (dev)
+      #   shell: bash
+      #   env:
+      #     FMT: 'false'
+      #     LINT: 'false'
+      #     DOC: 'true'
+      #     BUILD: 'true'
+      #     TEST: 'true'
+      #     BUILD_FLAGS: '--locked'
+      #     TEST_FLAGS: '--no-fail-fast'
+      #   run: ./test.sh
+
+      - name: Simple test
         shell: bash
-        env:
-          FMT: 'false'
-          LINT: 'false'
-          DOC: 'true'
-          BUILD: 'true'
-          TEST: 'true'
-          BUILD_FLAGS: '--locked'
-          TEST_FLAGS: '--no-fail-fast'
-        run: ./test.sh
+        run: cargo test --no-default-features
+
+      - name: Inspect directories
+        shell: bash
+        run: |
+          echo HOME IS $HOME
+          ls -lA $HOME
+          echo
+          echo
+
+          echo CARGO $HOME/.cargo
+          ls -lA $HOME/.cargo
+          ls -lA $HOME/.cargo/registry
+          ls -lA $HOME/.cargo/git
+          echo
+          echo
+
+          echo TARGET
+          ls -lA target
+          ls -lA target/debug
 
       # - name: Test (release)
       #   shell: bash
