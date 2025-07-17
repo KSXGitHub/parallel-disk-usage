@@ -16,6 +16,7 @@ pub trait DeduplicateSharedSize<Size: size::Size>: Sized {
 }
 
 /// Do deduplicate the sizes of hardlinks.
+#[cfg(unix)]
 pub type Do<Size> = super::HardlinkAware<Size>;
 /// Do not deduplicate the sizes of hardlinks.
 pub type DoNot = super::HardlinkIgnorant;

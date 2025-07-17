@@ -60,7 +60,10 @@ impl<Size> HardlinkList<Size> {
     }
 }
 
-/// Error that occurs when a different size was detected for the same [`ino`](std::os::unix::fs::MetadataExt::ino).
+/// Error that occurs when a different size was detected for the same [`ino`][ino].
+///
+/// <!-- Should have been `std::os::unix::fs::MetadataExt::ino` but it would error on Windows -->
+/// [ino]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
 #[derive(Debug, Display, Error)]
 #[display(bound(Size: Debug))]
 #[display("Size for inode {ino} changed from {recorded:?} to {detected:?}")]
@@ -83,6 +86,7 @@ where
     Size: size::Size,
 {
     /// Add an entry to the record.
+    #[cfg_attr(not(unix), expect(unused))]
     pub(crate) fn add(
         &self,
         ino: InodeNumber,

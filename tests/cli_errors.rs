@@ -1,10 +1,18 @@
 #![cfg(feature = "cli")]
+#![cfg_attr(not(unix), allow(unused))] // TODO: remove this after merging from master
 
 pub mod _utils;
 pub use _utils::*;
 
 use command_extra::CommandExtra;
+use pipe_trait::Pipe;
+use pretty_assertions::assert_eq;
+use std::process::{Command, Output, Stdio};
+use text_block_macros::text_block;
+
+#[cfg(unix)]
 use maplit::btreeset;
+#[cfg(unix)]
 use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::DataTree,
@@ -15,14 +23,8 @@ use parallel_disk_usage::{
     reporter::{ErrorOnlyReporter, ErrorReport},
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
-use pipe_trait::Pipe;
-use pretty_assertions::assert_eq;
-use std::{
-    collections::BTreeSet,
-    path::Path,
-    process::{Command, Output, Stdio},
-};
-use text_block_macros::text_block;
+#[cfg(unix)]
+use std::{collections::BTreeSet, path::Path};
 
 #[cfg(windows)]
 fn test_path_join_absolute() {
