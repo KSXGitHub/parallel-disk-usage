@@ -8,7 +8,7 @@ use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
-    get_size::{GetApparentSize, GetBlockCount, GetBlockSize},
+    get_size::GetApparentSize,
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
@@ -16,6 +16,9 @@ use parallel_disk_usage::{
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use std::process::{Command, Stdio};
+
+#[cfg(unix)]
+use parallel_disk_usage::get_size::{GetBlockCount, GetBlockSize};
 
 fn stdio(command: Command) -> Command {
     command
@@ -443,7 +446,7 @@ fn bytes_format_plain() {
     let actual = Command::new(PDU)
         .with_current_dir(&workspace)
         .with_arg("--total-width=100")
-        .with_arg("--quantity=block-size")
+        .with_arg("--quantity=apparent-size")
         .with_arg("--bytes-format=plain")
         .pipe(stdio)
         .output()
@@ -453,7 +456,7 @@ fn bytes_format_plain() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        size_getter: GetBlockSize,
+        size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -482,7 +485,7 @@ fn bytes_format_metric() {
     let actual = Command::new(PDU)
         .with_current_dir(&workspace)
         .with_arg("--total-width=100")
-        .with_arg("--quantity=block-size")
+        .with_arg("--quantity=apparent-size")
         .with_arg("--bytes-format=metric")
         .pipe(stdio)
         .output()
@@ -492,7 +495,7 @@ fn bytes_format_metric() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        size_getter: GetBlockSize,
+        size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
@@ -521,7 +524,7 @@ fn bytes_format_binary() {
     let actual = Command::new(PDU)
         .with_current_dir(&workspace)
         .with_arg("--total-width=100")
-        .with_arg("--quantity=block-size")
+        .with_arg("--quantity=apparent-size")
         .with_arg("--bytes-format=binary")
         .pipe(stdio)
         .output()
@@ -531,7 +534,7 @@ fn bytes_format_binary() {
 
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
-        size_getter: GetBlockSize,
+        size_getter: GetApparentSize,
         reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
