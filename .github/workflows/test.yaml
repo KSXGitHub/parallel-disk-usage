@@ -44,6 +44,7 @@ jobs:
           bash $installer --default-toolchain $(cat rust-toolchain) -y
 
       - name: Test (dev)
+        shell: bash
         env:
           FMT: 'false'
           LINT: 'false'
@@ -55,6 +56,7 @@ jobs:
         run: ./test.sh
 
       - name: Test (release)
+        shell: bash
         env:
           RUSTFLAGS: '-D warnings'
           RUSTDOCFLAGS: '-D warnings'
