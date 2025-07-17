@@ -20,13 +20,11 @@ pub struct LinkPathList(
 
 impl LinkPathList {
     /// Create a list of a single path.
-    #[cfg_attr(not(unix), expect(unused))]
     pub(crate) fn single(path: PathBuf) -> Self {
         LinkPathList(vec![path])
     }
 
     /// Add a path to the list.
-    #[cfg_attr(not(unix), expect(unused))]
     pub(crate) fn add(&mut self, path: PathBuf) {
         self.0.push(path)
     }
