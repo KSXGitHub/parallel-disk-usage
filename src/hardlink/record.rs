@@ -12,6 +12,7 @@ pub struct Argument<'a, Size, Report: ?Sized> {
 pub use Argument as RecordHardlinksArgument;
 
 impl<'a, Size, Report: ?Sized> Argument<'a, Size, Report> {
+    #[cfg_attr(not(unix), expect(unused))]
     pub(crate) fn new(
         path: &'a Path,
         stats: &'a Metadata,

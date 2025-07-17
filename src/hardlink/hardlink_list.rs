@@ -83,6 +83,7 @@ where
     Size: size::Size,
 {
     /// Add an entry to the record.
+    #[cfg_attr(not(unix), expect(unused))]
     pub(crate) fn add(
         &self,
         ino: InodeNumber,
