@@ -14,9 +14,7 @@ use std::path::PathBuf;
 /// `Serialize` and `Deserialize` traits directly, instead, it can be converted into/from a
 /// [`Reflection`] which implements these traits.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct LinkPathList(
-    Vec<PathBuf>, // TODO: benchmark against LinkedList<PathBuf>
-);
+pub struct LinkPathList(Vec<PathBuf>);
 
 impl LinkPathList {
     /// Create a list of a single path.
