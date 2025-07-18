@@ -152,6 +152,10 @@ impl<Size: size::Size> Display for SummaryDisplay<'_, Size> {
             };
         }
 
+        if inodes == &0 {
+            return ln!("There are no hardlinks.");
+        }
+
         write!(f, "Hardlinks detected! ")?;
         if exclusive_inodes == inodes {
             ln!("No files have links outside this tree")?;
