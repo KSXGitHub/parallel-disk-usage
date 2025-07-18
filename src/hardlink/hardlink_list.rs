@@ -35,7 +35,7 @@ struct Value<Size> {
 #[derive(Debug, SmartDefault, Clone)]
 pub struct HardlinkList<Size>(
     /// Map an inode number to its size, number of links, and detected paths.
-    DashMap<InodeNumber, Value<Size>>, // TODO: benchmark against Mutex<HashMap<InodeNumber, Value<Size>>>
+    DashMap<InodeNumber, Value<Size>>,
 );
 
 impl<Size> HardlinkList<Size> {
