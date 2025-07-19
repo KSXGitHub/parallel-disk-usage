@@ -12,9 +12,11 @@ pub use Summary as SharedLinkSummary;
 use crate::{hardlink::LinkPathList, inode::InodeNumber, size};
 use dashmap::DashMap;
 use derive_more::{Display, Error};
-use pipe_trait::Pipe;
 use smart_default::SmartDefault;
 use std::{fmt::Debug, path::Path};
+
+#[cfg_attr(not(unix), cfg(expect(unused)))]
+use pipe_trait::Pipe;
 
 /// Map value in [`HardlinkList`].
 #[derive(Debug, Clone)]
