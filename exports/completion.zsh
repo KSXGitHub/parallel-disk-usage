@@ -30,12 +30,12 @@ block-count\:"Count numbers of blocks"))' \
 '--threads=[Set the maximum number of threads to spawn. Could be either "auto", "max", or a number]:THREADS:_default' \
 '(--quantity --deduplicate-hardlinks)--json-input[Read JSON data from stdin]' \
 '--json-output[Print JSON data instead of an ASCII chart]' \
-'--deduplicate-hardlinks[Detect duplicated hardlinks and remove their sizes from total]' \
-'--detect-links[Detect duplicated hardlinks and remove their sizes from total]' \
-'--dedupe-links[Detect duplicated hardlinks and remove their sizes from total]' \
+'--deduplicate-hardlinks[Detect duplicated hardlinks and subtract their sizes from total]' \
+'--detect-links[Detect duplicated hardlinks and subtract their sizes from total]' \
+'--dedupe-links[Detect duplicated hardlinks and subtract their sizes from total]' \
 '--top-down[Print the tree top-down instead of bottom-up]' \
 '--align-right[Set the root of the bars to the right]' \
-'--no-sort[Preserve order of entries]' \
+'--no-sort[Do not sort the branches in the tree]' \
 '--silent-errors[Prevent filesystem error messages from appearing in stderr]' \
 '--no-errors[Prevent filesystem error messages from appearing in stderr]' \
 '--progress[Report progress being made at the expense of performance]' \

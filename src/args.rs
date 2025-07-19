@@ -138,7 +138,7 @@ pub struct Args {
     #[clap(long, default_value = "0.01")]
     pub min_ratio: Fraction,
 
-    /// Preserve order of entries.
+    /// Do not sort the branches in the tree.
     #[clap(long)]
     pub no_sort: bool,
 
