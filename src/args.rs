@@ -58,7 +58,7 @@ use text_block_macros::text_block;
         "    Show chart in apparent sizes instead of block sizes"
         "    $ pdu --quantity=apparent-size"
         ""
-        "    Detect and subtract the sizes of hardlinks from total"
+        "    Detect and subtract the sizes of hardlinks from their parent nodes"
         "    $ pdu --deduplicate-hardlinks"
         ""
         "    Show sizes in plain numbers instead of metric units"
@@ -103,7 +103,7 @@ pub struct Args {
     #[default(BytesFormat::MetricUnits)]
     pub bytes_format: BytesFormat,
 
-    /// Detect duplicated hardlinks and subtract their sizes from total.
+    /// Detect and subtract the sizes of hardlinks from their parent nodes.
     #[clap(long, visible_aliases = ["detect-links", "dedupe-links"])]
     #[cfg_attr(not(unix), clap(hide = true))]
     pub deduplicate_hardlinks: bool,
