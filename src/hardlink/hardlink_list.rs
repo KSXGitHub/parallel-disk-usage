@@ -13,10 +13,12 @@ use crate::{hardlink::LinkPathList, inode::InodeNumber, size};
 use dashmap::DashMap;
 use derive_more::{Display, Error};
 use smart_default::SmartDefault;
-use std::{fmt::Debug, path::Path};
+use std::fmt::Debug;
 
-#[cfg_attr(not(unix), cfg(expect(unused)))]
+#[cfg_attr(not(unix), cfg(test))]
 use pipe_trait::Pipe;
+#[cfg_attr(not(unix), cfg(test))]
+use std::path::Path;
 
 /// Map value in [`HardlinkList`].
 #[derive(Debug, Clone)]
