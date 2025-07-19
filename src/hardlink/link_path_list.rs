@@ -23,6 +23,14 @@ impl LinkPathList {
         LinkPathList(vec![path])
     }
 
+    /// Create a list of many paths.
+    #[cfg(test)]
+    pub(crate) fn many(paths: impl IntoIterator<Item: Into<PathBuf>>) -> Self {
+        let paths: Vec<_> = paths.into_iter().map(Into::into).collect();
+        assert!(!paths.is_empty(), "paths must not be empty");
+        LinkPathList(paths)
+    }
+
     /// Add a path to the list.
     pub(crate) fn add(&mut self, path: PathBuf) {
         self.0.push(path)
@@ -41,5 +49,52 @@ impl LinkPathList {
     /// Create reflection.
     pub fn into_reflection(self) -> Reflection {
         self.into()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::LinkPathList;
+    use pipe_trait::Pipe;
+    use pretty_assertions::{assert_eq, assert_ne};
+
+    #[test]
+    fn item_order_is_irrelevant_to_equality() {
+        let a = ["3", "4", "0", "2", "1"]
+            .pipe(LinkPathList::many)
+            .into_reflection();
+        let b = ["4", "0", "3", "2", "1"]
+            .pipe(LinkPathList::many)
+            .into_reflection();
+        let c = ["0", "1", "2", "3", "4"]
+            .pipe(LinkPathList::many)
+            .into_reflection();
+        assert_eq!(a, b);
+        assert_eq!(b, c);
+        assert_eq!(a, c);
+    }
+
+    #[test]
+    fn item_absent_cause_inequality() {
+        let a = ["0", "1", "2", "3"]
+            .pipe(LinkPathList::many)
+            .into_reflection();
+        let b = ["0", "1", "2", "3", "4"]
+            .pipe(LinkPathList::many)
+            .into_reflection();
+        assert_ne!(a, b);
+        assert_ne!(b, a);
+    }
+
+    #[test]
+    fn item_difference_cause_inequality() {
+        let a = ["0", "1", "2", "3", "5"]
+            .pipe(LinkPathList::many)
+            .into_reflection();
+        let b = ["0", "1", "2", "3", "4"]
+            .pipe(LinkPathList::many)
+            .into_reflection();
+        assert_ne!(a, b);
+        assert_ne!(b, a);
     }
 }
