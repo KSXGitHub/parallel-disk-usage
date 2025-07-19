@@ -93,7 +93,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     id: 'apparent-size',
     pduCliArgs: ['--quantity=apparent-size'],
     competitors: [
-      ['dust', '--apparent-size'],
+      ['dust', '--no-progress', '--apparent-size'],
       ['dua', '--count-hard-links', '--apparent-size'],
       ['ncdu', '-o', '/dev/stdout', '-0'],
       ['gdu', '--show-apparent-size', '--non-interactive', '--no-progress'],
@@ -104,7 +104,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     id: 'block-size',
     pduCliArgs: ['--quantity=block-size'],
     competitors: [
-      ['dust'],
+      ['dust', '--no-progress'],
       ['dua', '--count-hard-links'],
       ['ncdu', '-o', '/dev/stdout', '-0'],
       ['gdu', '--non-interactive', '--no-progress'],
@@ -115,7 +115,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     id: 'top-down',
     pduCliArgs: ['--top-down'],
     competitors: [
-      ['dust', '--reverse'],
+      ['dust', '--no-progress', '--reverse'],
     ],
   },
   {
