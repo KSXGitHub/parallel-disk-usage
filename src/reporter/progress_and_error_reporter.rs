@@ -98,6 +98,10 @@ where
                 report_error(error_report);
                 bump!(errors += 1);
             }
+            DetectHardlink(info) => {
+                bump!(linked += info.links);
+                bump!(shared += info.size.into());
+            }
         }
     }
 }

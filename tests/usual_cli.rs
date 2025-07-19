@@ -9,6 +9,7 @@ use parallel_disk_usage::{
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetApparentSize,
+    hardlink::HardlinkIgnorant,
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
@@ -42,7 +43,8 @@ fn total_width() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -80,7 +82,8 @@ fn column_width() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -118,7 +121,8 @@ fn min_ratio_0() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -155,7 +159,8 @@ fn min_ratio() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -193,7 +198,8 @@ fn max_depth_2() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 2,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -231,7 +237,8 @@ fn max_depth_1() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 1,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -268,7 +275,8 @@ fn top_down() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -305,7 +313,8 @@ fn align_right() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -342,7 +351,8 @@ fn quantity_apparent_size() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -380,7 +390,8 @@ fn quantity_block_size() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetBlockSize,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -418,7 +429,8 @@ fn quantity_block_count() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetBlockCount,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -439,7 +451,6 @@ fn quantity_block_count() {
     assert_eq!(actual, expected);
 }
 
-#[cfg(unix)]
 #[test]
 fn bytes_format_plain() {
     let workspace = SampleWorkspace::default();
@@ -457,7 +468,8 @@ fn bytes_format_plain() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -478,7 +490,6 @@ fn bytes_format_plain() {
     assert_eq!(actual, expected);
 }
 
-#[cfg(unix)]
 #[test]
 fn bytes_format_metric() {
     let workspace = SampleWorkspace::default();
@@ -496,7 +507,8 @@ fn bytes_format_metric() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -517,7 +529,6 @@ fn bytes_format_metric() {
     assert_eq!(actual, expected);
 }
 
-#[cfg(unix)]
 #[test]
 fn bytes_format_binary() {
     let workspace = SampleWorkspace::default();
@@ -535,7 +546,8 @@ fn bytes_format_binary() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -572,7 +584,8 @@ fn path_to_workspace() {
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: DEFAULT_GET_SIZE,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -614,7 +627,8 @@ fn multiple_names() {
             let builder = FsTreeBuilder {
                 root: workspace.to_path_buf().join(name),
                 size_getter: GetApparentSize,
-                reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+                hardlinks_recorder: &HardlinkIgnorant,
+                reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
                 max_depth: 10,
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -678,7 +692,8 @@ fn multiple_names_max_depth_2() {
             let builder = FsTreeBuilder {
                 root: workspace.to_path_buf().join(name),
                 size_getter: GetApparentSize,
-                reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+                hardlinks_recorder: &HardlinkIgnorant,
+                reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
                 max_depth: 1,
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -737,7 +752,8 @@ fn multiple_names_max_depth_1() {
             let builder = FsTreeBuilder {
                 root: workspace.to_path_buf().join(name),
                 size_getter: GetApparentSize,
-                reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+                hardlinks_recorder: &HardlinkIgnorant,
+                reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
                 max_depth: 10,
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();

@@ -5,6 +5,7 @@ use parallel_disk_usage::{
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
     get_size::{self, GetSize},
+    hardlink::HardlinkIgnorant,
     os_string_display::OsStringDisplay,
     reporter::ErrorOnlyReporter,
     size,
@@ -15,7 +16,7 @@ use rand::{distr::Alphanumeric, rng, Rng};
 use rayon::prelude::*;
 use std::{
     env::temp_dir,
-    fs::{create_dir, metadata, remove_dir_all},
+    fs::{create_dir, metadata, remove_dir_all, symlink_metadata},
     io::Error,
     path::{Path, PathBuf},
     process::{Command, Output},
@@ -95,6 +96,28 @@ impl Default for SampleWorkspace {
     }
 }
 
+/// POSIX-exclusive functions
+#[cfg(unix)]
+impl SampleWorkspace {
+    /// Set up a temporary directory for tests.
+    ///
+    /// This directory would have a single file being hard-linked multiple times.
+    pub fn multiple_hardlinks_to_a_single_file(bytes: usize, links: u64) -> Self {
+        use std::fs::{hard_link, write as write_file};
+        let temp = Temp::new_dir().expect("create working directory for sample workspace");
+
+        let file_path = temp.join("file.txt");
+        write_file(&file_path, "a".repeat(bytes)).expect("create file.txt");
+
+        for num in 0..links {
+            hard_link(&file_path, temp.join(format!("link.{num}")))
+                .unwrap_or_else(|error| panic!("Failed to create 'link.{num}': {error}"));
+        }
+
+        SampleWorkspace(temp)
+    }
+}
+
 /// Make the snapshot of a [`TreeReflection`] testable.
 ///
 /// The real filesystem is often messy, causing `children` to mess up its order.
@@ -149,7 +172,8 @@ where
     let measure = |suffix: &str| {
         FsTreeBuilder {
             size_getter,
-            reporter: ErrorOnlyReporter::new(|error| {
+            hardlinks_recorder: &HardlinkIgnorant,
+            reporter: &ErrorOnlyReporter::new(|error| {
                 panic!("Unexpected call to report_error: {error:?}")
             }),
             root: root.join(suffix),
@@ -329,4 +353,11 @@ pub fn inspect_stderr(stderr: &[u8]) {
     if !text.is_empty() {
         eprintln!("STDERR:\n{text}\n");
     }
+}
+
+/// Read [apparent size](std::fs::Metadata::len) of a path.
+pub fn read_apparent_size(path: &Path) -> u64 {
+    path.pipe(symlink_metadata)
+        .unwrap_or_else(|error| panic!("Can't read metadata at {path:?}: {error}"))
+        .len()
 }

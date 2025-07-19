@@ -1,6 +1,7 @@
 use super::{
     data_tree::DataTree,
     get_size::GetSize,
+    hardlink::{RecordHardlinks, RecordHardlinksArgument},
     os_string_display::OsStringDisplay,
     reporter::{error_report::Operation::*, ErrorReport, Event, Reporter},
     size,
@@ -24,44 +25,52 @@ use std::{
 ///     os_string_display::OsStringDisplay,
 ///     reporter::{ErrorOnlyReporter, ErrorReport},
 ///     size::Bytes,
+///     hardlink::HardlinkIgnorant,
 /// };
 /// let builder = FsTreeBuilder {
 ///     root: std::env::current_dir().unwrap(),
+///     hardlinks_recorder: &HardlinkIgnorant,
 ///     size_getter: GetApparentSize,
-///     reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+///     reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
 ///     max_depth: 10,
 /// };
 /// let data_tree: DataTree<OsStringDisplay, Bytes> = builder.into();
 /// ```
 #[derive(Debug)]
-pub struct FsTreeBuilder<Size, SizeGetter, Report>
+pub struct FsTreeBuilder<'a, Size, SizeGetter, HardlinksRecorder, Report>
 where
-    Report: Reporter<Size> + Sync,
+    Report: Reporter<Size> + Sync + ?Sized,
     Size: size::Size + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Sync,
+    HardlinksRecorder: RecordHardlinks<Size, Report> + Sync + ?Sized,
 {
     /// Root of the directory tree.
     pub root: PathBuf,
     /// Returns size of an item.
     pub size_getter: SizeGetter,
+    /// Handle to detect and record hardlinks.
+    pub hardlinks_recorder: &'a HardlinksRecorder,
     /// Reports progress to external system.
-    pub reporter: Report,
+    pub reporter: &'a Report,
     /// Deepest level of descendent display in the graph. The sizes beyond the max depth still count toward total.
     pub max_depth: u64,
 }
 
-impl<Size, SizeGetter, Report> From<FsTreeBuilder<Size, SizeGetter, Report>>
+impl<'a, Size, SizeGetter, HardlinksRecorder, Report>
+    From<FsTreeBuilder<'a, Size, SizeGetter, HardlinksRecorder, Report>>
     for DataTree<OsStringDisplay, Size>
 where
-    Report: Reporter<Size> + Sync,
+    Report: Reporter<Size> + Sync + ?Sized,
     Size: size::Size + Send + Sync,
     SizeGetter: GetSize<Size = Size> + Sync,
+    HardlinksRecorder: RecordHardlinks<Size, Report> + Sync + ?Sized,
 {
     /// Create a [`DataTree`] from an [`FsTreeBuilder`].
-    fn from(builder: FsTreeBuilder<Size, SizeGetter, Report>) -> Self {
+    fn from(builder: FsTreeBuilder<Size, SizeGetter, HardlinksRecorder, Report>) -> Self {
         let FsTreeBuilder {
             root,
             size_getter,
+            hardlinks_recorder,
             reporter,
             max_depth,
         } = builder;
@@ -89,6 +98,11 @@ where
                         let is_dir = stats.is_dir();
                         let size = size_getter.get_size(&stats);
                         reporter.report(Event::ReceiveData(size));
+                        hardlinks_recorder
+                            .record_hardlinks(RecordHardlinksArgument::new(
+                                path, &stats, size, reporter,
+                            ))
+                            .ok(); // ignore the error for now
                         (is_dir, size)
                     }
                 };
