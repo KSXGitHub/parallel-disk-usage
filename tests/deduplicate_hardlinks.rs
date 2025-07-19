@@ -7,7 +7,7 @@ pub use _utils::*;
 use command_extra::CommandExtra;
 use parallel_disk_usage::{
     data_tree::Reflection,
-    json_data::{JsonData, JsonDataBody},
+    json_data::{JsonData, JsonTree},
     size::Bytes,
 };
 use pipe_trait::Pipe;
@@ -30,7 +30,7 @@ fn deduplicate_multiple_hardlinks_to_a_single_file() {
     let links = 10;
     let workspace = SampleWorkspace::multiple_hardlinks_to_a_single_file(100_000, links);
 
-    let json = Command::new(PDU)
+    let tree = Command::new(PDU)
         .with_current_dir(&workspace)
         .with_arg("--quantity=apparent-size")
         .with_arg("--deduplicate-hardlinks")
@@ -40,18 +40,18 @@ fn deduplicate_multiple_hardlinks_to_a_single_file() {
         .expect("spawn command")
         .pipe(stdout_text)
         .pipe_as_ref(serde_json::from_str::<JsonData>)
-        .expect("parse stdout as JsonData");
+        .expect("parse stdout as JsonData")
+        .body
+        .pipe(JsonTree::<Bytes>::try_from)
+        .expect("get tree of bytes");
 
-    let JsonDataBody::Bytes(tree) = &json.body else {
-        panic!("expecting Bytes but got {:?}", &json.body);
-    };
+    let actual_size = tree.size;
 
     let file_size = workspace
         .join("file.txt")
         .pipe_as_ref(read_apparent_size)
         .pipe(Bytes::new);
 
-    let actual_size = tree.size;
     let expected_size = workspace
         .pipe_as_ref(read_apparent_size)
         .pipe(Bytes::new)
@@ -85,7 +85,7 @@ fn do_not_deduplicate_multiple_hardlinks_to_a_single_file() {
     let links = 10;
     let workspace = SampleWorkspace::multiple_hardlinks_to_a_single_file(100_000, links);
 
-    let json = Command::new(PDU)
+    let actual_size = Command::new(PDU)
         .with_current_dir(&workspace)
         .with_arg("--quantity=apparent-size")
         .with_arg("--json-output")
@@ -94,12 +94,11 @@ fn do_not_deduplicate_multiple_hardlinks_to_a_single_file() {
         .expect("spawn command")
         .pipe(stdout_text)
         .pipe_as_ref(serde_json::from_str::<JsonData>)
-        .expect("parse stdout as JsonData");
-
-    let actual_size = match &json.body {
-        JsonDataBody::Blocks(_) => panic!("expecting Bytes, but got {:?}", &json.body),
-        JsonDataBody::Bytes(tree) => tree.size,
-    };
+        .expect("parse stdout as JsonData")
+        .body
+        .pipe(JsonTree::<Bytes>::try_from)
+        .expect("get tree of bytes")
+        .size;
 
     let expected_size = workspace
         .join("file.txt")
