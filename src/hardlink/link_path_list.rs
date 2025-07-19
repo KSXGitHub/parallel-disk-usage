@@ -10,7 +10,7 @@ use std::path::PathBuf;
 
 /// List of different hardlinks to the same file.
 ///
-/// **Reflection:** `LinkPathList` does not implement `PartialEq`, `Eq`, `Hash`,
+/// **Reflection:** `LinkPathList` does not implement `PartialEq`, `Eq`,
 /// `Deserialize`, and `Serialize` directly. Instead, it can be converted into a
 /// [`Reflection`] which implement these traits. Do note that the time complexity
 /// of such conversion is O(n) as it has to convert a `Vec` into a `HashSet`.
