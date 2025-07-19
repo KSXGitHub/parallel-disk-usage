@@ -31,7 +31,7 @@ set edit:completion:arg-completer[pdu] = {|@words|
             cand --json-output 'Print JSON data instead of an ASCII chart'
             cand --top-down 'Print the tree top-down instead of bottom-up'
             cand --align-right 'Set the root of the bars to the right'
-            cand --no-sort 'Preserve order of entries'
+            cand --no-sort 'Do not sort the branches in the tree'
             cand --silent-errors 'Prevent filesystem error messages from appearing in stderr'
             cand --no-errors 'Prevent filesystem error messages from appearing in stderr'
             cand --progress 'Report progress being made at the expense of performance'
