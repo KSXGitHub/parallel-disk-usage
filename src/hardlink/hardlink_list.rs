@@ -65,6 +65,7 @@ impl<Size> HardlinkList<Size> {
 /// <!-- Should have been `std::os::unix::fs::MetadataExt::ino` but it would error on Windows -->
 /// [ino]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
 #[derive(Debug, Display, Error)]
+#[cfg_attr(test, derive(PartialEq, Eq))]
 #[display(bound(Size: Debug))]
 #[display("Size for inode {ino} changed from {recorded:?} to {detected:?}")]
 pub struct SizeConflictError<Size> {
@@ -79,6 +80,7 @@ pub struct SizeConflictError<Size> {
 /// [nlink]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.nlink
 /// [ino]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
 #[derive(Debug, Display, Error)]
+#[cfg_attr(test, derive(PartialEq, Eq))]
 #[display("Number of links of inode {ino} changed from {recorded:?} to {detected:?}")]
 pub struct NumberOfLinksConflictError {
     pub ino: InodeNumber,
@@ -88,6 +90,7 @@ pub struct NumberOfLinksConflictError {
 
 /// Error that occurs when it fails to add an item to [`HardlinkList`].
 #[derive(Debug, Display, Error)]
+#[cfg_attr(test, derive(PartialEq, Eq))]
 #[display(bound(Size: Debug))]
 #[non_exhaustive]
 pub enum AddError<Size> {
@@ -144,7 +147,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::HardlinkList;
+    use super::{AddError, HardlinkList, NumberOfLinksConflictError, SizeConflictError};
     use crate::size::Bytes;
     use pipe_trait::Pipe;
     use pretty_assertions::{assert_eq, assert_ne};
@@ -260,5 +263,37 @@ mod tests {
 
         assert_ne!(a, b);
         assert_ne!(b, a);
+    }
+
+    #[test]
+    fn detect_size_change() {
+        let list = HardlinkList::<Bytes>::new();
+        list.add(123.into(), 100.into(), 1, "a".as_ref())
+            .expect("add the first path");
+        let actual = list
+            .add(123.into(), 110.into(), 1, "b".as_ref())
+            .expect_err("add the second path");
+        let expected = AddError::SizeConflict(SizeConflictError {
+            ino: 123.into(),
+            recorded: 100.into(),
+            detected: 110.into(),
+        });
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn detect_number_of_links_change() {
+        let list = HardlinkList::<Bytes>::new();
+        list.add(123.into(), 100.into(), 1, "a".as_ref())
+            .expect("add the first path");
+        let actual = list
+            .add(123.into(), 100.into(), 2, "b".as_ref())
+            .expect_err("add the second path");
+        let expected = AddError::NumberOfLinksConflict(NumberOfLinksConflictError {
+            ino: 123.into(),
+            recorded: 1,
+            detected: 2,
+        });
+        assert_eq!(actual, expected);
     }
 }
