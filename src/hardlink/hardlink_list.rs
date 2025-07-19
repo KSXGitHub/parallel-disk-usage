@@ -73,12 +73,26 @@ pub struct SizeConflictError<Size> {
     pub detected: Size,
 }
 
+/// Error that occurs when a different [`nlink`][nlink] was detected for the same [`ino`][ino].
+///
+/// <!-- Should have been `std::os::unix::fs::MetadataExt::ino` but it would error on Windows -->
+/// [nlink]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.nlink
+/// [ino]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
+#[derive(Debug, Display, Error)]
+#[display("Number of links of inode {ino} changed from {recorded:?} to {detected:?}")]
+pub struct NumberOfLinksConflictError {
+    pub ino: InodeNumber,
+    pub recorded: u64,
+    pub detected: u64,
+}
+
 /// Error that occurs when it fails to add an item to [`HardlinkList`].
 #[derive(Debug, Display, Error)]
 #[display(bound(Size: Debug))]
 #[non_exhaustive]
 pub enum AddError<Size> {
     SizeConflict(SizeConflictError<Size>),
+    NumberOfLinksConflict(NumberOfLinksConflictError),
 }
 
 impl<Size> HardlinkList<Size>
@@ -94,25 +108,37 @@ where
         links: u64,
         path: &Path,
     ) -> Result<(), AddError<Size>> {
-        let mut size_assertion = Ok(());
+        let mut assertions = Ok(());
         self.0
             .entry(ino)
             .and_modify(|recorded| {
-                if size == recorded.size {
-                    recorded.paths.add(path.to_path_buf());
-                } else {
-                    size_assertion = Err(SizeConflictError {
+                if size != recorded.size {
+                    assertions = Err(AddError::SizeConflict(SizeConflictError {
                         ino,
                         recorded: recorded.size,
                         detected: size,
-                    });
+                    }));
+                    return;
                 }
+
+                if links != recorded.links {
+                    assertions = Err(AddError::NumberOfLinksConflict(
+                        NumberOfLinksConflictError {
+                            ino,
+                            recorded: recorded.links,
+                            detected: links,
+                        },
+                    ));
+                    return;
+                }
+
+                recorded.paths.add(path.to_path_buf());
             })
             .or_insert_with(|| {
                 let paths = path.to_path_buf().pipe(LinkPathList::single);
                 Value { size, links, paths }
             });
-        size_assertion.map_err(AddError::SizeConflict)
+        assertions
     }
 }
 
