@@ -13,7 +13,7 @@ use std::path::PathBuf;
 /// **Serialization and deserialization:** _(feature: `json`)_ `LinkPathList` does not implement
 /// `Serialize` and `Deserialize` traits directly, instead, it can be converted into/from a
 /// [`Reflection`] which implements these traits.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone)]
 pub struct LinkPathList(Vec<PathBuf>);
 
 impl LinkPathList {
