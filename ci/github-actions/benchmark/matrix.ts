@@ -112,6 +112,17 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     ],
   },
   {
+    id: 'deduplicate-hardlinks',
+    pduCliArgs: ['--deduplicate-hardlinks'],
+    competitors: [
+      ['dust', '--no-progress'],
+      ['dua'],
+      ['ncdu', '-o', '/dev/stdout', '-0'],
+      ['gdu', '--non-interactive', '--no-progress'],
+      ['du'],
+    ],
+  },
+  {
     id: 'top-down',
     pduCliArgs: ['--top-down'],
     competitors: [
