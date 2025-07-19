@@ -29,9 +29,9 @@ struct Value<Size> {
 
 /// Storage to be used by [`crate::hardlink::RecordHardlinks`].
 ///
-/// **Serialization and deserialization:** _(feature: `json`)_ `HardlinkList` does not implement
-/// `Serialize` and `Deserialize` traits directly, instead, it can be converted into/from a
-/// [`Reflection`] which implements these traits.
+/// **Reflection:** `HardlinkList` does not implement `PartialEq`, `Eq`, `Hash`,
+/// `Deserialize`, and `Serialize` directly. Instead, it can be converted into a
+/// [`Reflection`] which implement these traits.
 #[derive(Debug, SmartDefault, Clone)]
 pub struct HardlinkList<Size>(
     /// Map an inode number to its size, number of links, and detected paths.

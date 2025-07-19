@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 /// Intermediate format used for construction and inspection of
 /// [`LinkPathList`]'s internal content.
 ///
+/// **Equality and identity:** `Reflection` implements `PartialEq`, `Eq`, and `Hash` traits.
+///
 /// **Serialization and deserialization:** _(feature: `json`)_ `Reflection` implements
 /// `Serialize` and `Deserialize` traits, this allows functions in `serde_json` to convert
 /// a `Reflection` into/from JSON.

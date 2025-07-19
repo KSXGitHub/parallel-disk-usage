@@ -10,9 +10,10 @@ use std::path::PathBuf;
 
 /// List of different hardlinks to the same file.
 ///
-/// **Serialization and deserialization:** _(feature: `json`)_ `LinkPathList` does not implement
-/// `Serialize` and `Deserialize` traits directly, instead, it can be converted into/from a
-/// [`Reflection`] which implements these traits.
+/// **Reflection:** `LinkPathList` does not implement `PartialEq`, `Eq`, `Hash`,
+/// `Deserialize`, and `Serialize` directly. Instead, it can be converted into a
+/// [`Reflection`] which implement these traits. Do note that the time complexity
+/// of such conversion is O(n) as it has to convert a `Vec` into a `HashSet`.
 #[derive(Debug, Clone)]
 pub struct LinkPathList(Vec<PathBuf>);
 
