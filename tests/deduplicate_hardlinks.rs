@@ -109,3 +109,65 @@ fn multiple_hardlinks_to_a_single_file_without_deduplication() {
 
     assert_eq!(actual_size, expected_size);
 }
+
+#[test]
+fn complex_tree_with_shared_and_unique_files_with_deduplication() {
+    let files_per_branch = 255;
+    let workspace =
+        SampleWorkspace::complex_tree_with_shared_and_unique_files(files_per_branch, 100_000);
+
+    let tree = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--min-ratio=0")
+        .with_arg("--quantity=apparent-size")
+        .with_arg("--deduplicate-hardlinks")
+        .with_arg("--json-output")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text)
+        .pipe_as_ref(serde_json::from_str::<JsonData>)
+        .expect("parse stdout as JsonData")
+        .body
+        .pipe(JsonTree::<Bytes>::try_from)
+        .expect("get tree of bytes");
+
+    let actual_size = tree.size;
+
+    let file_size = workspace
+        .join("no-hardlinks/file-0.txt")
+        .pipe_as_ref(read_apparent_size)
+        .pipe(Bytes::new);
+
+    let inode_size = |path: &str| {
+        workspace
+            .join(path)
+            .pipe_as_ref(read_apparent_size)
+            .pipe(Bytes::new)
+    };
+
+    // The following formula treat the first file as "real" and
+    // the non-first file with the same inode as "fake" for ease
+    // of reasoning.
+    // It should still produce the same result as the proper
+    // deduplication formula however.
+    #[expect(clippy::erasing_op)]
+    let expected_size: Bytes = [
+        inode_size("."),
+        inode_size("no-hardlinks"),
+        inode_size("some-hardlinks"),
+        inode_size("only-hardlinks"),
+        inode_size("only-hardlinks/exclusive"),
+        inode_size("only-hardlinks/mixed"),
+        inode_size("only-hardlinks/external"),
+        file_size * files_per_branch, // no-hardlinks/*
+        file_size * files_per_branch, // some-hardlinks/*
+        file_size * files_per_branch, // only-hardlinks/exclusive/*
+        file_size * files_per_branch, // only-hardlinks/mixed/*
+        file_size * 0usize,           // only-hardlinks/external/*
+    ]
+    .into_iter()
+    .sum();
+
+    assert_eq!(actual_size, expected_size);
+}
