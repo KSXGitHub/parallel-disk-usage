@@ -154,7 +154,7 @@ fn multiple_hardlinks_to_a_single_file_without_deduplication() {
         .pipe(Bytes::new);
     assert_eq!(actual_size, expected_size);
 
-    assert!(tree.shared.details.is_none());
+    assert_eq!(tree.shared.details, None);
     assert_eq!(tree.shared.summary, None);
 }
 
