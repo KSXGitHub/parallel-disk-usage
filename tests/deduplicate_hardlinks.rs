@@ -56,6 +56,7 @@ fn multiple_hardlinks_to_a_single_file_with_deduplication() {
         .pipe_as_ref(read_apparent_size)
         .pipe(Bytes::new)
         .add(file_size);
+
     assert_eq!(actual_size, expected_size);
 
     let actual_children = {
