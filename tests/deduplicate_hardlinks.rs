@@ -425,7 +425,8 @@ fn complex_tree_with_shared_and_unique_files_without_deduplication() {
             * [
                 3 * files_per_branch / 8,
                 2 * files_per_branch / 8,
-                files_per_branch * 2 / 8,
+                files_per_branch / 8,
+                files_per_branch / 8,
                 files_per_branch * 4 / 8,
             ]
             .into_iter()
