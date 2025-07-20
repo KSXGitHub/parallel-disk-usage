@@ -7,8 +7,8 @@ use pipe_trait::Pipe;
 #[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};
 
-/// Intermediate format used for construction and inspection of
-/// [`HardlinkList`]'s internal content.
+/// Intermediate format used for construction and inspection of [`HardlinkList`]'s
+/// internal content.
 ///
 /// **Guarantees:**
 /// * Every inode number is unique.

@@ -6,8 +6,8 @@ use std::{collections::HashSet, path::PathBuf};
 #[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};
 
-/// Intermediate format used for construction and inspection of
-/// [`LinkPathList`]'s internal content.
+/// Intermediate format used for construction and inspection of [`LinkPathList`]'s
+/// internal content.
 ///
 /// **Equality:** `Reflection` implements `PartialEq` and `Eq` traits.
 ///
