@@ -242,24 +242,7 @@ fn complex_tree_with_shared_and_unique_files_with_deduplication() {
         assert_eq!(actual, None);
     }
 
-    // The entries are sorted by their inodes
-    {
-        let inodes: Vec<_> = tree
-            .shared
-            .details
-            .as_ref()
-            .expect("get details")
-            .iter()
-            .map(|item| item.ino)
-            .map(u64::from)
-            .collect();
-        assert!(
-            inodes.is_sorted(),
-            "Expecting the entries to be sorted by inodes, but they weren't: {inodes:?}",
-        );
-    }
-
-    // All entries have unique inodes
+    // All entries are sorted by their inodes and have unique inodes
     {
         let actual: Vec<_> = tree
             .shared
