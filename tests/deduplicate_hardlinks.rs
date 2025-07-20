@@ -371,3 +371,74 @@ fn complex_tree_with_shared_and_unique_files_with_deduplication() {
     };
     assert_eq!(actual_shared_summary, expected_shared_summary);
 }
+
+#[test]
+fn complex_tree_with_shared_and_unique_files_without_deduplication() {
+    let files_per_branch = 256;
+    let workspace =
+        SampleWorkspace::complex_tree_with_shared_and_unique_files(files_per_branch, 100_000);
+
+    let tree = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--min-ratio=0")
+        .with_arg("--quantity=apparent-size")
+        .with_arg("--json-output")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text)
+        .pipe_as_ref(serde_json::from_str::<JsonData>)
+        .expect("parse stdout as JsonData")
+        .body
+        .pipe(JsonTree::<Bytes>::try_from)
+        .expect("get tree of bytes");
+
+    let actual_size = tree.size;
+
+    let file_size = workspace
+        .join("no-hardlinks/file-0.txt")
+        .pipe_as_ref(read_apparent_size)
+        .pipe(Bytes::new);
+
+    let inode_size = |path: &str| {
+        workspace
+            .join(path)
+            .pipe_as_ref(read_apparent_size)
+            .pipe(Bytes::new)
+    };
+
+    // The following formula treat the first file as "real" and
+    // the non-first file with the same inode as "fake" for ease
+    // of reasoning.
+    // It should still produce the same result as the proper
+    // deduplication formula however.
+    let expected_size: Bytes = [
+        inode_size("."),
+        inode_size("no-hardlinks"),
+        inode_size("some-hardlinks"),
+        inode_size("only-hardlinks"),
+        inode_size("only-hardlinks/exclusive"),
+        inode_size("only-hardlinks/mixed"),
+        inode_size("only-hardlinks/external"),
+        file_size * files_per_branch, // no-hardlinks/*
+        file_size
+            * [
+                3 * files_per_branch / 8,
+                2 * files_per_branch / 8,
+                files_per_branch * 2 / 8,
+                files_per_branch * 4 / 8,
+            ]
+            .into_iter()
+            .sum::<usize>(), // some-hardlinks/*
+        file_size * (2 * files_per_branch), // only-hardlinks/exclusive/*
+        file_size * (files_per_branch / 2 + 2 * files_per_branch / 2), // only-hardlinks/mixed/*
+        file_size * files_per_branch, // only-hardlinks/external/*
+    ]
+    .into_iter()
+    .sum();
+
+    assert_eq!(actual_size, expected_size);
+
+    assert_eq!(tree.shared.details, None);
+    assert_eq!(tree.shared.summary, None);
+}
