@@ -336,6 +336,38 @@ fn complex_tree_with_shared_and_unique_files_with_deduplication() {
         assert_eq!(actual, expected);
     }
 
-    // TODO: tree.shared.details
-    // TODO: tree.shared.summary
+    let actual_shared_summary = tree.shared.summary;
+    let expected_shared_summary = {
+        // The following formula treat the first file as "real" and
+        // the non-first file with the same inode as "fake" for ease
+        // of reasoning.
+        // It should still produce the same result as the proper
+        // deduplication formula however.
+        let mut summary = Summary::default();
+        summary.inodes = [
+            0,                                               // no-hardlinks/*
+            2 * files_per_branch / 8 + files_per_branch / 2, // some-hardlinks/*
+            files_per_branch,                                // only-hardlinks/exclusive/*
+            files_per_branch,                                // only-hardlinks/mixed/*
+            0,                                               // only-hardlinks/external/*
+        ]
+        .into_iter()
+        .sum();
+        summary.exclusive_inodes = summary.inodes;
+        summary.all_links = [
+            0,                                                                              // no-hardlinks/*
+            files_per_branch * 3 / 8 + files_per_branch * 2 / 8 + files_per_branch * 2 / 2, // some-hardlinks/*
+            files_per_branch * 2, // only-hardlinks/exclusive/*
+            files_per_branch * 2 / 2 + files_per_branch * 2 / 2, // only-hardlinks/mixed/*
+            0,                    // only-hardlinks/external/*
+        ]
+        .into_iter()
+        .sum::<usize>() as u64;
+        summary.detected_links = summary.all_links as usize;
+        summary.exclusive_links = summary.all_links as usize;
+        summary.shared_size = file_size * summary.inodes;
+        summary.exclusive_shared_size = summary.shared_size;
+        Some(summary)
+    };
+    assert_eq!(actual_shared_summary, expected_shared_summary);
 }
