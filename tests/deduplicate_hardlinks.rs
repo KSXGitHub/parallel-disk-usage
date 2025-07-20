@@ -407,11 +407,6 @@ fn complex_tree_with_shared_and_unique_files_without_deduplication() {
             .pipe(Bytes::new)
     };
 
-    // The following formula treat the first file as "real" and
-    // the non-first file with the same inode as "fake" for ease
-    // of reasoning.
-    // It should still produce the same result as the proper
-    // deduplication formula however.
     let expected_size: Bytes = [
         inode_size("."),
         inode_size("no-hardlinks"),
