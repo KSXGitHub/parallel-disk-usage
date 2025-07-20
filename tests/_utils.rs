@@ -226,7 +226,7 @@ impl SampleWorkspace {
             let link_name = format!("linkX-{index}.txt");
             let link_path = temp.join("only-hardlinks/external").join(link_name);
 
-            let file_path = if index <= half {
+            let file_path = if index < half {
                 let file_name = format!("link0-{index}.txt"); // file name from only-hardlinks/mixed
                 let file_path = temp.join("only-hardlinks/mixed").join(file_name);
                 if let Err(error) = write_file(&file_path, "a".repeat(bytes_per_file)) {
