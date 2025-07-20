@@ -26,7 +26,7 @@ fn stdio(command: Command) -> Command {
 }
 
 #[test]
-fn deduplicate_multiple_hardlinks_to_a_single_file() {
+fn multiple_hardlinks_to_a_single_file_with_deduplication() {
     let links = 10;
     let workspace = SampleWorkspace::multiple_hardlinks_to_a_single_file(100_000, links);
 
@@ -81,7 +81,7 @@ fn deduplicate_multiple_hardlinks_to_a_single_file() {
 }
 
 #[test]
-fn do_not_deduplicate_multiple_hardlinks_to_a_single_file() {
+fn multiple_hardlinks_to_a_single_file_without_deduplication() {
     let links = 10;
     let workspace = SampleWorkspace::multiple_hardlinks_to_a_single_file(100_000, links);
 
