@@ -92,6 +92,7 @@ fn multiple_hardlinks_to_a_single_file_with_deduplication() {
     let actual_shared_details: Vec<_> = tree
         .shared
         .details
+        .as_ref()
         .expect("get details")
         .iter()
         .cloned()
