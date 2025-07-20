@@ -356,9 +356,9 @@ fn complex_tree_with_shared_and_unique_files_with_deduplication() {
         summary.exclusive_inodes = summary.inodes;
         summary.all_links = [
             0,                                                                              // no-hardlinks/*
-            files_per_branch * 3 / 8 + files_per_branch * 2 / 8 + files_per_branch * 2 / 2, // some-hardlinks/*
-            files_per_branch * 2, // only-hardlinks/exclusive/*
-            files_per_branch * 2 / 2 + files_per_branch * 2 / 2, // only-hardlinks/mixed/*
+            3 * files_per_branch / 8 + 2 * files_per_branch / 8 + 2 * files_per_branch / 2, // some-hardlinks/*
+            2 * files_per_branch, // only-hardlinks/exclusive/*
+            2 * files_per_branch / 2 + 2 * files_per_branch / 2, // only-hardlinks/mixed/*
             0,                    // only-hardlinks/external/*
         ]
         .into_iter()
