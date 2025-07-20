@@ -216,4 +216,7 @@ fn complex_tree_with_shared_and_unique_files_with_deduplication() {
     .sum();
 
     assert_eq!(actual_size, expected_size);
+
+    // TODO: tree.shared.details
+    // TODO: tree.shared.summary
 }
