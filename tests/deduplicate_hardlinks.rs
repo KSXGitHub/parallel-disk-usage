@@ -259,6 +259,27 @@ fn complex_tree_with_shared_and_unique_files_with_deduplication() {
         );
     }
 
+    // All entries have unique inodes
+    {
+        let actual: Vec<_> = tree
+            .shared
+            .details
+            .as_ref()
+            .expect("get details")
+            .iter()
+            .map(|item| item.ino)
+            .map(u64::from)
+            .collect();
+        let expected = actual
+            .clone()
+            .into_iter()
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>()
+            .into_sorted();
+        assert_eq!(actual, expected);
+    }
+
     // No files from no-hardlinks should appear
     {
         let actual = tree
