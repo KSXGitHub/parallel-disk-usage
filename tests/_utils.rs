@@ -227,7 +227,11 @@ impl SampleWorkspace {
 
             let file_path = if index <= half {
                 let file_name = format!("link0-{index}.txt"); // file name from only-hardlinks/mixed
-                temp.join("only-hardlinks/mixed").join(file_name)
+                let file_path = temp.join("only-hardlinks/mixed").join(file_name);
+                if let Err(error) = write_file(&file_path, "a".repeat(bytes_per_file)) {
+                    panic!("Failed to write {bytes_per_file} bytes to {file_path:?}: {error}");
+                }
+                file_path
             } else {
                 let file_name = format!("file-{index}.txt"); // file name from some-hardlinks
                 temp.join("some-hardlinks").join(file_name)
