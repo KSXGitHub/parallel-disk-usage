@@ -15,6 +15,7 @@ use pretty_assertions::assert_eq;
 use rand::{distr::Alphanumeric, rng, Rng};
 use rayon::prelude::*;
 use std::{
+    cmp::Ordering,
     env::temp_dir,
     fs::{create_dir, metadata, remove_dir_all, symlink_metadata},
     io::Error,
@@ -261,10 +262,10 @@ where
     let DataTreeReflection {
         name,
         size,
-        mut children,
+        children,
     } = tree_reflection;
-    children.sort_by(|left, right| left.name.cmp(&right.name));
     let children = children
+        .into_sorted_by(|left, right| left.name.cmp(&right.name))
         .into_par_iter()
         .map(sanitize_tree_reflection)
         .collect();
@@ -488,4 +489,38 @@ pub fn read_apparent_size(path: &Path) -> u64 {
     path.pipe(symlink_metadata)
         .unwrap_or_else(|error| panic!("Can't read metadata at {path:?}: {error}"))
         .len()
+}
+
+/// Utility methods to sort various types of arrays.
+pub trait IntoSorted<Item>: Sized {
+    /// Sort an array by [`Ord`] and return it.
+    fn into_sorted(self) -> Self
+    where
+        Item: Ord;
+
+    /// Sort an array by a function and return it.
+    fn into_sorted_by<Order>(self, order: Order) -> Self
+    where
+        Order: FnMut(&Item, &Item) -> Ordering;
+}
+
+impl<Item, Array> IntoSorted<Item> for Array
+where
+    Array: AsMut<[Item]> + Sized,
+{
+    fn into_sorted(mut self) -> Self
+    where
+        Item: Ord,
+    {
+        self.as_mut().sort();
+        self
+    }
+
+    fn into_sorted_by<Order>(mut self, order: Order) -> Self
+    where
+        Order: FnMut(&Item, &Item) -> Ordering,
+    {
+        self.as_mut().sort_by(order);
+        self
+    }
 }
