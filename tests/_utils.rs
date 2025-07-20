@@ -201,7 +201,7 @@ impl SampleWorkspace {
 
         // Create links in only-hardlinks/mixed.
         // Let's divide the PLANNED links into 2 equal groups.
-        // Each link in the first group is PLANNED to shared with only-hardlinks/external.
+        // Each link in the first group is PLANNED to share with only-hardlinks/external.
         // Each link in the second group is exclusive.
         (half..whole).par_bridge().for_each(|index| {
             let file_name = format!("link0-{index}.txt");
