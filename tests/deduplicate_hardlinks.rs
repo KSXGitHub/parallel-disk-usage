@@ -160,7 +160,7 @@ fn multiple_hardlinks_to_a_single_file_without_deduplication() {
 
 #[test]
 fn complex_tree_with_shared_and_unique_files_with_deduplication() {
-    let files_per_branch = 255;
+    let files_per_branch = 256;
     let workspace =
         SampleWorkspace::complex_tree_with_shared_and_unique_files(files_per_branch, 100_000);
 
