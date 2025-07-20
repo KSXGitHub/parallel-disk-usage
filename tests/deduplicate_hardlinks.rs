@@ -7,15 +7,21 @@ pub use _utils::*;
 use command_extra::CommandExtra;
 use parallel_disk_usage::{
     data_tree::Reflection,
-    hardlink::hardlink_list::Summary,
+    hardlink::{
+        hardlink_list::{self, Summary},
+        LinkPathListReflection,
+    },
+    inode::InodeNumber,
     json_data::{JsonData, JsonTree},
     size::Bytes,
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use std::{
+    collections::HashSet,
     iter,
     ops::{Add, Mul},
+    path::PathBuf,
     process::{Command, Stdio},
 };
 
@@ -51,6 +57,11 @@ fn multiple_hardlinks_to_a_single_file_with_deduplication() {
         .pipe_as_ref(read_apparent_size)
         .pipe(Bytes::new);
 
+    let file_ino = workspace
+        .join("file.txt")
+        .pipe_as_ref(read_ino)
+        .pipe(InodeNumber::from);
+
     let actual_size = tree.size;
     let expected_size = workspace
         .pipe_as_ref(read_apparent_size)
@@ -77,6 +88,26 @@ fn multiple_hardlinks_to_a_single_file_with_deduplication() {
             .collect()
     };
     assert_eq!(actual_children, expected_children);
+
+    let actual_shared_details: Vec<_> = tree
+        .shared
+        .details
+        .expect("get details")
+        .iter()
+        .cloned()
+        .collect();
+    let expected_shared_details = vec![hardlink_list::reflection::ReflectionEntry {
+        ino: file_ino,
+        size: file_size,
+        links: 1 + links,
+        paths: (0..links)
+            .map(|num| format!("./link.{num}"))
+            .chain("./file.txt".to_string().pipe(iter::once))
+            .map(PathBuf::from)
+            .collect::<HashSet<_>>()
+            .pipe(LinkPathListReflection),
+    }];
+    assert_eq!(actual_shared_details, expected_shared_details);
 
     let actual_shared_summary = tree.shared.summary;
     let expected_shared_summary = {
@@ -121,6 +152,7 @@ fn multiple_hardlinks_to_a_single_file_without_deduplication() {
         .pipe(Bytes::new);
     assert_eq!(actual_size, expected_size);
 
+    assert!(tree.shared.details.is_none());
     assert_eq!(tree.shared.summary, None);
 }
 

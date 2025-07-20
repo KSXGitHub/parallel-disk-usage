@@ -491,6 +491,15 @@ pub fn read_apparent_size(path: &Path) -> u64 {
         .len()
 }
 
+/// Read [ino](std::os::unix::fs::MetadataExt::ino) of a path.
+#[cfg(unix)]
+pub fn read_ino(path: &Path) -> u64 {
+    use std::os::unix::fs::MetadataExt;
+    path.pipe(symlink_metadata)
+        .unwrap_or_else(|error| panic!("Can't read metadata at {path:?}: {error}"))
+        .ino()
+}
+
 /// Utility methods to sort various types of arrays.
 pub trait IntoSorted<Item>: Sized {
     /// Sort an array by [`Ord`] and return it.
