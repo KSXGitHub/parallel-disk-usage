@@ -7,6 +7,7 @@ pub use _utils::*;
 use command_extra::CommandExtra;
 use parallel_disk_usage::{
     data_tree::Reflection,
+    hardlink::hardlink_list::Summary,
     json_data::{JsonData, JsonTree},
     size::Bytes,
 };
@@ -77,6 +78,20 @@ fn multiple_hardlinks_to_a_single_file_with_deduplication() {
             .collect()
     };
     assert_eq!(actual_children, expected_children);
+
+    let actual_shared_summary = tree.shared.summary;
+    let expected_shared_summary = {
+        let mut summary = Summary::default();
+        summary.inodes = 1;
+        summary.exclusive_inodes = 1;
+        summary.all_links = 1 + links;
+        summary.detected_links = 1 + links as usize;
+        summary.exclusive_links = 1 + links as usize;
+        summary.shared_size = file_size;
+        summary.exclusive_shared_size = file_size;
+        Some(summary)
+    };
+    assert_eq!(actual_shared_summary, expected_shared_summary);
 }
 
 #[test]
@@ -84,7 +99,7 @@ fn multiple_hardlinks_to_a_single_file_without_deduplication() {
     let links = 10;
     let workspace = SampleWorkspace::multiple_hardlinks_to_a_single_file(100_000, links);
 
-    let actual_size = Command::new(PDU)
+    let tree = Command::new(PDU)
         .with_current_dir(&workspace)
         .with_arg("--quantity=apparent-size")
         .with_arg("--json-output")
@@ -96,17 +111,18 @@ fn multiple_hardlinks_to_a_single_file_without_deduplication() {
         .expect("parse stdout as JsonData")
         .body
         .pipe(JsonTree::<Bytes>::try_from)
-        .expect("get tree of bytes")
-        .size;
+        .expect("get tree of bytes");
 
+    let actual_size = tree.size;
     let expected_size = workspace
         .join("file.txt")
         .pipe_as_ref(read_apparent_size)
         .mul(links + 1)
         .add(read_apparent_size(&workspace))
         .pipe(Bytes::new);
-
     assert_eq!(actual_size, expected_size);
+
+    assert_eq!(tree.shared.summary, None);
 }
 
 #[test]
