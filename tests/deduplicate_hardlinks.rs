@@ -45,18 +45,16 @@ fn multiple_hardlinks_to_a_single_file_with_deduplication() {
         .pipe(JsonTree::<Bytes>::try_from)
         .expect("get tree of bytes");
 
-    let actual_size = tree.size;
-
     let file_size = workspace
         .join("file.txt")
         .pipe_as_ref(read_apparent_size)
         .pipe(Bytes::new);
 
+    let actual_size = tree.size;
     let expected_size = workspace
         .pipe_as_ref(read_apparent_size)
         .pipe(Bytes::new)
         .add(file_size);
-
     assert_eq!(actual_size, expected_size);
 
     let actual_children = {
