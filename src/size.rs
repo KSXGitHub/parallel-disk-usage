@@ -35,6 +35,7 @@ pub trait Size:
     + MulAssignEx<u16>
     + MulAssignEx<u32>
     + MulAssignEx<u64>
+    + MulAssignEx<usize>
 {
     /// Underlying type
     type Inner: From<Self> + Into<Self> + Mul<Self, Output = Self>;
@@ -72,7 +73,7 @@ macro_rules! impl_mul {
     };
 
     ($name:ident: u64) => {
-        impl_mul!($name: u64 *= u8 u16 u32 u64);
+        impl_mul!($name: u64 *= usize u8 u16 u32 u64);
     };
 }
 
