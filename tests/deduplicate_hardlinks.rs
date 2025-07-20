@@ -5,6 +5,7 @@ pub mod _utils;
 pub use _utils::*;
 
 use command_extra::CommandExtra;
+use normalize_path::NormalizePath;
 use parallel_disk_usage::{
     data_tree::Reflection,
     hardlink::{
@@ -217,6 +218,102 @@ fn complex_tree_with_shared_and_unique_files_with_deduplication() {
     .sum();
 
     assert_eq!(actual_size, expected_size);
+
+    fn starts_with_path(
+        item: &hardlink_list::reflection::ReflectionEntry<Bytes>,
+        prefix: &str,
+    ) -> bool {
+        item.paths
+            .0
+            .iter()
+            .any(|path| path.normalize().starts_with(prefix))
+    }
+
+    // Files with nlink <= 1 shouldn't appear
+    {
+        let actual = tree
+            .shared
+            .details
+            .as_ref()
+            .expect("get details")
+            .iter()
+            .find(|item| item.links <= 1)
+            .cloned();
+        assert_eq!(actual, None);
+    }
+
+    // No files from no-hardlinks should appear
+    {
+        let actual = tree
+            .shared
+            .details
+            .as_ref()
+            .expect("get details")
+            .iter()
+            .find(|item| starts_with_path(item, "no-hardlinks"))
+            .cloned();
+        assert_eq!(actual, None);
+    }
+
+    // This file in some-hardlinks should have 2 links created for it
+    {
+        let actual = tree
+            .shared
+            .details
+            .as_ref()
+            .expect("get details")
+            .iter()
+            .find(|item| starts_with_path(item, "some-hardlinks/file-0.txt"))
+            .cloned();
+        let expected = Some(hardlink_list::reflection::ReflectionEntry {
+            ino: workspace
+                .join("some-hardlinks/file-0.txt")
+                .pipe_as_ref(read_inode_number)
+                .pipe(InodeNumber::from),
+            size: workspace
+                .join("some-hardlinks/file-0.txt")
+                .pipe_as_ref(read_apparent_size)
+                .pipe(Bytes::new),
+            links: 3,
+            paths: ["file-0.txt", "link0-file0.txt", "link1-file0.txt"]
+                .map(|name| PathBuf::from(".").join("some-hardlinks").join(name))
+                .pipe(HashSet::from)
+                .pipe(LinkPathListReflection),
+        });
+        assert_eq!(actual, expected);
+    }
+
+    // This file in some-hardlinks should have 1 link created for it
+    {
+        let file_index = files_per_branch / 8;
+        let actual = tree
+            .shared
+            .details
+            .as_ref()
+            .expect("get details")
+            .iter()
+            .find(|item| starts_with_path(item, &format!("some-hardlinks/file-{file_index}.txt")))
+            .cloned();
+        let expected = Some(hardlink_list::reflection::ReflectionEntry {
+            ino: workspace
+                .join(format!("some-hardlinks/file-{file_index}.txt"))
+                .pipe_as_ref(read_inode_number)
+                .pipe(InodeNumber::from),
+            size: workspace
+                .join(format!("some-hardlinks/file-{file_index}.txt"))
+                .pipe_as_ref(read_apparent_size)
+                .pipe(Bytes::new),
+            links: 2,
+            paths: [
+                format!("file-{file_index}.txt"),
+                format!("link0-file{file_index}.txt"),
+            ]
+            .map(|name| PathBuf::from(".").join("some-hardlinks").join(name))
+            .pipe(HashSet::from)
+            .pipe(LinkPathListReflection),
+        });
+        assert_eq!(actual, expected);
+    }
 
     // TODO: tree.shared.details
     // TODO: tree.shared.summary
