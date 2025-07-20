@@ -59,7 +59,7 @@ fn multiple_hardlinks_to_a_single_file_with_deduplication() {
 
     let file_ino = workspace
         .join("file.txt")
-        .pipe_as_ref(read_ino)
+        .pipe_as_ref(read_inode_number)
         .pipe(InodeNumber::from);
 
     let actual_size = tree.size;

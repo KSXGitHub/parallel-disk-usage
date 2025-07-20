@@ -493,7 +493,7 @@ pub fn read_apparent_size(path: &Path) -> u64 {
 
 /// Read [ino](std::os::unix::fs::MetadataExt::ino) of a path.
 #[cfg(unix)]
-pub fn read_ino(path: &Path) -> u64 {
+pub fn read_inode_number(path: &Path) -> u64 {
     use std::os::unix::fs::MetadataExt;
     path.pipe(symlink_metadata)
         .unwrap_or_else(|error| panic!("Can't read metadata at {path:?}: {error}"))
