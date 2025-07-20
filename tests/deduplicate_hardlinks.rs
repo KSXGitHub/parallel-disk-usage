@@ -58,11 +58,10 @@ fn multiple_hardlinks_to_a_single_file_with_deduplication() {
         .add(file_size);
     assert_eq!(actual_size, expected_size);
 
-    let actual_children = {
-        let mut children = tree.children.clone();
-        children.sort_by(|a, b| a.name.cmp(&b.name));
-        children
-    };
+    let actual_children = tree
+        .children
+        .clone()
+        .into_sorted_by(|a, b| a.name.cmp(&b.name));
     let expected_children: Vec<_> = {
         let links = (0..links).map(|num| format!("link.{num}"));
         let node = |name| Reflection {
