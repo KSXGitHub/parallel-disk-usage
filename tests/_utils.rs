@@ -343,6 +343,12 @@ pub trait IntoSorted<Item>: Sized {
     fn into_sorted_by<Order>(self, order: Order) -> Self
     where
         Order: FnMut(&Item, &Item) -> Ordering;
+
+    /// Sort an array by a key extraction function and return it.
+    fn into_sorted_by_key<Key, GetKey>(self, get_key: GetKey) -> Self
+    where
+        GetKey: FnMut(&Item) -> Key,
+        Key: Ord;
 }
 
 impl<Item, Array> IntoSorted<Item> for Array
@@ -362,6 +368,15 @@ where
         Order: FnMut(&Item, &Item) -> Ordering,
     {
         self.as_mut().sort_by(order);
+        self
+    }
+
+    fn into_sorted_by_key<Key, GetKey>(mut self, get_key: GetKey) -> Self
+    where
+        GetKey: FnMut(&Item) -> Key,
+        Key: Ord,
+    {
+        self.as_mut().sort_by_key(get_key);
         self
     }
 }
