@@ -11,7 +11,7 @@ use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::Reflection,
     hardlink::{
-        hardlink_list::{self, Summary},
+        hardlink_list::{reflection::ReflectionEntry, Summary},
         LinkPathListReflection,
     },
     inode::InodeNumber,
@@ -100,7 +100,7 @@ fn multiple_hardlinks_to_a_single_file_with_deduplication() {
         .iter()
         .cloned()
         .collect();
-    let expected_shared_details = [hardlink_list::reflection::ReflectionEntry {
+    let expected_shared_details = [ReflectionEntry {
         ino: file_ino,
         size: file_size,
         links: 1 + links,
@@ -221,10 +221,7 @@ fn complex_tree_with_shared_and_unique_files_with_deduplication() {
 
     assert_eq!(actual_size, expected_size);
 
-    fn starts_with_path(
-        item: &hardlink_list::reflection::ReflectionEntry<Bytes>,
-        prefix: &str,
-    ) -> bool {
+    fn starts_with_path(item: &ReflectionEntry<Bytes>, prefix: &str) -> bool {
         item.paths
             .0
             .iter()
@@ -288,7 +285,7 @@ fn complex_tree_with_shared_and_unique_files_with_deduplication() {
             .iter()
             .find(|item| starts_with_path(item, "some-hardlinks/file-0.txt"))
             .cloned();
-        let expected = Some(hardlink_list::reflection::ReflectionEntry {
+        let expected = Some(ReflectionEntry {
             ino: workspace
                 .join("some-hardlinks/file-0.txt")
                 .pipe_as_ref(read_inode_number)
@@ -317,7 +314,7 @@ fn complex_tree_with_shared_and_unique_files_with_deduplication() {
             .iter()
             .find(|item| starts_with_path(item, &format!("some-hardlinks/file-{file_index}.txt")))
             .cloned();
-        let expected = Some(hardlink_list::reflection::ReflectionEntry {
+        let expected = Some(ReflectionEntry {
             ino: workspace
                 .join(format!("some-hardlinks/file-{file_index}.txt"))
                 .pipe_as_ref(read_inode_number)
@@ -507,38 +504,38 @@ fn hardlinks_and_non_hardlinks_with_deduplication() {
         .cloned()
         .collect();
     let expected_shared_details = [
-        hardlink_list::reflection::ReflectionEntry {
+        ReflectionEntry {
             ino: file_inode("file-0.txt"),
             size: file_size,
             links: 3,
             paths: shared_paths(&["file-0.txt", "link0-file0.txt", "link1-file0.txt"]),
         },
-        hardlink_list::reflection::ReflectionEntry {
+        ReflectionEntry {
             ino: file_inode("file-1.txt"),
             size: file_size,
             links: 2,
             paths: shared_paths(&["file-1.txt", "link0-file1.txt"]),
         },
         // ... file-2.txt and file-3.txt don't have hardlinks so they shouldn't appear here ...
-        hardlink_list::reflection::ReflectionEntry {
+        ReflectionEntry {
             ino: file_inode("file-4.txt"),
             size: file_size,
             links: 2,
             paths: shared_paths(&["file-4.txt"]),
         },
-        hardlink_list::reflection::ReflectionEntry {
+        ReflectionEntry {
             ino: file_inode("file-5.txt"),
             size: file_size,
             links: 2,
             paths: shared_paths(&["file-5.txt"]),
         },
-        hardlink_list::reflection::ReflectionEntry {
+        ReflectionEntry {
             ino: file_inode("file-6.txt"),
             size: file_size,
             links: 2,
             paths: shared_paths(&["file-6.txt"]),
         },
-        hardlink_list::reflection::ReflectionEntry {
+        ReflectionEntry {
             ino: file_inode("file-7.txt"),
             size: file_size,
             links: 2,
