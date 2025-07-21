@@ -36,7 +36,7 @@ fn stdio(command: Command) -> Command {
 }
 
 #[test]
-fn multiple_hardlinks_to_a_single_file_with_deduplication() {
+fn multiple_hardlinks_to_a_single_file() {
     let links = 10;
     let workspace = SampleWorkspace::multiple_hardlinks_to_a_single_file(100_000, links);
 
@@ -129,7 +129,7 @@ fn multiple_hardlinks_to_a_single_file_with_deduplication() {
 }
 
 #[test]
-fn complex_tree_with_shared_and_unique_files_with_deduplication() {
+fn complex_tree_with_shared_and_unique_files() {
     let files_per_branch = 2 * 3 * 4;
     let workspace =
         SampleWorkspace::complex_tree_with_shared_and_unique_files(files_per_branch, 100_000);
@@ -340,7 +340,7 @@ fn complex_tree_with_shared_and_unique_files_with_deduplication() {
 }
 
 #[test]
-fn hardlinks_and_non_hardlinks_with_deduplication() {
+fn hardlinks_and_non_hardlinks() {
     #![expect(clippy::identity_op)]
 
     let files_per_branch = 2 * 4;
