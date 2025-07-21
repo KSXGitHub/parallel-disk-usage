@@ -182,8 +182,6 @@ fn complex_tree_with_shared_and_unique_files_with_deduplication() {
         .pipe(JsonTree::<Bytes>::try_from)
         .expect("get tree of bytes");
 
-    let actual_size = tree.size;
-
     let file_size = workspace
         .join("no-hardlinks/file-0.txt")
         .pipe_as_ref(read_apparent_size)
@@ -195,6 +193,8 @@ fn complex_tree_with_shared_and_unique_files_with_deduplication() {
             .pipe_as_ref(read_apparent_size)
             .pipe(Bytes::new)
     };
+
+    let actual_size = tree.size;
 
     // The following formula treat the first file as "real" and
     // the non-first file with the same inode as "fake" for ease
@@ -392,8 +392,6 @@ fn complex_tree_with_shared_and_unique_files_without_deduplication() {
         .pipe(JsonTree::<Bytes>::try_from)
         .expect("get tree of bytes");
 
-    let actual_size = tree.size;
-
     let file_size = workspace
         .join("no-hardlinks/file-0.txt")
         .pipe_as_ref(read_apparent_size)
@@ -406,6 +404,7 @@ fn complex_tree_with_shared_and_unique_files_without_deduplication() {
             .pipe(Bytes::new)
     };
 
+    let actual_size = tree.size;
     let expected_size: Bytes = [
         inode_size("."),
         inode_size("no-hardlinks"),
@@ -431,7 +430,6 @@ fn complex_tree_with_shared_and_unique_files_without_deduplication() {
     ]
     .into_iter()
     .sum();
-
     assert_eq!(actual_size, expected_size);
 
     assert_eq!(tree.shared.details, None);
