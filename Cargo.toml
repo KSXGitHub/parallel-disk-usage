@@ -52,6 +52,7 @@ cli-completions = ["cli"]
 pipe-trait = "^0.4.0"
 smart-default = "^0.7.1"
 derive_more = { version = "^2.0.1", features = ["full"] }
+derive_setters = "^0.1.8"
 rayon = "^1.10.0"
 text-block-macros = "^0.2.0"
 rounded-div = "^0.1.2"
