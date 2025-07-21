@@ -5,8 +5,10 @@ pub mod _utils;
 pub use _utils::*;
 
 use command_extra::CommandExtra;
+use itertools::Itertools;
 use normalize_path::NormalizePath;
 use parallel_disk_usage::{
+    bytes_format::BytesFormat,
     data_tree::Reflection,
     hardlink::{
         hardlink_list::{self, Summary},
@@ -581,5 +583,65 @@ fn hardlinks_and_non_hardlinks_with_deduplication() {
             .filter(|item| item.links == item.paths.len() as u64)
             .map(|item| item.links as usize)
             .sum::<usize>(),
+    );
+
+    let visualization = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--quantity=apparent-size")
+        .with_arg("--deduplicate-hardlinks")
+        .with_arg("some-hardlinks")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text);
+
+    eprintln!("STDOUT:\n{visualization}");
+
+    let actual_hardlinks_summary = visualization
+        .lines()
+        .skip_while(|line| !line.starts_with("Hardlinks detected!"))
+        .join("\n");
+    let expected_hardlinks_summary = {
+        use parallel_disk_usage::size::Size;
+        use std::fmt::Write;
+        let mut summary = String::new();
+        writeln!(
+            summary,
+            "Hardlinks detected! Some files have links outside this tree",
+        )
+        .unwrap();
+        writeln!(
+            summary,
+            "* Number of shared inodes: {total} total, {exclusive} exclusive",
+            total = expected_shared_summary.unwrap().inodes,
+            exclusive = expected_shared_summary.unwrap().exclusive_inodes,
+        )
+        .unwrap();
+        writeln!(
+            summary,
+            "* Total number of links: {total} total, {detected} detected, {exclusive} exclusive",
+            total = expected_shared_summary.unwrap().all_links,
+            detected = expected_shared_summary.unwrap().detected_links,
+            exclusive = expected_shared_summary.unwrap().exclusive_links,
+        )
+        .unwrap();
+        writeln!(
+            summary,
+            "* Total shared size: {total} total, {exclusive} exclusive",
+            total = expected_shared_summary
+                .unwrap()
+                .shared_size
+                .display(BytesFormat::MetricUnits),
+            exclusive = expected_shared_summary
+                .unwrap()
+                .exclusive_shared_size
+                .display(BytesFormat::MetricUnits),
+        )
+        .unwrap();
+        summary
+    };
+    assert_eq!(
+        actual_hardlinks_summary.trim_end(),
+        expected_hardlinks_summary.trim_end(),
     );
 }
