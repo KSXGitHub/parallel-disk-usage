@@ -8,13 +8,14 @@ pub use threads::Threads;
 
 use crate::{bytes_format::BytesFormat, visualizer::ColumnWidthDistribution};
 use clap::{ColorChoice, Parser};
+use derive_setters::Setters;
 use smart_default::SmartDefault;
 use std::{num::NonZeroU64, path::PathBuf};
 use terminal_size::{terminal_size, Width};
 use text_block_macros::text_block;
 
 /// The CLI arguments.
-#[derive(Debug, SmartDefault, Clone, Parser)]
+#[derive(Debug, SmartDefault, Clone, Parser, Setters)]
 #[clap(
     name = "pdu",
 
