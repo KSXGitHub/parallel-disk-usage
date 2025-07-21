@@ -438,3 +438,148 @@ fn complex_tree_with_shared_and_unique_files_without_deduplication() {
     assert_eq!(tree.shared.details, None);
     assert_eq!(tree.shared.summary, None);
 }
+
+#[test]
+fn hardlinks_and_non_hardlinks_with_deduplication() {
+    #![expect(clippy::identity_op)]
+
+    let files_per_branch = 2 * 4;
+    let workspace =
+        SampleWorkspace::complex_tree_with_shared_and_unique_files(files_per_branch, 100_000);
+
+    let tree = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--min-ratio=0")
+        .with_arg("--quantity=apparent-size")
+        .with_arg("--json-output")
+        .with_arg("--deduplicate-hardlinks")
+        .with_arg("some-hardlinks")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text)
+        .pipe_as_ref(serde_json::from_str::<JsonData>)
+        .expect("parse stdout as JsonData")
+        .body
+        .pipe(JsonTree::<Bytes>::try_from)
+        .expect("get tree of bytes");
+
+    let file_size = workspace
+        .join("some-hardlinks/file-0.txt")
+        .pipe_as_ref(read_apparent_size)
+        .pipe(Bytes::new);
+
+    let inode_size = |path: &str| {
+        workspace
+            .join(path)
+            .pipe_as_ref(read_apparent_size)
+            .pipe(Bytes::new)
+    };
+
+    let file_inode = |name: &str| {
+        workspace
+            .join("some-hardlinks")
+            .join(name)
+            .pipe_as_ref(read_inode_number)
+            .pipe(InodeNumber::from)
+    };
+
+    let shared_paths = |file_names: &[&str]| {
+        file_names
+            .iter()
+            .map(|file_name| PathBuf::from("some-hardlinks").join(file_name))
+            .collect::<HashSet<_>>()
+            .pipe(LinkPathListReflection)
+    };
+
+    let actual_size = tree.size;
+    let expected_size = inode_size("some-hardlinks") + file_size * files_per_branch;
+    assert_eq!(actual_size, expected_size);
+
+    let actual_shared_details: Vec<_> = tree
+        .shared
+        .details
+        .as_ref()
+        .unwrap()
+        .iter()
+        .cloned()
+        .collect();
+    let expected_shared_details = vec![
+        hardlink_list::reflection::ReflectionEntry {
+            ino: file_inode("file-0.txt"),
+            size: file_size,
+            links: 3,
+            paths: shared_paths(&["file-0.txt", "link0-file0.txt", "link1-file0.txt"]),
+        },
+        hardlink_list::reflection::ReflectionEntry {
+            ino: file_inode("file-1.txt"),
+            size: file_size,
+            links: 2,
+            paths: shared_paths(&["file-1.txt", "link0-file1.txt"]),
+        },
+        // ... file-2.txt and file-3.txt don't have hardlinks so they shouldn't appear here ...
+        hardlink_list::reflection::ReflectionEntry {
+            ino: file_inode("file-4.txt"),
+            size: file_size,
+            links: 2,
+            paths: shared_paths(&["file-4.txt"]),
+        },
+        hardlink_list::reflection::ReflectionEntry {
+            ino: file_inode("file-5.txt"),
+            size: file_size,
+            links: 2,
+            paths: shared_paths(&["file-5.txt"]),
+        },
+        hardlink_list::reflection::ReflectionEntry {
+            ino: file_inode("file-6.txt"),
+            size: file_size,
+            links: 2,
+            paths: shared_paths(&["file-6.txt"]),
+        },
+        hardlink_list::reflection::ReflectionEntry {
+            ino: file_inode("file-7.txt"),
+            size: file_size,
+            links: 2,
+            paths: shared_paths(&["file-7.txt"]),
+        },
+    ]
+    .into_sorted_by_key(|item| u64::from(item.ino));
+    assert_eq!(actual_shared_details, expected_shared_details);
+
+    let actual_shared_summary = tree.shared.summary;
+    let expected_shared_summary = {
+        let mut summary = Summary::default();
+        summary.inodes = expected_shared_details.len();
+        summary.exclusive_inodes = 2;
+        summary.all_links = 3 + 2 + 4 * 2;
+        summary.detected_links = 3 + 2 + 4 * 1;
+        summary.exclusive_links = 3 + 2;
+        summary.shared_size = summary.inodes * file_size;
+        summary.exclusive_shared_size = summary.exclusive_inodes * file_size;
+        Some(summary)
+    };
+    assert_eq!(actual_shared_summary, expected_shared_summary);
+    assert_eq!(actual_shared_summary.unwrap().inodes, files_per_branch - 2);
+    assert_eq!(
+        actual_shared_summary.unwrap().all_links,
+        actual_shared_details
+            .iter()
+            .map(|item| item.links)
+            .sum::<u64>(),
+    );
+    assert_eq!(
+        actual_shared_summary.unwrap().detected_links,
+        actual_shared_details
+            .iter()
+            .map(|item| item.paths.len())
+            .sum::<usize>(),
+    );
+    assert_eq!(
+        actual_shared_summary.unwrap().exclusive_links,
+        actual_shared_details
+            .iter()
+            .filter(|item| item.links == item.paths.len() as u64)
+            .map(|item| item.links as usize)
+            .sum::<usize>(),
+    );
+}
