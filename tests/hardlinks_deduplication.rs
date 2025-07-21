@@ -114,17 +114,15 @@ fn multiple_hardlinks_to_a_single_file() {
     assert_eq!(actual_shared_details, expected_shared_details);
 
     let actual_shared_summary = tree.shared.summary;
-    let expected_shared_summary = {
-        let mut summary = Summary::default();
-        summary.inodes = 1;
-        summary.exclusive_inodes = 1;
-        summary.all_links = 1 + links;
-        summary.detected_links = 1 + links as usize;
-        summary.exclusive_links = 1 + links as usize;
-        summary.shared_size = file_size;
-        summary.exclusive_shared_size = file_size;
-        Some(summary)
-    };
+    let expected_shared_summary = Summary::default()
+        .with_inodes(1)
+        .with_exclusive_inodes(1)
+        .with_all_links(1 + links)
+        .with_detected_links(1 + links as usize)
+        .with_exclusive_links(1 + links as usize)
+        .with_shared_size(file_size)
+        .with_exclusive_shared_size(file_size)
+        .pipe(Some);
     assert_eq!(actual_shared_summary, expected_shared_summary);
 }
 
@@ -310,8 +308,7 @@ fn complex_tree_with_shared_and_unique_files() {
         // of reasoning.
         // It should still produce the same result as the proper
         // deduplication formula however.
-        let mut summary = Summary::default();
-        summary.inodes = [
+        let inodes = [
             0,                                               // no-hardlinks/*
             2 * files_per_branch / 8 + files_per_branch / 2, // some-hardlinks/*
             files_per_branch,                                // only-hardlinks/exclusive/*
@@ -320,8 +317,7 @@ fn complex_tree_with_shared_and_unique_files() {
         ]
         .into_iter()
         .sum();
-        summary.exclusive_inodes = summary.inodes;
-        summary.all_links = [
+        let all_links = [
             0,                                                                              // no-hardlinks/*
             3 * files_per_branch / 8 + 2 * files_per_branch / 8 + 2 * files_per_branch / 2, // some-hardlinks/*
             2 * files_per_branch, // only-hardlinks/exclusive/*
@@ -330,11 +326,16 @@ fn complex_tree_with_shared_and_unique_files() {
         ]
         .into_iter()
         .sum::<usize>() as u64;
-        summary.detected_links = summary.all_links as usize;
-        summary.exclusive_links = summary.all_links as usize;
-        summary.shared_size = file_size * summary.inodes;
-        summary.exclusive_shared_size = summary.shared_size;
-        Some(summary)
+        let shared_size = file_size * inodes;
+        Summary::default()
+            .with_inodes(inodes)
+            .with_exclusive_inodes(inodes)
+            .with_all_links(all_links)
+            .with_detected_links(all_links as usize)
+            .with_exclusive_links(all_links as usize)
+            .with_shared_size(shared_size)
+            .with_exclusive_shared_size(shared_size)
+            .pipe(Some)
     };
     assert_eq!(actual_shared_summary, expected_shared_summary);
 }
@@ -448,15 +449,17 @@ fn hardlinks_and_non_hardlinks() {
 
     let actual_shared_summary = tree.shared.summary;
     let expected_shared_summary = {
-        let mut summary = Summary::default();
-        summary.inodes = expected_shared_details.len();
-        summary.exclusive_inodes = 2;
-        summary.all_links = 3 + 2 + 4 * 2;
-        summary.detected_links = 3 + 2 + 4 * 1;
-        summary.exclusive_links = 3 + 2;
-        summary.shared_size = summary.inodes * file_size;
-        summary.exclusive_shared_size = summary.exclusive_inodes * file_size;
-        Some(summary)
+        let inodes = expected_shared_details.len();
+        let exclusive_inodes = 2;
+        Summary::default()
+            .with_inodes(inodes)
+            .with_exclusive_inodes(exclusive_inodes)
+            .with_all_links(3 + 2 + 4 * 2)
+            .with_detected_links(3 + 2 + 4 * 1)
+            .with_exclusive_links(3 + 2)
+            .with_shared_size(inodes * file_size)
+            .with_exclusive_shared_size(exclusive_inodes * file_size)
+            .pipe(Some)
     };
     assert_eq!(actual_shared_summary, expected_shared_summary);
     assert_eq!(actual_shared_summary.unwrap().inodes, files_per_branch - 2);

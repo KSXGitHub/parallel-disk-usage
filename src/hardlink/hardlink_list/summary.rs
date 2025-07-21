@@ -1,6 +1,7 @@
 use super::{iter::Item as IterItem, reflection::ReflectionEntry, HardlinkList, Reflection};
 use crate::size;
 use derive_more::{Add, AddAssign, Sum};
+use derive_setters::Setters;
 use std::{
     cmp::Ordering,
     fmt::{self, Display},
@@ -10,8 +11,9 @@ use std::{
 use serde::{Deserialize, Serialize};
 
 /// Summary from [`HardlinkList`] or [`Reflection`].
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Add, AddAssign, Sum)]
+#[derive(Debug, Default, Setters, Clone, Copy, PartialEq, Eq, Add, AddAssign, Sum)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
+#[setters(prefix = "with_")]
 #[non_exhaustive]
 pub struct Summary<Size> {
     /// Number of shared inodes, each with more than 1 links (i.e. `nlink > 1`).
