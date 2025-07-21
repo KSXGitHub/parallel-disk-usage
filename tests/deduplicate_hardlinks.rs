@@ -98,7 +98,7 @@ fn multiple_hardlinks_to_a_single_file_with_deduplication() {
         .iter()
         .cloned()
         .collect();
-    let expected_shared_details = vec![hardlink_list::reflection::ReflectionEntry {
+    let expected_shared_details = [hardlink_list::reflection::ReflectionEntry {
         ino: file_ino,
         size: file_size,
         links: 1 + links,
@@ -504,7 +504,7 @@ fn hardlinks_and_non_hardlinks_with_deduplication() {
         .iter()
         .cloned()
         .collect();
-    let expected_shared_details = vec![
+    let expected_shared_details = [
         hardlink_list::reflection::ReflectionEntry {
             ino: file_inode("file-0.txt"),
             size: file_size,
