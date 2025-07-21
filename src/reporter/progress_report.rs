@@ -1,8 +1,10 @@
 use crate::{size, status_board::GLOBAL_STATUS_BOARD};
+use derive_setters::Setters;
 use std::fmt::Write;
 
 /// Scan progress.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Default, Setters, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[setters(prefix = "with_")]
 pub struct ProgressReport<Size: size::Size> {
     /// Number of scanned items.
     pub items: u64,
