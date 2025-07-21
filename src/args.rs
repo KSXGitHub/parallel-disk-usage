@@ -15,7 +15,7 @@ use terminal_size::{terminal_size, Width};
 use text_block_macros::text_block;
 
 /// The CLI arguments.
-#[derive(Debug, SmartDefault, Clone, Parser, Setters)]
+#[derive(Debug, SmartDefault, Setters, Clone, Parser)]
 #[clap(
     name = "pdu",
 
@@ -83,6 +83,7 @@ use text_block_macros::text_block;
 
     color = ColorChoice::Never,
 )]
+#[setters(prefix = "with_")]
 #[non_exhaustive]
 pub struct Args {
     /// List of files and/or directories.
