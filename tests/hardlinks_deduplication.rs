@@ -61,7 +61,7 @@ fn multiple_hardlinks_to_a_single_file() {
         .pipe_as_ref(read_apparent_size)
         .pipe(Bytes::new);
 
-    let file_ino = workspace
+    let file_inode = workspace
         .join("file.txt")
         .pipe_as_ref(read_inode_number)
         .pipe(InodeNumber::from);
@@ -102,7 +102,7 @@ fn multiple_hardlinks_to_a_single_file() {
         .cloned()
         .collect();
     let expected_shared_details = [ReflectionEntry {
-        ino: file_ino,
+        ino: file_inode,
         size: file_size,
         links: 1 + links,
         paths: (0..links)
