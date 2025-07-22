@@ -103,17 +103,18 @@ where
             .run();
         };
 
-        // ExactSizeIterator::is_empty is unstable
-        let data_tree = if iter.len() == 0 {
+        let only_one_arg = iter.len() == 0; // ExactSizeIterator::is_empty is unstable
+        let data_tree = if only_one_arg {
             data_tree
         } else {
             let children: Vec<_> = once(data_tree).chain(iter).collect();
-            DataTree::dir(
-                OsStringDisplay::os_string_from("(total)"),
-                Size::default(),
-                children,
-            )
-            .into_par_retained(|_, depth| depth + 1 < max_depth)
+
+            // This name is for hardlinks deduplication to work correctly as empty string is considered to be the start of any path.
+            // It would be changed into "(total)" later.
+            let fake_root_name = OsStringDisplay::os_string_from("");
+
+            DataTree::dir(fake_root_name, Size::default(), children)
+                .into_par_retained(|_, depth| depth + 1 < max_depth)
         };
 
         if reporter.destroy().is_err() {
@@ -130,6 +131,10 @@ where
                 data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
             }
             let deduplication_record = hardlinks_handler.deduplicate(&mut data_tree);
+            if !only_one_arg {
+                assert_eq!(data_tree.name().as_os_str().to_str(), Some(""));
+                *data_tree.name_mut() = OsStringDisplay::os_string_from("(total)");
+            }
             (data_tree, deduplication_record)
         };
 
