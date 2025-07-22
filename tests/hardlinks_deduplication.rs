@@ -37,6 +37,279 @@ fn stdio(command: Command) -> Command {
 }
 
 #[test]
+fn simple_tree_with_some_hardlinks() {
+    #![expect(clippy::identity_op)]
+
+    let sizes = [200_000, 220_000, 310_000, 110_000, 210_000];
+    let workspace = SampleWorkspace::simple_tree_with_some_hardlinks(sizes);
+
+    let mut tree = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--quantity=apparent-size")
+        .with_arg("--deduplicate-hardlinks")
+        .with_arg("--json-output")
+        .with_arg("main")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text)
+        .pipe_as_ref(serde_json::from_str::<JsonData>)
+        .expect("parse stdout as JsonData")
+        .body
+        .pipe(JsonTree::<Bytes>::try_from)
+        .expect("get tree of bytes");
+    sort_reflection_by(&mut tree, |a, b| a.name.cmp(&b.name));
+    let tree = tree;
+
+    let file_size = |name: &str| {
+        workspace
+            .join("main/sources")
+            .join(name)
+            .pipe_as_ref(read_apparent_size)
+            .pipe(Bytes::new)
+    };
+
+    let inode_size = |path: &str| {
+        workspace
+            .join(path)
+            .pipe_as_ref(read_apparent_size)
+            .pipe(Bytes::new)
+    };
+
+    let file_inode = |name: &str| {
+        workspace
+            .join("main/sources")
+            .join(name)
+            .pipe_as_ref(read_inode_number)
+            .pipe(InodeNumber::from)
+    };
+
+    let shared_paths = |suffices: &[&str]| {
+        suffices
+            .iter()
+            .map(|suffix| PathBuf::from("main").join(suffix))
+            .collect::<HashSet<_>>()
+            .pipe(LinkPathListReflection)
+    };
+
+    let actual_size = tree.size;
+    let expected_size = Bytes::new(0)
+        + inode_size("main")
+        + inode_size("main/sources")
+        + inode_size("main/internal-hardlinks")
+        + file_size("no-hardlinks.txt")
+        + file_size("one-internal-hardlink.txt")
+        + file_size("two-internal-hardlinks.txt")
+        + file_size("one-external-hardlink.txt")
+        + file_size("one-internal-one-external-hardlinks.txt");
+    assert_eq!(actual_size, expected_size);
+
+    let actual_tree = &tree.tree;
+    let mut expected_tree = Reflection {
+        name: "main".to_string(),
+        size: expected_size,
+        children: vec![
+            Reflection {
+                name: "sources".to_string(),
+                size: inode_size("main/sources")
+                    + file_size("no-hardlinks.txt")
+                    + file_size("one-internal-hardlink.txt")
+                    + file_size("two-internal-hardlinks.txt")
+                    + file_size("one-external-hardlink.txt")
+                    + file_size("one-internal-one-external-hardlinks.txt"),
+                children: vec![
+                    Reflection {
+                        name: "no-hardlinks.txt".to_string(),
+                        size: file_size("no-hardlinks.txt"),
+                        children: Vec::new(),
+                    },
+                    Reflection {
+                        name: "one-internal-hardlink.txt".to_string(),
+                        size: file_size("one-internal-hardlink.txt"),
+                        children: Vec::new(),
+                    },
+                    Reflection {
+                        name: "two-internal-hardlinks.txt".to_string(),
+                        size: file_size("two-internal-hardlinks.txt"),
+                        children: Vec::new(),
+                    },
+                    Reflection {
+                        name: "one-external-hardlink.txt".to_string(),
+                        size: file_size("one-external-hardlink.txt"),
+                        children: Vec::new(),
+                    },
+                    Reflection {
+                        name: "one-internal-one-external-hardlinks.txt".to_string(),
+                        size: file_size("one-internal-one-external-hardlinks.txt"),
+                        children: Vec::new(),
+                    },
+                ],
+            },
+            Reflection {
+                name: "internal-hardlinks".to_string(),
+                size: inode_size("main/internal-hardlinks")
+                    + file_size("one-internal-hardlink.txt")
+                    + file_size("two-internal-hardlinks.txt")
+                    + file_size("one-internal-one-external-hardlinks.txt"),
+                children: vec![
+                    Reflection {
+                        name: "link-0.txt".to_string(),
+                        size: file_size("one-internal-hardlink.txt"),
+                        children: Vec::new(),
+                    },
+                    Reflection {
+                        name: "link-1a.txt".to_string(),
+                        size: file_size("two-internal-hardlinks.txt"),
+                        children: Vec::new(),
+                    },
+                    Reflection {
+                        name: "link-1b.txt".to_string(),
+                        size: file_size("two-internal-hardlinks.txt"),
+                        children: Vec::new(),
+                    },
+                    Reflection {
+                        name: "link-3a.txt".to_string(),
+                        size: file_size("one-internal-one-external-hardlinks.txt"),
+                        children: Vec::new(),
+                    },
+                ],
+            },
+        ],
+    };
+    sort_reflection_by(&mut expected_tree, |a, b| a.name.cmp(&b.name));
+    assert_eq!(actual_tree, &expected_tree);
+
+    let actual_shared_details: Vec<_> = tree
+        .shared
+        .details
+        .as_ref()
+        .expect("get details")
+        .iter()
+        .cloned()
+        .collect();
+    let expected_shared_details = [
+        ReflectionEntry {
+            ino: file_inode("one-internal-hardlink.txt"),
+            size: file_size("one-internal-hardlink.txt"),
+            links: 1 + 1,
+            paths: shared_paths(&[
+                "sources/one-internal-hardlink.txt",
+                "internal-hardlinks/link-0.txt",
+            ]),
+        },
+        ReflectionEntry {
+            ino: file_inode("two-internal-hardlinks.txt"),
+            size: file_size("two-internal-hardlinks.txt"),
+            links: 1 + 2,
+            paths: shared_paths(&[
+                "sources/two-internal-hardlinks.txt",
+                "internal-hardlinks/link-1a.txt",
+                "internal-hardlinks/link-1b.txt",
+            ]),
+        },
+        ReflectionEntry {
+            ino: file_inode("one-external-hardlink.txt"),
+            size: file_size("one-external-hardlink.txt"),
+            links: 1 + 1,
+            paths: shared_paths(&["sources/one-external-hardlink.txt"]),
+        },
+        ReflectionEntry {
+            ino: file_inode("one-internal-one-external-hardlinks.txt"),
+            size: file_size("one-internal-one-external-hardlinks.txt"),
+            links: 1 + 1 + 1,
+            paths: shared_paths(&[
+                "sources/one-internal-one-external-hardlinks.txt",
+                "internal-hardlinks/link-3a.txt",
+            ]),
+        },
+    ]
+    .into_sorted_by_key(|item| u64::from(item.ino));
+    assert_eq!(actual_shared_details, expected_shared_details);
+
+    let actual_shared_summary = tree.shared.summary;
+    let expected_shared_summary = Summary::default()
+        .with_inodes(0 + 1 + 1 + 1 + 1)
+        .with_exclusive_inodes(0 + 1 + 1 + 0 + 0)
+        .with_all_links(0 + 2 + 3 + 2 + 3)
+        .with_detected_links(0 + 2 + 3 + 1 + 2)
+        .with_exclusive_links(0 + 2 + 3 + 0 + 0)
+        .with_shared_size(
+            Bytes::new(0)
+                + file_size("one-internal-hardlink.txt")
+                + file_size("two-internal-hardlinks.txt")
+                + file_size("one-external-hardlink.txt")
+                + file_size("one-internal-one-external-hardlinks.txt"),
+        )
+        .with_exclusive_shared_size(
+            Bytes::new(0)
+                + file_size("one-internal-hardlink.txt")
+                + file_size("two-internal-hardlinks.txt"),
+        )
+        .pipe(Some);
+    assert_eq!(actual_shared_summary, expected_shared_summary);
+
+    let visualization = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--quantity=apparent-size")
+        .with_arg("--deduplicate-hardlinks")
+        .with_arg("main")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text);
+
+    eprintln!("STDOUT:\n{visualization}");
+
+    let actual_hardlinks_summary = visualization
+        .lines()
+        .skip_while(|line| !line.starts_with("Hardlinks detected!"))
+        .join("\n");
+    let expected_hardlinks_summary = {
+        use parallel_disk_usage::size::Size;
+        use std::fmt::Write;
+        let mut summary = String::new();
+        writeln!(
+            summary,
+            "Hardlinks detected! Some files have links outside this tree",
+        )
+        .unwrap();
+        writeln!(
+            summary,
+            "* Number of shared inodes: {total} total, {exclusive} exclusive",
+            total = expected_shared_summary.unwrap().inodes,
+            exclusive = expected_shared_summary.unwrap().exclusive_inodes,
+        )
+        .unwrap();
+        writeln!(
+            summary,
+            "* Total number of links: {total} total, {detected} detected, {exclusive} exclusive",
+            total = expected_shared_summary.unwrap().all_links,
+            detected = expected_shared_summary.unwrap().detected_links,
+            exclusive = expected_shared_summary.unwrap().exclusive_links,
+        )
+        .unwrap();
+        writeln!(
+            summary,
+            "* Total shared size: {total} total, {exclusive} exclusive",
+            total = expected_shared_summary
+                .unwrap()
+                .shared_size
+                .display(BytesFormat::MetricUnits),
+            exclusive = expected_shared_summary
+                .unwrap()
+                .exclusive_shared_size
+                .display(BytesFormat::MetricUnits),
+        )
+        .unwrap();
+        summary
+    };
+    assert_eq!(
+        actual_hardlinks_summary.trim_end(),
+        expected_hardlinks_summary.trim_end(),
+    );
+}
+
+#[test]
 fn multiple_hardlinks_to_a_single_file() {
     let links = 10;
     let workspace = SampleWorkspace::multiple_hardlinks_to_a_single_file(100_000, links);

@@ -102,6 +102,49 @@ impl Default for SampleWorkspace {
 impl SampleWorkspace {
     /// Set up a temporary directory for tests.
     ///
+    /// This directory would have a couple of normal files and a couple of hardlinks.
+    pub fn simple_tree_with_some_hardlinks(sizes: [usize; 5]) -> Self {
+        use std::fs::hard_link;
+        let temp = Temp::new_dir().expect("create working directory for sample workspace");
+
+        MergeableFileSystemTree::<&str, String>::from(dir! {
+            "main" => dir! {
+                "sources" => dir! {
+                    "no-hardlinks.txt" => file!("a".repeat(sizes[0])),
+                    "one-internal-hardlink.txt" => file!("a".repeat(sizes[1])),
+                    "two-internal-hardlinks.txt" => file!("a".repeat(sizes[2])),
+                    "one-external-hardlink.txt" => file!("a".repeat(sizes[3])),
+                    "one-internal-one-external-hardlinks.txt" => file!("a".repeat(sizes[4])),
+                }
+                "internal-hardlinks" => dir! {}
+            }
+            "external-hardlinks" => dir! {}
+        })
+        .build(&temp)
+        .expect("build the filesystem tree for the sample workspace");
+
+        macro_rules! link {
+            ($original:literal -> $link:literal) => {{
+                let original = $original;
+                let link = $link;
+                if let Err(error) = hard_link(temp.join(original), temp.join(link)) {
+                    panic!("Failed to link {original} to {link}: {error}");
+                }
+            }};
+        }
+
+        link!("main/sources/one-internal-hardlink.txt" -> "main/internal-hardlinks/link-0.txt");
+        link!("main/sources/two-internal-hardlinks.txt" -> "main/internal-hardlinks/link-1a.txt");
+        link!("main/sources/two-internal-hardlinks.txt" -> "main/internal-hardlinks/link-1b.txt");
+        link!("main/sources/one-external-hardlink.txt" -> "external-hardlinks/link-2.txt");
+        link!("main/sources/one-internal-one-external-hardlinks.txt" -> "main/internal-hardlinks/link-3a.txt");
+        link!("main/sources/one-internal-one-external-hardlinks.txt" -> "external-hardlinks/link-3b.txt");
+
+        SampleWorkspace(temp)
+    }
+
+    /// Set up a temporary directory for tests.
+    ///
     /// This directory would have a single file being hard-linked multiple times.
     pub fn multiple_hardlinks_to_a_single_file(bytes: usize, links: u64) -> Self {
         use std::fs::{hard_link, write as write_file};
@@ -481,6 +524,21 @@ pub fn inspect_stderr(stderr: &[u8]) {
     let text = text.trim();
     if !text.is_empty() {
         eprintln!("STDERR:\n{text}\n");
+    }
+}
+
+/// Recursively sort a [`DataTreeReflection`].
+pub fn sort_reflection_by<Name, Size, Order>(
+    reflection: &mut DataTreeReflection<Name, Size>,
+    order: Order,
+) where
+    Size: size::Size,
+    Order:
+        FnMut(&DataTreeReflection<Name, Size>, &DataTreeReflection<Name, Size>) -> Ordering + Copy,
+{
+    reflection.children.sort_by(order);
+    for child in &mut reflection.children {
+        sort_reflection_by(child, order);
     }
 }
 
