@@ -221,3 +221,57 @@ fn exclusive_hardlinks_only() {
     assert_eq!(tree.shared.details, None);
     assert_eq!(tree.shared.summary, None);
 }
+
+#[test]
+fn exclusive_only_and_external_only_hardlinks() {
+    let files_per_branch = 2 * 4;
+    let workspace =
+        SampleWorkspace::complex_tree_with_shared_and_unique_files(files_per_branch, 100_000);
+
+    let tree = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--min-ratio=0")
+        .with_arg("--quantity=apparent-size")
+        .with_arg("--json-output")
+        .with_arg("only-hardlinks/mixed")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text)
+        .pipe_as_ref(serde_json::from_str::<JsonData>)
+        .expect("parse stdout as JsonData")
+        .body
+        .pipe(JsonTree::<Bytes>::try_from)
+        .expect("get tree of bytes");
+
+    let file_size = workspace
+        .join("only-hardlinks/mixed/link0-0.txt")
+        .pipe_as_ref(read_apparent_size)
+        .pipe(Bytes::new);
+
+    let inode_size = |path: &str| {
+        workspace
+            .join(path)
+            .pipe_as_ref(read_apparent_size)
+            .pipe(Bytes::new)
+    };
+
+    let actual_size = tree.size;
+    let expected_size =
+        inode_size("only-hardlinks/mixed") + file_size * (files_per_branch + files_per_branch / 2);
+    assert_eq!(actual_size, expected_size);
+
+    assert_eq!(tree.shared.details, None);
+    assert_eq!(tree.shared.summary, None);
+
+    let visualization = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--quantity=apparent-size")
+        .with_arg("only-hardlinks/mixed")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text);
+    eprintln!("STDOUT:\n{visualization}");
+    assert!(!visualization.contains("Hardlinks detected!"));
+}
