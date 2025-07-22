@@ -33,7 +33,7 @@ where
             .collect();
 
         for (size, link_suffices) in &sub_hardlink_info {
-            let number_of_links = link_suffices.len() as u64;
+            let number_of_links = link_suffices.len();
             debug_assert_op!(number_of_links > 1);
             self.size -= *size * (number_of_links - 1);
         }
