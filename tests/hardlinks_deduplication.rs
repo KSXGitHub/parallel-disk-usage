@@ -398,6 +398,45 @@ fn multiple_hardlinks_to_a_single_file() {
         .with_exclusive_shared_size(file_size)
         .pipe(Some);
     assert_eq!(actual_shared_summary, expected_shared_summary);
+
+    let visualization = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--quantity=apparent-size")
+        .with_arg("--deduplicate-hardlinks")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text);
+
+    eprintln!("STDOUT:\n{visualization}");
+
+    let actual_hardlinks_summary = visualization
+        .lines()
+        .skip_while(|line| !line.starts_with("Hardlinks detected!"))
+        .join("\n");
+    let expected_hardlinks_summary = {
+        use parallel_disk_usage::size::Size;
+        use std::fmt::Write;
+        let mut summary = String::new();
+        writeln!(
+            summary,
+            "Hardlinks detected! No files have links outside this tree",
+        )
+        .unwrap();
+        writeln!(summary, "* Number of shared inodes: 1").unwrap();
+        writeln!(summary, "* Total number of links: 11").unwrap();
+        writeln!(
+            summary,
+            "* Total shared size: {}",
+            file_size.display(BytesFormat::MetricUnits),
+        )
+        .unwrap();
+        summary
+    };
+    assert_eq!(
+        actual_hardlinks_summary.trim_end(),
+        expected_hardlinks_summary.trim_end(),
+    );
 }
 
 #[test]

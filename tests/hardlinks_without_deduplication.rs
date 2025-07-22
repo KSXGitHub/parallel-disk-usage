@@ -193,6 +193,16 @@ fn multiple_hardlinks_to_a_single_file() {
 
     assert_eq!(tree.shared.details, None);
     assert_eq!(tree.shared.summary, None);
+
+    let visualization = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--quantity=apparent-size")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text);
+    eprintln!("STDOUT:\n{visualization}");
+    assert!(!visualization.contains("Hardlinks detected!"));
 }
 
 #[test]
