@@ -840,3 +840,140 @@ fn exclusive_only_and_external_only_hardlinks() {
         expected_hardlinks_summary.trim_end(),
     );
 }
+
+#[test]
+fn external_hardlinks_only() {
+    let files_per_branch = 2 * 4;
+    let workspace =
+        SampleWorkspace::complex_tree_with_shared_and_unique_files(files_per_branch, 100_000);
+
+    let tree = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--min-ratio=0")
+        .with_arg("--quantity=apparent-size")
+        .with_arg("--json-output")
+        .with_arg("--deduplicate-hardlinks")
+        .with_arg("only-hardlinks/external")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text)
+        .pipe_as_ref(serde_json::from_str::<JsonData>)
+        .expect("parse stdout as JsonData")
+        .body
+        .pipe(JsonTree::<Bytes>::try_from)
+        .expect("get tree of bytes");
+
+    let file_size = workspace
+        .join("only-hardlinks/external/linkX-0.txt")
+        .pipe_as_ref(read_apparent_size)
+        .pipe(Bytes::new);
+
+    let inode_size = |path: &str| {
+        workspace
+            .join(path)
+            .pipe_as_ref(read_apparent_size)
+            .pipe(Bytes::new)
+    };
+
+    let file_inode = |name: &str| {
+        workspace
+            .join("only-hardlinks/external")
+            .join(name)
+            .pipe_as_ref(read_inode_number)
+            .pipe(InodeNumber::from)
+    };
+
+    let shared_paths = |file_names: &[&str]| {
+        file_names
+            .iter()
+            .map(|file_name| PathBuf::from("only-hardlinks/external").join(file_name))
+            .collect::<HashSet<_>>()
+            .pipe(LinkPathListReflection)
+    };
+
+    let actual_size = tree.size;
+    let expected_size = inode_size("only-hardlinks/external") + file_size * files_per_branch;
+    assert_eq!(actual_size, expected_size);
+
+    let actual_shared_details: Vec<_> = tree
+        .shared
+        .details
+        .as_ref()
+        .unwrap()
+        .iter()
+        .cloned()
+        .collect();
+    let expected_shared_details = (0..files_per_branch)
+        .par_bridge()
+        .map(|index| ReflectionEntry {
+            ino: file_inode(&format!("linkX-{index}.txt")),
+            size: file_size,
+            links: 2,
+            paths: shared_paths(&[&format!("linkX-{index}.txt")]),
+        })
+        .collect::<Vec<_>>()
+        .into_sorted_by_key(|item: &ReflectionEntry<Bytes>| u64::from(item.ino));
+    assert_eq!(actual_shared_details, expected_shared_details);
+
+    let actual_shared_summary = tree.shared.summary;
+    let expected_shared_summary = Summary::default()
+        .with_inodes(files_per_branch)
+        .with_exclusive_inodes(0)
+        .with_all_links(2 * files_per_branch as u64)
+        .with_detected_links(files_per_branch)
+        .with_exclusive_links(0)
+        .with_shared_size(files_per_branch * file_size)
+        .with_exclusive_shared_size(Bytes::new(0))
+        .pipe(Some);
+    assert_eq!(actual_shared_summary, expected_shared_summary);
+
+    let visualization = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--quantity=apparent-size")
+        .with_arg("--deduplicate-hardlinks")
+        .with_arg("only-hardlinks/external")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command")
+        .pipe(stdout_text);
+
+    eprintln!("STDOUT:\n{visualization}");
+
+    let actual_hardlinks_summary = visualization
+        .lines()
+        .skip_while(|line| !line.starts_with("Hardlinks detected!"))
+        .join("\n");
+    let expected_hardlinks_summary = {
+        use parallel_disk_usage::size::Size;
+        use std::fmt::Write;
+        let mut summary = String::new();
+        writeln!(
+            summary,
+            "Hardlinks detected! All hardlinks within this tree have links without",
+        )
+        .unwrap();
+        writeln!(summary, "* Number of shared inodes: {files_per_branch}").unwrap();
+        writeln!(
+            summary,
+            "* Total number of links: {total} total, {detected} detected",
+            total = expected_shared_summary.unwrap().all_links,
+            detected = expected_shared_summary.unwrap().detected_links,
+        )
+        .unwrap();
+        writeln!(
+            summary,
+            "* Total shared size: {}",
+            expected_shared_summary
+                .unwrap()
+                .shared_size
+                .display(BytesFormat::MetricUnits),
+        )
+        .unwrap();
+        summary
+    };
+    assert_eq!(
+        actual_hardlinks_summary.trim_end(),
+        expected_hardlinks_summary.trim_end(),
+    );
+}
