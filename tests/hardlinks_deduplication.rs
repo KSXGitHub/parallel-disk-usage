@@ -257,9 +257,7 @@ fn simple_tree_with_some_hardlinks() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-
     eprintln!("STDOUT:\n{visualization}");
-
     let actual_hardlinks_summary = visualization
         .lines()
         .skip_while(|line| !line.starts_with("Hardlinks detected!"))
@@ -407,9 +405,7 @@ fn multiple_hardlinks_to_a_single_file() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-
     eprintln!("STDOUT:\n{visualization}");
-
     let actual_hardlinks_summary = visualization
         .lines()
         .skip_while(|line| !line.starts_with("Hardlinks detected!"))
@@ -808,9 +804,7 @@ fn hardlinks_and_non_hardlinks() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-
     eprintln!("STDOUT:\n{visualization}");
-
     let actual_hardlinks_summary = visualization
         .lines()
         .skip_while(|line| !line.starts_with("Hardlinks detected!"))
@@ -956,9 +950,7 @@ fn exclusive_hardlinks_only() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-
     eprintln!("STDOUT:\n{visualization}");
-
     let actual_hardlinks_summary = visualization
         .lines()
         .skip_while(|line| !line.starts_with("Hardlinks detected!"))
@@ -1101,9 +1093,7 @@ fn exclusive_only_and_external_only_hardlinks() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-
     eprintln!("STDOUT:\n{visualization}");
-
     let actual_hardlinks_summary = visualization
         .lines()
         .skip_while(|line| !line.starts_with("Hardlinks detected!"))
@@ -1249,9 +1239,7 @@ fn external_hardlinks_only() {
         .output()
         .expect("spawn command")
         .pipe(stdout_text);
-
     eprintln!("STDOUT:\n{visualization}");
-
     let actual_hardlinks_summary = visualization
         .lines()
         .skip_while(|line| !line.starts_with("Hardlinks detected!"))
