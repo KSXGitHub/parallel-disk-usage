@@ -93,6 +93,7 @@ pub fn remove_items_from_vec_by_indices<Item>(vec: &mut Vec<Item>, indices: &Has
         .collect();
 }
 
+#[cfg(unix)]
 #[cfg(test)]
 mod tests {
     use super::remove_items_from_vec_by_indices;
