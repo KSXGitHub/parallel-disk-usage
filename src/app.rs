@@ -16,7 +16,7 @@ use crate::{
 use clap::Parser;
 use hdd::any_path_is_in_hdd;
 use pipe_trait::Pipe;
-use std::{io::stdin, time::Duration};
+use std::{fs::canonicalize, io::stdin, time::Duration};
 use sub::JsonOutputParam;
 use sysinfo::Disks;
 
@@ -38,7 +38,7 @@ impl App {
     }
 
     /// Run the application.
-    pub fn run(self) -> Result<(), RuntimeError> {
+    pub fn run(mut self) -> Result<(), RuntimeError> {
         // DYNAMIC DISPATCH POLICY:
         //
         // Errors rarely occur, therefore, using dynamic dispatch to report errors have an acceptable
@@ -130,6 +130,17 @@ impl App {
                 .num_threads(threads)
                 .build_global()
                 .unwrap_or_else(|_| eprintln!("warning: Failed to set thread limit to {threads}"));
+        }
+
+        if cfg!(unix) && self.args.deduplicate_hardlinks && self.args.files.len() > 1 {
+            // Hardlinks deduplication doesn't work properly if there are more than 1 paths pointing to
+            // the same tree or if a path points to a subtree of another path. Therefore, we must find
+            // and remove such duplications before they cause problem.
+            deduplicate_arguments::deduplicate_arguments(
+                &mut self.args.files,
+                |path| canonicalize(path),
+                |a, b| a.starts_with(b),
+            );
         }
 
         let report_error = if self.args.silent_errors {
@@ -291,5 +302,6 @@ impl App {
     }
 }
 
+mod deduplicate_arguments;
 mod hdd;
 mod mount_point;
