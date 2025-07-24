@@ -136,6 +136,10 @@ impl App {
             // Hardlinks deduplication doesn't work properly if there are more than 1 paths pointing to
             // the same tree or if a path points to a subtree of another path. Therefore, we must find
             // and remove such duplications before they cause problem.
+            //
+            // The current implementation has a quirk in which symbolic link to the real path of another
+            // argument would disappear. However, considering that nobody would use pdu to measure mere
+            // symbolic links, we trade this bug for a simpler codebase.
             deduplicate_arguments::deduplicate_arguments(
                 &mut self.args.files,
                 |path| canonicalize(path),
