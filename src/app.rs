@@ -16,7 +16,7 @@ use crate::{
 use clap::Parser;
 use hdd::any_path_is_in_hdd;
 use pipe_trait::Pipe;
-use std::{fs::canonicalize, io::stdin, time::Duration};
+use std::{io::stdin, time::Duration};
 use sub::JsonOutputParam;
 use sysinfo::Disks;
 
@@ -140,11 +140,8 @@ impl App {
             // The current implementation has a quirk in which symbolic link to the real path of another
             // argument would disappear. However, considering that nobody would use pdu to measure mere
             // symbolic links, we trade this bug for a simpler codebase.
-            deduplicate_arguments::deduplicate_arguments(
-                &mut self.args.files,
-                |path| canonicalize(path),
-                |a, b| a.starts_with(b),
-            );
+            use deduplicate_arguments::{deduplicate_arguments, RealApi};
+            deduplicate_arguments::<RealApi>(&mut self.args.files);
         }
 
         let report_error = if self.args.silent_errors {

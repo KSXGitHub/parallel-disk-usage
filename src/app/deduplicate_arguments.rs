@@ -1,19 +1,36 @@
 use pipe_trait::Pipe;
-use std::{collections::HashSet, mem::take};
+use std::{collections::HashSet, fs::canonicalize, io, mem::take, path::PathBuf};
+
+/// Mockable APIs to interact with the system.
+pub trait Api {
+    type Argument;
+    type RealPath: Eq;
+    type RealPathError;
+    fn canonicalize(path: &Self::Argument) -> Result<Self::RealPath, Self::RealPathError>;
+    fn starts_with(a: &Self::RealPath, b: &Self::RealPath) -> bool;
+}
+
+/// Implementation of [`Api`] that interacts with the real system.
+pub struct RealApi;
+impl Api for RealApi {
+    type Argument = PathBuf;
+    type RealPath = PathBuf;
+    type RealPathError = io::Error;
+
+    fn canonicalize(path: &Self::Argument) -> Result<Self::RealPath, Self::RealPathError> {
+        canonicalize(path)
+    }
+
+    fn starts_with(a: &Self::RealPath, b: &Self::RealPath) -> bool {
+        a.starts_with(b)
+    }
+}
 
 /// Hardlinks deduplication doesn't work properly if there are more than 1 paths pointing to
 /// the same tree or if a path points to a subtree of another path. Therefore, we must find
 /// and remove such duplications before they cause problem.
-pub fn deduplicate_arguments<'a, Argument, Canonicalize, StartsWith, RealPath, CanonicalizeError>(
-    arguments: &'a mut Vec<Argument>,
-    canonicalize: Canonicalize,
-    starts_with: StartsWith,
-) where
-    Canonicalize: for<'r> FnMut(&Argument) -> Result<RealPath, CanonicalizeError>,
-    StartsWith: for<'r> FnMut(&'r RealPath, &'r RealPath) -> bool,
-    RealPath: Eq,
-{
-    let to_remove = find_argument_duplications_to_remove(arguments, canonicalize, starts_with);
+pub fn deduplicate_arguments<Api: self::Api>(arguments: &mut Vec<Api::Argument>) {
+    let to_remove = find_argument_duplications_to_remove::<Api>(arguments);
     remove_items_from_vec_by_indices(arguments, &to_remove);
 }
 
@@ -23,23 +40,10 @@ pub fn deduplicate_arguments<'a, Argument, Canonicalize, StartsWith, RealPath, C
 ///
 /// Prefer keeping the first instance of the path over the later instances (returning the indices of
 /// the later instances).
-pub fn find_argument_duplications_to_remove<
-    Argument,
-    Canonicalize,
-    StartsWith,
-    RealPath,
-    CanonicalizeError,
->(
-    arguments: &[Argument],
-    canonicalize: Canonicalize,
-    mut starts_with: StartsWith,
-) -> HashSet<usize>
-where
-    Canonicalize: for<'r> FnMut(&Argument) -> Result<RealPath, CanonicalizeError>,
-    StartsWith: for<'r> FnMut(&'r RealPath, &'r RealPath) -> bool,
-    RealPath: Eq,
-{
-    let real_paths: Vec<_> = arguments.iter().map(canonicalize).collect();
+pub fn find_argument_duplications_to_remove<Api: self::Api>(
+    arguments: &[Api::Argument],
+) -> HashSet<usize> {
+    let real_paths: Vec<_> = arguments.iter().map(Api::canonicalize).collect();
     assert_eq!(arguments.len(), real_paths.len());
 
     let mut to_remove = HashSet::new();
@@ -53,13 +57,13 @@ where
                 }
 
                 // `left` starts with `right` means `left` is subtree of `right`, remove `left`
-                if starts_with(left, right) {
+                if Api::starts_with(left, right) {
                     to_remove.insert(left_index);
                     continue;
                 }
 
                 // `right` starts with `left` means `right` is subtree of `left`, remove `right`
-                if starts_with(right, left) {
+                if Api::starts_with(right, left) {
                     to_remove.insert(right_index);
                     continue;
                 }
