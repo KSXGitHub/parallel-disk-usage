@@ -129,13 +129,13 @@ mod tests {
     const MOCKED_CURRENT_DIR: &str = "/home/user/current-dir";
 
     const MOCKED_SYMLINKS: &[(&str, &str)] = &[
-        ("/home/usr/current-dir/link-to-current-dir", "."),
-        ("/home/usr/current-dir/link-to-parent-dir", ".."),
-        ("/home/usr/current-dir/link-to-root", "/"),
-        ("/home/usr/current-dir/link-to-bin", "/usr/bin"),
-        ("/home/usr/current-dir/link-to-foo", "foo"),
-        ("/home/usr/current-dir/link-to-bar", "bar"),
-        ("/home/usr/current-dir/link-to-012", "0/1/2"),
+        ("/home/user/current-dir/link-to-current-dir", "."),
+        ("/home/user/current-dir/link-to-parent-dir", ".."),
+        ("/home/user/current-dir/link-to-root", "/"),
+        ("/home/user/current-dir/link-to-bin", "/usr/bin"),
+        ("/home/user/current-dir/link-to-foo", "foo"),
+        ("/home/user/current-dir/link-to-bar", "bar"),
+        ("/home/user/current-dir/link-to-012", "0/1/2"),
     ];
 
     fn resolve_symlink(absolute_path: PathBuf) -> PathBuf {
