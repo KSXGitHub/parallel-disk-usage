@@ -12,7 +12,7 @@ pub fn find_mount_point<'a>(
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     use super::find_mount_point;
     use pretty_assertions::assert_eq;
     use std::path::Path;
