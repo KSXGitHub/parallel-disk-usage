@@ -103,10 +103,34 @@ mod tests {
     use super::{deduplicate_arguments, remove_items_from_vec_by_indices, Api};
     use maplit::hashset;
     use normalize_path::NormalizePath;
+    use pipe_trait::Pipe;
     use pretty_assertions::assert_eq;
     use std::{collections::HashSet, convert::Infallible, path::PathBuf};
 
     const MOCKED_CURRENT_DIR: &str = "/home/user/current-dir";
+
+    const MOCKED_SYMLINKS: &[(&str, &str)] = &[
+        ("/home/usr/current-dir/link-to-current-dir", "."),
+        ("/home/usr/current-dir/link-to-parent-dir", ".."),
+        ("/home/usr/current-dir/link-to-root", "/"),
+        ("/home/usr/current-dir/link-to-bin", "/usr/bin"),
+        ("/home/usr/current-dir/link-to-foo", "foo"),
+        ("/home/usr/current-dir/link-to-bar", "bar"),
+        ("/home/usr/current-dir/link-to-012", "0/1/2"),
+    ];
+
+    fn resolve_symlink(absolute_path: PathBuf) -> PathBuf {
+        assert!(absolute_path.is_absolute());
+        for &(link_path, link_target) in MOCKED_SYMLINKS {
+            if let Ok(suffix) = absolute_path.strip_prefix(link_path) {
+                return link_target
+                    .pipe(PathBuf::from)
+                    .join(suffix)
+                    .pipe(resolve_symlink);
+            }
+        }
+        absolute_path
+    }
 
     /// Mocked implementation of [`Api`] for testing purposes.
     struct MockedApi;
@@ -116,16 +140,12 @@ mod tests {
         type RealPathError = Infallible;
 
         fn canonicalize(path: &Self::Argument) -> Result<Self::RealPath, Self::RealPathError> {
-            Ok(match *path {
-                "link-to-current-dir" => Self::canonicalize(&".")?,
-                "link-to-parent-dir" => Self::canonicalize(&"..")?,
-                "link-to-root" => PathBuf::from("/"),
-                "link-to-bin" => PathBuf::from("/usr/bin"),
-                "link-to-foo" => Self::canonicalize(&"foo")?,
-                "link-to-bar" => Self::canonicalize(&"bar")?,
-                "link-to-012" => Self::canonicalize(&"0/1/2")?,
-                _ => PathBuf::from(MOCKED_CURRENT_DIR).join(path).normalize(),
-            })
+            MOCKED_CURRENT_DIR
+                .pipe(PathBuf::from)
+                .join(path)
+                .normalize()
+                .pipe(resolve_symlink)
+                .pipe(Ok)
         }
 
         fn starts_with(a: &Self::RealPath, b: &Self::RealPath) -> bool {
