@@ -139,7 +139,10 @@ mod tests {
     ];
 
     fn resolve_symlink(absolute_path: PathBuf) -> PathBuf {
-        assert!(absolute_path.is_absolute());
+        assert!(
+            absolute_path.is_absolute(),
+            "absolute_path should be absolute: {absolute_path:?}",
+        );
         for &(link_path, link_target) in MOCKED_SYMLINKS {
             if let Ok(suffix) = absolute_path.strip_prefix(link_path) {
                 return link_target
