@@ -169,7 +169,7 @@ mod tests {
         }
 
         fn is_real_dir(path: &Self::Argument) -> bool {
-            let path = PathBuf::from(path).normalize();
+            let path = MOCKED_CURRENT_DIR.pipe(PathBuf::from).join(path);
             MOCKED_SYMLINKS
                 .iter()
                 .all(|(link, _)| PathBuf::from(link).normalize() != path)
