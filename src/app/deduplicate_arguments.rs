@@ -100,10 +100,136 @@ pub fn remove_items_from_vec_by_indices<Item>(vec: &mut Vec<Item>, indices: &Has
 #[cfg(unix)]
 #[cfg(test)]
 mod tests {
-    use super::remove_items_from_vec_by_indices;
+    use super::{deduplicate_arguments, remove_items_from_vec_by_indices, Api};
     use maplit::hashset;
+    use normalize_path::NormalizePath;
     use pretty_assertions::assert_eq;
-    use std::collections::HashSet;
+    use std::{collections::HashSet, convert::Infallible, path::PathBuf};
+
+    const MOCKED_CURRENT_DIR: &str = "/home/user/current-dir";
+
+    /// Mocked implementation of [`Api`] for testing purposes.
+    struct MockedApi;
+    impl Api for MockedApi {
+        type Argument = &'static str;
+        type RealPath = PathBuf;
+        type RealPathError = Infallible;
+
+        fn canonicalize(path: &Self::Argument) -> Result<Self::RealPath, Self::RealPathError> {
+            Ok(match *path {
+                "link-to-current-dir" => Self::canonicalize(&".")?,
+                "link-to-parent-dir" => Self::canonicalize(&"..")?,
+                "link-to-root" => PathBuf::from("/"),
+                "link-to-bin" => PathBuf::from("/usr/bin"),
+                "link-to-foo" => Self::canonicalize(&"foo")?,
+                "link-to-bar" => Self::canonicalize(&"bar")?,
+                "link-to-012" => Self::canonicalize(&"0/1/2")?,
+                _ => PathBuf::from(MOCKED_CURRENT_DIR).join(path).normalize(),
+            })
+        }
+
+        fn starts_with(a: &Self::RealPath, b: &Self::RealPath) -> bool {
+            a.starts_with(b)
+        }
+    }
+
+    #[test]
+    fn find_nothing_to_remove() {
+        let original = vec!["foo", "bar", "abc/def", "0/1/2"];
+        let mut actual = original.clone();
+        deduplicate_arguments::<MockedApi>(&mut actual);
+        let expected = original;
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn remove_duplicated_arguments() {
+        let original = dbg!(vec![
+            "foo",
+            "bar",
+            "abc/def",
+            "foo",
+            "0/1/2",
+            "./bar",
+            "./abc/./def",
+        ]);
+        let mut actual = original.clone();
+        deduplicate_arguments::<MockedApi>(&mut actual);
+        let expected = vec!["foo", "bar", "abc/def", "0/1/2"];
+        assert_eq!(actual, expected);
+
+        let original = dbg!(vec![
+            "foo",
+            "./bar",
+            "bar",
+            "./abc/./def",
+            "abc/def",
+            "foo",
+            "0/1/2",
+        ]);
+        let mut actual = original.clone();
+        deduplicate_arguments::<MockedApi>(&mut actual);
+        let expected = vec!["foo", "./bar", "./abc/./def", "0/1/2"];
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn remove_all_except_current_dir() {
+        let original = dbg!(vec!["foo", "bar", ".", "abc/def", "0/1/2"]);
+        let mut actual = original.clone();
+        deduplicate_arguments::<MockedApi>(&mut actual);
+        let expected = vec!["."];
+        assert_eq!(actual, expected);
+
+        let original = dbg!(vec![
+            "foo",
+            "bar",
+            ".",
+            "abc/def",
+            "0/1/2",
+            MOCKED_CURRENT_DIR,
+        ]);
+        let mut actual = original.clone();
+        deduplicate_arguments::<MockedApi>(&mut actual);
+        let expected = vec!["."];
+        assert_eq!(actual, expected);
+
+        let original = dbg!(vec![
+            "foo",
+            "bar",
+            MOCKED_CURRENT_DIR,
+            ".",
+            "abc/def",
+            "0/1/2",
+        ]);
+        let mut actual = original.clone();
+        deduplicate_arguments::<MockedApi>(&mut actual);
+        let expected = vec![MOCKED_CURRENT_DIR];
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn remove_all_except_parent_dir() {
+        let original = dbg!(vec!["foo", "bar", "..", "abc/def", ".", "0/1/2"]);
+        let mut actual = original.clone();
+        deduplicate_arguments::<MockedApi>(&mut actual);
+        let expected = vec![".."];
+        assert_eq!(actual, expected);
+
+        let original = dbg!(vec![
+            "foo",
+            "/home/user",
+            "bar",
+            "..",
+            "abc/def",
+            ".",
+            "0/1/2"
+        ]);
+        let mut actual = original.clone();
+        deduplicate_arguments::<MockedApi>(&mut actual);
+        let expected = vec!["/home/user"];
+        assert_eq!(actual, expected);
+    }
 
     #[test]
     fn remove_nothing() {
