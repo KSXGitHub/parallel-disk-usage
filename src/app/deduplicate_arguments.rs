@@ -232,6 +232,23 @@ mod tests {
     }
 
     #[test]
+    fn remove_duplicated_sub_paths() {
+        let original = vec![
+            "foo/child",
+            "foo",
+            "bar",
+            "abc/def",
+            "0/1/2",
+            "bar/child",
+            "0/1/2/3",
+        ];
+        let mut actual = original.clone();
+        deduplicate_arguments::<MockedApi>(&mut actual);
+        let expected = vec!["foo", "bar", "abc/def", "0/1/2"];
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
     fn remove_all_except_current_dir() {
         let original = dbg!(vec!["foo", "bar", ".", "abc/def", "0/1/2"]);
         let mut actual = original.clone();
@@ -286,6 +303,77 @@ mod tests {
         let mut actual = original.clone();
         deduplicate_arguments::<MockedApi>(&mut actual);
         let expected = vec!["/home/user"];
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn remove_duplicated_real_paths() {
+        let original = dbg!(vec![
+            "foo",
+            "bar",
+            "abc/def",
+            "link-to-foo/child",
+            "link-to-bar/a/b/c",
+            "0/1/2",
+        ]);
+        let mut actual = original.clone();
+        deduplicate_arguments::<MockedApi>(&mut actual);
+        let expected = vec!["foo", "bar", "abc/def", "0/1/2"];
+        assert_eq!(actual, expected);
+
+        let original = dbg!(vec![
+            "link-to-foo/child",
+            "link-to-bar/a/b/c",
+            "foo",
+            "bar",
+            "abc/def",
+            "0/1/2",
+        ]);
+        let mut actual = original.clone();
+        deduplicate_arguments::<MockedApi>(&mut actual);
+        let expected = vec!["foo", "bar", "abc/def", "0/1/2"];
+        assert_eq!(actual, expected);
+
+        let original = dbg!(vec![
+            "link-to-current-dir/foo",
+            "foo",
+            "bar",
+            "abc/def",
+            "link-to-current-dir/bar",
+            "0/1/2",
+        ]);
+        let mut actual = original.clone();
+        deduplicate_arguments::<MockedApi>(&mut actual);
+        let expected = vec!["link-to-current-dir/foo", "bar", "abc/def", "0/1/2"];
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn do_not_remove_symlinks() {
+        let original = dbg!(vec![
+            "foo",
+            "bar",
+            "abc/def",
+            "link-to-foo",
+            "link-to-bar",
+            "0/1/2",
+        ]);
+        let mut actual = original.clone();
+        deduplicate_arguments::<MockedApi>(&mut actual);
+        let expected = original;
+        assert_eq!(actual, expected);
+
+        let original = dbg!(vec![
+            "foo/child",
+            "bar",
+            "abc/def",
+            "link-to-foo",
+            "link-to-bar",
+            "0/1/2",
+        ]);
+        let mut actual = original.clone();
+        deduplicate_arguments::<MockedApi>(&mut actual);
+        let expected = original;
         assert_eq!(actual, expected);
     }
 
