@@ -1,5 +1,11 @@
 use pipe_trait::Pipe;
-use std::{collections::HashSet, fs::canonicalize, io, mem::take, path::PathBuf};
+use std::{
+    collections::HashSet,
+    fs::{canonicalize, symlink_metadata},
+    io,
+    mem::take,
+    path::PathBuf,
+};
 
 /// Mockable APIs to interact with the system.
 pub trait Api {
@@ -7,6 +13,7 @@ pub trait Api {
     type RealPath: Eq;
     type RealPathError;
     fn canonicalize(path: &Self::Argument) -> Result<Self::RealPath, Self::RealPathError>;
+    fn is_real_dir(path: &Self::Argument) -> bool;
     fn starts_with(a: &Self::RealPath, b: &Self::RealPath) -> bool;
 }
 
@@ -19,6 +26,11 @@ impl Api for RealApi {
 
     fn canonicalize(path: &Self::Argument) -> Result<Self::RealPath, Self::RealPathError> {
         canonicalize(path)
+    }
+
+    fn is_real_dir(path: &Self::Argument) -> bool {
+        path.pipe(symlink_metadata)
+            .is_ok_and(|metadata| !metadata.is_symlink() && metadata.is_dir())
     }
 
     fn starts_with(a: &Self::RealPath, b: &Self::RealPath) -> bool {
@@ -43,13 +55,20 @@ pub fn deduplicate_arguments<Api: self::Api>(arguments: &mut Vec<Api::Argument>)
 pub fn find_argument_duplications_to_remove<Api: self::Api>(
     arguments: &[Api::Argument],
 ) -> HashSet<usize> {
-    let real_paths: Vec<_> = arguments.iter().map(Api::canonicalize).collect();
+    let real_paths: Vec<_> = arguments
+        .iter()
+        .map(|path| {
+            Api::is_real_dir(path)
+                .then(|| Api::canonicalize(path))
+                .and_then(Result::ok)
+        })
+        .collect();
     assert_eq!(arguments.len(), real_paths.len());
 
     let mut to_remove = HashSet::new();
     for left_index in 0..arguments.len() {
         for right_index in (left_index + 1)..arguments.len() {
-            if let (Ok(left), Ok(right)) = (&real_paths[left_index], &real_paths[right_index]) {
+            if let (Some(left), Some(right)) = (&real_paths[left_index], &real_paths[right_index]) {
                 // both paths are the same, remove the second one
                 if left == right {
                     to_remove.insert(right_index);
@@ -146,6 +165,13 @@ mod tests {
                 .normalize()
                 .pipe(resolve_symlink)
                 .pipe(Ok)
+        }
+
+        fn is_real_dir(path: &Self::Argument) -> bool {
+            let path = PathBuf::from(path).normalize();
+            MOCKED_SYMLINKS
+                .iter()
+                .all(|(link, _)| PathBuf::from(link).normalize() != path)
         }
 
         fn starts_with(a: &Self::RealPath, b: &Self::RealPath) -> bool {
