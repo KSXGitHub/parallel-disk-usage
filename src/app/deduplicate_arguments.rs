@@ -145,6 +145,7 @@ mod tests {
                 return link_target
                     .pipe(PathBuf::from)
                     .join(suffix)
+                    .normalize()
                     .pipe(resolve_symlink);
             }
         }
