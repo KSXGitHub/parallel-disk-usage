@@ -144,9 +144,17 @@ mod tests {
             "absolute_path should be absolute: {absolute_path:?}",
         );
         for &(link_path, link_target) in MOCKED_SYMLINKS {
-            if let Ok(suffix) = absolute_path.strip_prefix(link_path) {
-                return link_target
-                    .pipe(PathBuf::from)
+            let link_path = PathBuf::from(link_path);
+            assert!(
+                link_path.is_absolute(),
+                "link_path should be absolute: {link_path:?}",
+            );
+            let Some(parent) = link_path.parent() else {
+                panic!("Cannot get parent of {link_path:?}");
+            };
+            if let Ok(suffix) = absolute_path.strip_prefix(&link_path) {
+                return parent
+                    .join(link_target)
                     .join(suffix)
                     .normalize()
                     .pipe(resolve_symlink);
