@@ -298,7 +298,7 @@ mod tests {
             "..",
             "abc/def",
             ".",
-            "0/1/2"
+            "0/1/2",
         ]);
         let mut actual = original.clone();
         deduplicate_arguments::<MockedApi>(&mut actual);
