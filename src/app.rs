@@ -11,7 +11,7 @@ use crate::{
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
     size,
-    visualizer::{BarAlignment, Direction, Visualizer},
+    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use clap::Parser;
 use hdd::any_path_is_in_hdd;
@@ -67,16 +67,22 @@ impl App {
                 .map_err(RuntimeError::DeserializationFailure)?
                 .body;
 
-            macro_rules! extract {
-                ($tree:expr, $bytes_format: expr) => {{
-                    let JsonTree { tree, shared } = $tree;
+            trait VisualizeJsonTree: size::Size + Into<u64> + Send {
+                fn visualize_json_tree(
+                    tree: JsonTree<Self>,
+                    bytes_format: Self::DisplayFormat,
+                    column_width_distribution: ColumnWidthDistribution,
+                    direction: Direction,
+                    bar_alignment: BarAlignment,
+                ) -> Result<String, RuntimeError> {
+                    let JsonTree { tree, shared } = tree;
 
                     let data_tree = tree
                         .par_try_into_tree()
                         .map_err(|error| RuntimeError::InvalidInputReflection(error.to_string()))?;
                     let visualizer = Visualizer {
                         data_tree: &data_tree,
-                        bytes_format: $bytes_format,
+                        bytes_format,
                         column_width_distribution,
                         direction,
                         bar_alignment,
@@ -85,20 +91,36 @@ impl App {
                     let JsonShared { details, summary } = shared;
                     let summary = summary.or_else(|| details.map(|details| details.summarize()));
 
-                    if let Some(summary) = summary {
-                        let summary = summary.display($bytes_format);
+                    let visualization = if let Some(summary) = summary {
+                        let summary = summary.display(bytes_format);
                         // visualizer already ends with "\n"
                         format!("{visualizer}{summary}\n")
                     } else {
                         visualizer.to_string()
-                    }
-                }};
+                    };
+
+                    Ok(visualization)
+                }
+            }
+
+            impl<Size: size::Size + Into<u64> + Send> VisualizeJsonTree for Size {}
+
+            macro_rules! visualize {
+                ($tree:expr, $bytes_format:expr) => {
+                    VisualizeJsonTree::visualize_json_tree(
+                        $tree,
+                        $bytes_format,
+                        column_width_distribution,
+                        direction,
+                        bar_alignment,
+                    )
+                };
             }
 
             let visualization = match body {
-                JsonDataBody::Bytes(tree) => extract!(tree, bytes_format),
-                JsonDataBody::Blocks(tree) => extract!(tree, ()),
-            };
+                JsonDataBody::Bytes(tree) => visualize!(tree, bytes_format),
+                JsonDataBody::Blocks(tree) => visualize!(tree, ()),
+            }?;
 
             print!("{visualization}"); // it already ends with "\n", println! isn't needed here.
             return Ok(());
