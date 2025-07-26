@@ -9,6 +9,7 @@ pub enum Parenthood {
 
 impl Parenthood {
     /// Deduce parenthood from the number of children.
+    #[inline]
     pub const fn from_children_count(children_count: usize) -> Self {
         if children_count == 0 {
             Parenthood::Childless

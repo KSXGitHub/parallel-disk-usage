@@ -246,14 +246,17 @@ where
     DataTree<OsStringDisplay, Size>: Send,
     Size: size::Size + Sync,
 {
+    #[inline]
     fn convert_error(error: Self::Error) -> RuntimeError {
         match error {}
     }
 
+    #[inline]
     fn print_report((): Self::Report, _: Size::DisplayFormat) -> Result<(), RuntimeError> {
         Ok(())
     }
 
+    #[inline]
     fn json_report((): Self::Report) -> Result<Option<JsonShared<Size>>, RuntimeError> {
         Ok(None)
     }

@@ -31,21 +31,25 @@ impl<'a, Size> Iterator for Iter<'a, Size> {
 
 impl<'a, Size> Item<'a, Size> {
     /// The inode number of the file.
+    #[inline]
     pub fn ino(&self) -> InodeNumber {
         *self.0.key()
     }
 
     /// Size of the file.
+    #[inline]
     pub fn size(&self) -> &Size {
         &self.0.value().size
     }
 
     /// Total number of links of the file, both listed (in [`Self::paths`]) and unlisted.
+    #[inline]
     pub fn links(&self) -> u64 {
         self.0.value().links
     }
 
     /// Paths to the detected links of the file.
+    #[inline]
     pub fn paths(&self) -> &LinkPathList {
         &self.0.value().paths
     }

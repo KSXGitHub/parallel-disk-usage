@@ -19,6 +19,7 @@ impl<Name, Size: size::Size> From<DataTree<Name, Size>> for Reflection<Name, Siz
 
 impl<Name, Size: size::Size> DataTree<Name, Size> {
     /// Create reflection.
+    #[inline]
     pub fn into_reflection(self) -> Reflection<Name, Size> {
         self.into()
     }

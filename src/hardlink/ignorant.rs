@@ -16,6 +16,7 @@ impl<Size, Reporter> RecordHardlinks<Size, Reporter> for Ignorant {
     type Error = Infallible;
 
     /// Do nothing.
+    #[inline]
     fn record_hardlinks(
         &self,
         _: RecordHardlinksArgument<Size, Reporter>,
@@ -35,6 +36,7 @@ where
     type Error = Infallible;
 
     /// Do nothing.
+    #[inline]
     fn deduplicate(
         self,
         _: &mut DataTree<OsStringDisplay, Size>,

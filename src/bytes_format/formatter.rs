@@ -9,16 +9,19 @@ pub struct Formatter {
 
 impl Formatter {
     /// Create a new formatter.
+    #[inline]
     pub const fn new(scale_base: u64) -> Self {
         Formatter { scale_base }
     }
 
     /// Multiplication factor.
+    #[inline]
     pub const fn scale_base(self) -> u64 {
         self.scale_base
     }
 
     /// Get scale in number.
+    #[inline]
     pub const fn scale(self, exp: u32) -> u64 {
         self.scale_base().pow(exp)
     }

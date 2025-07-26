@@ -17,6 +17,7 @@ where
     }
 
     /// Process the tree via [`par_sort_by`](Self::par_sort_by) method.
+    #[inline]
     pub fn into_par_sorted(
         mut self,
         compare: impl Fn(&Self, &Self) -> Ordering + Copy + Sync,

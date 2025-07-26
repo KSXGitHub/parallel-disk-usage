@@ -103,6 +103,7 @@ macro_rules! newtype {
             type Inner = $inner;
             type DisplayFormat = $display_format;
             type DisplayOutput = $display_output;
+            #[inline]
             fn display(self, format: Self::DisplayFormat) -> Self::DisplayOutput {
                 let display: fn(Self, Self::DisplayFormat) -> Self::DisplayOutput = $display_impl;
                 display(self, format)

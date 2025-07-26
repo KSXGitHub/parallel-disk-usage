@@ -155,6 +155,7 @@ impl App {
         impl GetSizeUtils for GetApparentSize {
             const INSTANCE: Self = GetApparentSize;
             const QUANTITY: Quantity = Quantity::ApparentSize;
+            #[inline]
             fn formatter(bytes_format: BytesFormat) -> BytesFormat {
                 bytes_format
             }
@@ -164,6 +165,7 @@ impl App {
         impl GetSizeUtils for GetBlockSize {
             const INSTANCE: Self = GetBlockSize;
             const QUANTITY: Quantity = Quantity::BlockSize;
+            #[inline]
             fn formatter(bytes_format: BytesFormat) -> BytesFormat {
                 bytes_format
             }
@@ -173,6 +175,7 @@ impl App {
         impl GetSizeUtils for GetBlockCount {
             const INSTANCE: Self = GetBlockCount;
             const QUANTITY: Quantity = Quantity::BlockCount;
+            #[inline]
             fn formatter(_: BytesFormat) {}
         }
 
@@ -186,6 +189,7 @@ impl App {
             Self: GetSizeUtils,
         {
             type Reporter = ErrorOnlyReporter<fn(ErrorReport)>;
+            #[inline]
             fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter {
                 ErrorOnlyReporter::new(report_error)
             }
@@ -199,6 +203,7 @@ impl App {
             u64: Into<Self::Size>,
         {
             type Reporter = ProgressAndErrorReporter<Self::Size, fn(ErrorReport)>;
+            #[inline]
             fn create_reporter(report_error: fn(ErrorReport)) -> Self::Reporter {
                 ProgressAndErrorReporter::new(
                     ProgressReport::TEXT,
@@ -223,6 +228,7 @@ impl App {
             Self::Size: Send + Sync,
         {
             type HardlinksHandler = hardlink::HardlinkIgnorant;
+            #[inline]
             fn create_hardlinks_handler() -> Self::HardlinksHandler {
                 hardlink::HardlinkIgnorant
             }
@@ -237,6 +243,7 @@ impl App {
             Self::Reporter: crate::reporter::Reporter<Self::Size>,
         {
             type HardlinksHandler = hardlink::HardlinkAware<Self::Size>;
+            #[inline]
             fn create_hardlinks_handler() -> Self::HardlinksHandler {
                 hardlink::HardlinkAware::new()
             }

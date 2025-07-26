@@ -13,6 +13,7 @@ pub struct BinaryVersion(String);
 
 impl BinaryVersion {
     /// Get version of the current `pdu` program as a `BinaryVersion`.
+    #[inline]
     pub fn current() -> Self {
         CURRENT_VERSION.to_string().into()
     }

@@ -182,6 +182,7 @@ impl<Size: size::Size> Display for SummaryDisplay<'_, Size> {
 
 impl<Size: size::Size> Summary<Size> {
     /// Turns this [`Summary`] into something [displayable](Display).
+    #[inline]
     pub fn display(&self, format: Size::DisplayFormat) -> SummaryDisplay<Size> {
         SummaryDisplay {
             format,

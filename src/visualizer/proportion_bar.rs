@@ -30,27 +30,33 @@ pub struct ProportionBar {
 }
 
 impl ProportionBar {
+    #[inline]
     fn display_level0(self) -> impl Display {
         repeat(LEVEL0_BLOCK, self.level0)
     }
 
+    #[inline]
     fn display_level1(self) -> impl Display {
         repeat(LEVEL1_BLOCK, self.level1)
     }
 
+    #[inline]
     fn display_level2(self) -> impl Display {
         repeat(LEVEL2_BLOCK, self.level2)
     }
 
+    #[inline]
     fn display_level3(self) -> impl Display {
         repeat(LEVEL3_BLOCK, self.level3)
     }
 
+    #[inline]
     fn display_level4(self) -> impl Display {
         repeat(LEVEL4_BLOCK, self.level4)
     }
 
     /// Create a [displayable](Display) value.
+    #[inline]
     pub fn display(self, align: BarAlignment) -> ProportionBarDisplay {
         ProportionBarDisplay { bar: self, align }
     }

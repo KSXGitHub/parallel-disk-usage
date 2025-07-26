@@ -13,6 +13,7 @@ pub struct StatusBoard {
 
 impl StatusBoard {
     /// Create a new [`StatusBoard`].
+    #[inline]
     const fn new() -> Self {
         StatusBoard {
             line_width: AtomicUsize::new(0),
@@ -20,11 +21,13 @@ impl StatusBoard {
     }
 
     /// Get the number of characters of the current line.
+    #[inline]
     fn get_line_width(&self) -> usize {
         self.line_width.load(Ordering::Relaxed)
     }
 
     /// Set the number of characters of the current line.
+    #[inline]
     fn set_line_width(&self, value: usize) {
         self.line_width.store(value, Ordering::Relaxed);
     }

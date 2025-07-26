@@ -17,6 +17,7 @@ pub trait GetSize {
 pub struct GetApparentSize;
 impl GetSize for GetApparentSize {
     type Size = Bytes;
+    #[inline]
     fn get_size(&self, metadata: &Metadata) -> Self::Size {
         metadata.len().into()
     }
@@ -29,6 +30,7 @@ pub struct GetBlockSize;
 #[cfg(unix)]
 impl GetSize for GetBlockSize {
     type Size = Bytes;
+    #[inline]
     fn get_size(&self, metadata: &Metadata) -> Self::Size {
         (metadata.blocks() * 512).into()
     }
@@ -41,6 +43,7 @@ pub struct GetBlockCount;
 #[cfg(unix)]
 impl GetSize for GetBlockCount {
     type Size = Blocks;
+    #[inline]
     fn get_size(&self, metadata: &Metadata) -> Self::Size {
         metadata.blocks().into()
     }

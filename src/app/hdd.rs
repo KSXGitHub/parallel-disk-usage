@@ -19,14 +19,17 @@ pub struct RealApi;
 impl Api for RealApi {
     type Disk = Disk;
 
+    #[inline]
     fn get_disk_kind(disk: &Self::Disk) -> DiskKind {
         disk.kind()
     }
 
+    #[inline]
     fn get_mount_point(disk: &Self::Disk) -> &Path {
         disk.mount_point()
     }
 
+    #[inline]
     fn canonicalize(path: &Path) -> io::Result<PathBuf> {
         canonicalize(path)
     }

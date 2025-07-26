@@ -9,6 +9,7 @@ pub enum Direction {
 
 impl Direction {
     #[cfg(feature = "cli")]
+    #[inline]
     pub(crate) const fn from_top_down(top_down: bool) -> Self {
         if top_down {
             Direction::TopDown

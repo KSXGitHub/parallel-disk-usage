@@ -20,6 +20,7 @@ pub struct LinkPathList(Vec<PathBuf>);
 impl LinkPathList {
     /// Create a list of a single path.
     #[cfg(any(unix, test))]
+    #[inline]
     pub(crate) fn single(path: PathBuf) -> Self {
         LinkPathList(vec![path])
     }
@@ -34,21 +35,25 @@ impl LinkPathList {
 
     /// Add a path to the list.
     #[cfg(any(unix, test))]
+    #[inline]
     pub(crate) fn add(&mut self, path: PathBuf) {
         self.0.push(path)
     }
 
     /// Get the number of paths inside the list.
+    #[inline]
     pub fn len(&self) -> usize {
         self.0.len()
     }
 
     /// Check whether the list is empty.
+    #[inline]
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 
     /// Create reflection.
+    #[inline]
     pub fn into_reflection(self) -> Reflection {
         self.into()
     }

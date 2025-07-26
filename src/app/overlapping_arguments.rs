@@ -24,15 +24,18 @@ impl Api for RealApi {
     type RealPath = PathBuf;
     type RealPathError = io::Error;
 
+    #[inline]
     fn canonicalize(path: &Self::Argument) -> Result<Self::RealPath, Self::RealPathError> {
         canonicalize(path)
     }
 
+    #[inline]
     fn is_real_dir(path: &Self::Argument) -> bool {
         path.pipe(symlink_metadata)
             .is_ok_and(|metadata| !metadata.is_symlink() && metadata.is_dir())
     }
 
+    #[inline]
     fn starts_with(a: &Self::RealPath, b: &Self::RealPath) -> bool {
         a.starts_with(b)
     }
