@@ -15,9 +15,9 @@ use derive_more::{Display, Error};
 use smart_default::SmartDefault;
 use std::fmt::Debug;
 
-#[cfg_attr(not(unix), cfg(test))]
+#[cfg(any(unix, test))]
 use pipe_trait::Pipe;
-#[cfg_attr(not(unix), cfg(test))]
+#[cfg(any(unix, test))]
 use std::path::Path;
 
 /// Map value in [`HardlinkList`].
@@ -108,7 +108,7 @@ where
     Size: size::Size,
 {
     /// Add an entry to the record.
-    #[cfg_attr(not(unix), cfg(test))] // this function isn't used on non-POSIX except in tests
+    #[cfg(any(unix, test))] // this function isn't used on non-POSIX except in tests
     pub(crate) fn add(
         &self,
         ino: InodeNumber,
