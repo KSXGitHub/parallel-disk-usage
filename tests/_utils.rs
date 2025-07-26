@@ -143,6 +143,29 @@ impl SampleWorkspace {
         SampleWorkspace(temp)
     }
 
+    pub fn simple_tree_with_some_symlinks_and_hardlinks(sizes: [usize; 5]) -> Self {
+        use std::os::unix::fs::symlink;
+        let workspace = SampleWorkspace::simple_tree_with_some_hardlinks(sizes);
+
+        macro_rules! symlink {
+            ($link_name:literal -> $target:literal) => {
+                let link_name = $link_name;
+                let target = $target;
+                if let Err(error) = symlink(target, workspace.join(link_name)) {
+                    panic!("Failed create symbolic link {link_name} pointing to {target}: {error}");
+                }
+            };
+        }
+
+        symlink!("workspace-itself" -> ".");
+        symlink!("main/main-itself" -> ".");
+        symlink!("main/parent-of-main" -> "..");
+        symlink!("main-mirror" -> "./main");
+        symlink!("sources-mirror" -> "./main/sources");
+
+        workspace
+    }
+
     /// Set up a temporary directory for tests.
     ///
     /// This directory would have a single file being hard-linked multiple times.
