@@ -135,9 +135,9 @@ impl App {
         if cfg!(unix) && self.args.deduplicate_hardlinks && self.args.files.len() > 1 {
             // Hardlinks deduplication doesn't work properly if there are more than 1 paths pointing to
             // the same tree or if a path points to a subtree of another path. Therefore, we must find
-            // and remove such duplications before they cause problem.
-            use deduplicate_arguments::{deduplicate_arguments, RealApi};
-            deduplicate_arguments::<RealApi>(&mut self.args.files);
+            // and remove such overlapping paths before they cause problem.
+            use overlapping_arguments::{remove_overlapping_paths, RealApi};
+            remove_overlapping_paths::<RealApi>(&mut self.args.files);
         }
 
         let report_error = if self.args.silent_errors {
@@ -299,6 +299,6 @@ impl App {
     }
 }
 
-mod deduplicate_arguments;
 mod hdd;
 mod mount_point;
+mod overlapping_arguments;

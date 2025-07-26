@@ -40,19 +40,19 @@ impl Api for RealApi {
 
 /// Hardlinks deduplication doesn't work properly if there are more than 1 paths pointing to
 /// the same tree or if a path points to a subtree of another path. Therefore, we must find
-/// and remove such duplications before they cause problem.
-pub fn deduplicate_arguments<Api: self::Api>(arguments: &mut Vec<Api::Argument>) {
-    let to_remove = find_argument_duplications_to_remove::<Api>(arguments);
+/// and remove such overlapping paths before they cause problem.
+pub fn remove_overlapping_paths<Api: self::Api>(arguments: &mut Vec<Api::Argument>) {
+    let to_remove = find_overlapping_paths_to_remove::<Api>(arguments);
     remove_items_from_vec_by_indices(arguments, &to_remove);
 }
 
-/// Find duplication in a list of arguments to remove and return their indices.
+/// Find overlapping paths in a list of arguments to remove and return their indices.
 ///
 /// Prefer keeping the containing tree over the subtree (returning the index of the subtree).
 ///
 /// Prefer keeping the first instance of the path over the later instances (returning the indices of
 /// the later instances).
-pub fn find_argument_duplications_to_remove<Api: self::Api>(
+pub fn find_overlapping_paths_to_remove<Api: self::Api>(
     arguments: &[Api::Argument],
 ) -> HashSet<usize> {
     let real_paths: Vec<_> = arguments
@@ -116,8 +116,8 @@ pub fn remove_items_from_vec_by_indices<Item>(vec: &mut Vec<Item>, indices: &Has
         .collect();
 }
 
-#[cfg(unix)]
-#[cfg(test)]
-mod test_deduplicate_arguments;
 #[cfg(test)]
 mod test_remove_items_from_vec_by_indices;
+#[cfg(unix)]
+#[cfg(test)]
+mod test_remove_overlapping_paths;

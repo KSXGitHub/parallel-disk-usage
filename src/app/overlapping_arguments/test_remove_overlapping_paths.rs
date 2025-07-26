@@ -1,4 +1,4 @@
-use super::{deduplicate_arguments, Api};
+use super::{remove_overlapping_paths, Api};
 use normalize_path::NormalizePath;
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
@@ -73,7 +73,7 @@ impl Api for MockedApi {
 fn remove_nothing() {
     let original = vec!["foo", "bar", "abc/def", "0/1/2"];
     let mut actual = original.clone();
-    deduplicate_arguments::<MockedApi>(&mut actual);
+    remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = original;
     assert_eq!(actual, expected);
 }
@@ -90,7 +90,7 @@ fn remove_duplicated_arguments() {
         "./abc/./def",
     ]);
     let mut actual = original.clone();
-    deduplicate_arguments::<MockedApi>(&mut actual);
+    remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["foo", "bar", "abc/def", "0/1/2"];
     assert_eq!(actual, expected);
 
@@ -104,13 +104,13 @@ fn remove_duplicated_arguments() {
         "0/1/2",
     ]);
     let mut actual = original.clone();
-    deduplicate_arguments::<MockedApi>(&mut actual);
+    remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["foo", "./bar", "./abc/./def", "0/1/2"];
     assert_eq!(actual, expected);
 }
 
 #[test]
-fn remove_duplicated_sub_paths() {
+fn remove_overlapping_sub_paths() {
     let original = vec![
         "foo/child",
         "foo",
@@ -121,7 +121,7 @@ fn remove_duplicated_sub_paths() {
         "0/1/2/3",
     ];
     let mut actual = original.clone();
-    deduplicate_arguments::<MockedApi>(&mut actual);
+    remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["foo", "bar", "abc/def", "0/1/2"];
     assert_eq!(actual, expected);
 }
@@ -130,7 +130,7 @@ fn remove_duplicated_sub_paths() {
 fn remove_all_except_current_dir() {
     let original = dbg!(vec!["foo", "bar", ".", "abc/def", "0/1/2"]);
     let mut actual = original.clone();
-    deduplicate_arguments::<MockedApi>(&mut actual);
+    remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["."];
     assert_eq!(actual, expected);
 
@@ -143,7 +143,7 @@ fn remove_all_except_current_dir() {
         MOCKED_CURRENT_DIR,
     ]);
     let mut actual = original.clone();
-    deduplicate_arguments::<MockedApi>(&mut actual);
+    remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["."];
     assert_eq!(actual, expected);
 
@@ -156,7 +156,7 @@ fn remove_all_except_current_dir() {
         "0/1/2",
     ]);
     let mut actual = original.clone();
-    deduplicate_arguments::<MockedApi>(&mut actual);
+    remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec![MOCKED_CURRENT_DIR];
     assert_eq!(actual, expected);
 }
@@ -165,7 +165,7 @@ fn remove_all_except_current_dir() {
 fn remove_all_except_parent_dir() {
     let original = dbg!(vec!["foo", "bar", "..", "abc/def", ".", "0/1/2"]);
     let mut actual = original.clone();
-    deduplicate_arguments::<MockedApi>(&mut actual);
+    remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec![".."];
     assert_eq!(actual, expected);
 
@@ -179,13 +179,13 @@ fn remove_all_except_parent_dir() {
         "0/1/2",
     ]);
     let mut actual = original.clone();
-    deduplicate_arguments::<MockedApi>(&mut actual);
+    remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["/home/user"];
     assert_eq!(actual, expected);
 }
 
 #[test]
-fn remove_duplicated_real_paths() {
+fn remove_overlapping_real_paths() {
     let original = dbg!(vec![
         "foo",
         "bar",
@@ -195,7 +195,7 @@ fn remove_duplicated_real_paths() {
         "0/1/2",
     ]);
     let mut actual = original.clone();
-    deduplicate_arguments::<MockedApi>(&mut actual);
+    remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["foo", "bar", "abc/def", "0/1/2"];
     assert_eq!(actual, expected);
 
@@ -208,7 +208,7 @@ fn remove_duplicated_real_paths() {
         "0/1/2",
     ]);
     let mut actual = original.clone();
-    deduplicate_arguments::<MockedApi>(&mut actual);
+    remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["foo", "bar", "abc/def", "0/1/2"];
     assert_eq!(actual, expected);
 
@@ -221,7 +221,7 @@ fn remove_duplicated_real_paths() {
         "0/1/2",
     ]);
     let mut actual = original.clone();
-    deduplicate_arguments::<MockedApi>(&mut actual);
+    remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["link-to-current-dir/foo", "bar", "abc/def", "0/1/2"];
     assert_eq!(actual, expected);
 }
@@ -237,7 +237,7 @@ fn do_not_remove_symlinks() {
         "0/1/2",
     ]);
     let mut actual = original.clone();
-    deduplicate_arguments::<MockedApi>(&mut actual);
+    remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = original;
     assert_eq!(actual, expected);
 
@@ -250,7 +250,7 @@ fn do_not_remove_symlinks() {
         "0/1/2",
     ]);
     let mut actual = original.clone();
-    deduplicate_arguments::<MockedApi>(&mut actual);
+    remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = original;
     assert_eq!(actual, expected);
 }
