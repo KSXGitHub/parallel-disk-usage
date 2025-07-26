@@ -19,12 +19,12 @@ pub struct ProgressReport<Size: size::Size> {
 }
 
 impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
-    /// Maximum extend by which the progress text may extend.
+    /// Maximum length by which the progress text may extend.
     ///
     /// This constant is used as capacity in [`Self::TEXT`] to prevent
     /// performance penalty from string resizing.
     ///
-    /// The value of this function is made correct by a unit test.
+    /// The value of this constant is made correct by a unit test.
     const TEXT_MAX_LEN: usize = 145;
 
     /// Create a text to be used in [`Self::TEXT`].
