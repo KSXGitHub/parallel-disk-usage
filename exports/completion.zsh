@@ -30,9 +30,9 @@ block-count\:"Count numbers of blocks"))' \
 '--threads=[Set the maximum number of threads to spawn. Could be either "auto", "max", or a number]:THREADS:_default' \
 '(--quantity --deduplicate-hardlinks)--json-input[Read JSON data from stdin]' \
 '--json-output[Print JSON data instead of an ASCII chart]' \
-'--deduplicate-hardlinks[Detect and subtract the sizes of hardlinks from their parent nodes]' \
-'--detect-links[Detect and subtract the sizes of hardlinks from their parent nodes]' \
-'--dedupe-links[Detect and subtract the sizes of hardlinks from their parent nodes]' \
+'--deduplicate-hardlinks[Detect and subtract the sizes of hardlinks from their parent directory totals]' \
+'--detect-links[Detect and subtract the sizes of hardlinks from their parent directory totals]' \
+'--dedupe-links[Detect and subtract the sizes of hardlinks from their parent directory totals]' \
 '--top-down[Print the tree top-down instead of bottom-up]' \
 '--align-right[Set the root of the bars to the right]' \
 '--no-sort[Do not sort the branches in the tree]' \

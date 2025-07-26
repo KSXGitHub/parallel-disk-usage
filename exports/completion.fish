@@ -11,7 +11,7 @@ complete -c pdu -l min-ratio -d 'Minimal size proportion required to appear' -r
 complete -c pdu -l threads -d 'Set the maximum number of threads to spawn. Could be either "auto", "max", or a number' -r
 complete -c pdu -l json-input -d 'Read JSON data from stdin'
 complete -c pdu -l json-output -d 'Print JSON data instead of an ASCII chart'
-complete -c pdu -l deduplicate-hardlinks -l detect-links -l dedupe-links -d 'Detect and subtract the sizes of hardlinks from their parent nodes'
+complete -c pdu -l deduplicate-hardlinks -l detect-links -l dedupe-links -d 'Detect and subtract the sizes of hardlinks from their parent directory totals'
 complete -c pdu -l top-down -d 'Print the tree top-down instead of bottom-up'
 complete -c pdu -l align-right -d 'Set the root of the bars to the right'
 complete -c pdu -l no-sort -d 'Do not sort the branches in the tree'

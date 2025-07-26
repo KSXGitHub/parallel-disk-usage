@@ -105,7 +105,7 @@ pub struct Args {
     #[default(BytesFormat::MetricUnits)]
     pub bytes_format: BytesFormat,
 
-    /// Detect and subtract the sizes of hardlinks from their parent nodes.
+    /// Detect and subtract the sizes of hardlinks from their parent directory totals.
     #[clap(long, visible_aliases = ["detect-links", "dedupe-links"])]
     #[cfg_attr(not(unix), clap(hide = true))]
     pub deduplicate_hardlinks: bool,
