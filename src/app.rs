@@ -6,7 +6,8 @@ use crate::{
     args::{Args, Quantity, Threads},
     bytes_format::BytesFormat,
     get_size::{GetApparentSize, GetSize},
-    json_data::{JsonData, JsonDataBody},
+    hardlink,
+    json_data::{JsonData, JsonDataBody, JsonShared, JsonTree},
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
     size,
@@ -16,6 +17,7 @@ use clap::Parser;
 use hdd::any_path_is_in_hdd;
 use pipe_trait::Pipe;
 use std::{io::stdin, time::Duration};
+use sub::JsonOutputParam;
 use sysinfo::Disks;
 
 #[cfg(unix)]
@@ -36,7 +38,7 @@ impl App {
     }
 
     /// Run the application.
-    pub fn run(self) -> Result<(), RuntimeError> {
+    pub fn run(mut self) -> Result<(), RuntimeError> {
         // DYNAMIC DISPATCH POLICY:
         //
         // Errors rarely occur, therefore, using dynamic dispatch to report errors have an acceptable
@@ -65,29 +67,48 @@ impl App {
                 .map_err(RuntimeError::DeserializationFailure)?
                 .body;
 
-            macro_rules! visualize {
-                ($reflection:expr, $bytes_format: expr) => {{
-                    let data_tree = $reflection
+            macro_rules! extract {
+                ($tree:expr, $bytes_format: expr) => {{
+                    let JsonTree { tree, shared } = $tree;
+
+                    let data_tree = tree
                         .par_try_into_tree()
                         .map_err(|error| RuntimeError::InvalidInputReflection(error.to_string()))?;
-                    Visualizer {
+                    let visualizer = Visualizer {
                         data_tree: &data_tree,
                         bytes_format: $bytes_format,
                         column_width_distribution,
                         direction,
                         bar_alignment,
+                    };
+
+                    let JsonShared { details, summary } = shared;
+                    let summary = summary.or_else(|| details.map(|details| details.summarize()));
+
+                    if let Some(summary) = summary {
+                        let summary = summary.display($bytes_format);
+                        // visualizer already ends with "\n"
+                        format!("{visualizer}{summary}\n")
+                    } else {
+                        visualizer.to_string()
                     }
-                    .to_string()
                 }};
             }
 
             let visualization = match body {
-                JsonDataBody::Bytes(reflection) => visualize!(reflection, bytes_format),
-                JsonDataBody::Blocks(reflection) => visualize!(reflection, ()),
+                JsonDataBody::Bytes(tree) => extract!(tree, bytes_format),
+                JsonDataBody::Blocks(tree) => extract!(tree, ()),
             };
 
             print!("{visualization}"); // it already ends with "\n", println! isn't needed here.
             return Ok(());
+        }
+
+        #[cfg(not(unix))]
+        if self.args.deduplicate_hardlinks {
+            return crate::runtime_error::UnsupportedFeature::DeduplicateHardlink
+                .pipe(RuntimeError::UnsupportedFeature)
+                .pipe(Err);
         }
 
         let threads = match self.args.threads {
@@ -109,6 +130,14 @@ impl App {
                 .num_threads(threads)
                 .build_global()
                 .unwrap_or_else(|_| eprintln!("warning: Failed to set thread limit to {threads}"));
+        }
+
+        if cfg!(unix) && self.args.deduplicate_hardlinks && self.args.files.len() > 1 {
+            // Hardlinks deduplication doesn't work properly if there are more than 1 paths pointing to
+            // the same tree or if a path points to a subtree of another path. Therefore, we must find
+            // and remove such overlapping paths before they cause problem.
+            use overlapping_arguments::{remove_overlapping_paths, RealApi};
+            remove_overlapping_paths::<RealApi>(&mut self.args.files);
         }
 
         let report_error = if self.args.silent_errors {
@@ -179,15 +208,51 @@ impl App {
             }
         }
 
+        trait CreateHardlinksHandler<const DEDUPLICATE_HARDLINKS: bool, const REPORT_PROGRESS: bool>:
+            CreateReporter<REPORT_PROGRESS>
+        {
+            type HardlinksHandler: hardlink::RecordHardlinks<Self::Size, Self::Reporter>
+                + sub::HardlinkSubroutines<Self::Size>;
+            fn create_hardlinks_handler() -> Self::HardlinksHandler;
+        }
+
+        impl<const REPORT_PROGRESS: bool, SizeGetter> CreateHardlinksHandler<false, REPORT_PROGRESS>
+            for SizeGetter
+        where
+            Self: CreateReporter<REPORT_PROGRESS>,
+            Self::Size: Send + Sync,
+        {
+            type HardlinksHandler = hardlink::HardlinkIgnorant;
+            fn create_hardlinks_handler() -> Self::HardlinksHandler {
+                hardlink::HardlinkIgnorant
+            }
+        }
+
+        #[cfg(unix)]
+        impl<const REPORT_PROGRESS: bool, SizeGetter> CreateHardlinksHandler<true, REPORT_PROGRESS>
+            for SizeGetter
+        where
+            Self: CreateReporter<REPORT_PROGRESS>,
+            Self::Size: Send + Sync + 'static,
+            Self::Reporter: crate::reporter::Reporter<Self::Size>,
+        {
+            type HardlinksHandler = hardlink::HardlinkAware<Self::Size>;
+            fn create_hardlinks_handler() -> Self::HardlinksHandler {
+                hardlink::HardlinkAware::new()
+            }
+        }
+
         macro_rules! run {
             ($(
                 $(#[$variant_attrs:meta])*
-                $size_getter:ident, $progress:literal;
+                $size_getter:ident, $progress:literal, $hardlinks:ident;
             )*) => { match self.args {$(
                 $(#[$variant_attrs])*
                 Args {
                     quantity: <$size_getter as GetSizeUtils>::QUANTITY,
                     progress: $progress,
+                    #[cfg(unix)] deduplicate_hardlinks: $hardlinks,
+                    #[cfg(not(unix))] deduplicate_hardlinks: _,
                     files,
                     json_output,
                     bytes_format,
@@ -196,15 +261,18 @@ impl App {
                     max_depth,
                     min_ratio,
                     no_sort,
+                    omit_json_shared_details,
+                    omit_json_shared_summary,
                     ..
                 } => Sub {
                     direction: Direction::from_top_down(top_down),
                     bar_alignment: BarAlignment::from_align_right(align_right),
                     size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
+                    hardlinks_handler: <$size_getter as CreateHardlinksHandler<{ cfg!(unix) && $hardlinks }, $progress>>::create_hardlinks_handler(),
                     reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
                     bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
                     files,
-                    json_output,
+                    json_output: JsonOutputParam::from_cli_flags(json_output, omit_json_shared_details, omit_json_shared_summary),
                     column_width_distribution,
                     max_depth,
                     min_ratio,
@@ -215,15 +283,22 @@ impl App {
         }
 
         run! {
-            GetApparentSize, false;
-            GetApparentSize, true;
-            #[cfg(unix)] GetBlockSize, false;
-            #[cfg(unix)] GetBlockSize, true;
-            #[cfg(unix)] GetBlockCount, false;
-            #[cfg(unix)] GetBlockCount, true;
+            GetApparentSize, false, false;
+            GetApparentSize, true, false;
+            #[cfg(unix)] GetBlockSize, false, false;
+            #[cfg(unix)] GetBlockSize, true, false;
+            #[cfg(unix)] GetBlockCount, false, false;
+            #[cfg(unix)] GetBlockCount, true, false;
+            #[cfg(unix)] GetApparentSize, false, true;
+            #[cfg(unix)] GetApparentSize, true, true;
+            #[cfg(unix)] GetBlockSize, false, true;
+            #[cfg(unix)] GetBlockSize, true, true;
+            #[cfg(unix)] GetBlockCount, false, true;
+            #[cfg(unix)] GetBlockCount, true, true;
         }
     }
 }
 
 mod hdd;
 mod mount_point;
+mod overlapping_arguments;

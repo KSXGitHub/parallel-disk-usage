@@ -7,10 +7,11 @@ pub use _utils::*;
 use command_extra::CommandExtra;
 use parallel_disk_usage::{
     bytes_format::BytesFormat,
-    data_tree::{DataTree, Reflection},
+    data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetApparentSize,
-    json_data::{JsonData, SchemaVersion},
+    hardlink::HardlinkIgnorant,
+    json_data::{JsonData, JsonTree, SchemaVersion},
     reporter::{ErrorOnlyReporter, ErrorReport},
     size::Bytes,
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
@@ -25,7 +26,7 @@ use std::{
 
 type SampleName = String;
 type SampleSize = Bytes;
-type SampleReflection = Reflection<SampleName, SampleSize>;
+type SampleJsonTree = JsonTree<SampleSize>;
 type SampleTree = DataTree<SampleName, SampleSize>;
 
 fn sample_tree() -> SampleTree {
@@ -74,14 +75,16 @@ fn json_output() {
         .pipe_as_ref(serde_json::from_str::<JsonData>)
         .expect("parse stdout as JsonData")
         .body
-        .pipe(TryInto::<SampleReflection>::try_into)
+        .pipe(TryInto::<SampleJsonTree>::try_into)
         .expect("extract reflection")
+        .tree
         .pipe(sanitize_tree_reflection);
     dbg!(&actual);
     let builder = FsTreeBuilder {
         root: workspace.to_path_buf(),
         size_getter: GetApparentSize,
-        reporter: ErrorOnlyReporter::new(ErrorReport::SILENT),
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
     };
     let expected = builder
@@ -96,10 +99,14 @@ fn json_output() {
 
 #[test]
 fn json_input() {
+    let json_tree = JsonTree {
+        tree: sample_tree().into_reflection(),
+        shared: Default::default(),
+    };
     let json_data = JsonData {
         schema_version: SchemaVersion,
         binary_version: None,
-        body: sample_tree().into_reflection().into(),
+        body: json_tree.into(),
     };
     let json = serde_json::to_string_pretty(&json_data).expect("convert sample tree to JSON");
     eprintln!("JSON: {json}\n");

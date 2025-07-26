@@ -36,6 +36,7 @@ use text_block_macros::text_block;
         "    $ pdu path/to/file/or/directory"
         "    $ pdu file.txt dir/"
         "    $ pdu --quantity=apparent-size"
+        "    $ pdu --deduplicate-hardlinks"
         "    $ pdu --bytes-format=plain"
         "    $ pdu --bytes-format=binary"
         "    $ pdu --min-ratio=0"
@@ -57,6 +58,9 @@ use text_block_macros::text_block;
         ""
         "    Show chart in apparent sizes instead of block sizes"
         "    $ pdu --quantity=apparent-size"
+        ""
+        "    Detect and subtract the sizes of hardlinks from their parent nodes"
+        "    $ pdu --deduplicate-hardlinks"
         ""
         "    Show sizes in plain numbers instead of metric units"
         "    $ pdu --bytes-format=plain"
@@ -86,7 +90,10 @@ pub struct Args {
     pub files: Vec<PathBuf>,
 
     /// Read JSON data from stdin.
-    #[clap(long, conflicts_with = "quantity")]
+    #[clap(
+        long,
+        conflicts_with_all = ["quantity", "deduplicate_hardlinks"]
+    )]
     pub json_input: bool,
 
     /// Print JSON data instead of an ASCII chart.
@@ -97,6 +104,11 @@ pub struct Args {
     #[clap(long, value_enum, default_value_t = BytesFormat::MetricUnits)]
     #[default(BytesFormat::MetricUnits)]
     pub bytes_format: BytesFormat,
+
+    /// Detect and subtract the sizes of hardlinks from their parent directory totals.
+    #[clap(long, visible_aliases = ["detect-links", "dedupe-links"])]
+    #[cfg_attr(not(unix), clap(hide = true))]
+    pub deduplicate_hardlinks: bool,
 
     /// Print the tree top-down instead of bottom-up.
     #[clap(long)]
@@ -143,6 +155,14 @@ pub struct Args {
     /// Set the maximum number of threads to spawn. Could be either "auto", "max", or a number.
     #[clap(long, default_value_t = Threads::Auto)]
     pub threads: Threads,
+
+    /// Do not output `.shared.details` in the JSON output.
+    #[clap(long, requires = "json_output", requires = "deduplicate_hardlinks")]
+    pub omit_json_shared_details: bool,
+
+    /// Do not output `.shared.summary` in the JSON output.
+    #[clap(long, requires = "json_output", requires = "deduplicate_hardlinks")]
+    pub omit_json_shared_summary: bool,
 }
 
 impl Args {

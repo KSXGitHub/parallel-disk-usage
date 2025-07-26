@@ -15,6 +15,10 @@ pub struct ProgressReportState {
     pub total: AtomicU64,
     /// Number of occurred errors.
     pub errors: AtomicU64,
+    /// Total number of detected hardlinks.
+    pub linked: AtomicU64,
+    /// Total size of detected hardlinks.
+    pub shared: AtomicU64,
 }
 
 impl ProgressReportState {
@@ -38,10 +42,14 @@ impl ProgressReportState {
         let items = load!(items);
         let total = load!(total).into();
         let errors = load!(errors);
+        let linked = load!(linked);
+        let shared = load!(shared).into();
         ControlFlow::Continue(ProgressReport {
             items,
             total,
             errors,
+            linked,
+            shared,
         })
     }
 }

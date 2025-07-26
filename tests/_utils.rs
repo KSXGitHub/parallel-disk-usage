@@ -5,6 +5,7 @@ use parallel_disk_usage::{
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
     get_size::{self, GetSize},
+    hardlink::HardlinkIgnorant,
     os_string_display::OsStringDisplay,
     reporter::ErrorOnlyReporter,
     size,
@@ -16,7 +17,7 @@ use rayon::prelude::*;
 use std::{
     cmp::Ordering,
     env::temp_dir,
-    fs::{create_dir, metadata, remove_dir_all},
+    fs::{create_dir, metadata, remove_dir_all, symlink_metadata},
     io::Error,
     path::{Path, PathBuf},
     process::{Command, Output},
@@ -96,6 +97,222 @@ impl Default for SampleWorkspace {
     }
 }
 
+/// POSIX-exclusive functions
+#[cfg(unix)]
+impl SampleWorkspace {
+    /// Set up a temporary directory for tests.
+    ///
+    /// This directory would have a couple of normal files and a couple of hardlinks.
+    pub fn simple_tree_with_some_hardlinks(sizes: [usize; 5]) -> Self {
+        use std::fs::hard_link;
+        let temp = Temp::new_dir().expect("create working directory for sample workspace");
+
+        MergeableFileSystemTree::<&str, String>::from(dir! {
+            "main" => dir! {
+                "sources" => dir! {
+                    "no-hardlinks.txt" => file!("a".repeat(sizes[0])),
+                    "one-internal-hardlink.txt" => file!("a".repeat(sizes[1])),
+                    "two-internal-hardlinks.txt" => file!("a".repeat(sizes[2])),
+                    "one-external-hardlink.txt" => file!("a".repeat(sizes[3])),
+                    "one-internal-one-external-hardlinks.txt" => file!("a".repeat(sizes[4])),
+                }
+                "internal-hardlinks" => dir! {}
+            }
+            "external-hardlinks" => dir! {}
+        })
+        .build(&temp)
+        .expect("build the filesystem tree for the sample workspace");
+
+        macro_rules! link {
+            ($original:literal -> $link:literal) => {{
+                let original = $original;
+                let link = $link;
+                if let Err(error) = hard_link(temp.join(original), temp.join(link)) {
+                    panic!("Failed to link {original} to {link}: {error}");
+                }
+            }};
+        }
+
+        link!("main/sources/one-internal-hardlink.txt" -> "main/internal-hardlinks/link-0.txt");
+        link!("main/sources/two-internal-hardlinks.txt" -> "main/internal-hardlinks/link-1a.txt");
+        link!("main/sources/two-internal-hardlinks.txt" -> "main/internal-hardlinks/link-1b.txt");
+        link!("main/sources/one-external-hardlink.txt" -> "external-hardlinks/link-2.txt");
+        link!("main/sources/one-internal-one-external-hardlinks.txt" -> "main/internal-hardlinks/link-3a.txt");
+        link!("main/sources/one-internal-one-external-hardlinks.txt" -> "external-hardlinks/link-3b.txt");
+
+        SampleWorkspace(temp)
+    }
+
+    pub fn simple_tree_with_some_symlinks_and_hardlinks(sizes: [usize; 5]) -> Self {
+        use std::os::unix::fs::symlink;
+        let workspace = SampleWorkspace::simple_tree_with_some_hardlinks(sizes);
+
+        macro_rules! symlink {
+            ($link_name:literal -> $target:literal) => {
+                let link_name = $link_name;
+                let target = $target;
+                if let Err(error) = symlink(target, workspace.join(link_name)) {
+                    panic!("Failed create symbolic link {link_name} pointing to {target}: {error}");
+                }
+            };
+        }
+
+        symlink!("workspace-itself" -> ".");
+        symlink!("main/main-itself" -> ".");
+        symlink!("main/parent-of-main" -> "..");
+        symlink!("main-mirror" -> "./main");
+        symlink!("sources-mirror" -> "./main/sources");
+
+        workspace
+    }
+
+    /// Set up a temporary directory for tests.
+    ///
+    /// This directory would have a single file being hard-linked multiple times.
+    pub fn multiple_hardlinks_to_a_single_file(bytes: usize, links: u64) -> Self {
+        use std::fs::{hard_link, write as write_file};
+        let temp = Temp::new_dir().expect("create working directory for sample workspace");
+
+        let file_path = temp.join("file.txt");
+        write_file(&file_path, "a".repeat(bytes)).expect("create file.txt");
+
+        for num in 0..links {
+            hard_link(&file_path, temp.join(format!("link.{num}")))
+                .unwrap_or_else(|error| panic!("Failed to create 'link.{num}': {error}"));
+        }
+
+        SampleWorkspace(temp)
+    }
+
+    /// Set up a temporary directory for tests.
+    ///
+    /// The tree in this tests have a diverse types of files, both shared (hardlinks)
+    /// and unique (non-hardlinks).
+    pub fn complex_tree_with_shared_and_unique_files(
+        files_per_branch: usize,
+        bytes_per_file: usize,
+    ) -> Self {
+        use std::fs::{create_dir_all, hard_link, write as write_file};
+
+        let whole = files_per_branch;
+        let half = files_per_branch / 2;
+        let quarter = files_per_branch / 4;
+        let half_quarter = files_per_branch / 8;
+        let temp = Temp::new_dir().expect("create working directory for sample workspace");
+
+        temp.join("no-hardlinks")
+            .pipe(create_dir_all)
+            .expect("create no-hardlinks");
+        temp.join("some-hardlinks")
+            .pipe(create_dir_all)
+            .expect("create some-hardlinks");
+        temp.join("only-hardlinks/exclusive")
+            .pipe(create_dir_all)
+            .expect("create only-hardlinks/exclusive");
+        temp.join("only-hardlinks/mixed")
+            .pipe(create_dir_all)
+            .expect("create only-hardlinks/mixed");
+        temp.join("only-hardlinks/external")
+            .pipe(create_dir_all)
+            .expect("create only-hardlinks/external");
+
+        // Create files in no-hardlinks.
+        // There will be no files with nlink > 1.
+        (0..files_per_branch).par_bridge().for_each(|index| {
+            let file_name = format!("file-{index}.txt");
+            let file_path = temp.join("no-hardlinks").join(file_name);
+            if let Err(error) = write_file(&file_path, "a".repeat(bytes_per_file)) {
+                panic!("Failed to write {bytes_per_file} bytes into {file_path:?}: {error}");
+            }
+        });
+
+        // Create files in some-hardlinks.
+        // Let's divide the files into 8 equal groups.
+        // Each file in the first group will have 2 exclusive links.
+        // Each file in the second group will have 1 exclusive link.
+        // Each file in the third and fourth groups will have no links.
+        // Each file in the remaining groups is PLANNED to have 1 external link from only-hardlinks/mixed.
+        (0..whole).par_bridge().for_each(|file_index| {
+            let file_name = format!("file-{file_index}.txt");
+            let file_path = temp.join("some-hardlinks").join(file_name);
+            if let Err(error) = write_file(&file_path, "a".repeat(bytes_per_file)) {
+                panic!("Failed to write {bytes_per_file} bytes into {file_path:?}: {error}");
+            }
+
+            let link_count =
+                ((file_index < quarter) as usize) + ((file_index < half_quarter) as usize);
+
+            for link_index in 0..link_count {
+                let link_name = format!("link{link_index}-file{file_index}.txt");
+                let link_path = temp.join("some-hardlinks").join(link_name);
+                if let Err(error) = hard_link(&file_path, &link_path) {
+                    panic!("Failed to link {file_path:?} to {link_path:?}: {error}");
+                }
+            }
+        });
+
+        // Create files in only-hardlinks/exclusive.
+        // Each file in this directory will have 1 exclusive link.
+        (0..whole).par_bridge().for_each(|index| {
+            let file_name = format!("file-{index}.txt");
+            let file_path = temp.join("only-hardlinks/exclusive").join(file_name);
+            if let Err(error) = write_file(&file_path, "a".repeat(bytes_per_file)) {
+                panic!("Failed to write {bytes_per_file} bytes into {file_path:?}: {error}");
+            }
+            let link_name = format!("link-{index}.txt");
+            let link_path = temp.join("only-hardlinks/exclusive").join(link_name);
+            if let Err(error) = hard_link(&file_path, &link_path) {
+                panic!("Failed to link {file_path:?} to {link_path:?}: {error}");
+            }
+        });
+
+        // Create links in only-hardlinks/mixed.
+        // Let's divide the PLANNED links into 2 equal groups.
+        // Each link in the first group is PLANNED to share with only-hardlinks/external.
+        // Each link in the second group is exclusive.
+        (half..whole).par_bridge().for_each(|index| {
+            let file_name = format!("link0-{index}.txt");
+            let file_path = temp.join("only-hardlinks/mixed").join(file_name);
+            if let Err(error) = write_file(&file_path, "a".repeat(bytes_per_file)) {
+                panic!("Failed to write {bytes_per_file} bytes to {file_path:?}: {error}");
+            }
+
+            let link_name = format!("link1-{index}.txt");
+            let link_path = temp.join("only-hardlinks/mixed").join(link_name);
+            if let Err(error) = hard_link(&file_path, &link_path) {
+                panic!("Failed to link {file_path:?} to {link_path:?}: {error}");
+            }
+        });
+
+        // Create links in only-hardlinks/external
+        // Let's divide the links into 2 equal groups.
+        // The first group will share with only-hardlinks/mixed.
+        // The second group will share with some-hardlinks.
+        (0..whole).par_bridge().for_each(|index| {
+            let link_name = format!("linkX-{index}.txt");
+            let link_path = temp.join("only-hardlinks/external").join(link_name);
+
+            let file_path = if index < half {
+                let file_name = format!("link0-{index}.txt"); // file name from only-hardlinks/mixed
+                let file_path = temp.join("only-hardlinks/mixed").join(file_name);
+                if let Err(error) = write_file(&file_path, "a".repeat(bytes_per_file)) {
+                    panic!("Failed to write {bytes_per_file} bytes to {file_path:?}: {error}");
+                }
+                file_path
+            } else {
+                let file_name = format!("file-{index}.txt"); // file name from some-hardlinks
+                temp.join("some-hardlinks").join(file_name)
+            };
+
+            if let Err(error) = hard_link(&file_path, &link_path) {
+                panic!("Failed to link {file_path:?} to {link_path:?}: {error}");
+            }
+        });
+
+        SampleWorkspace(temp)
+    }
+}
+
 /// Make the snapshot of a [`TreeReflection`] testable.
 ///
 /// The real filesystem is often messy, causing `children` to mess up its order.
@@ -150,7 +367,8 @@ where
     let measure = |suffix: &str| {
         FsTreeBuilder {
             size_getter,
-            reporter: ErrorOnlyReporter::new(|error| {
+            hardlinks_recorder: &HardlinkIgnorant,
+            reporter: &ErrorOnlyReporter::new(|error| {
                 panic!("Unexpected call to report_error: {error:?}")
             }),
             root: root.join(suffix),
@@ -330,6 +548,37 @@ pub fn inspect_stderr(stderr: &[u8]) {
     if !text.is_empty() {
         eprintln!("STDERR:\n{text}\n");
     }
+}
+
+/// Recursively sort a [`DataTreeReflection`].
+pub fn sort_reflection_by<Name, Size, Order>(
+    reflection: &mut DataTreeReflection<Name, Size>,
+    order: Order,
+) where
+    Size: size::Size,
+    Order:
+        FnMut(&DataTreeReflection<Name, Size>, &DataTreeReflection<Name, Size>) -> Ordering + Copy,
+{
+    reflection.children.sort_by(order);
+    for child in &mut reflection.children {
+        sort_reflection_by(child, order);
+    }
+}
+
+/// Read [apparent size](std::fs::Metadata::len) of a path.
+pub fn read_apparent_size(path: &Path) -> u64 {
+    path.pipe(symlink_metadata)
+        .unwrap_or_else(|error| panic!("Can't read metadata at {path:?}: {error}"))
+        .len()
+}
+
+/// Read [ino](std::os::unix::fs::MetadataExt::ino) of a path.
+#[cfg(unix)]
+pub fn read_inode_number(path: &Path) -> u64 {
+    use std::os::unix::fs::MetadataExt;
+    path.pipe(symlink_metadata)
+        .unwrap_or_else(|error| panic!("Can't read metadata at {path:?}: {error}"))
+        .ino()
 }
 
 /// Utility methods to sort various types of arrays.

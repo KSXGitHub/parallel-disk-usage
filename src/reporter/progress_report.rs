@@ -12,6 +12,10 @@ pub struct ProgressReport<Size: size::Size> {
     pub total: Size,
     /// Number of occurred errors.
     pub errors: u64,
+    /// Total number of detected hardlinks.
+    pub linked: u64,
+    /// Total size of detected hardlinks.
+    pub shared: Size,
 }
 
 impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
@@ -21,7 +25,7 @@ impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
     /// performance penalty from string resizing.
     ///
     /// The value of this constant is made correct by a unit test.
-    const TEXT_MAX_LEN: usize = 87;
+    const TEXT_MAX_LEN: usize = 145;
 
     /// Create a text to be used in [`Self::TEXT`].
     fn text(self) -> String {
@@ -29,10 +33,19 @@ impl<Size: size::Size + Into<u64>> ProgressReport<Size> {
             items,
             total,
             errors,
+            linked,
+            shared,
         } = self;
         let mut text = String::with_capacity(Self::TEXT_MAX_LEN);
         let total: u64 = total.into();
         write!(text, "\r(scanned {items}, total {total}").unwrap();
+        if linked != 0 {
+            write!(text, ", linked {linked}").unwrap();
+        }
+        let shared: u64 = shared.into();
+        if shared != 0 {
+            write!(text, ", shared {shared}").unwrap();
+        }
         if errors != 0 {
             write!(text, ", erred {errors}").unwrap();
         }
@@ -53,6 +66,8 @@ fn text_max_len() {
         items: u64::MAX,
         total: u64::MAX.into(),
         errors: u64::MAX,
+        linked: u64::MAX,
+        shared: u64::MAX.into(),
     }
     .text()
     .len();

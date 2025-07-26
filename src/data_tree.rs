@@ -32,3 +32,6 @@ mod constructors;
 mod getters;
 mod retain;
 mod sort;
+
+#[cfg(unix)] // for now, it is only available on unix
+mod hardlink;

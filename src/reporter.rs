@@ -29,7 +29,7 @@ pub trait ParallelReporter<Size: size::Size>: Reporter<Size> {
 impl<Size, Target> Reporter<Size> for &Target
 where
     Size: size::Size,
-    Target: Reporter<Size>,
+    Target: Reporter<Size> + ?Sized,
 {
     fn report(&self, event: Event<Size>) {
         Target::report(*self, event)
