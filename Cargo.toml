@@ -62,12 +62,12 @@ itertools = "^0.14.0"
 assert-cmp = "^0.3.0"
 zero-copy-pads = "^0.2.0"
 terminal_size = "^0.4.0"
-clap = { version = "^4.5.40", optional = true }
-clap_complete = { version = "^4.5.54", optional = true }
+clap = { version = "^4.5.41", optional = true }
+clap_complete = { version = "^4.5.55", optional = true }
 clap-utilities = { version = "^0.2.0", optional = true }
 serde = { version = "^1.0.219", optional = true }
-serde_json = { version = "^1.0.140", optional = true }
-sysinfo = "^0.35.2"
+serde_json = { version = "^1.0.141", optional = true }
+sysinfo = "^0.36.1"
 
 [dev-dependencies]
 build-fs-tree = "^0.7.1"
@@ -75,4 +75,4 @@ command-extra = "^1.0.0"
 maplit = "^1.0.2"
 normalize-path = "^0.2.1"
 pretty_assertions = "^1.4.1"
-rand = "^0.9.1"
+rand = "^0.9.2"
