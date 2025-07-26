@@ -20,16 +20,19 @@ pub struct Reflection(pub HashSet<PathBuf>);
 
 impl Reflection {
     /// Create an empty reflection.
+    #[inline]
     pub fn new() -> Self {
         Reflection::default()
     }
 
     /// Get the number of paths in the reflection.
+    #[inline]
     pub fn len(&self) -> usize {
         self.0.len()
     }
 
     /// Check whether the reflection has any path.
+    #[inline]
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }

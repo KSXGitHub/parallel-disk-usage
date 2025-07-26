@@ -25,16 +25,19 @@ pub struct Reflection<Size>(Vec<ReflectionEntry<Size>>);
 
 impl<Size> Reflection<Size> {
     /// Get the number of entries inside the reflection.
+    #[inline]
     pub fn len(&self) -> usize {
         self.0.len()
     }
 
     /// Check whether the reflection has any entry.
+    #[inline]
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 
     /// Iterate over the entries.
+    #[inline]
     pub fn iter(&self) -> impl Iterator<Item = &ReflectionEntry<Size>> + Clone {
         self.0.iter()
     }
@@ -56,6 +59,7 @@ pub struct ReflectionEntry<Size> {
 
 impl<Size> ReflectionEntry<Size> {
     /// Create a new entry.
+    #[inline]
     fn new(ino: InodeNumber, Value { size, links, paths }: Value<Size>) -> Self {
         let paths = paths.into();
         ReflectionEntry {
@@ -67,6 +71,7 @@ impl<Size> ReflectionEntry<Size> {
     }
 
     /// Dissolve [`ReflectionEntry`] into a pair of [`InodeNumber`] and [`Value`].
+    #[inline]
     fn dissolve(self) -> (InodeNumber, Value<Size>) {
         let ReflectionEntry {
             ino,

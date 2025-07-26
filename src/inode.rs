@@ -14,6 +14,7 @@ pub struct InodeNumber(u64);
 #[cfg(unix)]
 impl InodeNumber {
     /// Get inode number of a [`std::fs::Metadata`].
+    #[inline]
     pub fn get(stats: &std::fs::Metadata) -> Self {
         use pipe_trait::Pipe;
         use std::os::unix::fs::MetadataExt;

@@ -80,8 +80,9 @@ pub struct SizeConflictError<Size> {
 
 /// Error that occurs when a different [`nlink`][nlink] was detected for the same [`ino`][ino].
 ///
-/// <!-- Should have been `std::os::unix::fs::MetadataExt::ino` but it would error on Windows -->
+/// <!-- Should have been `std::os::unix::fs::MetadataExt::nlink` but it would error on Windows -->
 /// [nlink]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.nlink
+/// <!-- Should have been `std::os::unix::fs::MetadataExt::ino` but it would error on Windows -->
 /// [ino]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
 #[derive(Debug, Display, Error)]
 #[cfg_attr(test, derive(PartialEq, Eq))]
