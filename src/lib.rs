@@ -17,7 +17,7 @@ pub mod runtime_error;
 pub fn main() -> std::process::ExitCode {
     if let Err(error) = app::App::from_env().run() {
         eprintln!("[error] {error}");
-        return std::process::ExitCode::FAILURE;
+        return error.code();
     }
     std::process::ExitCode::SUCCESS
 }

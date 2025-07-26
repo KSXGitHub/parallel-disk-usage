@@ -1,5 +1,5 @@
 use derive_more::{Display, Error};
-use std::convert::Infallible;
+use std::{convert::Infallible, process::ExitCode};
 
 /// Error caused by the CLI program.
 #[derive(Debug, Display, Error)]
@@ -37,5 +37,18 @@ pub enum UnsupportedFeature {
 impl From<Infallible> for RuntimeError {
     fn from(value: Infallible) -> Self {
         match value {}
+    }
+}
+
+impl RuntimeError {
+    /// Convert error into exit code.
+    pub fn code(&self) -> ExitCode {
+        ExitCode::from(match self {
+            RuntimeError::SerializationFailure(_) => 2,
+            RuntimeError::DeserializationFailure(_) => 3,
+            RuntimeError::JsonInputArgConflict => 4,
+            RuntimeError::InvalidInputReflection(_) => 5,
+            RuntimeError::UnsupportedFeature(_) => 6,
+        })
     }
 }
