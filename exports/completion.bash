@@ -23,7 +23,7 @@ _pdu() {
 
     case "${cmd}" in
         pdu)
-            opts="-h -V --json-input --json-output --bytes-format --detect-links --dedupe-links --deduplicate-hardlinks --top-down --align-right --quantity --depth --max-depth --width --total-width --column-width --min-ratio --no-sort --no-errors --silent-errors --progress --threads --omit-json-shared-details --omit-json-shared-summary --help --version [FILES]..."
+            opts="-b -H -q -d -w -m -s -p -h -V --json-input --json-output --bytes-format --detect-links --dedupe-links --deduplicate-hardlinks --top-down --align-right --quantity --depth --max-depth --width --total-width --column-width --min-ratio --no-sort --no-errors --silent-errors --progress --threads --omit-json-shared-details --omit-json-shared-summary --help --version [FILES]..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -33,7 +33,15 @@ _pdu() {
                     COMPREPLY=($(compgen -W "plain metric binary" -- "${cur}"))
                     return 0
                     ;;
+                -b)
+                    COMPREPLY=($(compgen -W "plain metric binary" -- "${cur}"))
+                    return 0
+                    ;;
                 --quantity)
+                    COMPREPLY=($(compgen -W "apparent-size block-size block-count" -- "${cur}"))
+                    return 0
+                    ;;
+                -q)
                     COMPREPLY=($(compgen -W "apparent-size block-size block-count" -- "${cur}"))
                     return 0
                     ;;
@@ -45,6 +53,10 @@ _pdu() {
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
+                -d)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
                 --total-width)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
@@ -53,11 +65,19 @@ _pdu() {
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
+                -w)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
                 --column-width)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
                 --min-ratio)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                -m)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;

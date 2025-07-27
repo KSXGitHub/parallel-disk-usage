@@ -101,12 +101,12 @@ pub struct Args {
     pub json_output: bool,
 
     /// How to display the numbers of bytes.
-    #[clap(long, value_enum, default_value_t = BytesFormat::MetricUnits)]
+    #[clap(long, short, value_enum, default_value_t = BytesFormat::MetricUnits)]
     #[default(BytesFormat::MetricUnits)]
     pub bytes_format: BytesFormat,
 
     /// Detect and subtract the sizes of hardlinks from their parent directory totals.
-    #[clap(long, visible_aliases = ["detect-links", "dedupe-links"])]
+    #[clap(long, short = 'H', visible_aliases = ["detect-links", "dedupe-links"])]
     #[cfg_attr(not(unix), clap(hide = true))]
     pub deduplicate_hardlinks: bool,
 
@@ -119,17 +119,22 @@ pub struct Args {
     pub align_right: bool,
 
     /// Aspect of the files/directories to be measured.
-    #[clap(long, value_enum, default_value_t = Quantity::DEFAULT)]
+    #[clap(long, short, value_enum, default_value_t = Quantity::DEFAULT)]
     #[default(Quantity::DEFAULT)]
     pub quantity: Quantity,
 
     /// Maximum depth to display the data (must be greater than 0).
-    #[clap(long, default_value = "10", visible_alias = "depth")]
+    #[clap(long, short = 'd', default_value = "10", visible_alias = "depth")]
     #[default(_code = "10.try_into().unwrap()")]
     pub max_depth: NonZeroU64,
 
     /// Width of the visualization.
-    #[clap(long, conflicts_with = "column_width", visible_alias = "width")]
+    #[clap(
+        long,
+        short = 'w',
+        conflicts_with = "column_width",
+        visible_alias = "width"
+    )]
     pub total_width: Option<usize>,
 
     /// Maximum widths of the tree column and width of the bar column.
@@ -137,7 +142,7 @@ pub struct Args {
     pub column_width: Option<Vec<usize>>,
 
     /// Minimal size proportion required to appear.
-    #[clap(long, default_value = "0.01")]
+    #[clap(long, short, default_value = "0.01")]
     pub min_ratio: Fraction,
 
     /// Do not sort the branches in the tree.
@@ -145,11 +150,11 @@ pub struct Args {
     pub no_sort: bool,
 
     /// Prevent filesystem error messages from appearing in stderr.
-    #[clap(long, visible_alias = "no-errors")]
+    #[clap(long, short, visible_alias = "no-errors")]
     pub silent_errors: bool,
 
     /// Report progress being made at the expense of performance.
-    #[clap(long)]
+    #[clap(long, short)]
     pub progress: bool,
 
     /// Set the maximum number of threads to spawn. Could be either "auto", "max", or a number.
