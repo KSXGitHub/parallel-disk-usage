@@ -23,7 +23,7 @@ jobs:
 
       - name: Cache
         uses: actions/cache@v4
-        timeout-minutes: 1
+        timeout-minutes: 2
         continue-on-error: true
         if: matrix.os != 'macos-latest' # Cache causes errors on macOS
         with:
