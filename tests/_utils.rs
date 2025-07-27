@@ -1,6 +1,7 @@
 use build_fs_tree::{dir, file, Build, MergeableFileSystemTree};
 use command_extra::CommandExtra;
 use derive_more::{AsRef, Deref};
+use into_sorted::IntoSorted;
 use parallel_disk_usage::{
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
@@ -579,53 +580,4 @@ pub fn read_inode_number(path: &Path) -> u64 {
     path.pipe(symlink_metadata)
         .unwrap_or_else(|error| panic!("Can't read metadata at {path:?}: {error}"))
         .ino()
-}
-
-/// Utility methods to sort various types of arrays.
-pub trait IntoSorted<Item>: Sized {
-    /// Sort an array by [`Ord`] and return it.
-    fn into_sorted(self) -> Self
-    where
-        Item: Ord;
-
-    /// Sort an array by a function and return it.
-    fn into_sorted_by<Order>(self, order: Order) -> Self
-    where
-        Order: FnMut(&Item, &Item) -> Ordering;
-
-    /// Sort an array by a key extraction function and return it.
-    fn into_sorted_by_key<Key, GetKey>(self, get_key: GetKey) -> Self
-    where
-        GetKey: FnMut(&Item) -> Key,
-        Key: Ord;
-}
-
-impl<Item, Array> IntoSorted<Item> for Array
-where
-    Array: AsMut<[Item]> + Sized,
-{
-    fn into_sorted(mut self) -> Self
-    where
-        Item: Ord,
-    {
-        self.as_mut().sort();
-        self
-    }
-
-    fn into_sorted_by<Order>(mut self, order: Order) -> Self
-    where
-        Order: FnMut(&Item, &Item) -> Ordering,
-    {
-        self.as_mut().sort_by(order);
-        self
-    }
-
-    fn into_sorted_by_key<Key, GetKey>(mut self, get_key: GetKey) -> Self
-    where
-        GetKey: FnMut(&Item) -> Key,
-        Key: Ord,
-    {
-        self.as_mut().sort_by_key(get_key);
-        self
-    }
 }

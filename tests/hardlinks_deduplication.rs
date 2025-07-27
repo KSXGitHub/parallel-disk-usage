@@ -5,6 +5,7 @@ pub mod _utils;
 pub use _utils::*;
 
 use command_extra::CommandExtra;
+use into_sorted::IntoSorted;
 use itertools::Itertools;
 use normalize_path::NormalizePath;
 use parallel_disk_usage::{

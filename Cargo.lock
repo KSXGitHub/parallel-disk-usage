@@ -476,6 +476,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "into-sorted"
+version = "0.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "39a074fd3c69ce7a7453f59d0dfeecd9ea74867b509c40c2754db46f801114bc"
+
+[[package]]
 name = "is_terminal_polyfill"
 version = "1.70.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -599,6 +605,7 @@ dependencies = [
  "derive_more 2.0.1",
  "derive_setters",
  "fmt-iter",
+ "into-sorted",
  "itertools 0.14.0",
  "maplit",
  "normalize-path",
