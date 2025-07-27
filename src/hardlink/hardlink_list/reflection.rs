@@ -2,7 +2,7 @@ use super::{HardlinkList, Value};
 use crate::{hardlink::LinkPathListReflection, inode::InodeNumber};
 use dashmap::DashMap;
 use derive_more::{Display, Error, Into, IntoIterator};
-use into_sorted::IntoSorted;
+use into_sorted::IntoSortedUnstable;
 use pipe_trait::Pipe;
 
 #[cfg(feature = "json")]
@@ -88,7 +88,7 @@ impl<Size> ReflectionEntry<Size> {
 impl<Size> From<Vec<ReflectionEntry<Size>>> for Reflection<Size> {
     /// Sort the list by inode numbers, then create the reflection.
     fn from(list: Vec<ReflectionEntry<Size>>) -> Self {
-        list.into_sorted_by_key(|entry| u64::from(entry.ino))
+        list.into_sorted_unstable_by_key(|entry| u64::from(entry.ino))
             .pipe(Reflection)
     }
 }

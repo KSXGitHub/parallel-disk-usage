@@ -13,7 +13,7 @@ where
         self.children
             .par_iter_mut()
             .for_each(|child| child.par_sort_by(compare));
-        self.children.sort_by(compare);
+        self.children.sort_unstable_by(compare);
     }
 
     /// Process the tree via [`par_sort_by`](Self::par_sort_by) method.
