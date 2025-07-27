@@ -171,6 +171,7 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     id: 'progress',
     pduCliArgs: ['--progress'],
     competitors: [
+      ['dust'],
       ['ncdu', '-o', '/dev/stdout', '-1'],
       ['gdu', '--non-interactive'],
     ],
