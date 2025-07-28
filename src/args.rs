@@ -1,7 +1,9 @@
+pub mod depth;
 pub mod fraction;
 pub mod quantity;
 pub mod threads;
 
+pub use depth::Depth;
 pub use fraction::Fraction;
 pub use quantity::Quantity;
 pub use threads::Threads;
@@ -10,7 +12,7 @@ use crate::{bytes_format::BytesFormat, visualizer::ColumnWidthDistribution};
 use clap::{ColorChoice, Parser};
 use derive_setters::Setters;
 use smart_default::SmartDefault;
-use std::{num::NonZeroU64, path::PathBuf};
+use std::path::PathBuf;
 use terminal_size::{terminal_size, Width};
 use text_block_macros::text_block;
 
@@ -41,7 +43,7 @@ use text_block_macros::text_block;
         "    $ pdu --bytes-format=binary"
         "    $ pdu --min-ratio=0"
         "    $ pdu --min-ratio=0.05"
-        "    $ pdu --min-ratio=0 --json-output | jq"
+        "    $ pdu --min-ratio=0 --max-depth=inf --json-output | jq"
         "    $ pdu --min-ratio=0 --json-input < disk-usage.json"
     },
 
@@ -75,7 +77,7 @@ use text_block_macros::text_block;
         "    $ pdu --min-ratio=0.05"
         ""
         "    Show disk usage data as JSON instead of chart"
-        "    $ pdu --min-ratio=0 --json-output | jq"
+        "    $ pdu --min-ratio=0 --max-depth=inf --json-output | jq"
         ""
         "    Visualize existing JSON representation of disk usage data"
         "    $ pdu --min-ratio=0 --json-input < disk-usage.json"
@@ -123,10 +125,10 @@ pub struct Args {
     #[default(Quantity::DEFAULT)]
     pub quantity: Quantity,
 
-    /// Maximum depth to display the data (must be greater than 0).
+    /// Maximum depth to display the data. Could be either "inf" or a positive integer.
     #[clap(long, short = 'd', default_value = "10", visible_alias = "depth")]
     #[default(_code = "10.try_into().unwrap()")]
-    pub max_depth: NonZeroU64,
+    pub max_depth: Depth,
 
     /// Width of the visualization.
     #[clap(

@@ -27,9 +27,9 @@ block-count\:"Count numbers of blocks"))' \
 '--quantity=[Aspect of the files/directories to be measured]:QUANTITY:((apparent-size\:"Measure apparent sizes"
 block-size\:"Measure block sizes (block-count * 512B)"
 block-count\:"Count numbers of blocks"))' \
-'-d+[Maximum depth to display the data (must be greater than 0)]:MAX_DEPTH:_default' \
-'--max-depth=[Maximum depth to display the data (must be greater than 0)]:MAX_DEPTH:_default' \
-'--depth=[Maximum depth to display the data (must be greater than 0)]:MAX_DEPTH:_default' \
+'-d+[Maximum depth to display the data. Could be either "inf" or a positive integer]:MAX_DEPTH:_default' \
+'--max-depth=[Maximum depth to display the data. Could be either "inf" or a positive integer]:MAX_DEPTH:_default' \
+'--depth=[Maximum depth to display the data. Could be either "inf" or a positive integer]:MAX_DEPTH:_default' \
 '(--column-width)-w+[Width of the visualization]:TOTAL_WIDTH:_default' \
 '(--column-width)--total-width=[Width of the visualization]:TOTAL_WIDTH:_default' \
 '(--column-width)--width=[Width of the visualization]:TOTAL_WIDTH:_default' \
