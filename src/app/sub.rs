@@ -1,5 +1,5 @@
 use crate::{
-    args::Fraction,
+    args::{Depth, Fraction},
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
@@ -14,7 +14,7 @@ use crate::{
 };
 use pipe_trait::Pipe;
 use serde::Serialize;
-use std::{io::stdout, iter::once, num::NonZeroU64, path::PathBuf};
+use std::{io::stdout, iter::once, path::PathBuf};
 
 /// The sub program of the main application.
 pub struct Sub<Size, SizeGetter, HardlinksHandler, Report>
@@ -38,7 +38,7 @@ where
     /// Distribution and number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
     /// Maximum number of levels that should be visualized.
-    pub max_depth: NonZeroU64,
+    pub max_depth: Depth,
     /// [Get the size](GetSize) of files/directories.
     pub size_getter: SizeGetter,
     /// Handle to detect, record, and deduplicate hardlinks.

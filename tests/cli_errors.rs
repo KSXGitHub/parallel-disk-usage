@@ -97,7 +97,7 @@ fn max_depth_0() {
     assert_eq!(
         stderr,
         text_block! {
-            "error: invalid value '0' for '--max-depth <MAX_DEPTH>': number would be zero for non-zero type"
+            r#"error: invalid value '0' for '--max-depth <MAX_DEPTH>': Value is neither "inf" nor a positive integer: number would be zero for non-zero type"#
             ""
             "For more information, try '--help'."
         }

@@ -4,7 +4,7 @@ binary\t'Use binary scale, i.e. 1K = 1024B, 1M = 1024K, and so on'"
 complete -c pdu -s q -l quantity -d 'Aspect of the files/directories to be measured' -r -f -a "apparent-size\t'Measure apparent sizes'
 block-size\t'Measure block sizes (block-count * 512B)'
 block-count\t'Count numbers of blocks'"
-complete -c pdu -s d -l max-depth -l depth -d 'Maximum depth to display the data (must be greater than 0)' -r
+complete -c pdu -s d -l max-depth -l depth -d 'Maximum depth to display the data. Could be either "inf" or a positive integer' -r
 complete -c pdu -s w -l total-width -l width -d 'Width of the visualization' -r
 complete -c pdu -l column-width -d 'Maximum widths of the tree column and width of the bar column' -r
 complete -c pdu -s m -l min-ratio -d 'Minimal size proportion required to appear' -r
