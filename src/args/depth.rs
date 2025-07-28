@@ -34,13 +34,12 @@ pub enum FromStrError {
 
 impl FromStr for Depth {
     type Err = FromStrError;
-    fn from_str(source: &str) -> Result<Self, Self::Err> {
-        let source = source.trim();
-        if source == INFINITE {
+    fn from_str(text: &str) -> Result<Self, Self::Err> {
+        let text = text.trim();
+        if text == INFINITE {
             return Ok(Depth::Infinite);
         }
-        source
-            .parse()
+        text.parse()
             .map_err(FromStrError::InvalidSyntax)
             .map(Depth::Finite)
     }
@@ -48,7 +47,7 @@ impl FromStr for Depth {
 
 impl TryFrom<u64> for Depth {
     type Error = TryFromIntError;
-    fn try_from(source: u64) -> Result<Self, Self::Error> {
-        source.try_into().map(Depth::Finite)
+    fn try_from(value: u64) -> Result<Self, Self::Error> {
+        value.try_into().map(Depth::Finite)
     }
 }
