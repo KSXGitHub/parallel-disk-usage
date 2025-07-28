@@ -42,7 +42,7 @@ use text_block_macros::text_block;
         "    $ pdu --min-ratio=0"
         "    $ pdu --min-ratio=0.05"
         "    $ pdu --min-ratio=0 --json-output | jq"
-        "    $ pdu --min-ratio=0 --json-input < disk-usage.json"
+        "    $ pdu --json-input < disk-usage.json"
     },
 
     after_long_help = text_block! {
@@ -78,7 +78,7 @@ use text_block_macros::text_block;
         "    $ pdu --min-ratio=0 --json-output | jq"
         ""
         "    Visualize existing JSON representation of disk usage data"
-        "    $ pdu --min-ratio=0 --json-input < disk-usage.json"
+        "    $ pdu --json-input < disk-usage.json"
     },
 
     color = ColorChoice::Never,
