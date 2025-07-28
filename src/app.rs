@@ -145,7 +145,7 @@ impl App {
                 }
             }
             Threads::Max => None,
-            Threads::Fixed(threads) => Some(threads),
+            Threads::Fixed(threads) => Some(threads.get()),
         };
 
         if let Some(threads) = threads {

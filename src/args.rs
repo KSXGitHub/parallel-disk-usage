@@ -157,7 +157,7 @@ pub struct Args {
     #[clap(long, short)]
     pub progress: bool,
 
-    /// Set the maximum number of threads to spawn. Could be either "auto", "max", or a number.
+    /// Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer.
     #[clap(long, default_value_t = Threads::Auto)]
     pub threads: Threads,
 

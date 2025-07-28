@@ -1,5 +1,8 @@
 use derive_more::{Display, Error};
-use std::{num::ParseIntError, str::FromStr};
+use std::{
+    num::{NonZeroUsize, ParseIntError},
+    str::FromStr,
+};
 
 const AUTO: &str = "auto";
 const MAX: &str = "max";
@@ -12,7 +15,7 @@ pub enum Threads {
     Auto,
     #[display("{MAX}")]
     Max,
-    Fixed(usize),
+    Fixed(NonZeroUsize),
 }
 
 /// Error that occurs when converting a string to an instance of [`Threads`].
