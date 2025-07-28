@@ -25,15 +25,14 @@ pub enum FromStrError {
 
 impl FromStr for Threads {
     type Err = FromStrError;
-    fn from_str(value: &str) -> Result<Self, Self::Err> {
-        let value = value.trim();
-        match value {
+    fn from_str(text: &str) -> Result<Self, Self::Err> {
+        let text = text.trim();
+        match text {
             AUTO => return Ok(Threads::Auto),
             MAX => return Ok(Threads::Max),
             _ => {}
         };
-        value
-            .parse()
+        text.parse()
             .map_err(FromStrError::InvalidSyntax)
             .map(Threads::Fixed)
     }
