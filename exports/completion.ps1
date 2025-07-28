@@ -34,7 +34,7 @@ Register-ArgumentCompleter -Native -CommandName 'pdu' -ScriptBlock {
             [CompletionResult]::new('--column-width', '--column-width', [CompletionResultType]::ParameterName, 'Maximum widths of the tree column and width of the bar column')
             [CompletionResult]::new('-m', '-m', [CompletionResultType]::ParameterName, 'Minimal size proportion required to appear')
             [CompletionResult]::new('--min-ratio', '--min-ratio', [CompletionResultType]::ParameterName, 'Minimal size proportion required to appear')
-            [CompletionResult]::new('--threads', '--threads', [CompletionResultType]::ParameterName, 'Set the maximum number of threads to spawn. Could be either "auto", "max", or a number')
+            [CompletionResult]::new('--threads', '--threads', [CompletionResultType]::ParameterName, 'Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer')
             [CompletionResult]::new('--json-input', '--json-input', [CompletionResultType]::ParameterName, 'Read JSON data from stdin')
             [CompletionResult]::new('--json-output', '--json-output', [CompletionResultType]::ParameterName, 'Print JSON data instead of an ASCII chart')
             [CompletionResult]::new('-H', '-H ', [CompletionResultType]::ParameterName, 'Detect and subtract the sizes of hardlinks from their parent directory totals')
