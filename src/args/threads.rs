@@ -17,6 +17,7 @@ pub enum Threads {
 
 /// Error that occurs when converting a string to an instance of [`Threads`].
 #[derive(Debug, Display, Clone, PartialEq, Eq, Error)]
+#[non_exhaustive]
 pub enum FromStrError {
     #[display("Value is neither {AUTO:?}, {MAX:?}, nor a number: {_0}")]
     InvalidSyntax(ParseIntError),
