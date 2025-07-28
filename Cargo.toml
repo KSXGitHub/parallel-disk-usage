@@ -57,7 +57,7 @@ dashmap = "6.1.0"
 derive_more = { version = "2.0.1", features = ["full"] }
 derive_setters = "0.1.8"
 fmt-iter = "0.2.1"
-into-sorted = "0.0.2"
+into-sorted = "0.0.3"
 itertools = "0.14.0"
 pipe-trait = "0.4.0"
 rayon = "1.10.0"

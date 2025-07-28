@@ -477,9 +477,9 @@ dependencies = [
 
 [[package]]
 name = "into-sorted"
-version = "0.0.2"
+version = "0.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39a074fd3c69ce7a7453f59d0dfeecd9ea74867b509c40c2754db46f801114bc"
+checksum = "e01b0686852f0dc0a48a830e141633c8a411078dbe98c7a817d2f42ec4c2e936"
 
 [[package]]
 name = "is_terminal_polyfill"
