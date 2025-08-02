@@ -1,12 +1,12 @@
 use super::DataTree;
 use crate::size;
 use assert_cmp::debug_assert_op;
-use rayon::prelude::*;
+use orx_parallel::*;
 use std::{ffi::OsStr, path::Path};
 
 impl<Name, Size> DataTree<Name, Size>
 where
-    Self: Send,
+    Self: Send + Sync,
     Name: AsRef<OsStr>,
     Size: size::Size + Sync,
 {
@@ -39,7 +39,8 @@ where
         }
 
         self.children
-            .par_iter_mut()
+            .iter_mut() // TODO: request orx-parallel to add par_mut
+            .iter_into_par()
             .for_each(|child| child.par_deduplicate_hardlinks(&sub_hardlink_info))
     }
 }

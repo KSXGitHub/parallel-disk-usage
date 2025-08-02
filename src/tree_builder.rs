@@ -3,7 +3,7 @@ pub mod info;
 pub use info::Info;
 
 use super::{data_tree::DataTree, size};
-use rayon::prelude::*;
+use orx_parallel::*;
 
 /// Collection of functions and starting points in order to build a [`DataTree`] with [`From`] or [`Into`].
 #[derive(Debug)]
@@ -34,7 +34,7 @@ where
     Name: Send + Sync,
     GetInfo: Fn(&Path) -> Info<Name, Size> + Copy + Send + Sync,
     JoinPath: Fn(&Path, &Name) -> Path + Copy + Send + Sync,
-    Size: size::Size + Send,
+    Size: size::Size + Send + Sync,
 {
     /// Create a [`DataTree`] from a [`TreeBuilder`].
     fn from(builder: TreeBuilder<Path, Name, Size, GetInfo, JoinPath>) -> Self {
@@ -50,7 +50,7 @@ where
         let max_depth = max_depth.saturating_sub(1);
 
         let children = children
-            .into_par_iter()
+            .into_par()
             .map(|name| TreeBuilder {
                 path: join_path(&path, &name),
                 name,

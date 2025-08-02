@@ -67,7 +67,7 @@ macro_rules! test_case {
 
 fn typical_tree<Size>(size_per_dir: Size, file_size_factor: u64) -> DataTree<&'static str, Size>
 where
-    Size: size::Size + Ord + From<u64> + Send,
+    Size: size::Size + Ord + From<u64> + Send + Sync,
 {
     let dir = DataTree::<&'static str, Size>::fixed_size_dir_constructor(size_per_dir);
     let file =
@@ -645,7 +645,7 @@ test_case! {
 
 fn empty_dir<Size>(inode_size: Size) -> DataTree<&'static str, Size>
 where
-    Size: size::Size + Ord + From<u64> + Send,
+    Size: size::Size + Ord + From<u64> + Send + Sync,
 {
     DataTree::dir("empty directory", inode_size, Vec::new()).into_par_sorted(order_tree)
 }
@@ -691,7 +691,7 @@ test_case! {
 
 fn long_and_short_names<Size>() -> DataTree<&'static str, Size>
 where
-    Size: size::Size + Ord + From<u64> + Send,
+    Size: size::Size + Ord + From<u64> + Send + Sync,
 {
     let dir = DataTree::<&'static str, Size>::fixed_size_dir_constructor(1.into());
     let file = |name: &'static str, size: u64| DataTree::file(name, Size::from(size));
@@ -890,7 +890,7 @@ test_case! {
 
 fn tree_with_a_file_of_extremely_long_name<Size>() -> DataTree<&'static str, Size>
 where
-    Size: size::Size + Ord + From<u64> + Send,
+    Size: size::Size + Ord + From<u64> + Send + Sync,
 {
     let dir = DataTree::<&'static str, Size>::fixed_size_dir_constructor(4069.into());
     let file = |name: &'static str, size: u64| DataTree::file(name, Size::from(size));
@@ -934,7 +934,7 @@ test_case! {
 
 fn big_tree_with_long_names<Size>() -> DataTree<&'static str, Size>
 where
-    Size: size::Size + Ord + From<u64> + Send,
+    Size: size::Size + Ord + From<u64> + Send + Sync,
 {
     let dir = DataTree::<&'static str, Size>::fixed_size_dir_constructor(4069.into());
     let file = |name: &'static str, size: u64| DataTree::file(name, Size::from(size));

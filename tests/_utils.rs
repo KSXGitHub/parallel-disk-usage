@@ -2,6 +2,7 @@ use build_fs_tree::{dir, file, Build, MergeableFileSystemTree};
 use command_extra::CommandExtra;
 use derive_more::{AsRef, Deref};
 use into_sorted::IntoSorted;
+use orx_parallel::*;
 use parallel_disk_usage::{
     data_tree::{DataTree, DataTreeReflection},
     fs_tree_builder::FsTreeBuilder,
@@ -14,7 +15,6 @@ use parallel_disk_usage::{
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use rand::{distr::Alphanumeric, rng, Rng};
-use rayon::prelude::*;
 use std::{
     cmp::Ordering,
     env::temp_dir,
@@ -219,7 +219,7 @@ impl SampleWorkspace {
 
         // Create files in no-hardlinks.
         // There will be no files with nlink > 1.
-        (0..files_per_branch).par_bridge().for_each(|index| {
+        (0..files_per_branch).into_par().for_each(|index| {
             let file_name = format!("file-{index}.txt");
             let file_path = temp.join("no-hardlinks").join(file_name);
             if let Err(error) = write_file(&file_path, "a".repeat(bytes_per_file)) {
@@ -233,7 +233,7 @@ impl SampleWorkspace {
         // Each file in the second group will have 1 exclusive link.
         // Each file in the third and fourth groups will have no links.
         // Each file in the remaining groups is PLANNED to have 1 external link from only-hardlinks/mixed.
-        (0..whole).par_bridge().for_each(|file_index| {
+        (0..whole).into_par().for_each(|file_index| {
             let file_name = format!("file-{file_index}.txt");
             let file_path = temp.join("some-hardlinks").join(file_name);
             if let Err(error) = write_file(&file_path, "a".repeat(bytes_per_file)) {
@@ -254,7 +254,7 @@ impl SampleWorkspace {
 
         // Create files in only-hardlinks/exclusive.
         // Each file in this directory will have 1 exclusive link.
-        (0..whole).par_bridge().for_each(|index| {
+        (0..whole).into_par().for_each(|index| {
             let file_name = format!("file-{index}.txt");
             let file_path = temp.join("only-hardlinks/exclusive").join(file_name);
             if let Err(error) = write_file(&file_path, "a".repeat(bytes_per_file)) {
@@ -271,7 +271,7 @@ impl SampleWorkspace {
         // Let's divide the PLANNED links into 2 equal groups.
         // Each link in the first group is PLANNED to share with only-hardlinks/external.
         // Each link in the second group is exclusive.
-        (half..whole).par_bridge().for_each(|index| {
+        (half..whole).into_par().for_each(|index| {
             let file_name = format!("link0-{index}.txt");
             let file_path = temp.join("only-hardlinks/mixed").join(file_name);
             if let Err(error) = write_file(&file_path, "a".repeat(bytes_per_file)) {
@@ -289,7 +289,7 @@ impl SampleWorkspace {
         // Let's divide the links into 2 equal groups.
         // The first group will share with only-hardlinks/mixed.
         // The second group will share with some-hardlinks.
-        (0..whole).par_bridge().for_each(|index| {
+        (0..whole).into_par().for_each(|index| {
             let link_name = format!("linkX-{index}.txt");
             let link_path = temp.join("only-hardlinks/external").join(link_name);
 
@@ -324,7 +324,7 @@ pub fn sanitize_tree_reflection<Name, Size>(
 where
     Name: Ord,
     Size: size::Size,
-    DataTreeReflection<Name, Size>: Send,
+    DataTreeReflection<Name, Size>: Send + Sync,
 {
     let DataTreeReflection {
         name,
@@ -333,7 +333,7 @@ where
     } = tree_reflection;
     let children = children
         .into_sorted_by(|left, right| left.name.cmp(&right.name))
-        .into_par_iter()
+        .into_par()
         .map(sanitize_tree_reflection)
         .collect();
     DataTreeReflection {

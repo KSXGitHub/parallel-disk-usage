@@ -1,12 +1,12 @@
 use super::{ConversionError, Reflection};
 use crate::{data_tree::DataTree, size};
-use rayon::prelude::*;
+use orx_parallel::*;
 use std::{ffi::OsStr, iter::once};
 
 impl<Name, Size> Reflection<Name, Size>
 where
-    Name: Send,
-    Size: size::Size + Send,
+    Name: Send + Sync,
+    Size: size::Size + Send + Sync,
 {
     /// Attempting to convert a [`Reflection`] into a valid [`DataTree`].
     pub fn par_try_into_tree(self) -> Result<DataTree<Name, Size>, ConversionError<Name, Size>> {
@@ -25,8 +25,10 @@ where
             return Err(ConversionError::ExcessiveChildren { path, size, child });
         }
         let children: Result<Vec<_>, _> = children
-            .into_par_iter()
+            .into_par()
             .map(Self::par_try_into_tree)
+            .collect::<Vec<Result<_, _>>>() // TODO: request orx-parallel to make collecting Result possible
+            .into_iter()
             .collect();
         let children = match children {
             Ok(children) => children,
@@ -52,9 +54,9 @@ where
         transform: Transform,
     ) -> Result<Reflection<TargetName, TargetSize>, Error>
     where
-        TargetName: Send,
+        TargetName: Send + Sync,
         TargetSize: size::Size + Send + Sync,
-        Error: Send,
+        Error: Send + Sync,
         Transform: Fn(Name, Size) -> Result<(TargetName, TargetSize), Error> + Copy + Sync,
     {
         let Reflection {
@@ -63,8 +65,10 @@ where
             children,
         } = self;
         let children = children
-            .into_par_iter()
+            .into_par()
             .map(|child| child.par_try_map(transform))
+            .collect::<Vec<Result<_, _>>>() // TODO: request orx-parallel to make collecting Result possible
+            .into_iter()
             .collect::<Result<Vec<_>, _>>()?;
         let (name, size) = transform(name, size)?;
         Ok(Reflection {

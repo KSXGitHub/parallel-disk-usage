@@ -8,6 +8,7 @@ use command_extra::CommandExtra;
 use into_sorted::IntoSorted;
 use itertools::Itertools;
 use normalize_path::NormalizePath;
+use orx_parallel::*;
 use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::Reflection,
@@ -21,7 +22,7 @@ use parallel_disk_usage::{
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use rayon::prelude::*;
+use rayon::prelude::*; // TODO: replace this with `orx-parallel`
 use std::{
     collections::HashSet,
     iter,
@@ -919,7 +920,7 @@ fn exclusive_hardlinks_only() {
         .cloned()
         .collect();
     let expected_shared_details = (0..files_per_branch)
-        .par_bridge()
+        .into_par()
         .map(|index| ReflectionEntry {
             ino: file_inode(&format!("file-{index}.txt")),
             size: file_size,
@@ -1045,10 +1046,10 @@ fn exclusive_only_and_external_only_hardlinks() {
         .cloned()
         .collect();
     let expected_shared_details = iter::empty()
-        .par_bridge()
+        .par_bridge() // TODO: replace this with `orx-parallel`
         .chain(
             (0..(files_per_branch / 2))
-                .par_bridge()
+                .par_bridge() // TODO: replace this with `orx-parallel`
                 .map(|index| ReflectionEntry {
                     ino: file_inode(&format!("link0-{index}.txt")),
                     size: file_size,
@@ -1058,7 +1059,7 @@ fn exclusive_only_and_external_only_hardlinks() {
         )
         .chain(
             ((files_per_branch / 2)..files_per_branch)
-                .par_bridge()
+                .par_bridge() // TODO: replace this with `orx-parallel`
                 .map(|index| ReflectionEntry {
                     ino: file_inode(&format!("link0-{index}.txt")),
                     size: file_size,
@@ -1208,7 +1209,7 @@ fn external_hardlinks_only() {
         .cloned()
         .collect();
     let expected_shared_details = (0..files_per_branch)
-        .par_bridge()
+        .into_par()
         .map(|index| ReflectionEntry {
             ino: file_inode(&format!("linkX-{index}.txt")),
             size: file_size,

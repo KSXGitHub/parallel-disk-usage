@@ -67,7 +67,7 @@ impl App {
                 .map_err(RuntimeError::DeserializationFailure)?
                 .body;
 
-            trait VisualizeJsonTree: size::Size + Into<u64> + Send {
+            trait VisualizeJsonTree: size::Size + Into<u64> + Send + Sync {
                 fn visualize_json_tree(
                     tree: JsonTree<Self>,
                     bytes_format: Self::DisplayFormat,
@@ -103,7 +103,7 @@ impl App {
                 }
             }
 
-            impl<Size: size::Size + Into<u64> + Send> VisualizeJsonTree for Size {}
+            impl<Size: size::Size + Into<u64> + Send + Sync> VisualizeJsonTree for Size {}
 
             macro_rules! visualize {
                 ($tree:expr, $bytes_format:expr) => {
@@ -149,10 +149,7 @@ impl App {
         };
 
         if let Some(threads) = threads {
-            rayon::ThreadPoolBuilder::new()
-                .num_threads(threads)
-                .build_global()
-                .unwrap_or_else(|_| eprintln!("warning: Failed to set thread limit to {threads}"));
+            todo!("Set number of threads to {threads}");
         }
 
         if cfg!(unix) && self.args.deduplicate_hardlinks && self.args.files.len() > 1 {

@@ -1,10 +1,10 @@
 use super::DataTree;
 use crate::size;
-use rayon::prelude::*;
+use orx_parallel::*;
 
 impl<Name, Size> DataTree<Name, Size>
 where
-    Self: Send,
+    Self: Send + Sync,
     Size: size::Size,
 {
     /// Internal function to be used by [`Self::par_retain`].
@@ -17,7 +17,8 @@ where
             .retain(|child| predicate(child, current_depth));
         let next_depth = current_depth + 1;
         self.children
-            .par_iter_mut()
+            .iter_mut() // TODO: request orx-parallel to add par_mut
+            .iter_into_par()
             .for_each(|child| child.par_retain_with_depth(next_depth, predicate))
     }
 
