@@ -8,7 +8,7 @@ pub struct Iter<'a>(slice::Iter<'a, PathBuf>);
 
 impl LinkPathList {
     /// Iterate over the paths inside the list.
-    pub fn iter(&self) -> Iter {
+    pub fn iter(&self) -> Iter<'_> {
         self.0.iter().pipe(Iter)
     }
 }
