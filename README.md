@@ -184,7 +184,7 @@ sudo pacman -S parallel-disk-usage
   * [`godu`](https://github.com/viktomas/godu)
 * **GUI:**
   * [GNOME's Disk Usage Analyzer, a.k.a. `baobab`](https://apps.gnome.org/Baobab/)
-  * Filelight
+  * [Filelight](https://apps.kde.org/filelight/)
 
 ## License
 
