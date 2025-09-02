@@ -11,7 +11,7 @@ pub struct Iter<'a, Size>(DashIter<'a, InodeNumber, Value<Size>>);
 
 impl<Size> HardlinkList<Size> {
     /// Iterate over the recorded entries.
-    pub fn iter(&self) -> Iter<Size> {
+    pub fn iter(&self) -> Iter<'_, Size> {
         self.0.iter().pipe(Iter)
     }
 }

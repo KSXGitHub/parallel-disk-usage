@@ -38,7 +38,7 @@ pub(super) type InitialTable<Name, NodeData> =
     Table<InitialRow<Name, NodeData>, InitialColumnWidth>;
 
 pub(super) fn render_initial<Name, Size>(
-    visualizer: Visualizer<Name, Size>,
+    visualizer: Visualizer<'_, Name, Size>,
 ) -> InitialTable<&'_ Name, Size>
 where
     Name: Display,
