@@ -85,7 +85,7 @@ jobs:
         run: strip --strip-all target/${{ matrix.target }}/release/pdu
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: pdu-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/pdu
@@ -121,7 +121,7 @@ jobs:
         run: strip target/${{ matrix.target }}/release/pdu
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: pdu-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/pdu
@@ -156,7 +156,7 @@ jobs:
         run: cargo build --target ${{ matrix.target }} --release --all-features
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: pdu-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/pdu.exe
@@ -348,7 +348,7 @@ jobs:
         run: ./ci/github-actions/create-checksums.sh
 
       - name: Upload as artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: checksums
           path: sha*sum.txt
