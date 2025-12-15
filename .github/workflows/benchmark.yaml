@@ -99,7 +99,7 @@ jobs:
         run: node ci/github-actions/illustrate-benchmark-reports.js
 
       - name: Upload benchmark reports
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         continue-on-error: true
         with:
           name: benchmark-reports
