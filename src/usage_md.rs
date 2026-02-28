@@ -1,6 +1,7 @@
 use crate::args::Args;
 use clap::{Arg, Command, CommandFactory};
 use itertools::Itertools;
+use pipe_trait::Pipe;
 use std::borrow::Cow;
 
 /// Renders a Markdown reference page for `pdu`'s CLI.
@@ -181,15 +182,12 @@ fn render_option(arg: &Arg, out: &mut String) {
     }
 }
 
-fn get_help_text(arg: &Arg) -> String {
-    let mut parts: Vec<String> = Vec::new();
-    if let Some(help) = arg.get_help() {
-        parts.push(help.to_string());
+fn get_help_text(arg: &Arg) -> Cow<'static, str> {
+    match (arg.get_help(), arg.get_long_help()) {
+        (None, None) => Cow::Borrowed(""),
+        (Some(help), None) | (None, Some(help)) => help.to_string().pipe(Cow::Owned),
+        (Some(short), Some(long)) => Cow::Owned(format!("{short}\n{long}")),
     }
-    if let Some(help) = arg.get_long_help() {
-        parts.push(help.to_string());
-    }
-    parts.join("\n")
 }
 
 fn render_examples_section<'a>(lines: impl Iterator<Item = &'a str>, out: &mut String) {
