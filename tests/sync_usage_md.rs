@@ -2,7 +2,7 @@
 //!
 //! If the tests fail, run `./generate-completions.sh` on the root of the repo to update the help files.
 
-// Since the CLI in Windows look a little different, and I am way too lazy to make two versions
+// Since the CLI in Windows looks a little different, and I am way too lazy to make two versions
 // of help files, the following tests would only run in UNIX-like environment.
 #![cfg(unix)]
 #![cfg(feature = "cli")]
