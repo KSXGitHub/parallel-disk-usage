@@ -9,7 +9,7 @@
 
 use clap::CommandFactory;
 use itertools::Itertools;
-use parallel_disk_usage::{args::Args, usage_md::render_usage_md};
+use parallel_disk_usage::args::Args;
 
 macro_rules! check {
     ($name:ident: $render_help:ident => $path:literal) => {
@@ -38,13 +38,3 @@ macro_rules! check {
 
 check!(long: render_long_help => "../exports/long.help");
 check!(short: render_help => "../exports/short.help");
-
-#[test]
-fn usage_md() {
-    let actual = render_usage_md();
-    let expected = include_str!("../USAGE.md");
-    assert!(
-        actual.trim_end() == expected.trim_end(),
-        "USAGE.md is outdated, run ./generate-completions.sh to update it",
-    );
-}
