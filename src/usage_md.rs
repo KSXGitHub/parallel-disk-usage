@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use itertools::Itertools;
 
 pub fn render(input: &str) -> String {
@@ -56,9 +58,9 @@ fn render_preamble(lines: &[&str], out: &mut String) {
 fn render_section(name: &str, lines: &[&str], out: &mut String) {
     out.push_str(&format!("## {name}\n\n"));
     match name {
-        "Arguments" => render_arguments_section(lines, out),
-        "Options" => render_options_section(lines, out),
-        "Examples" => render_examples_section(lines, out),
+        "Arguments" | "ARGUMENTS" => render_arguments_section(lines, out),
+        "Options" | "OPTIONS" => render_options_section(lines, out),
+        "Examples" | "EXAMPLES" => render_examples_section(lines, out),
         _ => {}
     }
 }
@@ -69,13 +71,12 @@ fn render_section(name: &str, lines: &[&str], out: &mut String) {
 /// The name of flag starts with `-` or `--`, followed by a kebab-case word.
 /// The name of an argument is an UPPER_SNAKE_CASE enclosed in square brackets.
 /// The name of an enum choice is a kebab-case word enclosed in square brackets.
-fn find_item_starts(lines: &[&str]) -> Vec<usize> {
+fn find_item_starts<'a>(lines: &'a [&'a str]) -> impl Iterator<Item = usize> + 'a {
     lines
         .iter()
         .enumerate()
         .filter(|(_, l)| is_item_start(l))
         .map(|(i, _)| i)
-        .collect()
 }
 
 fn is_item_start(line: &str) -> bool {
@@ -101,7 +102,7 @@ fn is_item_start(line: &str) -> bool {
 }
 
 fn render_arguments_section(lines: &[&str], out: &mut String) {
-    let item_starts = find_item_starts(lines);
+    let item_starts: Vec<usize> = find_item_starts(lines).collect();
     for (idx, &start) in item_starts.iter().enumerate() {
         let end = item_starts.get(idx + 1).copied().unwrap_or(lines.len());
         render_argument_item(&lines[start..end], out);
@@ -124,7 +125,7 @@ fn render_argument_item(lines: &[&str], out: &mut String) {
 }
 
 fn render_options_section(lines: &[&str], out: &mut String) {
-    let item_starts = find_item_starts(lines);
+    let item_starts: Vec<usize> = find_item_starts(lines).collect();
     for (idx, &start) in item_starts.iter().enumerate() {
         let end = item_starts.get(idx + 1).copied().unwrap_or(lines.len());
         render_option_item(&lines[start..end], out);
@@ -142,7 +143,7 @@ fn render_option_item(lines: &[&str], out: &mut String) {
     let mut desc_parts: Vec<&str> = Vec::new();
     let mut possible_values: Vec<(&str, &str)> = Vec::new();
     let mut default_value: Option<&str> = None;
-    let mut long_aliases_str: Option<&str> = None;
+    let mut alt_aliases_str: Option<&str> = None;
     let mut in_possible_values = false;
 
     for line in &lines[1..] {
@@ -166,7 +167,7 @@ fn render_option_item(lines: &[&str], out: &mut String) {
             .strip_prefix("[aliases: ")
             .and_then(|s| s.strip_suffix(']'))
         {
-            long_aliases_str = Some(inner);
+            alt_aliases_str = Some(inner);
             continue;
         }
         if in_possible_values {
@@ -188,8 +189,8 @@ fn render_option_item(lines: &[&str], out: &mut String) {
     if let Some(s) = &short_alias {
         aliases.push(s.clone());
     }
-    if let Some(a) = long_aliases_str {
-        for alias in a.split(", ") {
+    if let Some(a) = alt_aliases_str {
+        for alias in a.split(',').map(str::trim) {
             aliases.push(alias.to_string());
         }
     }
@@ -198,20 +199,25 @@ fn render_option_item(lines: &[&str], out: &mut String) {
     let primary_anchor = primary_name.trim_start_matches('-');
     let mut anchor_ids: Vec<String> = Vec::new();
     if let Some(s) = &short_alias {
-        let bare = s.trim_start_matches('-');
+        let bare = s.strip_prefix('-').unwrap_or(s);
         anchor_ids.push(format!("option-{bare}"));
     }
     anchor_ids.push(primary_anchor.to_string());
-    if let Some(a) = long_aliases_str {
-        for alias in a.split(", ") {
-            anchor_ids.push(alias.trim_start_matches('-').to_string());
+    if let Some(a) = alt_aliases_str {
+        for alias in a.split(',').map(str::trim) {
+            if alias.starts_with("--") {
+                anchor_ids.push(alias.trim_start_matches('-').to_string());
+            } else if let Some(bare) = alias.strip_prefix('-') {
+                anchor_ids.push(format!("option-{bare}"));
+            } else {
+                anchor_ids.push(alias.to_string());
+            }
         }
     }
-    let anchors: String = anchor_ids
-        .iter()
-        .map(|id| format!(r#"<a id="{id}" name="{id}"></a>"#))
-        .join("");
-    out.push_str(&format!("{anchors}\n"));
+    for id in &anchor_ids {
+        out.push_str(&format!(r#"<a id="{id}" name="{id}"></a>"#));
+    }
+    out.push('\n');
 
     // Heading
     out.push_str(&format!("### `{primary_name}`\n\n"));
@@ -224,8 +230,8 @@ fn render_option_item(lines: &[&str], out: &mut String) {
         let aliases_str = aliases.iter().map(|a| format!("`{a}`")).join(", ");
         out.push_str(&format!("* _Aliases:_ {aliases_str}.\n"));
     }
-    if let Some(d) = default_value {
-        out.push_str(&format!("* _Default:_ `{d}`.\n"));
+    if let Some(default_value) = default_value {
+        out.push_str(&format!("* _Default:_ `{default_value}`.\n"));
     }
     if !possible_values.is_empty() {
         out.push_str("* _Choices:_\n");
@@ -259,7 +265,7 @@ fn parse_flag_primary(flag_line: &str) -> (String, Option<String>) {
     let mut short_alias: Option<String> = None;
     let mut primary_name = flag_line.to_string();
 
-    for part in flag_line.split(", ") {
+    for part in flag_line.split(',').map(str::trim) {
         let name_only = part.split_whitespace().next().unwrap_or(part);
         if name_only.starts_with("--") {
             primary_name = name_only.to_string();
@@ -280,7 +286,7 @@ fn render_examples_section(lines: &[&str], out: &mut String) {
             continue;
         }
         // A line starting with `$ ` is a bare command (no preceding description).
-        if let Some(cmd) = trimmed.strip_prefix("$ ") {
+        if let Some(cmd) = trimmed.strip_prefix('$').map(str::trim) {
             out.push_str(&format!("### `{cmd}`\n\n```sh\n{cmd}\n```\n\n"));
             i += 1;
         } else {
@@ -291,7 +297,7 @@ fn render_examples_section(lines: &[&str], out: &mut String) {
                 i += 1;
             }
             if i < lines.len() {
-                if let Some(cmd) = lines[i].trim().strip_prefix("$ ") {
+                if let Some(cmd) = lines[i].trim().strip_prefix('$').map(str::trim) {
                     out.push_str(&format!("### {desc}\n\n```sh\n{cmd}\n```\n\n"));
                     i += 1;
                     continue;
@@ -302,13 +308,10 @@ fn render_examples_section(lines: &[&str], out: &mut String) {
     }
 }
 
-fn ensure_ends_with_period(s: &str) -> String {
-    if s.is_empty() {
-        return s.to_string();
-    }
-    if s.ends_with('.') || s.ends_with('!') || s.ends_with('?') {
-        s.to_string()
+fn ensure_ends_with_period(line: &str) -> Cow<'_, str> {
+    if line.is_empty() || line.ends_with('.') || line.ends_with('!') || line.ends_with('?') {
+        Cow::Borrowed(line)
     } else {
-        format!("{s}.")
+        Cow::Owned(format!("{line}."))
     }
 }

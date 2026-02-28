@@ -442,9 +442,6 @@ where
 /// Path to the `pdu` executable
 pub const PDU: &str = env!("CARGO_BIN_EXE_pdu");
 
-/// Path to the `pdu-usage-md` executable
-pub const PDU_USAGE_MD: &str = env!("CARGO_BIN_EXE_pdu-usage-md");
-
 /// Representation of a `pdu` command.
 #[derive(Debug, Default, Clone)]
 pub struct CommandRepresentation<'a> {
