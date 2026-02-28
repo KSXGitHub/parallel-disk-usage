@@ -92,8 +92,8 @@ fn render_option(arg: &Arg, out: &mut String) {
 
     // Invisible anchors: short first, then primary long, then long aliases
     let mut anchor_ids: Vec<String> = Vec::new();
-    if let Some(s) = short {
-        anchor_ids.push(format!("option-{s}"));
+    if let Some(short) = short {
+        anchor_ids.push(format!("option-{short}"));
     }
     anchor_ids.push(primary_long.to_string());
     for &alias in &visible_long_aliases {
