@@ -1,3 +1,7 @@
+//! The following tests check whether the shell completion files are outdated.
+//!
+//! If the tests fail, run `./generate-completions.sh` on the root of the repo to update the completion files.
+
 // Since the CLI in Windows look a little different, and I am way too lazy to make two versions
 // of completion files, the following tests would only run in UNIX-like environment.
 #![cfg(unix)]
@@ -20,7 +24,10 @@ macro_rules! check {
             let received =
                 Args::get_completion_string("pdu", Shell::$shell).expect("get completion string");
             let expected = include_str!($path);
-            assert!(received == expected, "completion is outdated");
+            assert!(
+                received == expected,
+                "completion is outdated, run ./generate-completions.sh to update them",
+            );
         }
     };
 }
