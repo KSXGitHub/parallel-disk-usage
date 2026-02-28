@@ -229,7 +229,7 @@ fn render_option_item(lines: &[&str], out: &mut String) {
     }
 
     // Description
-    let description = desc_parts.iter().join(" ");
+    let description = desc_parts.join(" ");
     if !description.is_empty() {
         let description = ensure_ends_with_period(&description);
         out.push_str(&format!("{description}\n\n"));
