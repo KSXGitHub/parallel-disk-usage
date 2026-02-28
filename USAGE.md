@@ -6,35 +6,119 @@ pdu [OPTIONS] [FILES]...
 
 ## Arguments
 
-* `[FILES]...`: List of files and/or directories
+* `[FILES]...`: List of files and/or directories.
 
 ## Options
 
-* `--json-input`: Read JSON data from stdin
-* `--json-output`: Print JSON data instead of an ASCII chart
-* `-b <BYTES_FORMAT>`, `--bytes-format <BYTES_FORMAT>`: How to display the numbers of bytes (default: `metric`)
-  * `plain`: Display plain number of bytes without units
-  * `metric`: Use metric scale, i.e. 1K = 1000B, 1M = 1000K, and so on
-  * `binary`: Use binary scale, i.e. 1K = 1024B, 1M = 1024K, and so on
-* `-H`, `--deduplicate-hardlinks`, `--detect-links`, `--dedupe-links`: Detect and subtract the sizes of hardlinks from their parent directory totals
-* `--top-down`: Print the tree top-down instead of bottom-up
-* `--align-right`: Set the root of the bars to the right
-* `-q <QUANTITY>`, `--quantity <QUANTITY>`: Aspect of the files/directories to be measured (default: `block-size`)
-  * `apparent-size`: Measure apparent sizes
-  * `block-size`: Measure block sizes (block-count * 512B)
-  * `block-count`: Count numbers of blocks
-* `-d <MAX_DEPTH>`, `--max-depth <MAX_DEPTH>`, `--depth <MAX_DEPTH>`: Maximum depth to display the data. Could be either "inf" or a positive integer (default: `10`)
-* `-w <TOTAL_WIDTH>`, `--total-width <TOTAL_WIDTH>`, `--width <TOTAL_WIDTH>`: Width of the visualization
-* `--column-width <TREE_WIDTH> <BAR_WIDTH>`: Maximum widths of the tree column and width of the bar column
-* `-m <MIN_RATIO>`, `--min-ratio <MIN_RATIO>`: Minimal size proportion required to appear (default: `0.01`)
-* `--no-sort`: Do not sort the branches in the tree
-* `-s`, `--silent-errors`, `--no-errors`: Prevent filesystem error messages from appearing in stderr
-* `-p`, `--progress`: Report progress being made at the expense of performance
-* `--threads <THREADS>`: Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer (default: `auto`)
-* `--omit-json-shared-details`: Do not output `.shared.details` in the JSON output
-* `--omit-json-shared-summary`: Do not output `.shared.summary` in the JSON output
-* `-h`, `--help`: Print help (see a summary with '-h')
-* `-V`, `--version`: Print version
+### `--json-input`
+
+Read JSON data from stdin.
+
+### `--json-output`
+
+Print JSON data instead of an ASCII chart.
+
+### `--bytes-format`
+
+* _Aliases:_ `-b`.
+* _Default:_ `metric`.
+* _Choices:_
+  - `plain`: Display plain number of bytes without units
+  - `metric`: Use metric scale, i.e. 1K = 1000B, 1M = 1000K, and so on
+  - `binary`: Use binary scale, i.e. 1K = 1024B, 1M = 1024K, and so on
+
+How to display the numbers of bytes.
+
+### `--deduplicate-hardlinks`
+
+* _Aliases:_ `-H`, `--detect-links`, `--dedupe-links`.
+
+Detect and subtract the sizes of hardlinks from their parent directory totals.
+
+### `--top-down`
+
+Print the tree top-down instead of bottom-up.
+
+### `--align-right`
+
+Set the root of the bars to the right.
+
+### `--quantity`
+
+* _Aliases:_ `-q`.
+* _Default:_ `block-size`.
+* _Choices:_
+  - `apparent-size`: Measure apparent sizes
+  - `block-size`: Measure block sizes (block-count * 512B)
+  - `block-count`: Count numbers of blocks
+
+Aspect of the files/directories to be measured.
+
+### `--max-depth`
+
+* _Aliases:_ `-d`, `--depth`.
+* _Default:_ `10`.
+
+Maximum depth to display the data. Could be either "inf" or a positive integer.
+
+### `--total-width`
+
+* _Aliases:_ `-w`, `--width`.
+
+Width of the visualization.
+
+### `--column-width`
+
+Maximum widths of the tree column and width of the bar column.
+
+### `--min-ratio`
+
+* _Aliases:_ `-m`.
+* _Default:_ `0.01`.
+
+Minimal size proportion required to appear.
+
+### `--no-sort`
+
+Do not sort the branches in the tree.
+
+### `--silent-errors`
+
+* _Aliases:_ `-s`, `--no-errors`.
+
+Prevent filesystem error messages from appearing in stderr.
+
+### `--progress`
+
+* _Aliases:_ `-p`.
+
+Report progress being made at the expense of performance.
+
+### `--threads`
+
+* _Default:_ `auto`.
+
+Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer.
+
+### `--omit-json-shared-details`
+
+Do not output `.shared.details` in the JSON output.
+
+### `--omit-json-shared-summary`
+
+Do not output `.shared.summary` in the JSON output.
+
+### `--help`
+
+* _Aliases:_ `-h`.
+
+Print help (see a summary with '-h').
+
+### `--version`
+
+* _Aliases:_ `-V`.
+
+Print version.
 
 ## Examples
 

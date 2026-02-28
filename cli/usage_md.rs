@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 fn main() {
     let help = include_str!("../exports/long.help");
     println!("{}", render(help).trim_end());
@@ -29,15 +31,21 @@ fn render(input: &str) -> String {
     out
 }
 
-/// A top-level section header is a single unindented word followed by `:`
-/// (e.g. `Arguments:`, `Options:`, `Examples:`).
-/// Lines like `Usage: pdu …` or `Copyright: …` do not qualify because they
-/// either contain spaces before `:` content or have trailing content.
+/// A top-level section header is a single unindented non-empty alphanumeric word followed by `:`.
 fn is_section_header(line: &str) -> bool {
-    !line.starts_with(' ')
-        && line
-            .strip_suffix(':')
-            .is_some_and(|s| !s.is_empty() && s.chars().all(|c| c.is_alphabetic()))
+    if line.starts_with(' ') || line.starts_with('\t') {
+        return false;
+    }
+
+    let Some(prefix) = line.strip_suffix(':') else {
+        return false;
+    };
+
+    if prefix.is_empty() {
+        return false;
+    }
+
+    prefix.chars().all(|c| c.is_alphanumeric())
 }
 
 fn render_preamble(lines: &[&str], out: &mut String) {
@@ -53,90 +61,93 @@ fn render_preamble(lines: &[&str], out: &mut String) {
 fn render_section(name: &str, lines: &[&str], out: &mut String) {
     out.push_str(&format!("## {name}\n\n"));
     match name {
-        "Arguments" | "Options" => render_flag_section(lines, out),
+        "Arguments" => render_arguments_section(lines, out),
+        "Options" => render_options_section(lines, out),
         "Examples" => render_examples_section(lines, out),
         _ => {}
     }
 }
 
-fn render_flag_section(lines: &[&str], out: &mut String) {
-    // Flag / argument names are indented 2–6 spaces; descriptions are indented 10+.
-    let item_starts: Vec<usize> = lines
+/// Find the start positions of flag/argument items within a section's lines.
+///
+/// Flags, arguments, enum choices, and descriptions are indented by either tab or spaces.
+/// The name of flag starts with `-` or `--`, followed by a kebab-case word.
+/// The name of an argument is an UPPER_SNAKE_CASE enclosed in square brackets.
+/// The name of an enum choice is a kebab-case word enclosed in square brackets.
+fn find_item_starts(lines: &[&str]) -> Vec<usize> {
+    lines
         .iter()
         .enumerate()
-        .filter(|(_, l)| {
-            let trimmed = l.trim_start();
-            if trimmed.is_empty() {
-                return false;
-            }
-            let indent = l.len() - trimmed.len();
-            (2..=6).contains(&indent)
-        })
+        .filter(|(_, l)| is_item_start(l))
         .map(|(i, _)| i)
-        .collect();
+        .collect()
+}
 
+fn is_item_start(line: &str) -> bool {
+    if !line.starts_with(' ') && !line.starts_with('\t') {
+        return false;
+    }
+    let trimmed = line.trim_start();
+    if trimmed.is_empty() {
+        return false;
+    }
+    // Flag: starts with `-` followed by `-` or alphanumeric (excludes `- ` bullet lists)
+    if let Some(rest) = trimmed.strip_prefix('-') {
+        if rest.starts_with('-') || rest.starts_with(|c: char| c.is_alphanumeric()) {
+            return true;
+        }
+    }
+    // Argument: [UPPER_SNAKE_CASE]
+    if let Some(rest) = trimmed.strip_prefix('[') {
+        let name = rest.split(']').next().unwrap_or("");
+        return !name.is_empty() && name.chars().all(|c| c.is_uppercase() || c == '_');
+    }
+    false
+}
+
+fn render_arguments_section(lines: &[&str], out: &mut String) {
+    let item_starts = find_item_starts(lines);
     for (idx, &start) in item_starts.iter().enumerate() {
         let end = item_starts.get(idx + 1).copied().unwrap_or(lines.len());
-        render_flag_item(&lines[start..end], out);
+        render_argument_item(&lines[start..end], out);
     }
     out.push('\n');
 }
 
-/// Format a flag line and its aliases as a comma-separated list of backtick-quoted names.
-///
-/// For example, `-b, --bytes-format <BYTES_FORMAT>` with no aliases becomes
-/// `` `-b <BYTES_FORMAT>`, `--bytes-format <BYTES_FORMAT>` ``.
-///
-/// For `-H, --deduplicate-hardlinks` with aliases `--detect-links, --dedupe-links` the
-/// result is `` `-H`, `--deduplicate-hardlinks`, `--detect-links`, `--dedupe-links` ``.
-fn format_flag_names(flag_line: &str, aliases: Option<&str>) -> String {
-    let parts: Vec<&str> = flag_line.split(", ").collect();
-
-    // Extract the value placeholder suffix from the last part (e.g. " <BYTES_FORMAT>").
-    let value_suffix = parts
-        .last()
-        .and_then(|p| p.find(' ').map(|i| &p[i..]))
-        .unwrap_or("");
-
-    let mut names: Vec<String> = parts
-        .iter()
-        .enumerate()
-        .map(|(i, part)| {
-            if i < parts.len() - 1 && !value_suffix.is_empty() {
-                format!("{part}{value_suffix}")
-            } else {
-                part.to_string()
-            }
-        })
-        .collect();
-
-    if let Some(a) = aliases {
-        for alias in a.split(", ") {
-            if value_suffix.is_empty() {
-                names.push(alias.to_string());
-            } else {
-                names.push(format!("{alias}{value_suffix}"));
-            }
-        }
-    }
-
-    names
-        .iter()
-        .map(|n| format!("`{n}`"))
-        .collect::<Vec<_>>()
-        .join(", ")
-}
-
-fn render_flag_item(lines: &[&str], out: &mut String) {
+fn render_argument_item(lines: &[&str], out: &mut String) {
     if lines.is_empty() {
         return;
     }
-    let flag = lines[0].trim();
+    let name = lines[0].trim();
+    let desc = lines[1..]
+        .iter()
+        .map(|l| l.trim())
+        .filter(|l| !l.is_empty())
+        .join(" ");
+    let desc = ensure_ends_with_period(&desc);
+    out.push_str(&format!("* `{name}`: {desc}\n"));
+}
+
+fn render_options_section(lines: &[&str], out: &mut String) {
+    let item_starts = find_item_starts(lines);
+    for (idx, &start) in item_starts.iter().enumerate() {
+        let end = item_starts.get(idx + 1).copied().unwrap_or(lines.len());
+        render_option_item(&lines[start..end], out);
+    }
+}
+
+fn render_option_item(lines: &[&str], out: &mut String) {
+    if lines.is_empty() {
+        return;
+    }
+    let flag_line = lines[0].trim();
+
+    let (primary_name, short_alias) = parse_flag_primary(flag_line);
 
     let mut desc_parts: Vec<&str> = Vec::new();
     let mut possible_values: Vec<(&str, &str)> = Vec::new();
     let mut default_value: Option<&str> = None;
-    let mut aliases_value: Option<&str> = None;
+    let mut long_aliases_str: Option<&str> = None;
     let mut in_possible_values = false;
 
     for line in &lines[1..] {
@@ -160,7 +171,7 @@ fn render_flag_item(lines: &[&str], out: &mut String) {
             .strip_prefix("[aliases: ")
             .and_then(|s| s.strip_suffix(']'))
         {
-            aliases_value = Some(inner);
+            long_aliases_str = Some(inner);
             continue;
         }
         if in_possible_values {
@@ -177,21 +188,73 @@ fn render_flag_item(lines: &[&str], out: &mut String) {
         desc_parts.push(trimmed);
     }
 
-    let names = format_flag_names(flag, aliases_value);
-    let description = desc_parts.join(" ");
-    out.push_str(&format!("* {names}: {description}"));
-    if let Some(d) = default_value {
-        out.push_str(&format!(" (default: `{d}`)"));
+    // Build aliases list: short alias first, then long aliases from [aliases: ...]
+    let mut aliases: Vec<String> = Vec::new();
+    if let Some(s) = short_alias {
+        aliases.push(s);
     }
-    out.push('\n');
-
-    for (name, desc) in &possible_values {
-        if desc.is_empty() {
-            out.push_str(&format!("  * `{name}`\n"));
-        } else {
-            out.push_str(&format!("  * `{name}`: {desc}\n"));
+    if let Some(a) = long_aliases_str {
+        for alias in a.split(", ") {
+            aliases.push(alias.to_string());
         }
     }
+
+    // Heading
+    out.push_str(&format!("### `{primary_name}`\n\n"));
+
+    // Metadata bullets
+    let has_metadata =
+        !aliases.is_empty() || default_value.is_some() || !possible_values.is_empty();
+
+    if !aliases.is_empty() {
+        let aliases_str = aliases.iter().map(|a| format!("`{a}`")).join(", ");
+        out.push_str(&format!("* _Aliases:_ {aliases_str}.\n"));
+    }
+    if let Some(d) = default_value {
+        out.push_str(&format!("* _Default:_ `{d}`.\n"));
+    }
+    if !possible_values.is_empty() {
+        out.push_str("* _Choices:_\n");
+        for (name, desc) in &possible_values {
+            if desc.is_empty() {
+                out.push_str(&format!("  - `{name}`\n"));
+            } else {
+                out.push_str(&format!("  - `{name}`: {desc}\n"));
+            }
+        }
+    }
+
+    if has_metadata {
+        out.push('\n');
+    }
+
+    // Description
+    let description = desc_parts.iter().join(" ");
+    if !description.is_empty() {
+        let description = ensure_ends_with_period(&description);
+        out.push_str(&format!("{description}\n\n"));
+    } else {
+        out.push('\n');
+    }
+}
+
+/// Extract the primary (long) flag name and optional short alias from a flag definition line.
+///
+/// E.g. `-b, --bytes-format <BYTES_FORMAT>` → (`--bytes-format`, `Some("-b")`)
+fn parse_flag_primary(flag_line: &str) -> (String, Option<String>) {
+    let mut short_alias: Option<String> = None;
+    let mut primary_name = flag_line.to_string();
+
+    for part in flag_line.split(", ") {
+        let name_only = part.split_whitespace().next().unwrap_or(part);
+        if name_only.starts_with("--") {
+            primary_name = name_only.to_string();
+        } else if name_only.starts_with('-') {
+            short_alias = Some(name_only.to_string());
+        }
+    }
+
+    (primary_name, short_alias)
 }
 
 fn render_examples_section(lines: &[&str], out: &mut String) {
@@ -222,5 +285,16 @@ fn render_examples_section(lines: &[&str], out: &mut String) {
             }
             out.push_str(&format!("### {desc}\n\n"));
         }
+    }
+}
+
+fn ensure_ends_with_period(s: &str) -> String {
+    if s.is_empty() {
+        return s.to_string();
+    }
+    if s.ends_with('.') || s.ends_with('!') || s.ends_with('?') {
+        s.to_string()
+    } else {
+        format!("{s}.")
     }
 }
