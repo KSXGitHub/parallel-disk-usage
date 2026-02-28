@@ -10,7 +10,6 @@ pub fn render_usage_md() -> String {
     let mut command: Command = Args::command();
     let mut out = String::new();
 
-    // Usage section
     let usage = command.render_usage().to_string();
     if let Some(usage) = usage.strip_prefix("Usage:") {
         out.push_str("# Usage\n\n```sh\n");
@@ -18,7 +17,6 @@ pub fn render_usage_md() -> String {
         out.push_str("\n```\n\n");
     }
 
-    // Arguments section – positional, non-hidden args
     let mut arguments_heading_written = false;
     for arg in command.get_arguments() {
         if !arg.is_positional() || arg.is_hide_set() || arg.is_hide_long_help_set() {
@@ -34,7 +32,6 @@ pub fn render_usage_md() -> String {
         out.push('\n');
     }
 
-    // Options section – non-positional, non-hidden args
     let mut options_heading_written = false;
     for arg in command.get_arguments() {
         if arg.is_positional() || arg.is_hide_set() || arg.is_hide_long_help_set() {
@@ -47,7 +44,6 @@ pub fn render_usage_md() -> String {
         render_option(arg, &mut out);
     }
 
-    // Examples section – parse from after_long_help text
     if let Some(after_help) = command.get_after_long_help() {
         let text = after_help.to_string();
         let mut lines_iter = text.lines();
@@ -187,7 +183,6 @@ fn render_option(arg: &Arg, out: &mut String) {
     }
 }
 
-/// Returns the help text for an argument: `get_help()` with `get_long_help()` appended if set.
 fn get_help_text(arg: &Arg) -> String {
     let mut parts: Vec<String> = Vec::new();
     if let Some(h) = arg.get_help() {
