@@ -2,217 +2,96 @@ use std::borrow::Cow;
 
 use itertools::Itertools;
 
-pub fn render(input: &str) -> String {
+pub fn render(mut command: clap::Command) -> String {
     let mut out = String::new();
-    let lines: Vec<&str> = input.lines().collect();
 
-    let section_positions: Vec<usize> = lines
-        .iter()
-        .enumerate()
-        .filter(|(_, l)| is_section_header(l))
-        .map(|(i, _)| i)
+    // Usage section
+    let usage = command.render_usage().to_string();
+    if let Some(rest) = usage.strip_prefix("Usage: ") {
+        out.push_str("# Usage\n\n```sh\n");
+        out.push_str(rest.trim());
+        out.push_str("\n```\n\n");
+    }
+
+    // Arguments section – positional, non-hidden args
+    let positional_args: Vec<clap::Arg> = command
+        .get_arguments()
+        .filter(|a| a.is_positional() && !a.is_hide_set() && !a.is_hide_long_help_set())
+        .cloned()
         .collect();
+    if !positional_args.is_empty() {
+        out.push_str("## Arguments\n\n");
+        for arg in &positional_args {
+            render_argument(arg, &mut out);
+        }
+        out.push('\n');
+    }
 
-    let first_section = section_positions.first().copied().unwrap_or(lines.len());
-    render_preamble(&lines[..first_section], &mut out);
+    // Options section – non-positional, non-hidden args
+    let option_args: Vec<clap::Arg> = command
+        .get_arguments()
+        .filter(|a| !a.is_positional() && !a.is_hide_set() && !a.is_hide_long_help_set())
+        .cloned()
+        .collect();
+    if !option_args.is_empty() {
+        out.push_str("## Options\n\n");
+        for arg in &option_args {
+            render_option(arg, &mut out);
+        }
+    }
 
-    for (idx, &start) in section_positions.iter().enumerate() {
-        let end = section_positions
-            .get(idx + 1)
-            .copied()
-            .unwrap_or(lines.len());
-        let name = lines[start].strip_suffix(':').unwrap_or(lines[start]);
-        render_section(name, &lines[start + 1..end], &mut out);
+    // Examples section – parse from after_long_help text
+    if let Some(after_help) = command.get_after_long_help() {
+        let text = after_help.to_string();
+        let lines: Vec<&str> = text.lines().collect();
+        if let Some(pos) = lines.iter().position(|l| l.trim() == "Examples:") {
+            out.push_str("## Examples\n\n");
+            render_examples_section(&lines[pos + 1..], &mut out);
+        }
     }
 
     out
 }
 
-/// A top-level section header is a single unindented non-empty alphanumeric word followed by `:`.
-fn is_section_header(line: &str) -> bool {
-    if line.starts_with(' ') || line.starts_with('\t') {
-        return false;
-    }
-
-    let Some(prefix) = line.strip_suffix(':') else {
-        return false;
+fn render_argument(arg: &clap::Arg, out: &mut String) {
+    let name = arg
+        .get_value_names()
+        .and_then(|names| names.first())
+        .map(|n| n.as_str())
+        .unwrap_or_else(|| arg.get_id().as_str());
+    let is_multiple = arg
+        .get_num_args()
+        .map(|r| r.max_values() > 1)
+        .unwrap_or(false);
+    let display_name = if is_multiple {
+        format!("[{name}]...")
+    } else {
+        format!("[{name}]")
     };
-
-    if prefix.is_empty() {
-        return false;
-    }
-
-    prefix.chars().all(|c| c.is_alphanumeric())
-}
-
-fn render_preamble(lines: &[&str], out: &mut String) {
-    for line in lines {
-        if let Some(rest) = line.strip_prefix("Usage: ") {
-            out.push_str("# Usage\n\n```sh\n");
-            out.push_str(rest);
-            out.push_str("\n```\n\n");
-        }
-    }
-}
-
-fn render_section(name: &str, lines: &[&str], out: &mut String) {
-    out.push_str(&format!("## {name}\n\n"));
-    match name {
-        "Arguments" | "ARGUMENTS" => render_arguments_section(lines, out),
-        "Options" | "OPTIONS" => render_options_section(lines, out),
-        "Examples" | "EXAMPLES" => render_examples_section(lines, out),
-        _ => {}
-    }
-}
-
-/// Find the start positions of flag/argument items within a section's lines.
-///
-/// Flags, arguments, enum choices, and descriptions are indented by either tab or spaces.
-/// The name of flag starts with `-` or `--`, followed by a kebab-case word.
-/// The name of an argument is an UPPER_SNAKE_CASE enclosed in square brackets.
-/// The name of an enum choice is a kebab-case word enclosed in square brackets.
-fn find_item_starts<'a>(lines: &'a [&'a str]) -> impl Iterator<Item = usize> + 'a {
-    lines
-        .iter()
-        .enumerate()
-        .filter(|(_, l)| is_item_start(l))
-        .map(|(i, _)| i)
-}
-
-fn is_item_start(line: &str) -> bool {
-    if !line.starts_with(' ') && !line.starts_with('\t') {
-        return false;
-    }
-    let trimmed = line.trim_start();
-    if trimmed.is_empty() {
-        return false;
-    }
-    // Flag: starts with `-` followed by `-` or alphanumeric (excludes `- ` bullet lists)
-    if let Some(rest) = trimmed.strip_prefix('-') {
-        if rest.starts_with('-') || rest.starts_with(|c: char| c.is_alphanumeric()) {
-            return true;
-        }
-    }
-    // Argument: [UPPER_SNAKE_CASE]
-    if let Some(rest) = trimmed.strip_prefix('[') {
-        let name = rest.split(']').next().unwrap_or("");
-        return !name.is_empty() && name.chars().all(|c| c.is_uppercase() || c == '_');
-    }
-    false
-}
-
-fn render_arguments_section(lines: &[&str], out: &mut String) {
-    let item_starts: Vec<usize> = find_item_starts(lines).collect();
-    for (idx, &start) in item_starts.iter().enumerate() {
-        let end = item_starts.get(idx + 1).copied().unwrap_or(lines.len());
-        render_argument_item(&lines[start..end], out);
-    }
-    out.push('\n');
-}
-
-fn render_argument_item(lines: &[&str], out: &mut String) {
-    if lines.is_empty() {
-        return;
-    }
-    let name = lines[0].trim();
-    let desc = lines[1..]
-        .iter()
-        .map(|l| l.trim())
-        .filter(|l| !l.is_empty())
-        .join(" ");
+    let desc = get_help_text(arg);
     let desc = ensure_ends_with_period(&desc);
-    out.push_str(&format!("* `{name}`: {desc}\n"));
+    out.push_str(&format!("* `{display_name}`: {desc}\n"));
 }
 
-fn render_options_section(lines: &[&str], out: &mut String) {
-    let item_starts: Vec<usize> = find_item_starts(lines).collect();
-    for (idx, &start) in item_starts.iter().enumerate() {
-        let end = item_starts.get(idx + 1).copied().unwrap_or(lines.len());
-        render_option_item(&lines[start..end], out);
-    }
-}
+fn render_option(arg: &clap::Arg, out: &mut String) {
+    let primary_long = arg.get_long().expect("option must have a long flag");
+    let primary_name = format!("--{primary_long}");
 
-fn render_option_item(lines: &[&str], out: &mut String) {
-    if lines.is_empty() {
-        return;
-    }
-    let flag_line = lines[0].trim();
+    let short = arg.get_short();
+    let visible_long_aliases: Vec<&str> = arg.get_visible_aliases().unwrap_or_default();
+    let visible_short_aliases: Vec<char> = arg.get_visible_short_aliases().unwrap_or_default();
 
-    let (primary_name, short_alias) = parse_flag_primary(flag_line);
-
-    let mut desc_parts: Vec<&str> = Vec::new();
-    let mut possible_values: Vec<(&str, &str)> = Vec::new();
-    let mut default_value: Option<&str> = None;
-    let mut alt_aliases_str: Option<&str> = None;
-    let mut in_possible_values = false;
-
-    for line in &lines[1..] {
-        let trimmed = line.trim();
-        if trimmed.is_empty() {
-            in_possible_values = false;
-            continue;
-        }
-        if trimmed == "Possible values:" {
-            in_possible_values = true;
-            continue;
-        }
-        if let Some(inner) = trimmed
-            .strip_prefix("[default: ")
-            .and_then(|s| s.strip_suffix(']'))
-        {
-            default_value = Some(inner);
-            continue;
-        }
-        if let Some(inner) = trimmed
-            .strip_prefix("[aliases: ")
-            .and_then(|s| s.strip_suffix(']'))
-        {
-            alt_aliases_str = Some(inner);
-            continue;
-        }
-        if in_possible_values {
-            if let Some(entry) = trimmed.strip_prefix("- ") {
-                let (name, desc) = if let Some(colon) = entry.find(':') {
-                    (entry[..colon].trim(), entry[colon + 1..].trim())
-                } else {
-                    (entry.trim(), "")
-                };
-                possible_values.push((name, desc));
-            }
-            continue;
-        }
-        desc_parts.push(trimmed);
-    }
-
-    // Build aliases list: short alias first, then long aliases from [aliases: ...]
-    let mut aliases: Vec<String> = Vec::new();
-    if let Some(s) = &short_alias {
-        aliases.push(s.clone());
-    }
-    if let Some(a) = alt_aliases_str {
-        for alias in a.split(',').map(str::trim) {
-            aliases.push(alias.to_string());
-        }
-    }
-
-    // Invisible anchors: short aliases (prefixed with "option-"), then primary name, then long aliases
-    let primary_anchor = primary_name.strip_prefix("--").unwrap_or(&primary_name);
+    // Invisible anchors: short first, then primary long, then long aliases
     let mut anchor_ids: Vec<String> = Vec::new();
-    if let Some(s) = &short_alias {
-        let bare = s.strip_prefix('-').unwrap_or(s);
-        anchor_ids.push(format!("option-{bare}"));
+    if let Some(s) = short {
+        anchor_ids.push(format!("option-{s}"));
     }
-    anchor_ids.push(primary_anchor.to_string());
-    if let Some(a) = alt_aliases_str {
-        for alias in a.split(',').map(str::trim) {
-            if alias.starts_with("--") {
-                anchor_ids.push(alias.strip_prefix("--").unwrap_or(alias).to_string());
-            } else if let Some(bare) = alias.strip_prefix('-') {
-                anchor_ids.push(format!("option-{bare}"));
-            } else {
-                anchor_ids.push(alias.to_string());
-            }
-        }
+    anchor_ids.push(primary_long.to_string());
+    for &a in &visible_long_aliases {
+        anchor_ids.push(a.to_string());
+    }
+    for c in &visible_short_aliases {
+        anchor_ids.push(format!("option-{c}"));
     }
     for id in &anchor_ids {
         out.push_str(&format!(r#"<a id="{id}" name="{id}"></a>"#));
@@ -222,24 +101,57 @@ fn render_option_item(lines: &[&str], out: &mut String) {
     // Heading
     out.push_str(&format!("### `{primary_name}`\n\n"));
 
-    // Metadata bullets
+    // Aliases for display in metadata
+    let mut aliases: Vec<String> = Vec::new();
+    if let Some(s) = short {
+        aliases.push(format!("-{s}"));
+    }
+    for &a in &visible_long_aliases {
+        aliases.push(format!("--{a}"));
+    }
+    for c in &visible_short_aliases {
+        aliases.push(format!("-{c}"));
+    }
+
+    // Default values – skip "false" (clap's implicit default for boolean flags)
+    let default_values: Vec<_> = if arg.is_hide_default_value_set() {
+        vec![]
+    } else {
+        arg.get_default_values()
+            .iter()
+            .filter(|v| v.to_string_lossy() != "false")
+            .collect()
+    };
+
+    // Possible values (choices)
+    let possible_values: Vec<_> = if arg.is_hide_possible_values_set() {
+        vec![]
+    } else {
+        arg.get_possible_values()
+            .into_iter()
+            .filter(|pv| !pv.is_hide_set())
+            .collect()
+    };
+
     let has_metadata =
-        !aliases.is_empty() || default_value.is_some() || !possible_values.is_empty();
+        !aliases.is_empty() || !default_values.is_empty() || !possible_values.is_empty();
 
     if !aliases.is_empty() {
         let aliases_str = aliases.iter().map(|a| format!("`{a}`")).join(", ");
         out.push_str(&format!("* _Aliases:_ {aliases_str}.\n"));
     }
-    if let Some(default_value) = default_value {
-        out.push_str(&format!("* _Default:_ `{default_value}`.\n"));
+    if !default_values.is_empty() {
+        let default_str = default_values.iter().map(|v| v.to_string_lossy()).join(", ");
+        out.push_str(&format!("* _Default:_ `{default_str}`.\n"));
     }
     if !possible_values.is_empty() {
         out.push_str("* _Choices:_\n");
-        for (name, desc) in &possible_values {
-            if desc.is_empty() {
-                out.push_str(&format!("  - `{name}`\n"));
+        for pv in &possible_values {
+            let name = pv.get_name();
+            if let Some(help) = pv.get_help() {
+                out.push_str(&format!("  - `{name}`: {help}\n"));
             } else {
-                out.push_str(&format!("  - `{name}`: {desc}\n"));
+                out.push_str(&format!("  - `{name}`\n"));
             }
         }
     }
@@ -248,8 +160,8 @@ fn render_option_item(lines: &[&str], out: &mut String) {
         out.push('\n');
     }
 
-    // Description
-    let description = desc_parts.join(" ");
+    // Description: short help, with long help appended if also set
+    let description = get_help_text(arg);
     if !description.is_empty() {
         let description = ensure_ends_with_period(&description);
         out.push_str(&format!("{description}\n\n"));
@@ -258,23 +170,16 @@ fn render_option_item(lines: &[&str], out: &mut String) {
     }
 }
 
-/// Extract the primary (long) flag name and optional short alias from a flag definition line.
-///
-/// E.g. `-b, --bytes-format <BYTES_FORMAT>` → (`--bytes-format`, `Some("-b")`)
-fn parse_flag_primary(flag_line: &str) -> (String, Option<String>) {
-    let mut short_alias: Option<String> = None;
-    let mut primary_name = flag_line.to_string();
-
-    for part in flag_line.split(',').map(str::trim) {
-        let name_only = part.split_whitespace().next().unwrap_or(part);
-        if name_only.starts_with("--") {
-            primary_name = name_only.to_string();
-        } else if name_only.starts_with('-') {
-            short_alias = Some(name_only.to_string());
-        }
+/// Returns the help text for an argument: `get_help()` with `get_long_help()` appended if set.
+fn get_help_text(arg: &clap::Arg) -> String {
+    let mut parts: Vec<String> = Vec::new();
+    if let Some(h) = arg.get_help() {
+        parts.push(h.to_string());
     }
-
-    (primary_name, short_alias)
+    if let Some(lh) = arg.get_long_help() {
+        parts.push(lh.to_string());
+    }
+    parts.join("\n")
 }
 
 fn render_examples_section(lines: &[&str], out: &mut String) {

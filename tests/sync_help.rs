@@ -34,8 +34,7 @@ fn short_help_is_up_to_date() {
 
 #[test]
 fn usage_md_is_up_to_date() {
-    let help = Args::command().render_long_help().to_string();
-    let actual = render(&help);
+    let actual = render(Args::command());
     let expected = include_str!("../USAGE.md");
     assert!(
         actual.trim_end() == expected.trim_end(),
