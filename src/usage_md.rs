@@ -1,4 +1,5 @@
 use crate::args::Args;
+use clap::builder::PossibleValue;
 use clap::{Arg, Command, CommandFactory};
 use itertools::Itertools;
 use pipe_trait::Pipe;
@@ -86,63 +87,12 @@ fn render_option(arg: &Arg, out: &mut String) {
     let primary_long = arg.get_long().expect("option must have a long flag");
     let primary_name = format!("--{primary_long}");
 
-    let short = arg.get_short();
-    let visible_long_aliases: Vec<&str> = arg.get_visible_aliases().unwrap_or_default();
-    let visible_short_aliases: Vec<char> = arg.get_visible_short_aliases().unwrap_or_default();
-
-    // Invisible anchors: short first, then primary long, then long aliases
-    let mut anchor_ids: Vec<String> = Vec::new();
-    if let Some(short) = short {
-        anchor_ids.push(format!("option-{short}"));
-    }
-    anchor_ids.push(primary_long.to_string());
-    for &alias in &visible_long_aliases {
-        anchor_ids.push(alias.to_string());
-    }
-    for char in &visible_short_aliases {
-        anchor_ids.push(format!("option-{char}"));
-    }
-    for id in &anchor_ids {
-        out.push_str(&format!(r#"<a id="{id}" name="{id}"></a>"#));
-    }
-    out.push('\n');
-
-    // Heading
+    write_option_anchors(arg, primary_long, out);
     out.push_str(&format!("### `{primary_name}`\n\n"));
 
-    // Aliases for display in metadata
-    let mut aliases: Vec<String> = Vec::new();
-    if let Some(short) = short {
-        aliases.push(format!("-{short}"));
-    }
-    for &alias in &visible_long_aliases {
-        aliases.push(format!("--{alias}"));
-    }
-    for alias in &visible_short_aliases {
-        aliases.push(format!("-{alias}"));
-    }
-
-    // Default values – skip "false" (clap's implicit default for boolean flags)
-    let default_values: Vec<String> = if arg.is_hide_default_value_set() {
-        Vec::new()
-    } else {
-        arg.get_default_values()
-            .iter()
-            .map(|value| value.to_string_lossy())
-            .filter(|value| value != "false")
-            .map(|value| value.to_string())
-            .collect()
-    };
-
-    // Possible values (choices)
-    let possible_values: Vec<_> = if arg.is_hide_possible_values_set() {
-        Vec::new()
-    } else {
-        arg.get_possible_values()
-            .into_iter()
-            .filter(|value| !value.is_hide_set())
-            .collect()
-    };
+    let aliases = collect_option_display_aliases(arg);
+    let default_values = collect_option_default_values(arg);
+    let possible_values = collect_option_possible_values(arg);
 
     let has_metadata =
         !aliases.is_empty() || !default_values.is_empty() || !possible_values.is_empty();
@@ -152,14 +102,14 @@ fn render_option(arg: &Arg, out: &mut String) {
         out.push_str(&format!("* _Aliases:_ {aliases_str}.\n"));
     }
     if !default_values.is_empty() {
-        let default_values = default_values.join(", ");
-        out.push_str(&format!("* _Default:_ `{default_values}`.\n"));
+        let default_values_str = default_values.join(", ");
+        out.push_str(&format!("* _Default:_ `{default_values_str}`.\n"));
     }
     if !possible_values.is_empty() {
         out.push_str("* _Choices:_\n");
-        for value in &possible_values {
-            let name = value.get_name();
-            if let Some(help) = value.get_help() {
+        for possible_value in &possible_values {
+            let name = possible_value.get_name();
+            if let Some(help) = possible_value.get_help() {
                 out.push_str(&format!("  - `{name}`: {help}\n"));
             } else {
                 out.push_str(&format!("  - `{name}`\n"));
@@ -171,7 +121,72 @@ fn render_option(arg: &Arg, out: &mut String) {
         out.push('\n');
     }
 
-    // Description: short help, with long help appended if also set
+    write_option_description(arg, out);
+}
+
+fn write_option_anchors(arg: &Arg, primary_long: &str, out: &mut String) {
+    let short = arg.get_short();
+    let visible_long_aliases: Vec<&str> = arg.get_visible_aliases().unwrap_or_default();
+    let visible_short_aliases: Vec<char> = arg.get_visible_short_aliases().unwrap_or_default();
+
+    let mut anchor_ids: Vec<String> = Vec::new();
+    if let Some(short_char) = short {
+        anchor_ids.push(format!("option-{short_char}"));
+    }
+    anchor_ids.push(primary_long.to_string());
+    for &long_alias in &visible_long_aliases {
+        anchor_ids.push(long_alias.to_string());
+    }
+    for &short_alias in &visible_short_aliases {
+        anchor_ids.push(format!("option-{short_alias}"));
+    }
+    for id in &anchor_ids {
+        out.push_str(&format!(r#"<a id="{id}" name="{id}"></a>"#));
+    }
+    out.push('\n');
+}
+
+fn collect_option_display_aliases(arg: &Arg) -> Vec<String> {
+    let short = arg.get_short();
+    let visible_long_aliases: Vec<&str> = arg.get_visible_aliases().unwrap_or_default();
+    let visible_short_aliases: Vec<char> = arg.get_visible_short_aliases().unwrap_or_default();
+
+    let mut aliases: Vec<String> = Vec::new();
+    if let Some(short_char) = short {
+        aliases.push(format!("-{short_char}"));
+    }
+    for &long_alias in &visible_long_aliases {
+        aliases.push(format!("--{long_alias}"));
+    }
+    for &short_alias in &visible_short_aliases {
+        aliases.push(format!("-{short_alias}"));
+    }
+    aliases
+}
+
+fn collect_option_default_values(arg: &Arg) -> Vec<String> {
+    if arg.is_hide_default_value_set() {
+        return Vec::new();
+    }
+    arg.get_default_values()
+        .iter()
+        .map(|value| value.to_string_lossy())
+        .filter(|value| value != "false")
+        .map(|value| value.to_string())
+        .collect()
+}
+
+fn collect_option_possible_values(arg: &Arg) -> Vec<PossibleValue> {
+    if arg.is_hide_possible_values_set() {
+        return Vec::new();
+    }
+    arg.get_possible_values()
+        .into_iter()
+        .filter(|possible_value| !possible_value.is_hide_set())
+        .collect()
+}
+
+fn write_option_description(arg: &Arg, out: &mut String) {
     let description = get_help_text(arg);
     if !description.is_empty() {
         let description = ensure_ends_with_punctuation(&description);
@@ -190,6 +205,7 @@ fn get_help_text(arg: &Arg) -> Cow<'static, str> {
 }
 
 fn render_examples_section<'a>(lines: impl Iterator<Item = &'a str>, out: &mut String) {
+    let mut current_title: Option<&'a str> = None;
     for line in lines {
         let line = line.trim();
 
@@ -197,13 +213,16 @@ fn render_examples_section<'a>(lines: impl Iterator<Item = &'a str>, out: &mut S
             continue;
         }
 
-        if let Some(command) = line.strip_prefix('$') {
-            let command = command.trim();
-            out.push_str(&format!("```sh\n{command}\n```\n\n"));
-            continue;
+        if let Some(cmd) = line.strip_prefix('$').map(str::trim) {
+            let heading = if let Some(title) = current_title.take() {
+                title.to_string()
+            } else {
+                format!("`{cmd}`")
+            };
+            out.push_str(&format!("### {heading}\n\n```sh\n{cmd}\n```\n\n"));
+        } else {
+            current_title = Some(line);
         }
-
-        out.push_str(&format!("### {line}\n\n"));
     }
 }
 
