@@ -84,7 +84,9 @@ fn render_argument(out: &mut String, arg: &Arg) {
 }
 
 fn render_option(out: &mut String, arg: &Arg) {
-    let primary_long = arg.get_long().expect("option must have a long flag");
+    let Some(primary_long) = arg.get_long() else {
+        return;
+    };
     let primary_name = format!("--{primary_long}");
 
     write_option_anchors(out, arg, primary_long);
