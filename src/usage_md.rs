@@ -168,8 +168,7 @@ fn collect_option_default_values(arg: &Arg) -> Vec<Cow<'_, str>> {
     if arg.is_hide_default_value_set() {
         return Vec::new();
     }
-    let is_boolean_flag = matches!(arg.get_action(), ArgAction::SetTrue | ArgAction::SetFalse);
-    if is_boolean_flag {
+    if !arg.is_positional() && matches!(arg.get_action(), ArgAction::SetTrue) {
         return Vec::new();
     }
     arg.get_default_values()
