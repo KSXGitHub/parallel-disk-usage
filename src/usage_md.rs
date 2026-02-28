@@ -11,15 +11,12 @@ pub fn render_usage_md() -> String {
     let mut out = String::new();
 
     // Usage section
-    let usage_str = command.render_usage().to_string();
-    let usage_cmd = usage_str
-        .trim()
-        .split_once(':')
-        .map(|(_, rest)| rest.trim())
-        .unwrap_or("");
-    out.push_str("# Usage\n\n```sh\n");
-    out.push_str(usage_cmd);
-    out.push_str("\n```\n\n");
+    let usage = command.render_usage().to_string();
+    if let Some(usage) = usage.strip_prefix("Usage:") {
+        out.push_str("# Usage\n\n```sh\n");
+        out.push_str(usage.trim());
+        out.push_str("\n```\n\n");
+    }
 
     // Arguments section – positional, non-hidden args
     let mut arguments_heading_written = false;
