@@ -129,7 +129,7 @@ fn write_option_anchors(arg: &Arg, primary_long: &str, out: &mut String) {
     let visible_long_aliases: Vec<&str> = arg.get_visible_aliases().unwrap_or_default();
     let visible_short_aliases: Vec<char> = arg.get_visible_short_aliases().unwrap_or_default();
 
-    let mut anchor_ids: Vec<String> = Vec::new();
+    let mut anchor_ids = Vec::<String>::new();
     if let Some(short) = short {
         anchor_ids.push(format!("option-{short}"));
     }
@@ -151,7 +151,7 @@ fn collect_option_display_aliases(arg: &Arg) -> Vec<String> {
     let visible_long_aliases: Vec<&str> = arg.get_visible_aliases().unwrap_or_default();
     let visible_short_aliases: Vec<char> = arg.get_visible_short_aliases().unwrap_or_default();
 
-    let mut aliases: Vec<String> = Vec::new();
+    let mut aliases = Vec::<String>::new();
     if let Some(short) = short {
         aliases.push(format!("-{short}"));
     }
