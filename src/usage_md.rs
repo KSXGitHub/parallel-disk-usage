@@ -152,8 +152,8 @@ fn render_option(arg: &Arg, out: &mut String) {
         out.push_str(&format!("* _Aliases:_ {aliases_str}.\n"));
     }
     if !default_values.is_empty() {
-        let default_str = default_values.join(", ");
-        out.push_str(&format!("* _Default:_ `{default_str}`.\n"));
+        let default_values = default_values.join(", ");
+        out.push_str(&format!("* _Default:_ `{default_values}`.\n"));
     }
     if !possible_values.is_empty() {
         out.push_str("* _Choices:_\n");
