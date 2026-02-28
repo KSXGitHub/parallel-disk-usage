@@ -1,9 +1,7 @@
+use crate::args::Args;
+use clap::{Arg, Command, CommandFactory};
 use itertools::Itertools;
 use std::borrow::Cow;
-
-use clap::{Arg, Command, CommandFactory};
-
-use crate::args::Args;
 
 /// Renders a Markdown reference page for `pdu`'s CLI.
 pub fn render_usage_md() -> String {
