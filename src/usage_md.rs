@@ -1,6 +1,6 @@
 use crate::args::Args;
 use clap::builder::PossibleValue;
-use clap::{Arg, Command, CommandFactory};
+use clap::{Arg, ArgAction, Command, CommandFactory};
 use itertools::Itertools;
 use std::borrow::Cow;
 
@@ -72,7 +72,13 @@ fn render_argument(out: &mut String, arg: &Arg) {
         .get_num_args()
         .map(|r| r.max_values() > 1)
         .unwrap_or(false);
-    let display_name = if is_multiple {
+    let display_name = if arg.is_required_set() {
+        if is_multiple {
+            format!("<{name}>...")
+        } else {
+            format!("<{name}>")
+        }
+    } else if is_multiple {
         format!("[{name}]...")
     } else {
         format!("[{name}]")
@@ -162,11 +168,13 @@ fn collect_option_default_values(arg: &Arg) -> Vec<String> {
     if arg.is_hide_default_value_set() {
         return Vec::new();
     }
+    let is_boolean_flag = matches!(arg.get_action(), ArgAction::SetTrue | ArgAction::SetFalse);
+    if is_boolean_flag {
+        return Vec::new();
+    }
     arg.get_default_values()
         .iter()
-        .map(|value| value.to_string_lossy())
-        .filter(|value| value != "false")
-        .map(|value| value.to_string())
+        .map(|value| value.to_string_lossy().to_string())
         .collect()
 }
 
