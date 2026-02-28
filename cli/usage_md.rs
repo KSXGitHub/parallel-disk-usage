@@ -1,6 +1,6 @@
 fn main() {
     let help = include_str!("../exports/long.help");
-    print!("{}\n", render(help).trim_end());
+    println!("{}", render(help).trim_end());
 }
 
 fn render(input: &str) -> String {
@@ -22,7 +22,7 @@ fn render(input: &str) -> String {
             .get(idx + 1)
             .copied()
             .unwrap_or(lines.len());
-        let name = lines[start].trim_end_matches(':');
+        let name = lines[start].strip_suffix(':').unwrap_or(lines[start]);
         render_section(name, &lines[start + 1..end], &mut out);
     }
 
@@ -70,7 +70,7 @@ fn render_flag_section(lines: &[&str], out: &mut String) {
                 return false;
             }
             let indent = l.len() - trimmed.len();
-            indent >= 2 && indent <= 6
+            (2..=6).contains(&indent)
         })
         .map(|(i, _)| i)
         .collect();
@@ -80,6 +80,51 @@ fn render_flag_section(lines: &[&str], out: &mut String) {
         render_flag_item(&lines[start..end], out);
     }
     out.push('\n');
+}
+
+/// Format a flag line and its aliases as a comma-separated list of backtick-quoted names.
+///
+/// For example, `-b, --bytes-format <BYTES_FORMAT>` with no aliases becomes
+/// `` `-b <BYTES_FORMAT>`, `--bytes-format <BYTES_FORMAT>` ``.
+///
+/// For `-H, --deduplicate-hardlinks` with aliases `--detect-links, --dedupe-links` the
+/// result is `` `-H`, `--deduplicate-hardlinks`, `--detect-links`, `--dedupe-links` ``.
+fn format_flag_names(flag_line: &str, aliases: Option<&str>) -> String {
+    let parts: Vec<&str> = flag_line.split(", ").collect();
+
+    // Extract the value placeholder suffix from the last part (e.g. " <BYTES_FORMAT>").
+    let value_suffix = parts
+        .last()
+        .and_then(|p| p.find(' ').map(|i| &p[i..]))
+        .unwrap_or("");
+
+    let mut names: Vec<String> = parts
+        .iter()
+        .enumerate()
+        .map(|(i, part)| {
+            if i < parts.len() - 1 && !value_suffix.is_empty() {
+                format!("{part}{value_suffix}")
+            } else {
+                part.to_string()
+            }
+        })
+        .collect();
+
+    if let Some(a) = aliases {
+        for alias in a.split(", ") {
+            if value_suffix.is_empty() {
+                names.push(alias.to_string());
+            } else {
+                names.push(format!("{alias}{value_suffix}"));
+            }
+        }
+    }
+
+    names
+        .iter()
+        .map(|n| format!("`{n}`"))
+        .collect::<Vec<_>>()
+        .join(", ")
 }
 
 fn render_flag_item(lines: &[&str], out: &mut String) {
@@ -132,8 +177,9 @@ fn render_flag_item(lines: &[&str], out: &mut String) {
         desc_parts.push(trimmed);
     }
 
+    let names = format_flag_names(flag, aliases_value);
     let description = desc_parts.join(" ");
-    out.push_str(&format!("* `{flag}`: {description}"));
+    out.push_str(&format!("* {names}: {description}"));
     if let Some(d) = default_value {
         out.push_str(&format!(" (default: `{d}`)"));
     }
@@ -145,15 +191,6 @@ fn render_flag_item(lines: &[&str], out: &mut String) {
         } else {
             out.push_str(&format!("  * `{name}`: {desc}\n"));
         }
-    }
-
-    if let Some(a) = aliases_value {
-        let formatted = a
-            .split(", ")
-            .map(|s| format!("`{s}`"))
-            .collect::<Vec<_>>()
-            .join(", ");
-        out.push_str(&format!("  * Aliases: {formatted}\n"));
     }
 }
 
@@ -167,7 +204,7 @@ fn render_examples_section(lines: &[&str], out: &mut String) {
         }
         // A line starting with `$ ` is a bare command (no preceding description).
         if let Some(cmd) = trimmed.strip_prefix("$ ") {
-            out.push_str(&format!("* `{cmd}`\n"));
+            out.push_str(&format!("### `{cmd}`\n\n```sh\n{cmd}\n```\n\n"));
             i += 1;
         } else {
             // Description line — the very next non-empty line should be `$ <cmd>`.
@@ -178,13 +215,12 @@ fn render_examples_section(lines: &[&str], out: &mut String) {
             }
             if i < lines.len() {
                 if let Some(cmd) = lines[i].trim().strip_prefix("$ ") {
-                    out.push_str(&format!("* {desc}: `{cmd}`\n"));
+                    out.push_str(&format!("### {desc}\n\n```sh\n{cmd}\n```\n\n"));
                     i += 1;
                     continue;
                 }
             }
-            out.push_str(&format!("* {desc}\n"));
+            out.push_str(&format!("### {desc}\n\n"));
         }
     }
-    out.push('\n');
 }

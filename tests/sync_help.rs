@@ -33,25 +33,23 @@ macro_rules! check {
             );
         }
     };
-    ($name:ident: bin $bin:expr => $path:literal) => {
-        #[test]
-        fn $name() {
-            let actual = Command::new($bin)
-                .with_stdin(Stdio::null())
-                .with_stdout(Stdio::piped())
-                .with_stderr(Stdio::null())
-                .output()
-                .expect("get actual help text")
-                .pipe(stdout_text);
-            let expected = include_str!($path);
-            assert!(
-                actual == expected.trim_end(),
-                "help text is outdated, run ./generate-completions.sh to update it",
-            );
-        }
-    };
 }
 
 check!(long_help_is_up_to_date: "--help" => "../exports/long.help");
 check!(short_help_is_up_to_date: "-h" => "../exports/short.help");
-check!(usage_md_is_up_to_date: bin PDU_USAGE_MD => "../USAGE.md");
+
+#[test]
+fn usage_md_is_up_to_date() {
+    let actual = Command::new(PDU_USAGE_MD)
+        .with_stdin(Stdio::null())
+        .with_stdout(Stdio::piped())
+        .with_stderr(Stdio::null())
+        .output()
+        .expect("get actual help text")
+        .pipe(stdout_text);
+    let expected = include_str!("../USAGE.md");
+    assert!(
+        actual == expected.trim_end(),
+        "USAGE.md is outdated, run ./generate-completions.sh to update it",
+    );
+}
