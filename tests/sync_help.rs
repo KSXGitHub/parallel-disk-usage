@@ -10,10 +10,17 @@
 use clap::CommandFactory;
 use parallel_disk_usage::{args::Args, usage_md::render_usage_md};
 
+fn normalize_help(text: &str) -> String {
+    text.lines()
+        .map(str::trim_end)
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
 #[test]
 fn long_help_is_up_to_date() {
-    let actual = Args::command().render_long_help().to_string();
-    let expected = include_str!("../exports/long.help");
+    let actual = normalize_help(&Args::command().render_long_help().to_string());
+    let expected = normalize_help(include_str!("../exports/long.help"));
     assert!(
         actual.trim_end() == expected.trim_end(),
         "help text is outdated, run ./generate-completions.sh to update it",
@@ -22,8 +29,8 @@ fn long_help_is_up_to_date() {
 
 #[test]
 fn short_help_is_up_to_date() {
-    let actual = Args::command().render_help().to_string();
-    let expected = include_str!("../exports/short.help");
+    let actual = normalize_help(&Args::command().render_help().to_string());
+    let expected = normalize_help(include_str!("../exports/short.help"));
     assert!(
         actual.trim_end() == expected.trim_end(),
         "help text is outdated, run ./generate-completions.sh to update it",

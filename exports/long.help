@@ -23,12 +23,12 @@ Options:
           - plain:  Display plain number of bytes without units
           - metric: Use metric scale, i.e. 1K = 1000B, 1M = 1000K, and so on
           - binary: Use binary scale, i.e. 1K = 1024B, 1M = 1024K, and so on
-          
+
           [default: metric]
 
   -H, --deduplicate-hardlinks
           Detect and subtract the sizes of hardlinks from their parent directory totals
-          
+
           [aliases: --detect-links, --dedupe-links]
 
       --top-down
@@ -44,18 +44,18 @@ Options:
           - apparent-size: Measure apparent sizes
           - block-size:    Measure block sizes (block-count * 512B)
           - block-count:   Count numbers of blocks
-          
+
           [default: block-size]
 
   -d, --max-depth <MAX_DEPTH>
           Maximum depth to display the data. Could be either "inf" or a positive integer
-          
+
           [default: 10]
           [aliases: --depth]
 
   -w, --total-width <TOTAL_WIDTH>
           Width of the visualization
-          
+
           [aliases: --width]
 
       --column-width <TREE_WIDTH> <BAR_WIDTH>
@@ -63,7 +63,7 @@ Options:
 
   -m, --min-ratio <MIN_RATIO>
           Minimal size proportion required to appear
-          
+
           [default: 0.01]
 
       --no-sort
@@ -71,7 +71,7 @@ Options:
 
   -s, --silent-errors
           Prevent filesystem error messages from appearing in stderr
-          
+
           [aliases: --no-errors]
 
   -p, --progress
@@ -79,7 +79,7 @@ Options:
 
       --threads <THREADS>
           Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer
-          
+
           [default: auto]
 
       --omit-json-shared-details
