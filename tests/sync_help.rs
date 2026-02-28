@@ -7,8 +7,6 @@
 #![cfg(unix)]
 #![cfg(feature = "cli")]
 
-pub mod _utils;
-
 use clap::CommandFactory;
 use parallel_disk_usage::{args::Args, usage_md::render_usage_md};
 
