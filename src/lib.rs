@@ -46,6 +46,7 @@ pub mod reporter;
 pub mod size;
 pub mod status_board;
 pub mod tree_builder;
+pub mod usage_md;
 pub mod visualizer;
 
 pub use zero_copy_pads;

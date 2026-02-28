@@ -10,14 +10,17 @@ pdu [OPTIONS] [FILES]...
 
 ## Options
 
+<a id="json-input" name="json-input"></a>
 ### `--json-input`
 
 Read JSON data from stdin.
 
+<a id="json-output" name="json-output"></a>
 ### `--json-output`
 
 Print JSON data instead of an ASCII chart.
 
+<a id="option-b" name="option-b"></a><a id="bytes-format" name="bytes-format"></a>
 ### `--bytes-format`
 
 * _Aliases:_ `-b`.
@@ -29,20 +32,24 @@ Print JSON data instead of an ASCII chart.
 
 How to display the numbers of bytes.
 
+<a id="option-H" name="option-H"></a><a id="deduplicate-hardlinks" name="deduplicate-hardlinks"></a><a id="detect-links" name="detect-links"></a><a id="dedupe-links" name="dedupe-links"></a>
 ### `--deduplicate-hardlinks`
 
 * _Aliases:_ `-H`, `--detect-links`, `--dedupe-links`.
 
 Detect and subtract the sizes of hardlinks from their parent directory totals.
 
+<a id="top-down" name="top-down"></a>
 ### `--top-down`
 
 Print the tree top-down instead of bottom-up.
 
+<a id="align-right" name="align-right"></a>
 ### `--align-right`
 
 Set the root of the bars to the right.
 
+<a id="option-q" name="option-q"></a><a id="quantity" name="quantity"></a>
 ### `--quantity`
 
 * _Aliases:_ `-q`.
@@ -54,6 +61,7 @@ Set the root of the bars to the right.
 
 Aspect of the files/directories to be measured.
 
+<a id="option-d" name="option-d"></a><a id="max-depth" name="max-depth"></a><a id="depth" name="depth"></a>
 ### `--max-depth`
 
 * _Aliases:_ `-d`, `--depth`.
@@ -61,16 +69,19 @@ Aspect of the files/directories to be measured.
 
 Maximum depth to display the data. Could be either "inf" or a positive integer.
 
+<a id="option-w" name="option-w"></a><a id="total-width" name="total-width"></a><a id="width" name="width"></a>
 ### `--total-width`
 
 * _Aliases:_ `-w`, `--width`.
 
 Width of the visualization.
 
+<a id="column-width" name="column-width"></a>
 ### `--column-width`
 
 Maximum widths of the tree column and width of the bar column.
 
+<a id="option-m" name="option-m"></a><a id="min-ratio" name="min-ratio"></a>
 ### `--min-ratio`
 
 * _Aliases:_ `-m`.
@@ -78,42 +89,50 @@ Maximum widths of the tree column and width of the bar column.
 
 Minimal size proportion required to appear.
 
+<a id="no-sort" name="no-sort"></a>
 ### `--no-sort`
 
 Do not sort the branches in the tree.
 
+<a id="option-s" name="option-s"></a><a id="silent-errors" name="silent-errors"></a><a id="no-errors" name="no-errors"></a>
 ### `--silent-errors`
 
 * _Aliases:_ `-s`, `--no-errors`.
 
 Prevent filesystem error messages from appearing in stderr.
 
+<a id="option-p" name="option-p"></a><a id="progress" name="progress"></a>
 ### `--progress`
 
 * _Aliases:_ `-p`.
 
 Report progress being made at the expense of performance.
 
+<a id="threads" name="threads"></a>
 ### `--threads`
 
 * _Default:_ `auto`.
 
 Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer.
 
+<a id="omit-json-shared-details" name="omit-json-shared-details"></a>
 ### `--omit-json-shared-details`
 
 Do not output `.shared.details` in the JSON output.
 
+<a id="omit-json-shared-summary" name="omit-json-shared-summary"></a>
 ### `--omit-json-shared-summary`
 
 Do not output `.shared.summary` in the JSON output.
 
+<a id="option-h" name="option-h"></a><a id="help" name="help"></a>
 ### `--help`
 
 * _Aliases:_ `-h`.
 
 Print help (see a summary with '-h').
 
+<a id="option-V" name="option-V"></a><a id="version" name="version"></a>
 ### `--version`
 
 * _Aliases:_ `-V`.

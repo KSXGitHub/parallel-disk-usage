@@ -8,48 +8,37 @@
 #![cfg(feature = "cli")]
 
 pub mod _utils;
-pub use _utils::*;
 
-use command_extra::CommandExtra;
-use pipe_trait::Pipe;
-use std::process::{Command, Stdio};
+use clap::CommandFactory;
+use parallel_disk_usage::{args::Args, usage_md::render};
 
-macro_rules! check {
-    ($name:ident: $flag:literal => $path:literal) => {
-        #[test]
-        fn $name() {
-            let actual = Command::new(PDU)
-                .with_arg($flag)
-                .with_stdin(Stdio::null())
-                .with_stdout(Stdio::piped())
-                .with_stderr(Stdio::null())
-                .output()
-                .expect("get actual help text")
-                .pipe(stdout_text);
-            let expected = include_str!($path);
-            assert!(
-                actual == expected.trim_end(),
-                "help text is outdated, run ./generate-completions.sh to update it",
-            );
-        }
-    };
+#[test]
+fn long_help_is_up_to_date() {
+    let actual = Args::command().render_long_help().to_string();
+    let expected = include_str!("../exports/long.help");
+    assert!(
+        actual.trim_end() == expected.trim_end(),
+        "help text is outdated, run ./generate-completions.sh to update it",
+    );
 }
 
-check!(long_help_is_up_to_date: "--help" => "../exports/long.help");
-check!(short_help_is_up_to_date: "-h" => "../exports/short.help");
+#[test]
+fn short_help_is_up_to_date() {
+    let actual = Args::command().render_help().to_string();
+    let expected = include_str!("../exports/short.help");
+    assert!(
+        actual.trim_end() == expected.trim_end(),
+        "help text is outdated, run ./generate-completions.sh to update it",
+    );
+}
 
 #[test]
 fn usage_md_is_up_to_date() {
-    let actual = Command::new(PDU_USAGE_MD)
-        .with_stdin(Stdio::null())
-        .with_stdout(Stdio::piped())
-        .with_stderr(Stdio::null())
-        .output()
-        .expect("get actual help text")
-        .pipe(stdout_text);
+    let help = Args::command().render_long_help().to_string();
+    let actual = render(&help);
     let expected = include_str!("../USAGE.md");
     assert!(
-        actual == expected.trim_end(),
+        actual.trim_end() == expected.trim_end(),
         "USAGE.md is outdated, run ./generate-completions.sh to update it",
     );
 }
