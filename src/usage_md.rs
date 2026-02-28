@@ -123,12 +123,14 @@ fn render_option(arg: &Arg, out: &mut String) {
     }
 
     // Default values – skip "false" (clap's implicit default for boolean flags)
-    let default_values: Vec<_> = if arg.is_hide_default_value_set() {
+    let default_values: Vec<String> = if arg.is_hide_default_value_set() {
         Vec::new()
     } else {
         arg.get_default_values()
             .iter()
-            .filter(|v| v.to_string_lossy() != "false")
+            .map(|value| value.to_string_lossy())
+            .filter(|value| value != "false")
+            .map(|value| value.to_string())
             .collect()
     };
 
@@ -150,10 +152,7 @@ fn render_option(arg: &Arg, out: &mut String) {
         out.push_str(&format!("* _Aliases:_ {aliases_str}.\n"));
     }
     if !default_values.is_empty() {
-        let default_str = default_values
-            .iter()
-            .map(|v| v.to_string_lossy())
-            .join(", ");
+        let default_str = default_values.join(", ");
         out.push_str(&format!("* _Default:_ `{default_str}`.\n"));
     }
     if !possible_values.is_empty() {
