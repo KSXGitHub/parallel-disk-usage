@@ -198,16 +198,13 @@ fn write_option_description(out: &mut String, arg: &Arg) {
 }
 
 fn get_help_text(arg: &Arg) -> Cow<'static, str> {
-    let help = match (arg.get_help(), arg.get_long_help()) {
-        (None, None) => return Cow::Borrowed(""),
-        (Some(help), None) | (_, Some(help)) => help.to_string(),
-    };
-    let help = if help.contains("see a summary with") && help.contains("help") {
-        "Print help".to_string()
-    } else {
-        help
-    };
-    Cow::Owned(help)
+    if !arg.is_positional() && arg.get_id() == "help" {
+        return Cow::Borrowed("Print help");
+    }
+    match (arg.get_help(), arg.get_long_help()) {
+        (None, None) => Cow::Borrowed(""),
+        (Some(help), None) | (_, Some(help)) => Cow::Owned(help.to_string()),
+    }
 }
 
 fn render_examples_section<'a>(out: &mut String, lines: impl Iterator<Item = &'a str>) {
