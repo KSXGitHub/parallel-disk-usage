@@ -77,7 +77,7 @@ fn render_argument(arg: &Arg, out: &mut String) {
         format!("[{name}]")
     };
     let desc = get_help_text(arg);
-    let desc = ensure_ends_with_period(&desc);
+    let desc = ensure_ends_with_punctuation(&desc);
     out.push_str(&format!("* `{display_name}`: {desc}\n"));
 }
 
@@ -174,7 +174,7 @@ fn render_option(arg: &Arg, out: &mut String) {
     // Description: short help, with long help appended if also set
     let description = get_help_text(arg);
     if !description.is_empty() {
-        let description = ensure_ends_with_period(&description);
+        let description = ensure_ends_with_punctuation(&description);
         out.push_str(&format!("{description}\n\n"));
     } else {
         out.push('\n');
@@ -210,7 +210,7 @@ fn render_examples_section<'a>(lines: impl Iterator<Item = &'a str>, out: &mut S
     }
 }
 
-fn ensure_ends_with_period(line: &str) -> Cow<'_, str> {
+fn ensure_ends_with_punctuation(line: &str) -> Cow<'_, str> {
     if line.is_empty() || line.ends_with('.') || line.ends_with('!') || line.ends_with('?') {
         Cow::Borrowed(line)
     } else {
