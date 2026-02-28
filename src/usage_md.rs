@@ -125,19 +125,21 @@ fn render_option(arg: &Arg, out: &mut String) {
 }
 
 fn write_option_anchors(arg: &Arg, primary_long: &str, out: &mut String) {
-    let mut anchor_ids = Vec::<String>::new();
+    let append_anchor = |out: &mut String, id: &str| {
+        out.push_str(&format!(r#"<a id="{id}" name="{id}"></a>"#));
+    };
+    let append_anchor_for_short = |out: &mut String, short: char| {
+        append_anchor(out, &format!("option-{short}"));
+    };
     if let Some(short) = arg.get_short() {
-        anchor_ids.push(format!("option-{short}"));
+        append_anchor_for_short(out, short);
     }
-    anchor_ids.push(primary_long.to_string());
+    append_anchor(out, primary_long);
     for alias in arg.get_visible_aliases().unwrap_or_default() {
-        anchor_ids.push(alias.to_string());
+        append_anchor(out, alias);
     }
     for short in arg.get_visible_short_aliases().unwrap_or_default() {
-        anchor_ids.push(format!("option-{short}"));
-    }
-    for id in &anchor_ids {
-        out.push_str(&format!(r#"<a id="{id}" name="{id}"></a>"#));
+        append_anchor_for_short(out, short);
     }
     out.push('\n');
 }
