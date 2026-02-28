@@ -40,7 +40,7 @@ check!(long: render_long_help => "../exports/long.help");
 check!(short: render_help => "../exports/short.help");
 
 #[test]
-fn usage_md_is_up_to_date() {
+fn usage_md() {
     let actual = render_usage_md();
     let expected = include_str!("../USAGE.md");
     assert!(
