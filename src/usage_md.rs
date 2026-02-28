@@ -2,7 +2,6 @@ use crate::args::Args;
 use clap::builder::PossibleValue;
 use clap::{Arg, Command, CommandFactory};
 use itertools::Itertools;
-use pipe_trait::Pipe;
 use std::borrow::Cow;
 
 /// Renders a Markdown reference page for `pdu`'s CLI.
@@ -192,10 +191,16 @@ fn write_option_description(out: &mut String, arg: &Arg) {
 }
 
 fn get_help_text(arg: &Arg) -> Cow<'static, str> {
-    match (arg.get_help(), arg.get_long_help()) {
-        (None, None) => Cow::Borrowed(""),
-        (Some(help), None) | (_, Some(help)) => help.to_string().pipe(Cow::Owned),
-    }
+    let help = match (arg.get_help(), arg.get_long_help()) {
+        (None, None) => return Cow::Borrowed(""),
+        (Some(help), None) | (_, Some(help)) => help.to_string(),
+    };
+    let help = if help.contains("see a summary with") && help.contains("help") {
+        "Print help".to_string()
+    } else {
+        help
+    };
+    Cow::Owned(help)
 }
 
 fn render_examples_section<'a>(out: &mut String, lines: impl Iterator<Item = &'a str>) {
