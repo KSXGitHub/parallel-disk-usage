@@ -140,7 +140,7 @@ fn render_option(arg: &Arg, out: &mut String) {
     } else {
         arg.get_possible_values()
             .into_iter()
-            .filter(|pv| !pv.is_hide_set())
+            .filter(|value| !value.is_hide_set())
             .collect()
     };
 
