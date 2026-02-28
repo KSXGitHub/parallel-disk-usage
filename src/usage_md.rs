@@ -157,9 +157,9 @@ fn render_option(arg: &Arg, out: &mut String) {
     }
     if !possible_values.is_empty() {
         out.push_str("* _Choices:_\n");
-        for pv in &possible_values {
-            let name = pv.get_name();
-            if let Some(help) = pv.get_help() {
+        for value in &possible_values {
+            let name = value.get_name();
+            if let Some(help) = value.get_help() {
                 out.push_str(&format!("  - `{name}`: {help}\n"));
             } else {
                 out.push_str(&format!("  - `{name}`\n"));
