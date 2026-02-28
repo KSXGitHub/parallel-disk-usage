@@ -43,7 +43,7 @@ impl Api for RealApi {
 
 /// Hardlinks deduplication doesn't work properly if there are more than 1 paths pointing to
 /// the same tree or if a path points to a subtree of another path. Therefore, we must find
-/// and remove such overlapping paths before they cause problem.
+/// and remove such overlapping paths before they cause problems.
 pub fn remove_overlapping_paths<Api: self::Api>(arguments: &mut Vec<Api::Argument>) {
     let to_remove = find_overlapping_paths_to_remove::<Api>(arguments);
     remove_items_from_vec_by_indices(arguments, &to_remove);
@@ -102,14 +102,14 @@ pub fn remove_items_from_vec_by_indices<Item>(vec: &mut Vec<Item>, indices: &Has
         return;
     }
 
-    // Optimization: If there is only 1 element to remove, shifting elements would be cheaper than reallocate a whole array.
+    // Optimization: If there is only 1 element to remove, shifting elements would be cheaper than reallocating a whole array.
     if indices.len() == 1 {
         let index = *indices.iter().next().unwrap();
         vec.remove(index);
         return;
     }
 
-    // Default: If there are more than 1 elements to remove, just copy the whole array without them.
+    // Default: If there are more than 1 element to remove, just copy the whole array without them.
     *vec = vec
         .pipe(take)
         .into_iter()
