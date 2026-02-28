@@ -26,7 +26,7 @@ pub fn render_usage_md() -> String {
             arguments_heading_written = true;
             out.push_str("## Arguments\n\n");
         }
-        render_argument(arg, &mut out);
+        render_argument(&mut out, arg);
     }
     if arguments_heading_written {
         out.push('\n');
@@ -41,7 +41,7 @@ pub fn render_usage_md() -> String {
             options_heading_written = true;
             out.push_str("## Options\n\n");
         }
-        render_option(arg, &mut out);
+        render_option(&mut out, arg);
     }
 
     if let Some(after_help) = command.get_after_long_help() {
@@ -56,14 +56,14 @@ pub fn render_usage_md() -> String {
         }
         if has_examples {
             out.push_str("## Examples\n\n");
-            render_examples_section(lines_iter, &mut out);
+            render_examples_section(&mut out, lines_iter);
         }
     }
 
     out
 }
 
-fn render_argument(arg: &Arg, out: &mut String) {
+fn render_argument(out: &mut String, arg: &Arg) {
     let name = arg
         .get_value_names()
         .and_then(|names| names.first())
@@ -83,11 +83,11 @@ fn render_argument(arg: &Arg, out: &mut String) {
     out.push_str(&format!("* `{display_name}`: {desc}\n"));
 }
 
-fn render_option(arg: &Arg, out: &mut String) {
+fn render_option(out: &mut String, arg: &Arg) {
     let primary_long = arg.get_long().expect("option must have a long flag");
     let primary_name = format!("--{primary_long}");
 
-    write_option_anchors(arg, primary_long, out);
+    write_option_anchors(out, arg, primary_long);
     out.push_str(&format!("### `{primary_name}`\n\n"));
 
     let aliases = collect_option_display_aliases(arg);
@@ -121,10 +121,10 @@ fn render_option(arg: &Arg, out: &mut String) {
         out.push('\n');
     }
 
-    write_option_description(arg, out);
+    write_option_description(out, arg);
 }
 
-fn write_option_anchors(arg: &Arg, primary_long: &str, out: &mut String) {
+fn write_option_anchors(out: &mut String, arg: &Arg, primary_long: &str) {
     let append_anchor = |out: &mut String, id: &str| {
         out.push_str(&format!(r#"<a id="{id}" name="{id}"></a>"#));
     };
@@ -180,7 +180,7 @@ fn collect_option_possible_values(arg: &Arg) -> Vec<PossibleValue> {
         .collect()
 }
 
-fn write_option_description(arg: &Arg, out: &mut String) {
+fn write_option_description(out: &mut String, arg: &Arg) {
     let description = get_help_text(arg);
     if !description.is_empty() {
         let description = ensure_ends_with_punctuation(&description);
@@ -198,7 +198,7 @@ fn get_help_text(arg: &Arg) -> Cow<'static, str> {
     }
 }
 
-fn render_examples_section<'a>(lines: impl Iterator<Item = &'a str>, out: &mut String) {
+fn render_examples_section<'a>(out: &mut String, lines: impl Iterator<Item = &'a str>) {
     for line in lines {
         let line = line.trim();
 
