@@ -183,11 +183,11 @@ fn render_option(arg: &Arg, out: &mut String) {
 
 fn get_help_text(arg: &Arg) -> String {
     let mut parts: Vec<String> = Vec::new();
-    if let Some(h) = arg.get_help() {
-        parts.push(h.to_string());
+    if let Some(help) = arg.get_help() {
+        parts.push(help.to_string());
     }
-    if let Some(lh) = arg.get_long_help() {
-        parts.push(lh.to_string());
+    if let Some(help) = arg.get_long_help() {
+        parts.push(help.to_string());
     }
     parts.join("\n")
 }
