@@ -6,12 +6,6 @@ use clap::{Arg, Command, CommandFactory};
 use crate::args::Args;
 
 /// Renders a Markdown reference page for `pdu`'s CLI.
-///
-/// The output includes:
-/// - A `# Usage` section with a `sh` code block
-/// - A `## Arguments` section listing positional arguments
-/// - A `## Options` section with a subsection per option flag
-/// - A `## Examples` section parsed from `after_long_help`
 pub fn render_usage_md() -> String {
     let mut command: Command = Args::command();
     let mut out = String::new();
