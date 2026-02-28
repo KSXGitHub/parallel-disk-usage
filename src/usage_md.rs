@@ -205,7 +205,6 @@ fn get_help_text(arg: &Arg) -> Cow<'static, str> {
 }
 
 fn render_examples_section<'a>(lines: impl Iterator<Item = &'a str>, out: &mut String) {
-    let mut current_title: Option<&'a str> = None;
     for line in lines {
         let line = line.trim();
 
@@ -213,16 +212,13 @@ fn render_examples_section<'a>(lines: impl Iterator<Item = &'a str>, out: &mut S
             continue;
         }
 
-        if let Some(cmd) = line.strip_prefix('$').map(str::trim) {
-            let heading = if let Some(title) = current_title.take() {
-                title.to_string()
-            } else {
-                format!("`{cmd}`")
-            };
-            out.push_str(&format!("### {heading}\n\n```sh\n{cmd}\n```\n\n"));
-        } else {
-            current_title = Some(line);
+        if let Some(command) = line.strip_prefix('$') {
+            let command = command.trim();
+            out.push_str(&format!("```sh\n{command}\n```\n\n"));
+            continue;
         }
+
+        out.push_str(&format!("### {line}\n\n"));
     }
 }
 
