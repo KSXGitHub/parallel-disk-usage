@@ -8,41 +8,36 @@
 #![cfg(feature = "cli")]
 
 use clap::CommandFactory;
+use itertools::Itertools;
 use parallel_disk_usage::{args::Args, usage_md::render_usage_md};
-use pipe_trait::Pipe;
 
-fn normalize_help(text: &str) -> String {
-    text.lines()
-        .map(str::trim_end)
-        .collect::<Vec<_>>()
-        .join("\n")
+macro_rules! check {
+    ($name:ident: $render_help:ident => $path:literal) => {
+        #[test]
+        fn $name() {
+            eprintln!(
+                "check!({name}: {method} => {path});",
+                name = stringify!($name),
+                method = stringify!($render_help),
+                path = $path,
+            );
+            let received = Args::command()
+                .$render_help()
+                .to_string()
+                .lines()
+                .map(str::trim_end)
+                .join("\n");
+            let expected = include_str!($path);
+            assert!(
+                received.trim_end() == expected.trim_end(),
+                "help text is outdated, run ./generate-completions.sh to update it",
+            );
+        }
+    };
 }
 
-#[test]
-fn long_help_is_up_to_date() {
-    let actual = Args::command()
-        .render_long_help()
-        .to_string()
-        .pipe_as_ref(normalize_help);
-    let expected = include_str!("../exports/long.help");
-    assert!(
-        actual.trim_end() == expected.trim_end(),
-        "help text is outdated, run ./generate-completions.sh to update it",
-    );
-}
-
-#[test]
-fn short_help_is_up_to_date() {
-    let actual = Args::command()
-        .render_help()
-        .to_string()
-        .pipe_as_ref(normalize_help);
-    let expected = include_str!("../exports/short.help");
-    assert!(
-        actual.trim_end() == expected.trim_end(),
-        "help text is outdated, run ./generate-completions.sh to update it",
-    );
-}
+check!(long: render_long_help => "../exports/long.help");
+check!(short: render_help => "../exports/short.help");
 
 #[test]
 fn usage_md_is_up_to_date() {
