@@ -87,10 +87,9 @@ fn render_option(out: &mut String, arg: &Arg) {
     let Some(primary_long) = arg.get_long() else {
         return;
     };
-    let primary_name = format!("--{primary_long}");
 
     write_option_anchors(out, arg, primary_long);
-    out.push_str(&format!("### `{primary_name}`\n\n"));
+    out.push_str(&format!("### `--{primary_long}`\n\n"));
 
     let aliases = collect_option_display_aliases(arg);
     let default_values = collect_option_default_values(arg);
