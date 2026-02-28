@@ -16,3 +16,4 @@ gen elvish completion.elv
 
 ./run.sh pdu --help > exports/long.help
 ./run.sh pdu -h > exports/short.help
+./run.sh pdu-usage-md > USAGE.md
