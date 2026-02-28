@@ -1,0 +1,59 @@
+Summarize disk usage of the set of files, recursively for directories.
+
+Usage: pdu [OPTIONS] [FILES]...
+
+Arguments:
+  [FILES]...  List of files and/or directories
+
+Options:
+      --json-input
+          Read JSON data from stdin
+      --json-output
+          Print JSON data instead of an ASCII chart
+  -b, --bytes-format <BYTES_FORMAT>
+          How to display the numbers of bytes [default: metric] [possible values: plain, metric, binary]
+  -H, --deduplicate-hardlinks
+          Detect and subtract the sizes of hardlinks from their parent directory totals [aliases: --detect-links, --dedupe-links]
+      --top-down
+          Print the tree top-down instead of bottom-up
+      --align-right
+          Set the root of the bars to the right
+  -q, --quantity <QUANTITY>
+          Aspect of the files/directories to be measured [default: block-size] [possible values: apparent-size, block-size, block-count]
+  -d, --max-depth <MAX_DEPTH>
+          Maximum depth to display the data. Could be either "inf" or a positive integer [default: 10] [aliases: --depth]
+  -w, --total-width <TOTAL_WIDTH>
+          Width of the visualization [aliases: --width]
+      --column-width <TREE_WIDTH> <BAR_WIDTH>
+          Maximum widths of the tree column and width of the bar column
+  -m, --min-ratio <MIN_RATIO>
+          Minimal size proportion required to appear [default: 0.01]
+      --no-sort
+          Do not sort the branches in the tree
+  -s, --silent-errors
+          Prevent filesystem error messages from appearing in stderr [aliases: --no-errors]
+  -p, --progress
+          Report progress being made at the expense of performance
+      --threads <THREADS>
+          Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer [default: auto]
+      --omit-json-shared-details
+          Do not output `.shared.details` in the JSON output
+      --omit-json-shared-summary
+          Do not output `.shared.summary` in the JSON output
+  -h, --help
+          Print help (see more with '--help')
+  -V, --version
+          Print version
+
+Examples:
+    $ pdu
+    $ pdu path/to/file/or/directory
+    $ pdu file.txt dir/
+    $ pdu --quantity=apparent-size
+    $ pdu --deduplicate-hardlinks
+    $ pdu --bytes-format=plain
+    $ pdu --bytes-format=binary
+    $ pdu --min-ratio=0
+    $ pdu --min-ratio=0.05
+    $ pdu --min-ratio=0 --max-depth=inf --json-output | jq
+    $ pdu --json-input < disk-usage.json

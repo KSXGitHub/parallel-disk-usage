@@ -25,6 +25,7 @@ include = [
   "/tests",
   "/Cargo.toml",
   "/README.md",
+  "/USAGE.md",
   "/LICENSE",
 ]
 
@@ -41,6 +42,11 @@ required-features = ["cli"]
 name = "pdu-completions"
 path = "cli/completions.rs"
 required-features = ["cli-completions"]
+
+[[bin]]
+name = "pdu-usage-md"
+path = "cli/usage_md.rs"
+required-features = ["cli"]
 
 [features]
 default = ["cli"]

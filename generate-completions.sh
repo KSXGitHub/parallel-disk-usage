@@ -13,3 +13,7 @@ gen fish completion.fish
 gen zsh completion.zsh
 gen powershell completion.ps1
 gen elvish completion.elv
+
+./run.sh pdu --help | sed 's/[[:space:]]*$//' > exports/long.help
+./run.sh pdu -h | sed 's/[[:space:]]*$//' > exports/short.help
+./run.sh pdu-usage-md > USAGE.md
