@@ -20,9 +20,8 @@ pub fn render_usage_md() -> String {
     let usage_str = command.render_usage().to_string();
     let usage_cmd = usage_str
         .trim()
-        .splitn(2, ':')
-        .nth(1)
-        .map(str::trim)
+        .split_once(':')
+        .map(|(_, rest)| rest.trim())
         .unwrap_or("");
     out.push_str("# Usage\n\n```sh\n");
     out.push_str(usage_cmd);
@@ -217,11 +216,12 @@ fn render_examples_section<'a>(lines: impl Iterator<Item = &'a str>, out: &mut S
             continue;
         }
         if let Some(cmd) = trimmed.strip_prefix('$').map(str::trim) {
-            if let Some(title) = current_title.take() {
-                out.push_str(&format!("### {title}\n\n```sh\n{cmd}\n```\n\n"));
+            let heading = if let Some(title) = current_title.take() {
+                title.to_string()
             } else {
-                out.push_str(&format!("### `{cmd}`\n\n```sh\n{cmd}\n```\n\n"));
-            }
+                format!("`{cmd}`")
+            };
+            out.push_str(&format!("### {heading}\n\n```sh\n{cmd}\n```\n\n"));
         } else {
             current_title = Some(trimmed);
         }
