@@ -112,14 +112,14 @@ fn render_option(arg: &Arg, out: &mut String) {
 
     // Aliases for display in metadata
     let mut aliases: Vec<String> = Vec::new();
-    if let Some(s) = short {
-        aliases.push(format!("-{s}"));
+    if let Some(short) = short {
+        aliases.push(format!("-{short}"));
     }
-    for &a in &visible_long_aliases {
-        aliases.push(format!("--{a}"));
+    for &alias in &visible_long_aliases {
+        aliases.push(format!("--{alias}"));
     }
-    for c in &visible_short_aliases {
-        aliases.push(format!("-{c}"));
+    for alias in &visible_short_aliases {
+        aliases.push(format!("-{alias}"));
     }
 
     // Default values – skip "false" (clap's implicit default for boolean flags)
