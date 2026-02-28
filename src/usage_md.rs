@@ -96,11 +96,11 @@ fn render_option(arg: &Arg, out: &mut String) {
         anchor_ids.push(format!("option-{s}"));
     }
     anchor_ids.push(primary_long.to_string());
-    for &a in &visible_long_aliases {
-        anchor_ids.push(a.to_string());
+    for &alias in &visible_long_aliases {
+        anchor_ids.push(alias.to_string());
     }
-    for c in &visible_short_aliases {
-        anchor_ids.push(format!("option-{c}"));
+    for char in &visible_short_aliases {
+        anchor_ids.push(format!("option-{char}"));
     }
     for id in &anchor_ids {
         out.push_str(&format!(r#"<a id="{id}" name="{id}"></a>"#));
