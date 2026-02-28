@@ -164,7 +164,7 @@ fn collect_option_display_aliases(arg: &Arg) -> Vec<String> {
     aliases
 }
 
-fn collect_option_default_values(arg: &Arg) -> Vec<String> {
+fn collect_option_default_values(arg: &Arg) -> Vec<Cow<'_, str>> {
     if arg.is_hide_default_value_set() {
         return Vec::new();
     }
@@ -174,7 +174,7 @@ fn collect_option_default_values(arg: &Arg) -> Vec<String> {
     }
     arg.get_default_values()
         .iter()
-        .map(|value| value.to_string_lossy().to_string())
+        .map(|value| value.to_string_lossy())
         .collect()
 }
 
