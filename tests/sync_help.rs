@@ -24,7 +24,7 @@ fn long_help_is_up_to_date() {
         .render_long_help()
         .to_string()
         .pipe_as_ref(normalize_help);
-    let expected = normalize_help(include_str!("../exports/long.help"));
+    let expected = include_str!("../exports/long.help");
     assert!(
         actual.trim_end() == expected.trim_end(),
         "help text is outdated, run ./generate-completions.sh to update it",
@@ -37,7 +37,7 @@ fn short_help_is_up_to_date() {
         .render_help()
         .to_string()
         .pipe_as_ref(normalize_help);
-    let expected = normalize_help(include_str!("../exports/short.help"));
+    let expected = include_str!("../exports/short.help");
     assert!(
         actual.trim_end() == expected.trim_end(),
         "help text is outdated, run ./generate-completions.sh to update it",
