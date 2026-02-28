@@ -1,6 +1,5 @@
-use clap::CommandFactory;
-use parallel_disk_usage::{args::Args, usage_md::render};
+use parallel_disk_usage::usage_md::render_usage_md;
 
 fn main() {
-    println!("{}", render(Args::command()).trim_end());
+    println!("{}", render_usage_md().trim_end());
 }

@@ -16,6 +16,8 @@ pub mod app;
 pub mod args;
 #[cfg(feature = "cli")]
 pub mod runtime_error;
+#[cfg(feature = "cli")]
+pub mod usage_md;
 
 /// The main program.
 #[cfg(feature = "cli")]
@@ -46,7 +48,6 @@ pub mod reporter;
 pub mod size;
 pub mod status_board;
 pub mod tree_builder;
-pub mod usage_md;
 pub mod visualizer;
 
 pub use zero_copy_pads;

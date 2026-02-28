@@ -10,7 +10,7 @@
 pub mod _utils;
 
 use clap::CommandFactory;
-use parallel_disk_usage::{args::Args, usage_md::render};
+use parallel_disk_usage::{args::Args, usage_md::render_usage_md};
 
 #[test]
 fn long_help_is_up_to_date() {
@@ -34,7 +34,7 @@ fn short_help_is_up_to_date() {
 
 #[test]
 fn usage_md_is_up_to_date() {
-    let actual = render(Args::command());
+    let actual = render_usage_md();
     let expected = include_str!("../USAGE.md");
     assert!(
         actual.trim_end() == expected.trim_end(),

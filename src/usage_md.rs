@@ -1,59 +1,83 @@
+use itertools::Itertools;
 use std::borrow::Cow;
 
-use itertools::Itertools;
+use clap::{Arg, Command, CommandFactory};
 
-pub fn render(mut command: clap::Command) -> String {
+use crate::args::Args;
+
+/// Renders a Markdown reference page for `pdu`'s CLI.
+///
+/// The output includes:
+/// - A `# Usage` section with a `sh` code block
+/// - A `## Arguments` section listing positional arguments
+/// - A `## Options` section with a subsection per option flag
+/// - A `## Examples` section parsed from `after_long_help`
+pub fn render_usage_md() -> String {
+    let mut command: Command = Args::command();
     let mut out = String::new();
 
     // Usage section
-    let usage = command.render_usage().to_string();
-    if let Some(rest) = usage.strip_prefix("Usage: ") {
-        out.push_str("# Usage\n\n```sh\n");
-        out.push_str(rest.trim());
-        out.push_str("\n```\n\n");
-    }
+    let usage_str = command.render_usage().to_string();
+    let usage_cmd = usage_str
+        .trim()
+        .splitn(2, ':')
+        .nth(1)
+        .map(str::trim)
+        .unwrap_or("");
+    out.push_str("# Usage\n\n```sh\n");
+    out.push_str(usage_cmd);
+    out.push_str("\n```\n\n");
 
     // Arguments section – positional, non-hidden args
-    let positional_args: Vec<clap::Arg> = command
-        .get_arguments()
-        .filter(|a| a.is_positional() && !a.is_hide_set() && !a.is_hide_long_help_set())
-        .cloned()
-        .collect();
-    if !positional_args.is_empty() {
-        out.push_str("## Arguments\n\n");
-        for arg in &positional_args {
-            render_argument(arg, &mut out);
+    let mut arguments_heading_written = false;
+    for arg in command.get_arguments() {
+        if !arg.is_positional() || arg.is_hide_set() || arg.is_hide_long_help_set() {
+            continue;
         }
+        if !arguments_heading_written {
+            arguments_heading_written = true;
+            out.push_str("## Arguments\n\n");
+        }
+        render_argument(arg, &mut out);
+    }
+    if arguments_heading_written {
         out.push('\n');
     }
 
     // Options section – non-positional, non-hidden args
-    let option_args: Vec<clap::Arg> = command
-        .get_arguments()
-        .filter(|a| !a.is_positional() && !a.is_hide_set() && !a.is_hide_long_help_set())
-        .cloned()
-        .collect();
-    if !option_args.is_empty() {
-        out.push_str("## Options\n\n");
-        for arg in &option_args {
-            render_option(arg, &mut out);
+    let mut options_heading_written = false;
+    for arg in command.get_arguments() {
+        if arg.is_positional() || arg.is_hide_set() || arg.is_hide_long_help_set() {
+            continue;
         }
+        if !options_heading_written {
+            options_heading_written = true;
+            out.push_str("## Options\n\n");
+        }
+        render_option(arg, &mut out);
     }
 
     // Examples section – parse from after_long_help text
     if let Some(after_help) = command.get_after_long_help() {
         let text = after_help.to_string();
-        let lines: Vec<&str> = text.lines().collect();
-        if let Some(pos) = lines.iter().position(|l| l.trim() == "Examples:") {
+        let mut lines_iter = text.lines();
+        let mut has_examples = false;
+        for line in lines_iter.by_ref() {
+            if line.trim() == "Examples:" {
+                has_examples = true;
+                break;
+            }
+        }
+        if has_examples {
             out.push_str("## Examples\n\n");
-            render_examples_section(&lines[pos + 1..], &mut out);
+            render_examples_section(lines_iter, &mut out);
         }
     }
 
     out
 }
 
-fn render_argument(arg: &clap::Arg, out: &mut String) {
+fn render_argument(arg: &Arg, out: &mut String) {
     let name = arg
         .get_value_names()
         .and_then(|names| names.first())
@@ -73,7 +97,7 @@ fn render_argument(arg: &clap::Arg, out: &mut String) {
     out.push_str(&format!("* `{display_name}`: {desc}\n"));
 }
 
-fn render_option(arg: &clap::Arg, out: &mut String) {
+fn render_option(arg: &Arg, out: &mut String) {
     let primary_long = arg.get_long().expect("option must have a long flag");
     let primary_name = format!("--{primary_long}");
 
@@ -115,7 +139,7 @@ fn render_option(arg: &clap::Arg, out: &mut String) {
 
     // Default values – skip "false" (clap's implicit default for boolean flags)
     let default_values: Vec<_> = if arg.is_hide_default_value_set() {
-        vec![]
+        Vec::new()
     } else {
         arg.get_default_values()
             .iter()
@@ -125,7 +149,7 @@ fn render_option(arg: &clap::Arg, out: &mut String) {
 
     // Possible values (choices)
     let possible_values: Vec<_> = if arg.is_hide_possible_values_set() {
-        vec![]
+        Vec::new()
     } else {
         arg.get_possible_values()
             .into_iter()
@@ -141,7 +165,10 @@ fn render_option(arg: &clap::Arg, out: &mut String) {
         out.push_str(&format!("* _Aliases:_ {aliases_str}.\n"));
     }
     if !default_values.is_empty() {
-        let default_str = default_values.iter().map(|v| v.to_string_lossy()).join(", ");
+        let default_str = default_values
+            .iter()
+            .map(|v| v.to_string_lossy())
+            .join(", ");
         out.push_str(&format!("* _Default:_ `{default_str}`.\n"));
     }
     if !possible_values.is_empty() {
@@ -171,7 +198,7 @@ fn render_option(arg: &clap::Arg, out: &mut String) {
 }
 
 /// Returns the help text for an argument: `get_help()` with `get_long_help()` appended if set.
-fn get_help_text(arg: &clap::Arg) -> String {
+fn get_help_text(arg: &Arg) -> String {
     let mut parts: Vec<String> = Vec::new();
     if let Some(h) = arg.get_help() {
         parts.push(h.to_string());
@@ -182,33 +209,21 @@ fn get_help_text(arg: &clap::Arg) -> String {
     parts.join("\n")
 }
 
-fn render_examples_section(lines: &[&str], out: &mut String) {
-    let mut i = 0;
-    while i < lines.len() {
-        let trimmed = lines[i].trim();
+fn render_examples_section<'a>(lines: impl Iterator<Item = &'a str>, out: &mut String) {
+    let mut current_title: Option<&'a str> = None;
+    for line in lines {
+        let trimmed = line.trim();
         if trimmed.is_empty() {
-            i += 1;
             continue;
         }
-        // A line starting with `$ ` is a bare command (no preceding description).
         if let Some(cmd) = trimmed.strip_prefix('$').map(str::trim) {
-            out.push_str(&format!("### `{cmd}`\n\n```sh\n{cmd}\n```\n\n"));
-            i += 1;
+            if let Some(title) = current_title.take() {
+                out.push_str(&format!("### {title}\n\n```sh\n{cmd}\n```\n\n"));
+            } else {
+                out.push_str(&format!("### `{cmd}`\n\n```sh\n{cmd}\n```\n\n"));
+            }
         } else {
-            // Description line — the very next non-empty line should be `$ <cmd>`.
-            let desc = trimmed;
-            i += 1;
-            while i < lines.len() && lines[i].trim().is_empty() {
-                i += 1;
-            }
-            if i < lines.len() {
-                if let Some(cmd) = lines[i].trim().strip_prefix('$').map(str::trim) {
-                    out.push_str(&format!("### {desc}\n\n```sh\n{cmd}\n```\n\n"));
-                    i += 1;
-                    continue;
-                }
-            }
-            out.push_str(&format!("### {desc}\n\n"));
+            current_title = Some(trimmed);
         }
     }
 }
