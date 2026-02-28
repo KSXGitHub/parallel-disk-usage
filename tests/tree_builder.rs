@@ -39,10 +39,10 @@ impl SampleTree {
     }
 
     fn tree(&self, root: &'static str) -> DataTree<SampleName, SampleData> {
-        TreeBuilder {
-            path: root.to_string(),
-            name: root.to_string(),
-            get_info: |path| {
+        TreeBuilder::builder()
+            .path(root.to_string())
+            .name(root.to_string())
+            .get_info(|path| {
                 let path: Vec<_> = path
                     .split(SAMPLE_SEPARATOR)
                     .map(ToString::to_string)
@@ -56,12 +56,12 @@ impl SampleTree {
                     )),
                     None => panic!("Path does not exist"),
                 }
-            },
-            join_path: |prefix, name| format!("{prefix}{SAMPLE_SEPARATOR}{name}"),
-            max_depth: 10,
-        }
-        .pipe(DataTree::from)
-        .into_par_sorted(|left, right| left.name().as_str().cmp(right.name().as_str()))
+            })
+            .join_path(|prefix, name| format!("{prefix}{SAMPLE_SEPARATOR}{name}"))
+            .max_depth(10)
+            .build()
+            .pipe(DataTree::from)
+            .into_par_sorted(|left, right| left.name().as_str().cmp(right.name().as_str()))
     }
 }
 

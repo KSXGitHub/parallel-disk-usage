@@ -40,24 +40,25 @@ fn total_width() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: DEFAULT_GET_SIZE,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(10)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -79,24 +80,25 @@ fn column_width() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: DEFAULT_GET_SIZE,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(10)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::components(10, 90),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::components(10, 90))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -118,23 +120,24 @@ fn min_ratio_0() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(10)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -156,24 +159,25 @@ fn min_ratio() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(10)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.1);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -195,24 +199,25 @@ fn max_depth_2() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 2,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(2)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -234,24 +239,25 @@ fn max_depth_1() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 1,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(1)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -272,24 +278,25 @@ fn top_down() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: DEFAULT_GET_SIZE,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(10)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::TopDown,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::TopDown)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -310,24 +317,25 @@ fn align_right() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: DEFAULT_GET_SIZE,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(10)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Right,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Right)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -348,24 +356,25 @@ fn quantity_apparent_size() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(10)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -387,24 +396,25 @@ fn quantity_block_size() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetBlockSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(GetBlockSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(10)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -426,24 +436,25 @@ fn quantity_block_count() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetBlockCount,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(GetBlockCount)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(10)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: (),
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(())
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -465,24 +476,25 @@ fn bytes_format_plain() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(10)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::PlainNumber,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::PlainNumber)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -504,24 +516,25 @@ fn bytes_format_metric() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(10)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -543,24 +556,25 @@ fn bytes_format_binary() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(10)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::BinaryUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::BinaryUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -581,23 +595,24 @@ fn path_to_workspace() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: DEFAULT_GET_SIZE,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(10)
+        .build();
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -624,13 +639,14 @@ fn multiple_names() {
     let mut data_tree = ["nested", "flat", "empty-dir"]
         .iter()
         .map(|name| {
-            let builder = FsTreeBuilder {
-                root: workspace.to_path_buf().join(name),
-                size_getter: GetApparentSize,
-                hardlinks_recorder: &HardlinkIgnorant,
-                reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-                max_depth: 10,
-            };
+            let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+            let builder = FsTreeBuilder::builder()
+                .root(workspace.to_path_buf().join(name))
+                .size_getter(GetApparentSize)
+                .hardlinks_recorder(&HardlinkIgnorant)
+                .reporter(&reporter)
+                .max_depth(10)
+                .build();
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
             data_tree
@@ -644,13 +660,13 @@ fn multiple_names() {
         })
         .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse());
     data_tree.par_cull_insignificant_data(0.01);
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -689,13 +705,14 @@ fn multiple_names_max_depth_2() {
     let mut data_tree = ["nested", "flat", "empty-dir"]
         .iter()
         .map(|name| {
-            let builder = FsTreeBuilder {
-                root: workspace.to_path_buf().join(name),
-                size_getter: GetApparentSize,
-                hardlinks_recorder: &HardlinkIgnorant,
-                reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-                max_depth: 1,
-            };
+            let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+            let builder = FsTreeBuilder::builder()
+                .root(workspace.to_path_buf().join(name))
+                .size_getter(GetApparentSize)
+                .hardlinks_recorder(&HardlinkIgnorant)
+                .reporter(&reporter)
+                .max_depth(1)
+                .build();
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
             data_tree
@@ -709,13 +726,13 @@ fn multiple_names_max_depth_2() {
         })
         .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse());
     data_tree.par_cull_insignificant_data(0.01);
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
@@ -749,13 +766,14 @@ fn multiple_names_max_depth_1() {
     let mut data_tree = ["nested", "flat", "empty-dir"]
         .iter()
         .map(|name| {
-            let builder = FsTreeBuilder {
-                root: workspace.to_path_buf().join(name),
-                size_getter: GetApparentSize,
-                hardlinks_recorder: &HardlinkIgnorant,
-                reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-                max_depth: 10,
-            };
+            let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+            let builder = FsTreeBuilder::builder()
+                .root(workspace.to_path_buf().join(name))
+                .size_getter(GetApparentSize)
+                .hardlinks_recorder(&HardlinkIgnorant)
+                .reporter(&reporter)
+                .max_depth(10)
+                .build();
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
             data_tree
@@ -770,13 +788,13 @@ fn multiple_names_max_depth_1() {
         .into_par_retained(|_, _| false)
         .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse());
     data_tree.par_cull_insignificant_data(0.01);
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let visualizer = Visualizer::<OsStringDisplay, _>::builder()
+        .data_tree(&data_tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");

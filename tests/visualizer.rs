@@ -35,13 +35,13 @@ macro_rules! test_case {
             let column_width_distribution =
                 ColumnWidthDistribution::$column_width_function($($column_width_arguments),+);
             tree.par_retain(|_, depth| depth + 1 < $max_depth);
-            let actual = Visualizer {
-                column_width_distribution,
-                data_tree: &tree,
-                bytes_format: $bytes_format,
-                direction: Direction::$direction,
-                bar_alignment: BarAlignment::$bar_alignment,
-            }
+            let actual = Visualizer::builder()
+                .column_width_distribution(column_width_distribution)
+                .data_tree(&tree)
+                .bytes_format($bytes_format)
+                .direction(Direction::$direction)
+                .bar_alignment(BarAlignment::$bar_alignment)
+                .build()
             .to_string();
             let expected = $expected;
             eprintln!("\nACTUAL:\n{actual}\n");

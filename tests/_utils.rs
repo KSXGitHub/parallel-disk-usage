@@ -366,18 +366,18 @@ where
     }
 
     let measure = |suffix: &str| {
-        FsTreeBuilder {
-            size_getter,
-            hardlinks_recorder: &HardlinkIgnorant,
-            reporter: &ErrorOnlyReporter::new(|error| {
+        FsTreeBuilder::builder()
+            .size_getter(size_getter)
+            .hardlinks_recorder(&HardlinkIgnorant)
+            .reporter(&ErrorOnlyReporter::new(|error| {
                 panic!("Unexpected call to report_error: {error:?}")
-            }),
-            root: root.join(suffix),
-            max_depth: 10,
-        }
-        .pipe(DataTree::<OsStringDisplay, Size>::from)
-        .into_par_sorted(|left, right| left.name().cmp(right.name()))
-        .into_reflection()
+            }))
+            .root(root.join(suffix))
+            .max_depth(10)
+            .build()
+            .pipe(DataTree::<OsStringDisplay, Size>::from)
+            .into_par_sorted(|left, right| left.name().cmp(right.name()))
+            .into_reflection()
     };
 
     let sub = |suffix: &str| root.join(suffix).pipe(OsStringDisplay::os_string_from);

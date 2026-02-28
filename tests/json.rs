@@ -80,13 +80,14 @@ fn json_output() {
         .tree
         .pipe(sanitize_tree_reflection);
     dbg!(&actual);
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
+    let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+    let builder = FsTreeBuilder::builder()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&reporter)
+        .max_depth(10)
+        .build();
     let expected = builder
         .pipe(DataTree::<_, Bytes>::from)
         .into_reflection()
@@ -135,13 +136,14 @@ fn json_input() {
     let actual = actual.trim_end();
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let visualizer = Visualizer {
-        data_tree: &sample_tree(),
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
+    let tree = sample_tree();
+    let visualizer = Visualizer::builder()
+        .data_tree(&tree)
+        .bytes_format(BytesFormat::MetricUnits)
+        .direction(Direction::BottomUp)
+        .bar_alignment(BarAlignment::Left)
+        .column_width_distribution(ColumnWidthDistribution::total(100))
+        .build();
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
     eprintln!("EXPECTED:\n{expected}\n");
