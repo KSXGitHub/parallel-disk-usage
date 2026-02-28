@@ -54,7 +54,7 @@ where
     pub hardlinks_recorder: &'a HardlinksRecorder,
     /// Reports progress to external system.
     pub reporter: &'a Report,
-    /// Deepest level of descendent display in the graph. The sizes beyond the max depth still count toward total.
+    /// Deepest level of descendant display in the graph. The sizes beyond the max depth still count toward total.
     pub max_depth: u64,
 }
 

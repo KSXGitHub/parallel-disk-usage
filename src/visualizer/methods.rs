@@ -22,7 +22,7 @@ where
     Name: Display,
     Size: size::Size + Into<u64>,
 {
-    /// Create ASCII rows that visualize of the [tree](crate::data_tree::DataTree), such rows
+    /// Create ASCII rows that visualize the [tree](crate::data_tree::DataTree), such rows
     /// are meant to be printed to a terminal screen.
     pub fn rows(mut self) -> Vec<String> {
         let initial_table = render_initial(self);
