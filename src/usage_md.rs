@@ -148,7 +148,7 @@ fn render_option(arg: &Arg, out: &mut String) {
         !aliases.is_empty() || !default_values.is_empty() || !possible_values.is_empty();
 
     if !aliases.is_empty() {
-        let aliases_str = aliases.iter().map(|a| format!("`{a}`")).join(", ");
+        let aliases_str = aliases.iter().map(|alias| format!("`{alias}`")).join(", ");
         out.push_str(&format!("* _Aliases:_ {aliases_str}.\n"));
     }
     if !default_values.is_empty() {
