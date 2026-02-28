@@ -16,6 +16,8 @@ pub mod app;
 pub mod args;
 #[cfg(feature = "cli")]
 pub mod runtime_error;
+#[cfg(feature = "cli")]
+pub mod usage_md;
 
 /// The main program.
 #[cfg(feature = "cli")]
