@@ -18,7 +18,7 @@ pub enum Threads {
     Fixed(NonZeroUsize),
 }
 
-/// Error that occurs when parsing a string to as [`Threads`].
+/// Error that occurs when parsing a string as [`Threads`].
 #[derive(Debug, Display, Clone, PartialEq, Eq, Error)]
 #[non_exhaustive]
 pub enum FromStrError {
