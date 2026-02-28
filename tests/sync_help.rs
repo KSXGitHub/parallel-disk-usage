@@ -9,6 +9,7 @@
 
 use clap::CommandFactory;
 use parallel_disk_usage::{args::Args, usage_md::render_usage_md};
+use pipe_trait::Pipe;
 
 fn normalize_help(text: &str) -> String {
     text.lines()
@@ -19,7 +20,10 @@ fn normalize_help(text: &str) -> String {
 
 #[test]
 fn long_help_is_up_to_date() {
-    let actual = normalize_help(&Args::command().render_long_help().to_string());
+    let actual = Args::command()
+        .render_long_help()
+        .to_string()
+        .pipe_as_ref(normalize_help);
     let expected = normalize_help(include_str!("../exports/long.help"));
     assert!(
         actual.trim_end() == expected.trim_end(),
@@ -29,7 +33,10 @@ fn long_help_is_up_to_date() {
 
 #[test]
 fn short_help_is_up_to_date() {
-    let actual = normalize_help(&Args::command().render_help().to_string());
+    let actual = Args::command()
+        .render_help()
+        .to_string()
+        .pipe_as_ref(normalize_help);
     let expected = normalize_help(include_str!("../exports/short.help"));
     assert!(
         actual.trim_end() == expected.trim_end(),
