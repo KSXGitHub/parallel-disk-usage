@@ -125,19 +125,15 @@ fn render_option(arg: &Arg, out: &mut String) {
 }
 
 fn write_option_anchors(arg: &Arg, primary_long: &str, out: &mut String) {
-    let short = arg.get_short();
-    let visible_long_aliases: Vec<&str> = arg.get_visible_aliases().unwrap_or_default();
-    let visible_short_aliases: Vec<char> = arg.get_visible_short_aliases().unwrap_or_default();
-
     let mut anchor_ids = Vec::<String>::new();
-    if let Some(short) = short {
+    if let Some(short) = arg.get_short() {
         anchor_ids.push(format!("option-{short}"));
     }
     anchor_ids.push(primary_long.to_string());
-    for &alias in &visible_long_aliases {
+    for alias in arg.get_visible_aliases().unwrap_or_default() {
         anchor_ids.push(alias.to_string());
     }
-    for &short in &visible_short_aliases {
+    for short in arg.get_visible_short_aliases().unwrap_or_default() {
         anchor_ids.push(format!("option-{short}"));
     }
     for id in &anchor_ids {
@@ -147,18 +143,14 @@ fn write_option_anchors(arg: &Arg, primary_long: &str, out: &mut String) {
 }
 
 fn collect_option_display_aliases(arg: &Arg) -> Vec<String> {
-    let short = arg.get_short();
-    let visible_long_aliases: Vec<&str> = arg.get_visible_aliases().unwrap_or_default();
-    let visible_short_aliases: Vec<char> = arg.get_visible_short_aliases().unwrap_or_default();
-
     let mut aliases = Vec::<String>::new();
-    if let Some(short) = short {
+    if let Some(short) = arg.get_short() {
         aliases.push(format!("-{short}"));
     }
-    for &alias in &visible_long_aliases {
+    for alias in arg.get_visible_aliases().unwrap_or_default() {
         aliases.push(format!("--{alias}"));
     }
-    for &alias in &visible_short_aliases {
+    for alias in arg.get_visible_short_aliases().unwrap_or_default() {
         aliases.push(format!("-{alias}"));
     }
     aliases
