@@ -61,6 +61,7 @@ jobs:
           mkdir -p tmp.sample
           curl -L https://github.com/torvalds/linux/archive/refs/tags/v5.12.zip > tmp.sample.zip
           unzip tmp.sample.zip -d tmp.sample
+          ./ci/make-tree-with-hardlinks.sh tmp.sample
 
       - name: Install Node.js
         uses: actions/setup-node@v6
