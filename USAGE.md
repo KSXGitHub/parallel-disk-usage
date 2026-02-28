@@ -130,7 +130,6 @@ Do not output `.shared.summary` in the JSON output.
 
 * _Aliases:_ `-h`.
 
-Print help (see more with '--help')
 Print help (see a summary with '-h').
 
 <a id="option-V" name="option-V"></a><a id="version" name="version"></a>

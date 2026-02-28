@@ -194,8 +194,7 @@ fn write_option_description(out: &mut String, arg: &Arg) {
 fn get_help_text(arg: &Arg) -> Cow<'static, str> {
     match (arg.get_help(), arg.get_long_help()) {
         (None, None) => Cow::Borrowed(""),
-        (Some(help), None) | (None, Some(help)) => help.to_string().pipe(Cow::Owned),
-        (Some(short), Some(long)) => Cow::Owned(format!("{short}\n{long}")),
+        (Some(help), None) | (_, Some(help)) => help.to_string().pipe(Cow::Owned),
     }
 }
 
