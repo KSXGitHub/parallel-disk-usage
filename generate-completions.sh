@@ -13,3 +13,6 @@ gen fish completion.fish
 gen zsh completion.zsh
 gen powershell completion.ps1
 gen elvish completion.elv
+
+./run.sh pdu --help > exports/long.help
+./run.sh pdu -h > exports/short.help
