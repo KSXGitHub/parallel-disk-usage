@@ -12,11 +12,13 @@ use crate::{
     status_board::GLOBAL_STATUS_BOARD,
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
+use bon::Builder;
 use pipe_trait::Pipe;
 use serde::Serialize;
 use std::{io::stdout, iter::once, path::PathBuf};
 
 /// The sub program of the main application.
+#[derive(Builder)]
 pub struct Sub<Size, SizeGetter, HardlinksHandler, Report>
 where
     Report: ParallelReporter<Size> + Sync,

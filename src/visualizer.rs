@@ -15,6 +15,7 @@ pub use proportion_bar::{ProportionBar, ProportionBarBlock};
 pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
 
 use super::{data_tree::DataTree, size};
+use bon::Builder;
 use std::fmt::Display;
 
 /// Visualize a [`DataTree`].
@@ -32,17 +33,17 @@ use std::fmt::Display;
 /// # use parallel_disk_usage::visualizer::{Visualizer, Direction, BarAlignment, ColumnWidthDistribution};
 /// # fn _wrapper(create_data_tree: fn() -> DataTree<OsStringDisplay, Bytes>) {
 /// let data_tree: DataTree<OsStringDisplay, Bytes> = create_data_tree();
-/// let visualizer = Visualizer {
-///     data_tree: &data_tree,
-///     bytes_format: BytesFormat::MetricUnits,
-///     direction: Direction::BottomUp,
-///     bar_alignment: BarAlignment::Right,
-///     column_width_distribution: ColumnWidthDistribution::total(100),
-/// };
+/// let visualizer = Visualizer::builder()
+///     .data_tree(&data_tree)
+///     .bytes_format(BytesFormat::MetricUnits)
+///     .direction(Direction::BottomUp)
+///     .bar_alignment(BarAlignment::Right)
+///     .column_width_distribution(ColumnWidthDistribution::total(100))
+///     .build();
 /// println!("{visualizer}");
 /// # }
 /// ```
-#[derive(Debug)]
+#[derive(Debug, Builder)]
 pub struct Visualizer<'a, Name, Size>
 where
     Name: Display,

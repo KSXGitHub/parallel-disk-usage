@@ -7,6 +7,7 @@ use super::{
     size,
     tree_builder::{Info, TreeBuilder},
 };
+use bon::Builder;
 use pipe_trait::Pipe;
 use std::{
     fs::{read_dir, symlink_metadata},
@@ -27,16 +28,17 @@ use std::{
 ///     size::Bytes,
 ///     hardlink::HardlinkIgnorant,
 /// };
-/// let builder = FsTreeBuilder {
-///     root: std::env::current_dir().unwrap(),
-///     hardlinks_recorder: &HardlinkIgnorant,
-///     size_getter: GetApparentSize,
-///     reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-///     max_depth: 10,
-/// };
+/// let reporter = ErrorOnlyReporter::new(ErrorReport::SILENT);
+/// let builder = FsTreeBuilder::builder()
+///     .root(std::env::current_dir().unwrap())
+///     .hardlinks_recorder(&HardlinkIgnorant)
+///     .size_getter(GetApparentSize)
+///     .reporter(&reporter)
+///     .max_depth(10)
+///     .build();
 /// let data_tree: DataTree<OsStringDisplay, Bytes> = builder.into();
 /// ```
-#[derive(Debug)]
+#[derive(Debug, Builder)]
 pub struct FsTreeBuilder<'a, Size, SizeGetter, HardlinksRecorder, Report>
 where
     Report: Reporter<Size> + Sync + ?Sized,

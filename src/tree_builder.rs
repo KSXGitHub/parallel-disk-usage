@@ -3,10 +3,11 @@ pub mod info;
 pub use info::Info;
 
 use super::{data_tree::DataTree, size};
+use bon::Builder;
 use rayon::prelude::*;
 
 /// Collection of functions and starting points in order to build a [`DataTree`] with [`From`] or [`Into`].
-#[derive(Debug)]
+#[derive(Debug, Builder)]
 pub struct TreeBuilder<Path, Name, Size, GetInfo, JoinPath>
 where
     Path: Send + Sync,
