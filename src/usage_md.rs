@@ -196,7 +196,7 @@ fn render_option_item(lines: &[&str], out: &mut String) {
     }
 
     // Invisible anchors: short aliases (prefixed with "option-"), then primary name, then long aliases
-    let primary_anchor = primary_name.trim_start_matches('-');
+    let primary_anchor = primary_name.strip_prefix("--").unwrap_or(&primary_name);
     let mut anchor_ids: Vec<String> = Vec::new();
     if let Some(s) = &short_alias {
         let bare = s.strip_prefix('-').unwrap_or(s);
@@ -206,7 +206,7 @@ fn render_option_item(lines: &[&str], out: &mut String) {
     if let Some(a) = alt_aliases_str {
         for alias in a.split(',').map(str::trim) {
             if alias.starts_with("--") {
-                anchor_ids.push(alias.trim_start_matches('-').to_string());
+                anchor_ids.push(alias.strip_prefix("--").unwrap_or(alias).to_string());
             } else if let Some(bare) = alias.strip_prefix('-') {
                 anchor_ids.push(format!("option-{bare}"));
             } else {
