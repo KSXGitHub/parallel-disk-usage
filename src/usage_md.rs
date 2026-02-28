@@ -195,11 +195,11 @@ fn get_help_text(arg: &Arg) -> String {
 fn render_examples_section<'a>(lines: impl Iterator<Item = &'a str>, out: &mut String) {
     let mut current_title: Option<&'a str> = None;
     for line in lines {
-        let trimmed = line.trim();
-        if trimmed.is_empty() {
+        let line = line.trim();
+        if line.is_empty() {
             continue;
         }
-        if let Some(cmd) = trimmed.strip_prefix('$').map(str::trim) {
+        if let Some(cmd) = line.strip_prefix('$').map(str::trim) {
             let heading = if let Some(title) = current_title.take() {
                 title.to_string()
             } else {
@@ -207,7 +207,7 @@ fn render_examples_section<'a>(lines: impl Iterator<Item = &'a str>, out: &mut S
             };
             out.push_str(&format!("### {heading}\n\n```sh\n{cmd}\n```\n\n"));
         } else {
-            current_title = Some(trimmed);
+            current_title = Some(line);
         }
     }
 }
