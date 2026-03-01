@@ -13,7 +13,7 @@ use parallel_disk_usage::{
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use rand::{distr::Alphanumeric, rng, Rng};
+use rand::{distr::Alphanumeric, rng, RngExt};
 use rayon::prelude::*;
 use std::{
     cmp::Ordering,

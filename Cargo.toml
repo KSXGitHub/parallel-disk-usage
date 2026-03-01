@@ -57,30 +57,30 @@ cli-completions = ["cli"]
 [dependencies]
 assert-cmp = "0.3.0"
 bon = "3.9.0"
-clap = { version = "4.5.46", optional = true }
-clap_complete = { version = "4.5.57", optional = true }
-clap-utilities = { version = "0.2.0", optional = true }
+clap = { version = "4.5.60", optional = true }
+clap_complete = { version = "4.5.66", optional = true }
+clap-utilities = { version = "0.3.0", optional = true }
 dashmap = "6.1.0"
-derive_more = { version = "2.0.1", features = ["full"] }
-derive_setters = "0.1.8"
+derive_more = { version = "2.1.1", features = ["full"] }
+derive_setters = "0.1.9"
 fmt-iter = "0.2.1"
 into-sorted = "0.0.3"
 itertools = "0.14.0"
 pipe-trait = "0.4.0"
 rayon = "1.10.0"
-rounded-div = "0.1.2"
-serde = { version = "1.0.219", optional = true }
-serde_json = { version = "1.0.143", optional = true }
+rounded-div = "0.1.4"
+serde = { version = "1.0.228", optional = true }
+serde_json = { version = "1.0.149", optional = true }
 smart-default = "0.7.1"
-sysinfo = "0.37.0"
+sysinfo = "0.38.2"
 terminal_size = "0.4.3"
 text-block-macros = "0.2.0"
 zero-copy-pads = "0.2.0"
 
 [dev-dependencies]
-build-fs-tree = "0.7.1"
+build-fs-tree = "0.8.1"
 command-extra = "1.0.0"
 maplit = "1.0.2"
 normalize-path = "0.2.1"
 pretty_assertions = "1.4.1"
-rand = "0.9.2"
+rand = "0.10.0"

@@ -461,7 +461,7 @@ jobs:
       - name: Install dust
         env:
           REPO: https://github.com/bootandy/dust
-          VERSION: '1.2.1'
+          VERSION: '1.2.4'
         run: |
           mkdir -p DUST.tmp
           archive_name="dust-v${VERSION}-x86_64-unknown-linux-gnu"
@@ -489,7 +489,7 @@ jobs:
       - name: Install dua
         env:
           REPO: https://github.com/Byron/dua-cli
-          VERSION: '2.30.1'
+          VERSION: '2.34.0'
         run: |
           mkdir -p DUA.tmp
           archive_name="dua-v${VERSION}-x86_64-unknown-linux-musl"
@@ -552,6 +552,7 @@ jobs:
           mkdir -p tmp.sample
           curl -L https://github.com/torvalds/linux/archive/refs/tags/v5.12.zip > tmp.sample.zip
           unzip tmp.sample.zip -d tmp.sample
+          ./ci/make-tree-with-hardlinks.sh tmp.sample
 
       - name: Install Node.js
         uses: actions/setup-node@v6
