@@ -80,14 +80,13 @@ fn json_output() {
         .tree
         .pipe(sanitize_tree_reflection);
     dbg!(&actual);
-    let expected: DataTree<_, Bytes> = build_data_tree_from_fs()
+    let expected = build_data_tree_from_fs()
         .root(workspace.to_path_buf())
         .size_getter(GetApparentSize)
         .hardlinks_recorder(&HardlinkIgnorant)
         .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
         .max_depth(10)
-        .call();
-    let expected = expected
+        .call()
         .into_reflection()
         .par_convert_names_to_utf8()
         .expect("convert all names from raw strings to UTF-8")

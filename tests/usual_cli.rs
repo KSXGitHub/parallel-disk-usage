@@ -610,12 +610,12 @@ fn multiple_names() {
         .iter()
         .map(|name| {
             let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf().join(name))
-    .size_getter(GetApparentSize)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+                .root(workspace.to_path_buf().join(name))
+                .size_getter(GetApparentSize)
+                .hardlinks_recorder(&HardlinkIgnorant)
+                .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+                .max_depth(10)
+                .call();
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
             data_tree
         })
@@ -674,12 +674,12 @@ fn multiple_names_max_depth_2() {
         .iter()
         .map(|name| {
             let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf().join(name))
-    .size_getter(GetApparentSize)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(1)
-    .call();
+                .root(workspace.to_path_buf().join(name))
+                .size_getter(GetApparentSize)
+                .hardlinks_recorder(&HardlinkIgnorant)
+                .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+                .max_depth(1)
+                .call();
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
             data_tree
         })
@@ -733,12 +733,12 @@ fn multiple_names_max_depth_1() {
         .iter()
         .map(|name| {
             let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf().join(name))
-    .size_getter(GetApparentSize)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+                .root(workspace.to_path_buf().join(name))
+                .size_getter(GetApparentSize)
+                .hardlinks_recorder(&HardlinkIgnorant)
+                .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+                .max_depth(10)
+                .call();
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
             data_tree
         })
