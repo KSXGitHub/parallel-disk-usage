@@ -1,7 +1,7 @@
 //! The library crate for `pdu`.
 //!
-//! The things you are most interested in are likely [`fs_tree_builder::FsTreeBuilder`],
-//! [`tree_builder::TreeBuilder`], [`data_tree::DataTree`], or [`visualizer::Visualizer`].
+//! The things you are most interested in are likely [`fs_tree_builder::build_data_tree_from_fs`],
+//! [`tree_builder::build_data_tree`], [`data_tree::DataTree`], or [`visualizer::Visualizer`].
 
 #![deny(warnings)]
 

@@ -15,7 +15,7 @@ use maplit::btreeset;
 use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::DataTree,
-    fs_tree_builder::FsTreeBuilder,
+    fs_tree_builder::build_data_tree_from_fs,
     get_size::GetApparentSize,
     hardlink::HardlinkIgnorant,
     os_string_display::OsStringDisplay,
@@ -130,14 +130,13 @@ fn fs_errors() {
     dbg!(&status);
     eprintln!("STDERR+STDOUT:\n{stderr}{stdout}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer {

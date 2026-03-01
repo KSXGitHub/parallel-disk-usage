@@ -3,8 +3,8 @@ use command_extra::CommandExtra;
 use derive_more::{AsRef, Deref};
 use into_sorted::IntoSorted;
 use parallel_disk_usage::{
-    data_tree::{DataTree, DataTreeReflection},
-    fs_tree_builder::FsTreeBuilder,
+    data_tree::DataTreeReflection,
+    fs_tree_builder::build_data_tree_from_fs,
     get_size::{self, GetSize},
     hardlink::HardlinkIgnorant,
     os_string_display::OsStringDisplay,
@@ -366,16 +366,15 @@ where
     }
 
     let measure = |suffix: &str| {
-        FsTreeBuilder {
-            size_getter,
-            hardlinks_recorder: &HardlinkIgnorant,
-            reporter: &ErrorOnlyReporter::new(|error| {
+        build_data_tree_from_fs()
+            .size_getter(size_getter)
+            .hardlinks_recorder(&HardlinkIgnorant)
+            .reporter(&ErrorOnlyReporter::new(|error| {
                 panic!("Unexpected call to report_error: {error:?}")
-            }),
-            root: root.join(suffix),
-            max_depth: 10,
-        }
-        .pipe(DataTree::<OsStringDisplay, Size>::from)
+            }))
+            .root(root.join(suffix))
+            .max_depth(10)
+            .call()
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
         .into_reflection()
     };
