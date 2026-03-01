@@ -375,8 +375,8 @@ where
             .root(root.join(suffix))
             .max_depth(10)
             .call()
-        .into_par_sorted(|left, right| left.name().cmp(right.name()))
-        .into_reflection()
+            .into_par_sorted(|left, right| left.name().cmp(right.name()))
+            .into_reflection()
     };
 
     let sub = |suffix: &str| root.join(suffix).pipe(OsStringDisplay::os_string_from);

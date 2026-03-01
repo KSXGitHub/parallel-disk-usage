@@ -30,17 +30,15 @@ where
     let Info { size, children } = get_info(&path);
     let max_depth = max_depth.saturating_sub(1);
 
-    let children = children
-        .into_par_iter()
-        .map(|name| {
-            build_data_tree()
-                .path(join_path(&path, &name))
-                .name(name)
-                .get_info(get_info)
-                .join_path(join_path)
-                .max_depth(max_depth)
-                .call()
-        });
+    let children = children.into_par_iter().map(|name| {
+        build_data_tree()
+            .path(join_path(&path, &name))
+            .name(name)
+            .get_info(get_info)
+            .join_path(join_path)
+            .max_depth(max_depth)
+            .call()
+    });
 
     if max_depth > 0 {
         DataTree::dir(name, size, children.collect())

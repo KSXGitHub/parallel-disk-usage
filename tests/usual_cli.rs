@@ -41,12 +41,12 @@ fn total_width() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(DEFAULT_GET_SIZE)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -79,12 +79,12 @@ fn column_width() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(DEFAULT_GET_SIZE)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -117,12 +117,12 @@ fn min_ratio_0() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(GetApparentSize)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
@@ -154,12 +154,12 @@ fn min_ratio() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(GetApparentSize)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.1);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -192,12 +192,12 @@ fn max_depth_2() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(GetApparentSize)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(2)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(2)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -230,12 +230,12 @@ fn max_depth_1() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(GetApparentSize)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(1)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(1)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -267,12 +267,12 @@ fn top_down() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(DEFAULT_GET_SIZE)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -304,12 +304,12 @@ fn align_right() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(DEFAULT_GET_SIZE)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -341,12 +341,12 @@ fn quantity_apparent_size() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(GetApparentSize)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -379,12 +379,12 @@ fn quantity_block_size() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(GetBlockSize)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(GetBlockSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -417,12 +417,12 @@ fn quantity_block_count() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(GetBlockCount)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(GetBlockCount)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -455,12 +455,12 @@ fn bytes_format_plain() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(GetApparentSize)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -493,12 +493,12 @@ fn bytes_format_metric() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(GetApparentSize)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -531,12 +531,12 @@ fn bytes_format_binary() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(GetApparentSize)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -568,12 +568,12 @@ fn path_to_workspace() {
     eprintln!("ACTUAL:\n{actual}\n");
 
     let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
-    .root(workspace.to_path_buf())
-    .size_getter(DEFAULT_GET_SIZE)
-    .hardlinks_recorder(&HardlinkIgnorant)
-    .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
-    .max_depth(10)
-    .call();
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     let visualizer = Visualizer::<OsStringDisplay, _> {
