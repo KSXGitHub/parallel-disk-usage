@@ -17,9 +17,20 @@ use pipe_trait::Pipe;
 use serde::Serialize;
 use std::{io::stdout, iter::once, path::PathBuf};
 
-/// Run the sub program.
-#[builder]
-pub fn run_sub<Size, SizeGetter, HardlinksHandler, Report>(
+/// Start building a sub program.
+///
+/// The returned object is a builder that asks for various fields via setter methods.
+///
+/// Once all required fields have been set, call [`SubBuilder::run`] to execute the sub program.
+#[builder(
+    finish_fn(
+        name = run,
+        doc {
+            /// Run the sub program.
+        }
+    )
+)]
+pub fn sub<Size, SizeGetter, HardlinksHandler, Report>(
     /// List of files and/or directories.
     files: Vec<PathBuf>,
     /// Print JSON data instead of an ASCII chart.
@@ -70,7 +81,7 @@ where
     let data_tree = if let Some(data_tree) = iter.next() {
         data_tree
     } else {
-        return run_sub()
+        return sub()
             .files(vec![".".into()])
             .json_output(json_output)
             .bytes_format(bytes_format)
@@ -83,7 +94,7 @@ where
             .reporter(reporter)
             .min_ratio(min_ratio)
             .no_sort(no_sort)
-            .call();
+            .run();
     };
 
     let only_one_arg = iter.len() == 0; // ExactSizeIterator::is_empty is unstable
@@ -186,7 +197,7 @@ where
     Ok(())
 }
 
-/// Value to pass to [`run_sub`] to decide how much details should be
+/// Value to pass to [`sub`] to decide how much details should be
 /// put in the output JSON object.
 #[derive(Debug, Clone, Copy)]
 pub struct JsonOutputParam {
@@ -210,7 +221,7 @@ impl JsonOutputParam {
     }
 }
 
-/// Subroutines used by [`run_sub`] to deduplicate sizes of detected hardlinks and report about it.
+/// Subroutines used by [`sub`] to deduplicate sizes of detected hardlinks and report about it.
 pub trait HardlinkSubroutines<Size: size::Size>: DeduplicateSharedSize<Size> {
     /// Convert the error to runtime error.
     fn convert_error(error: Self::Error) -> RuntimeError;
