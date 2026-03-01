@@ -9,9 +9,9 @@ use super::size;
 /// Disk usage data of a filesystem tree.
 ///
 /// **Construction:** There are 3 main ways to create a `DataTree`:
-/// * Use [`FsTreeBuilder`](crate::fs_tree_builder::FsTreeBuilder) to create it from the real
+/// * Use [`build_data_tree_from_fs`](crate::fs_tree_builder::build_data_tree_from_fs) to create it from the real
 ///   filesystem.
-/// * Use [`TreeBuilder`](crate::tree_builder::TreeBuilder) to create it from a representation
+/// * Use [`build_data_tree`](crate::tree_builder::build_data_tree) to create it from a representation
 ///   of a filesystem.
 /// * Use [`Reflection`].
 ///

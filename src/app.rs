@@ -1,7 +1,5 @@
 pub mod sub;
 
-pub use sub::Sub;
-
 use crate::{
     args::{Args, Quantity, Threads},
     bytes_format::BytesFormat,
@@ -17,7 +15,7 @@ use clap::Parser;
 use hdd::any_path_is_in_hdd;
 use pipe_trait::Pipe;
 use std::{io::stdin, time::Duration};
-use sub::JsonOutputParam;
+use sub::{sub, JsonOutputParam};
 use sysinfo::Disks;
 
 #[cfg(unix)]
@@ -294,21 +292,20 @@ impl App {
                     omit_json_shared_details,
                     omit_json_shared_summary,
                     ..
-                } => Sub {
-                    direction: Direction::from_top_down(top_down),
-                    bar_alignment: BarAlignment::from_align_right(align_right),
-                    size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
-                    hardlinks_handler: <$size_getter as CreateHardlinksHandler<{ cfg!(unix) && $hardlinks }, $progress>>::create_hardlinks_handler(),
-                    reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
-                    bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
-                    files,
-                    json_output: JsonOutputParam::from_cli_flags(json_output, omit_json_shared_details, omit_json_shared_summary),
-                    column_width_distribution,
-                    max_depth,
-                    min_ratio,
-                    no_sort,
-                }
-                .run(),
+                } => sub()
+                    .direction(Direction::from_top_down(top_down))
+                    .bar_alignment(BarAlignment::from_align_right(align_right))
+                    .size_getter(<$size_getter as GetSizeUtils>::INSTANCE)
+                    .hardlinks_handler(<$size_getter as CreateHardlinksHandler<{ cfg!(unix) && $hardlinks }, $progress>>::create_hardlinks_handler())
+                    .reporter(<$size_getter as CreateReporter<$progress>>::create_reporter(report_error))
+                    .bytes_format(<$size_getter as GetSizeUtils>::formatter(bytes_format))
+                    .files(files)
+                    .json_output(JsonOutputParam::from_cli_flags(json_output, omit_json_shared_details, omit_json_shared_summary))
+                    .column_width_distribution(column_width_distribution)
+                    .max_depth(max_depth)
+                    .min_ratio(min_ratio)
+                    .no_sort(no_sort)
+                    .run(),
             )*} };
         }
 

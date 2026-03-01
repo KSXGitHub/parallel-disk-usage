@@ -7,7 +7,7 @@ use command_extra::CommandExtra;
 use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::DataTree,
-    fs_tree_builder::FsTreeBuilder,
+    fs_tree_builder::build_data_tree_from_fs,
     get_size::GetApparentSize,
     hardlink::HardlinkIgnorant,
     os_string_display::OsStringDisplay,
@@ -40,14 +40,13 @@ fn total_width() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: DEFAULT_GET_SIZE,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -79,14 +78,13 @@ fn column_width() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: DEFAULT_GET_SIZE,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -118,14 +116,13 @@ fn min_ratio_0() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
     let visualizer = Visualizer::<OsStringDisplay, _> {
@@ -156,14 +153,13 @@ fn min_ratio() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.1);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -195,14 +191,13 @@ fn max_depth_2() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 2,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(2)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -234,14 +229,13 @@ fn max_depth_1() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 1,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(1)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -272,14 +266,13 @@ fn top_down() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: DEFAULT_GET_SIZE,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -310,14 +303,13 @@ fn align_right() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: DEFAULT_GET_SIZE,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -348,14 +340,13 @@ fn quantity_apparent_size() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -387,14 +378,13 @@ fn quantity_block_size() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetBlockSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(GetBlockSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -426,14 +416,13 @@ fn quantity_block_count() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetBlockCount,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(GetBlockCount)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -465,14 +454,13 @@ fn bytes_format_plain() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -504,14 +492,13 @@ fn bytes_format_metric() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -543,14 +530,13 @@ fn bytes_format_binary() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
@@ -581,14 +567,13 @@ fn path_to_workspace() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: DEFAULT_GET_SIZE,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(DEFAULT_GET_SIZE)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call();
     data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     let visualizer = Visualizer::<OsStringDisplay, _> {
@@ -624,14 +609,13 @@ fn multiple_names() {
     let mut data_tree = ["nested", "flat", "empty-dir"]
         .iter()
         .map(|name| {
-            let builder = FsTreeBuilder {
-                root: workspace.to_path_buf().join(name),
-                size_getter: GetApparentSize,
-                hardlinks_recorder: &HardlinkIgnorant,
-                reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-                max_depth: 10,
-            };
-            let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+            let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+                .root(workspace.to_path_buf().join(name))
+                .size_getter(GetApparentSize)
+                .hardlinks_recorder(&HardlinkIgnorant)
+                .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+                .max_depth(10)
+                .call();
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
             data_tree
         })
@@ -689,14 +673,13 @@ fn multiple_names_max_depth_2() {
     let mut data_tree = ["nested", "flat", "empty-dir"]
         .iter()
         .map(|name| {
-            let builder = FsTreeBuilder {
-                root: workspace.to_path_buf().join(name),
-                size_getter: GetApparentSize,
-                hardlinks_recorder: &HardlinkIgnorant,
-                reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-                max_depth: 1,
-            };
-            let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+            let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+                .root(workspace.to_path_buf().join(name))
+                .size_getter(GetApparentSize)
+                .hardlinks_recorder(&HardlinkIgnorant)
+                .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+                .max_depth(1)
+                .call();
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
             data_tree
         })
@@ -749,14 +732,13 @@ fn multiple_names_max_depth_1() {
     let mut data_tree = ["nested", "flat", "empty-dir"]
         .iter()
         .map(|name| {
-            let builder = FsTreeBuilder {
-                root: workspace.to_path_buf().join(name),
-                size_getter: GetApparentSize,
-                hardlinks_recorder: &HardlinkIgnorant,
-                reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-                max_depth: 10,
-            };
-            let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+            let mut data_tree: DataTree<OsStringDisplay, _> = build_data_tree_from_fs()
+                .root(workspace.to_path_buf().join(name))
+                .size_getter(GetApparentSize)
+                .hardlinks_recorder(&HardlinkIgnorant)
+                .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+                .max_depth(10)
+                .call();
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
             data_tree
         })

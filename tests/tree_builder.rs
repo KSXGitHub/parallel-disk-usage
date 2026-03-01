@@ -3,9 +3,8 @@ use derive_more::From;
 use parallel_disk_usage::{
     data_tree::{DataTree, DataTreeReflection},
     size::Bytes,
-    tree_builder::{Info, TreeBuilder},
+    tree_builder::{build_data_tree, Info},
 };
-use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 
 type SampleData = Bytes;
@@ -39,10 +38,10 @@ impl SampleTree {
     }
 
     fn tree(&self, root: &'static str) -> DataTree<SampleName, SampleData> {
-        TreeBuilder {
-            path: root.to_string(),
-            name: root.to_string(),
-            get_info: |path| {
+        build_data_tree()
+            .path(root.to_string())
+            .name(root.to_string())
+            .get_info(|path| {
                 let path: Vec<_> = path
                     .split(SAMPLE_SEPARATOR)
                     .map(ToString::to_string)
@@ -56,12 +55,11 @@ impl SampleTree {
                     )),
                     None => panic!("Path does not exist"),
                 }
-            },
-            join_path: |prefix, name| format!("{prefix}{SAMPLE_SEPARATOR}{name}"),
-            max_depth: 10,
-        }
-        .pipe(DataTree::from)
-        .into_par_sorted(|left, right| left.name().as_str().cmp(right.name().as_str()))
+            })
+            .join_path(|prefix, name| format!("{prefix}{SAMPLE_SEPARATOR}{name}"))
+            .max_depth(10)
+            .call()
+            .into_par_sorted(|left, right| left.name().as_str().cmp(right.name().as_str()))
     }
 }
 

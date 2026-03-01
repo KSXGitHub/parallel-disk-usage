@@ -8,7 +8,7 @@ use command_extra::CommandExtra;
 use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::DataTree,
-    fs_tree_builder::FsTreeBuilder,
+    fs_tree_builder::build_data_tree_from_fs,
     get_size::GetApparentSize,
     hardlink::HardlinkIgnorant,
     json_data::{JsonData, JsonTree, SchemaVersion},
@@ -80,15 +80,13 @@ fn json_output() {
         .tree
         .pipe(sanitize_tree_reflection);
     dbg!(&actual);
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: GetApparentSize,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let expected = builder
-        .pipe(DataTree::<_, Bytes>::from)
+    let expected = build_data_tree_from_fs()
+        .root(workspace.to_path_buf())
+        .size_getter(GetApparentSize)
+        .hardlinks_recorder(&HardlinkIgnorant)
+        .reporter(&ErrorOnlyReporter::new(ErrorReport::SILENT))
+        .max_depth(10)
+        .call()
         .into_reflection()
         .par_convert_names_to_utf8()
         .expect("convert all names from raw strings to UTF-8")
