@@ -1,5 +1,6 @@
 use crate::{
-    args::{Depth, Fraction},
+    args::{ColorOption, Depth, Fraction},
+    coloring::Coloring,
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
@@ -49,6 +50,8 @@ where
     pub min_ratio: Fraction,
     /// Preserve order of entries.
     pub no_sort: bool,
+    /// When to colorize the output.
+    pub color: ColorOption,
 }
 
 impl<Size, SizeGetter, HardlinksHandler, Report> Sub<Size, SizeGetter, HardlinksHandler, Report>
@@ -74,6 +77,7 @@ where
             reporter,
             min_ratio,
             no_sort,
+            color,
         } = self;
 
         let max_depth = max_depth.get();
@@ -187,12 +191,27 @@ where
                 .or(deduplication_result);
         }
 
+        // Build color map AFTER pruning to save CPU/IO cycles
+        let coloring = match color {
+            ColorOption::Always => Some(Coloring::from_tree(&data_tree)),
+            ColorOption::Never => None,
+            ColorOption::Auto => {
+                use std::io::IsTerminal;
+                if std::io::stdout().is_terminal() {
+                    Some(Coloring::from_tree(&data_tree))
+                } else {
+                    None
+                }
+            }
+        };
+
         let visualizer = Visualizer {
             data_tree: &data_tree,
             bytes_format,
             direction,
             bar_alignment,
             column_width_distribution,
+            coloring: coloring.as_ref(),
         };
 
         print!("{visualizer}"); // visualizer already ends with "\n", println! isn't needed here.

@@ -88,6 +88,16 @@ Options:
       --omit-json-shared-summary
           Do not output `.shared.summary` in the JSON output
 
+      --color <COLOR>
+          When to colorize the output
+
+          Possible values:
+          - auto:   Colorize output only when stdout is a terminal
+          - always: Always colorize the output
+          - never:  Never colorize the output
+
+          [default: auto]
+
   -h, --help
           Print help (see a summary with '-h')
 

@@ -86,6 +86,7 @@ impl App {
                         column_width_distribution,
                         direction,
                         bar_alignment,
+                        coloring: None,
                     };
 
                     let JsonShared { details, summary } = shared;
@@ -291,6 +292,7 @@ impl App {
                     max_depth,
                     min_ratio,
                     no_sort,
+                    color,
                     omit_json_shared_details,
                     omit_json_shared_summary,
                     ..
@@ -307,6 +309,7 @@ impl App {
                     max_depth,
                     min_ratio,
                     no_sort,
+                    color,
                 }
                 .run(),
             )*} };

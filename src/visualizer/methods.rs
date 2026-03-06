@@ -82,10 +82,17 @@ where
         bar_table
             .into_iter()
             .map(|row| {
+                let tree = if let Some(coloring) = self.coloring {
+                    let (prefix, suffix) =
+                        coloring.ansi_for(&row.tree_horizontal_slice.name);
+                    row.tree_horizontal_slice
+                        .display_colored(prefix, suffix, tree_width)
+                } else {
+                    align_left(&row.tree_horizontal_slice, tree_width).to_string()
+                };
                 format!(
                     "{size} {tree}│{bar}│{ratio}",
                     size = align_right(&row.size, size_width),
-                    tree = align_left(&row.tree_horizontal_slice, tree_width),
                     bar = row.proportion_bar.display(self.bar_alignment),
                     ratio = align_right(&row.percentage, PERCENTAGE_COLUMN_MAX_WIDTH),
                 )

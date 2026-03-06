@@ -40,6 +40,8 @@ Options:
           Do not output `.shared.details` in the JSON output
       --omit-json-shared-summary
           Do not output `.shared.summary` in the JSON output
+      --color <COLOR>
+          When to colorize the output [default: auto] [possible values: auto, always, never]
   -h, --help
           Print help (see more with '--help')
   -V, --version

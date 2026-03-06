@@ -14,7 +14,7 @@ pub use parenthood::Parenthood;
 pub use proportion_bar::{ProportionBar, ProportionBarBlock};
 pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
 
-use super::{data_tree::DataTree, size};
+use super::{coloring::Coloring, data_tree::DataTree, size};
 use std::fmt::Display;
 
 /// Visualize a [`DataTree`].
@@ -38,6 +38,7 @@ use std::fmt::Display;
 ///     direction: Direction::BottomUp,
 ///     bar_alignment: BarAlignment::Right,
 ///     column_width_distribution: ColumnWidthDistribution::total(100),
+///     coloring: None,
 /// };
 /// println!("{visualizer}");
 /// # }
@@ -58,6 +59,9 @@ where
     pub bar_alignment: BarAlignment,
     /// Distribution and total number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
+    /// Optional coloring for file/directory names.
+    /// `None` means no color; `Some` means color according to the map.
+    pub coloring: Option<&'a Coloring>,
 }
 
 mod copy;

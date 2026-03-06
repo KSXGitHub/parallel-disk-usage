@@ -57,6 +57,7 @@ fn total_width() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -96,6 +97,7 @@ fn column_width() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::components(10, 90),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -134,6 +136,7 @@ fn min_ratio_0() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -173,6 +176,7 @@ fn min_ratio() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -212,6 +216,7 @@ fn max_depth_2() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -251,6 +256,7 @@ fn max_depth_1() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -289,6 +295,7 @@ fn top_down() {
         direction: Direction::TopDown,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -327,6 +334,7 @@ fn align_right() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -365,6 +373,7 @@ fn quantity_apparent_size() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -404,6 +413,7 @@ fn quantity_block_size() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -443,6 +453,7 @@ fn quantity_block_count() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -482,6 +493,7 @@ fn bytes_format_plain() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -521,6 +533,7 @@ fn bytes_format_metric() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -560,6 +573,7 @@ fn bytes_format_binary() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -597,6 +611,7 @@ fn path_to_workspace() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -650,6 +665,7 @@ fn multiple_names() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -715,6 +731,7 @@ fn multiple_names_max_depth_2() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -776,6 +793,7 @@ fn multiple_names_max_depth_1() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();

@@ -18,6 +18,7 @@ fn flag_combinations() {
 
     let list = CommandList::default()
         .option_matrix("--quantity", quantity)
+        .option_matrix("--color", ["auto", "always", "never"])
         .flag_matrix("--progress");
 
     for command in list.commands() {
