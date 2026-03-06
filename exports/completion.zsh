@@ -37,7 +37,7 @@ block-count\:"Count numbers of blocks"))' \
 '-m+[Minimal size proportion required to appear]:MIN_RATIO:_default' \
 '--min-ratio=[Minimal size proportion required to appear]:MIN_RATIO:_default' \
 '--threads=[Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer]:THREADS:_default' \
-'--color=[When to use colors in the output]:COLOR:((auto\:"Use colors only when the output is a terminal"
+'--color=[Whether to show colors]:COLOR:((auto\:"Detect whether the output is a terminal and use colors accordingly"
 always\:"Always use colors"
 never\:"Never use colors"))' \
 '(-q --quantity -H --deduplicate-hardlinks)--json-input[Read JSON data from stdin]' \

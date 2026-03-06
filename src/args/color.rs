@@ -5,7 +5,7 @@ use clap::ValueEnum;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[cfg_attr(feature = "cli", derive(ValueEnum))]
 pub enum ColorWhen {
-    /// Use colors only when the output is a terminal.
+    /// Detect whether the output is a terminal and use colors accordingly.
     #[default]
     Auto,
     /// Always use colors.

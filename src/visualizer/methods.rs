@@ -17,6 +17,9 @@ use crate::size;
 use std::{cmp::min, fmt::Display, hash::Hash};
 use zero_copy_pads::{align_left, align_right, Width};
 
+const DIRECTORY_COLOR_PREFIX: &str = "\x1b[1;34m";
+const COLOR_RESET: &str = "\x1b[0m";
+
 impl<'a, Name, Size> Visualizer<'a, Name, Size>
 where
     Name: Display + Hash + Eq,
@@ -82,12 +85,20 @@ where
         bar_table
             .into_iter()
             .map(|row| {
-                let tree = if let Some(coloring) = self.coloring {
-                    let slice = &row.tree_horizontal_slice;
+                let slice = &row.tree_horizontal_slice;
+
+                // Decide whether this node should be colored as a directory.
+                let is_dir = if let Some(coloring) = self.coloring {
+                    row.node_info.children_count > 0
+                        || coloring.get(row.node_info.name) == Some(&Color::Directory)
+                } else {
+                    false
+                };
+
+                let tree = if is_dir {
+                    // Color only the name portion; indent and skeletal connector stay plain.
                     let visual_width = slice.width();
                     let padding = tree_width.saturating_sub(visual_width);
-
-                    // Reconstruct indent from ancestor positions
                     let indent: String = slice
                         .ancestor_relative_positions
                         .iter()
@@ -96,27 +107,11 @@ where
                             ChildPosition::Last => "  ",
                         })
                         .collect();
-
                     let skeletal = slice.skeletal_component.visualize();
-                    let name_str = &slice.name;
-
-                    // Determine color: parent dirs use directory color; leaves use coloring map
-                    let (prefix, suffix) = if row.node_info.children_count > 0 {
-                        (Color::DIRECTORY_ANSI_PREFIX, Color::RESET)
-                    } else if let Some(color) = coloring.get(row.node_info.name) {
-                        if color.ansi_prefix.is_empty() {
-                            ("", "")
-                        } else {
-                            (color.ansi_prefix.as_str(), Color::RESET)
-                        }
-                    } else {
-                        ("", "")
-                    };
-
                     let spaces = " ".repeat(padding);
-                    format!("{indent}{skeletal}{prefix}{name_str}{suffix}{spaces}")
+                    format!("{indent}{skeletal}{DIRECTORY_COLOR_PREFIX}{}{COLOR_RESET}{spaces}", slice.name)
                 } else {
-                    format!("{}", align_left(&row.tree_horizontal_slice, tree_width))
+                    format!("{}", align_left(slice, tree_width))
                 };
 
                 format!(

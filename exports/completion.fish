@@ -9,7 +9,7 @@ complete -c pdu -s w -l total-width -l width -d 'Width of the visualization' -r
 complete -c pdu -l column-width -d 'Maximum widths of the tree column and width of the bar column' -r
 complete -c pdu -s m -l min-ratio -d 'Minimal size proportion required to appear' -r
 complete -c pdu -l threads -d 'Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer' -r
-complete -c pdu -l color -d 'When to use colors in the output' -r -f -a "auto\t'Use colors only when the output is a terminal'
+complete -c pdu -l color -d 'Whether to show colors' -r -f -a "auto\t'Detect whether the output is a terminal and use colors accordingly'
 always\t'Always use colors'
 never\t'Never use colors'"
 complete -c pdu -l json-input -d 'Read JSON data from stdin'

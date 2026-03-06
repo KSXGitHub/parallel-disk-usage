@@ -203,9 +203,8 @@ where
         };
 
         let coloring_map: Option<HashMap<OsStringDisplay, Color>> = if use_color {
-            let ls_colors = lscolors::LsColors::from_env().unwrap_or_default();
             let mut map = HashMap::new();
-            build_coloring_map(&data_tree, PathBuf::new(), &ls_colors, &mut map);
+            build_coloring_map(&data_tree, PathBuf::new(), &mut map);
             Some(map)
         } else {
             None
@@ -296,23 +295,20 @@ where
 fn build_coloring_map(
     node: &DataTree<OsStringDisplay, impl size::Size>,
     path: PathBuf,
-    ls_colors: &lscolors::LsColors,
     map: &mut HashMap<OsStringDisplay, Color>,
 ) {
     let node_path = path.join(node.name().as_os_str());
     if node.children().is_empty() {
-        // Leaf node (file or childless directory): look up its color.
-        let color = if let Some(style) = ls_colors.style_for_path(&node_path) {
-            let nu_style = style.to_nu_ansi_term_style();
-            let ansi_prefix = nu_style.prefix().to_string();
-            Color::new(ansi_prefix)
+        // Leaf node: determine if it's a directory or a file.
+        let color = if node_path.is_dir() {
+            Color::Directory
         } else {
-            Color::default()
+            Color::Colorless
         };
         map.insert(node.name().clone(), color);
     } else {
         for child in node.children() {
-            build_coloring_map(child, node_path.clone(), ls_colors, map);
+            build_coloring_map(child, node_path.clone(), map);
         }
     }
 }
