@@ -62,11 +62,6 @@ where
     /// Distribution and total number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
     /// Mapping of names to colors for colorful output.
-    ///
-    /// * `None` means no color.
-    /// * `Some(map)` means to color the names. Names present in the map are colored
-    ///   according to their corresponding [`Color`] values. Names absent from the map
-    ///   are directories (with children) and are colored using the directory color.
     pub coloring: Option<&'a HashMap<Name, Color>>,
 }
 

@@ -12,13 +12,46 @@ use node_info::*;
 use table::*;
 use tree_table::*;
 
-use super::{ChildPosition, Color, ColumnWidthDistribution, Visualizer};
+use super::{ChildPosition, Color, ColumnWidthDistribution, TreeHorizontalSlice, Visualizer};
 use crate::size;
-use std::{cmp::min, fmt::Display, hash::Hash};
+use std::{
+    cmp::min,
+    fmt::{self, Display},
+    hash::Hash,
+};
 use zero_copy_pads::{align_left, align_right, Width};
 
 const DIRECTORY_COLOR_PREFIX: &str = "\x1b[1;34m";
 const COLOR_RESET: &str = "\x1b[0m";
+
+struct ColoredSlice<'a>(&'a TreeHorizontalSlice<String>);
+
+impl fmt::Display for ColoredSlice<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = self.0;
+        for pos in &s.ancestor_relative_positions {
+            write!(
+                f,
+                "{}",
+                match pos {
+                    ChildPosition::Init => "│ ",
+                    ChildPosition::Last => "  ",
+                }
+            )?;
+        }
+        write!(
+            f,
+            "{}{DIRECTORY_COLOR_PREFIX}{}{COLOR_RESET}",
+            s.skeletal_component, s.name
+        )
+    }
+}
+
+impl Width for ColoredSlice<'_> {
+    fn width(&self) -> usize {
+        self.0.width()
+    }
+}
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>
 where
@@ -87,27 +120,16 @@ where
             .map(|row| {
                 let slice = &row.tree_horizontal_slice;
 
-                // Decide whether this node should be colored as a directory.
-                let is_dir = self.coloring.map(|coloring| {
-                    row.node_info.children_count > 0
-                        || coloring.get(row.node_info.name) == Some(&Color::Directory)
-                }).unwrap_or(false);
+                let use_directory_color = self
+                    .coloring
+                    .map(|coloring| {
+                        row.node_info.children_count > 0
+                            || coloring.get(row.node_info.name) == Some(&Color::Directory)
+                    })
+                    .unwrap_or(false);
 
-                let tree = if is_dir {
-                    // Color only the name portion; indent and skeletal connector stay plain.
-                    let visual_width = slice.width();
-                    let padding = tree_width.saturating_sub(visual_width);
-                    let indent: String = slice
-                        .ancestor_relative_positions
-                        .iter()
-                        .map(|pos| match pos {
-                            ChildPosition::Init => "│ ",
-                            ChildPosition::Last => "  ",
-                        })
-                        .collect();
-                    let skeletal = slice.skeletal_component.visualize();
-                    let spaces = " ".repeat(padding);
-                    format!("{indent}{skeletal}{DIRECTORY_COLOR_PREFIX}{}{COLOR_RESET}{spaces}", slice.name)
+                let tree = if use_directory_color {
+                    format!("{}", align_left(ColoredSlice(slice), tree_width))
                 } else {
                     format!("{}", align_left(slice, tree_width))
                 };
