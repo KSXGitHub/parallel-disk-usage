@@ -130,11 +130,11 @@ Do not output `.shared.summary` in the JSON output.
 
 * _Default:_ `auto`.
 * _Choices:_
-  - `auto`: Use colors only when the output is a terminal
+  - `auto`: Detect whether the output is a terminal and use colors accordingly
   - `always`: Always use colors
   - `never`: Never use colors
 
-When to use colors in the output.
+Whether to show colors.
 
 <a id="option-h" name="option-h"></a><a id="help" name="help"></a>
 ### `--help`

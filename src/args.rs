@@ -173,7 +173,7 @@ pub struct Args {
     #[clap(long, requires = "json_output", requires = "deduplicate_hardlinks")]
     pub omit_json_shared_summary: bool,
 
-    /// When to use colors in the output.
+    /// Whether to show colors.
     #[clap(long, value_enum, default_value_t = ColorWhen::Auto)]
     #[default(ColorWhen::Auto)]
     pub color: ColorWhen,
