@@ -130,9 +130,9 @@ Do not output `.shared.summary` in the JSON output.
 
 * _Default:_ `auto`.
 * _Choices:_
-  - `auto`: Detect whether the output is a terminal and use colors accordingly
-  - `always`: Always use colors
-  - `never`: Never use colors
+  - `auto`: Detect if the output is a TTY and render colors accordingly
+  - `always`: Always render colors
+  - `never`: Never render colors
 
 Whether to show colors.
 

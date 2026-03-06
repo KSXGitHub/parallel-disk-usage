@@ -5,11 +5,11 @@ use clap::ValueEnum;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[cfg_attr(feature = "cli", derive(ValueEnum))]
 pub enum ColorWhen {
-    /// Detect whether the output is a terminal and use colors accordingly.
+    /// Detect if the output is a TTY and render colors accordingly.
     #[default]
     Auto,
-    /// Always use colors.
+    /// Always render colors.
     Always,
-    /// Never use colors.
+    /// Never render colors.
     Never,
 }

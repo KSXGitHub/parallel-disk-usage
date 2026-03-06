@@ -299,11 +299,10 @@ fn build_coloring_map(
 ) {
     let node_path = path.join(node.name().as_os_str());
     if node.children().is_empty() {
-        // Leaf node: determine if it's a directory or a file.
         let color = if node_path.is_dir() {
             Color::Directory
         } else {
-            Color::Colorless
+            Color::Normal
         };
         map.insert(node.name().clone(), color);
     } else {
