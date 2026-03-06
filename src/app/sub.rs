@@ -1,5 +1,5 @@
 use crate::{
-    args::{Depth, Fraction},
+    args::{ColorWhen, Depth, Fraction},
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
@@ -10,11 +10,16 @@ use crate::{
     runtime_error::RuntimeError,
     size,
     status_board::GLOBAL_STATUS_BOARD,
-    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
+    visualizer::{BarAlignment, Color, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pipe_trait::Pipe;
 use serde::Serialize;
-use std::{io::stdout, iter::once, path::PathBuf};
+use std::{
+    collections::HashMap,
+    io::{stdout, IsTerminal},
+    iter::once,
+    path::PathBuf,
+};
 
 /// The sub program of the main application.
 pub struct Sub<Size, SizeGetter, HardlinksHandler, Report>
@@ -49,6 +54,8 @@ where
     pub min_ratio: Fraction,
     /// Preserve order of entries.
     pub no_sort: bool,
+    /// When to use colors in the output.
+    pub color: ColorWhen,
 }
 
 impl<Size, SizeGetter, HardlinksHandler, Report> Sub<Size, SizeGetter, HardlinksHandler, Report>
@@ -74,6 +81,7 @@ where
             reporter,
             min_ratio,
             no_sort,
+            color,
         } = self;
 
         let max_depth = max_depth.get();
@@ -187,12 +195,29 @@ where
                 .or(deduplication_result);
         }
 
+        // Determine whether to use colors. This is done after pruning to save CPU/IO cycles.
+        let use_color = match color {
+            ColorWhen::Always => true,
+            ColorWhen::Never => false,
+            ColorWhen::Auto => stdout().is_terminal(),
+        };
+
+        let coloring_map: Option<HashMap<OsStringDisplay, Color>> = if use_color {
+            let ls_colors = lscolors::LsColors::from_env().unwrap_or_default();
+            let mut map = HashMap::new();
+            build_coloring_map(&data_tree, PathBuf::new(), &ls_colors, &mut map);
+            Some(map)
+        } else {
+            None
+        };
+
         let visualizer = Visualizer {
             data_tree: &data_tree,
             bytes_format,
             direction,
             bar_alignment,
             column_width_distribution,
+            coloring: coloring_map.as_ref(),
         };
 
         print!("{visualizer}"); // visualizer already ends with "\n", println! isn't needed here.
@@ -259,6 +284,36 @@ where
     #[inline]
     fn json_report((): Self::Report) -> Result<Option<JsonShared<Size>>, RuntimeError> {
         Ok(None)
+    }
+}
+
+/// Recursively walk a pruned [`DataTree`] and build a map of leaf node names to [`Color`] values.
+///
+/// The `path` argument should be the current path prefix for reconstructing full filesystem paths.
+/// Leaf nodes (files or childless directories after pruning) are added to the map.
+/// Nodes with children (directories with visible children) are skipped since the [`Visualizer`]
+/// applies the directory color to any name absent from the map.
+fn build_coloring_map(
+    node: &DataTree<OsStringDisplay, impl size::Size>,
+    path: PathBuf,
+    ls_colors: &lscolors::LsColors,
+    map: &mut HashMap<OsStringDisplay, Color>,
+) {
+    let node_path = path.join(node.name().as_os_str());
+    if node.children().is_empty() {
+        // Leaf node (file or childless directory): look up its color.
+        let color = if let Some(style) = ls_colors.style_for_path(&node_path) {
+            let nu_style = style.to_nu_ansi_term_style();
+            let ansi_prefix = nu_style.prefix().to_string();
+            Color::new(ansi_prefix)
+        } else {
+            Color::default()
+        };
+        map.insert(node.name().clone(), color);
+    } else {
+        for child in node.children() {
+            build_coloring_map(child, node_path.clone(), ls_colors, map);
+        }
     }
 }
 

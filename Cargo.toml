@@ -51,7 +51,7 @@ required-features = ["cli"]
 [features]
 default = ["cli"]
 json = ["serde/derive", "serde_json"]
-cli = ["clap/derive", "clap_complete", "clap-utilities", "json"]
+cli = ["clap/derive", "clap_complete", "clap-utilities", "json", "lscolors"]
 cli-completions = ["cli"]
 
 [dependencies]
@@ -65,6 +65,7 @@ derive_setters = "0.1.9"
 fmt-iter = "0.2.1"
 into-sorted = "0.0.3"
 itertools = "0.14.0"
+lscolors = { version = "0.21.0", optional = true }
 pipe-trait = "0.4.0"
 rayon = "1.10.0"
 rounded-div = "0.1.4"

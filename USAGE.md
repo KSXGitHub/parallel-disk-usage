@@ -125,6 +125,17 @@ Do not output `.shared.details` in the JSON output.
 
 Do not output `.shared.summary` in the JSON output.
 
+<a id="color" name="color"></a>
+### `--color`
+
+* _Default:_ `auto`.
+* _Choices:_
+  - `auto`: Use colors only when the output is a terminal
+  - `always`: Always use colors
+  - `never`: Never use colors
+
+When to use colors in the output.
+
 <a id="option-h" name="option-h"></a><a id="help" name="help"></a>
 ### `--help`
 
