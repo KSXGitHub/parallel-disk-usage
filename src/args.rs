@@ -175,7 +175,6 @@ pub struct Args {
 
     /// Whether to show colors.
     #[clap(long, value_enum, default_value_t = ColorWhen::Auto)]
-    #[default(ColorWhen::Auto)]
     pub color: ColorWhen,
 }
 

@@ -195,14 +195,13 @@ where
                 .or(deduplication_result);
         }
 
-        // Determine whether to use colors. This is done after pruning to save CPU/IO cycles.
         let use_color = match color {
             ColorWhen::Always => true,
             ColorWhen::Never => false,
             ColorWhen::Auto => stdout().is_terminal(),
         };
 
-        let coloring_map: Option<HashMap<OsStringDisplay, Color>> = if use_color {
+        let coloring: Option<HashMap<OsStringDisplay, Color>> = if use_color {
             let mut map = HashMap::new();
             build_coloring_map(&data_tree, PathBuf::new(), &mut map);
             Some(map)
@@ -216,7 +215,7 @@ where
             direction,
             bar_alignment,
             column_width_distribution,
-            coloring: coloring_map.as_ref(),
+            coloring: coloring.as_ref(),
         };
 
         print!("{visualizer}"); // visualizer already ends with "\n", println! isn't needed here.
