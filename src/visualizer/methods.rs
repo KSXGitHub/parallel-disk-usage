@@ -88,12 +88,10 @@ where
                 let slice = &row.tree_horizontal_slice;
 
                 // Decide whether this node should be colored as a directory.
-                let is_dir = if let Some(coloring) = self.coloring {
+                let is_dir = self.coloring.map(|coloring| {
                     row.node_info.children_count > 0
                         || coloring.get(row.node_info.name) == Some(&Color::Directory)
-                } else {
-                    false
-                };
+                }).unwrap_or(false);
 
                 let tree = if is_dir {
                     // Color only the name portion; indent and skeletal connector stay plain.

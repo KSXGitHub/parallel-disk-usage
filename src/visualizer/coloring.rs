@@ -5,5 +5,5 @@ pub enum Color {
     Directory,
     /// No color.
     #[default]
-    Colorless,
+    Normal,
 }
