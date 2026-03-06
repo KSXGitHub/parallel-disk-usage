@@ -18,6 +18,7 @@ use serde::{Deserialize, Serialize};
     Copy,
     PartialEq,
     Eq,
+    Hash,
     PartialOrd,
     Ord,
     AsMut,

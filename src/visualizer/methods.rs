@@ -12,14 +12,14 @@ use node_info::*;
 use table::*;
 use tree_table::*;
 
-use super::{ColumnWidthDistribution, Visualizer};
+use super::{ChildPosition, Color, ColumnWidthDistribution, Visualizer};
 use crate::size;
-use std::{cmp::min, fmt::Display};
-use zero_copy_pads::{align_left, align_right};
+use std::{cmp::min, fmt::Display, hash::Hash};
+use zero_copy_pads::{align_left, align_right, Width};
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>
 where
-    Name: Display,
+    Name: Display + Hash + Eq,
     Size: size::Size + Into<u64>,
 {
     /// Create ASCII rows that visualize the [tree](crate::data_tree::DataTree), such rows
@@ -82,10 +82,46 @@ where
         bar_table
             .into_iter()
             .map(|row| {
+                let tree = if let Some(coloring) = self.coloring {
+                    let slice = &row.tree_horizontal_slice;
+                    let visual_width = slice.width();
+                    let padding = tree_width.saturating_sub(visual_width);
+
+                    // Reconstruct indent from ancestor positions
+                    let indent: String = slice
+                        .ancestor_relative_positions
+                        .iter()
+                        .map(|pos| match pos {
+                            ChildPosition::Init => "│ ",
+                            ChildPosition::Last => "  ",
+                        })
+                        .collect();
+
+                    let skeletal = slice.skeletal_component.visualize();
+                    let name_str = &slice.name;
+
+                    // Determine color: parent dirs use directory color; leaves use coloring map
+                    let (prefix, suffix) = if row.node_info.children_count > 0 {
+                        (Color::DIRECTORY_ANSI_PREFIX, Color::RESET)
+                    } else if let Some(color) = coloring.get(row.node_info.name) {
+                        if color.ansi_prefix.is_empty() {
+                            ("", "")
+                        } else {
+                            (color.ansi_prefix.as_str(), Color::RESET)
+                        }
+                    } else {
+                        ("", "")
+                    };
+
+                    let spaces = " ".repeat(padding);
+                    format!("{indent}{skeletal}{prefix}{name_str}{suffix}{spaces}")
+                } else {
+                    format!("{}", align_left(&row.tree_horizontal_slice, tree_width))
+                };
+
                 format!(
                     "{size} {tree}│{bar}│{ratio}",
                     size = align_right(&row.size, size_width),
-                    tree = align_left(&row.tree_horizontal_slice, tree_width),
                     bar = row.proportion_bar.display(self.bar_alignment),
                     ratio = align_right(&row.percentage, PERCENTAGE_COLUMN_MAX_WIDTH),
                 )

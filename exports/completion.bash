@@ -23,7 +23,7 @@ _pdu() {
 
     case "${cmd}" in
         pdu)
-            opts="-b -H -q -d -w -m -s -p -h -V --json-input --json-output --bytes-format --detect-links --dedupe-links --deduplicate-hardlinks --top-down --align-right --quantity --depth --max-depth --width --total-width --column-width --min-ratio --no-sort --no-errors --silent-errors --progress --threads --omit-json-shared-details --omit-json-shared-summary --help --version [FILES]..."
+            opts="-b -H -q -d -w -m -s -p -h -V --json-input --json-output --bytes-format --detect-links --dedupe-links --deduplicate-hardlinks --top-down --align-right --quantity --depth --max-depth --width --total-width --column-width --min-ratio --no-sort --no-errors --silent-errors --progress --threads --omit-json-shared-details --omit-json-shared-summary --color --help --version [FILES]..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -83,6 +83,10 @@ _pdu() {
                     ;;
                 --threads)
                     COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --color)
+                    COMPREPLY=($(compgen -W "auto always never" -- "${cur}"))
                     return 0
                     ;;
                 *)

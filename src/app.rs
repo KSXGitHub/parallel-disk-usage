@@ -86,6 +86,7 @@ impl App {
                         column_width_distribution,
                         direction,
                         bar_alignment,
+                        coloring: None,
                     };
 
                     let JsonShared { details, summary } = shared;
@@ -293,6 +294,7 @@ impl App {
                     no_sort,
                     omit_json_shared_details,
                     omit_json_shared_summary,
+                    color,
                     ..
                 } => Sub {
                     direction: Direction::from_top_down(top_down),
@@ -307,6 +309,7 @@ impl App {
                     max_depth,
                     min_ratio,
                     no_sort,
+                    color,
                 }
                 .run(),
             )*} };

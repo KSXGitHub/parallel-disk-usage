@@ -41,6 +41,7 @@ macro_rules! test_case {
                 bytes_format: $bytes_format,
                 direction: Direction::$direction,
                 bar_alignment: BarAlignment::$bar_alignment,
+                coloring: None,
             }
             .to_string();
             let expected = $expected;
