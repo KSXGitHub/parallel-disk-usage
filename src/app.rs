@@ -15,7 +15,7 @@ use clap::Parser;
 use hdd::any_path_is_in_hdd;
 use pipe_trait::Pipe;
 use std::{io::stdin, time::Duration};
-use sub::{sub, JsonOutputParam};
+use sub::{JsonOutputParam, Sub};
 use sysinfo::Disks;
 
 #[cfg(unix)]
@@ -292,7 +292,7 @@ impl App {
                     omit_json_shared_details,
                     omit_json_shared_summary,
                     ..
-                } => sub()
+                } => Sub::builder()
                     .direction(Direction::from_top_down(top_down))
                     .bar_alignment(BarAlignment::from_align_right(align_right))
                     .size_getter(<$size_getter as GetSizeUtils>::INSTANCE)
@@ -305,6 +305,7 @@ impl App {
                     .max_depth(max_depth)
                     .min_ratio(min_ratio)
                     .no_sort(no_sort)
+                    .run()
                     .run(),
             )*} };
         }
