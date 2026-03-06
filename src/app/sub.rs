@@ -64,6 +64,12 @@ where
     HardlinksHandler: RecordHardlinks<Size, Report> + HardlinkSubroutines<Size> + Sync,
     JsonTree<Size>: Into<JsonDataBody>,
 {
+    let files = if files.is_empty() {
+        vec![PathBuf::from(".")]
+    } else {
+        files
+    };
+
     let max_depth_u64 = max_depth.get();
 
     let mut iter = files
@@ -78,24 +84,9 @@ where
                 .call()
         });
 
-    let data_tree = if let Some(data_tree) = iter.next() {
-        data_tree
-    } else {
-        return sub()
-            .files(vec![".".into()])
-            .json_output(json_output)
-            .bytes_format(bytes_format)
-            .direction(direction)
-            .bar_alignment(bar_alignment)
-            .column_width_distribution(column_width_distribution)
-            .max_depth(max_depth)
-            .size_getter(size_getter)
-            .hardlinks_handler(hardlinks_handler)
-            .reporter(reporter)
-            .min_ratio(min_ratio)
-            .no_sort(no_sort)
-            .run();
-    };
+    let data_tree = iter
+        .next()
+        .expect("iterator should have at least one element after normalizing empty files to [\".\"]");
 
     let only_one_arg = iter.len() == 0; // ExactSizeIterator::is_empty is unstable
     let data_tree = if only_one_arg {
