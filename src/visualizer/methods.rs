@@ -12,10 +12,7 @@ use node_info::*;
 use table::*;
 use tree_table::*;
 
-use super::{
-    coloring::maybe_color_slice,
-    ColumnWidthDistribution, Visualizer,
-};
+use super::{coloring::maybe_color_slice, ColumnWidthDistribution, Visualizer};
 use crate::size;
 use pipe_trait::Pipe;
 use std::{cmp::min, ffi::OsStr, fmt::Display, iter::once};
