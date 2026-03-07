@@ -47,7 +47,7 @@ pub enum Color {
 
 impl Color {
     /// Get the ANSI prefix for this color from the given prefix table.
-    pub fn ansi_prefix(self, prefixes: &LsColors) -> AnsiPrefix<'_> {
+    pub(super) fn ansi_prefix(self, prefixes: &LsColors) -> AnsiPrefix<'_> {
         AnsiPrefix(prefixes.prefix_str(self))
     }
 }
@@ -58,7 +58,7 @@ pub struct AnsiPrefix<'a>(&'a str);
 
 impl AnsiPrefix<'_> {
     /// Returns the reset suffix to emit after this prefix, or `""` if no prefix.
-    pub fn suffix(&self) -> &'static str {
+    pub(super) fn suffix(&self) -> &'static str {
         if self.0.is_empty() {
             ""
         } else {
