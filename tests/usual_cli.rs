@@ -28,7 +28,7 @@ use parallel_disk_usage::{
     visualizer::{Color, Coloring},
 };
 #[cfg(unix)]
-use std::{collections::HashMap, ffi::OsString};
+use std::{collections::HashMap, ffi::OsStr};
 
 fn stdio(command: Command) -> Command {
     command
@@ -858,8 +858,7 @@ fn color_always() {
     let leaf_colors = HashMap::from(leaf_colors.map(|(path, color)| {
         (
             path.split('/')
-                .map(ToString::to_string)
-                .map(OsString::from)
+                .map(AsRef::<OsStr>::as_ref)
                 .collect::<Vec<_>>(),
             color,
         )

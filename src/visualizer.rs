@@ -62,7 +62,7 @@ where
     /// Distribution and total number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
     /// Optional coloring configuration for colorful output, mapping full node paths to colors.
-    pub coloring: Option<&'a Coloring>,
+    pub coloring: Option<&'a Coloring<'a>>,
 }
 
 mod copy;
