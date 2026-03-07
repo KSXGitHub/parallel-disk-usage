@@ -20,7 +20,7 @@ impl LsColors {
     /// Parse an `LS_COLORS`-format string into an [`LsColors`].
     ///
     /// Unrecognized or invalid entries are silently ignored.
-    pub fn from_str(input: &str) -> Self {
+    pub fn from_ls_colors_string(input: &str) -> Self {
         Self::from_ls_colors_crate(&lscolors::LsColors::from_string(input))
     }
 

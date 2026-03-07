@@ -930,7 +930,7 @@ fn color_always() {
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
 
-    let ls_colors = LsColors::from_str(LS_COLORS);
+    let ls_colors = LsColors::from_ls_colors_string(LS_COLORS);
     let map = HashMap::from([
         (
             OsStringDisplay::os_string_from("file-a1.txt"),
