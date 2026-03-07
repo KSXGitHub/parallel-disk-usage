@@ -13,60 +13,27 @@ use table::*;
 use tree_table::*;
 
 use super::{ChildPosition, Color, ColumnWidthDistribution, TreeHorizontalSlice, Visualizer};
-use crate::size;
-use lscolors::{Indicator, LsColors};
+use crate::{size, AnsiPrefixes};
 use std::{
     cmp::min,
     fmt::{self, Display},
     hash::Hash,
-    sync::LazyLock,
 };
 use zero_copy_pads::{align_left, align_right, Width};
 
-struct AnsiPrefixes {
-    directory: String,
-    normal: String,
-    executable: String,
-    symlink: String,
-}
-
-static ANSI_PREFIXES: LazyLock<AnsiPrefixes> = LazyLock::new(|| {
-    let ls_colors = LsColors::from_env().unwrap_or_default();
-    let compute = |indicator: Indicator| {
-        ls_colors
-            .style_for_indicator(indicator)
-            .map(|s| s.to_nu_ansi_term_style().prefix().to_string())
-            .unwrap_or_default()
-    };
-    AnsiPrefixes {
-        directory: compute(Indicator::Directory),
-        normal: compute(Indicator::RegularFile),
-        executable: compute(Indicator::ExecutableFile),
-        symlink: compute(Indicator::SymbolicLink),
-    }
-});
-
-fn color_ansi_prefix(color: Color) -> &'static str {
-    match color {
-        Color::Directory => &ANSI_PREFIXES.directory,
-        Color::Normal => &ANSI_PREFIXES.normal,
-        Color::Executable => &ANSI_PREFIXES.executable,
-        Color::Symlink => &ANSI_PREFIXES.symlink,
-    }
-}
-
-struct ColoredSlice<'a> {
-    slice: &'a TreeHorizontalSlice<String>,
+struct ColoredTreeHorizontalSlice<'a> {
+    slice: TreeHorizontalSlice<String>,
     color: Color,
+    ansi_prefixes: &'a AnsiPrefixes,
 }
 
-impl fmt::Display for ColoredSlice<'_> {
+impl fmt::Display for ColoredTreeHorizontalSlice<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let TreeHorizontalSlice {
             ancestor_relative_positions,
             skeletal_component,
             name,
-        } = self.slice;
+        } = &self.slice;
         for pos in ancestor_relative_positions {
             let connector = match pos {
                 ChildPosition::Init => "│ ",
@@ -74,13 +41,13 @@ impl fmt::Display for ColoredSlice<'_> {
             };
             write!(f, "{connector}")?;
         }
-        let prefix = color_ansi_prefix(self.color);
-        let suffix = if prefix.is_empty() { "" } else { "\x1b[0m" };
+        let prefix = self.color.ansi_prefix(self.ansi_prefixes);
+        let suffix = prefix.suffix();
         write!(f, "{skeletal_component}{prefix}{name}{suffix}")
     }
 }
 
-impl Width for ColoredSlice<'_> {
+impl Width for ColoredTreeHorizontalSlice<'_> {
     fn width(&self) -> usize {
         self.slice.width()
     }
@@ -151,25 +118,38 @@ where
         bar_table
             .into_iter()
             .map(|row| {
-                let BarRow { tree_row, proportion_bar } = row;
-                let TreeRow { initial_row, tree_horizontal_slice: slice } = tree_row;
+                let BarRow {
+                    tree_row,
+                    proportion_bar,
+                } = row;
+                let TreeRow {
+                    initial_row,
+                    tree_horizontal_slice,
+                } = tree_row;
 
-                let node_color = self.coloring.and_then(|coloring| {
-                    if initial_row.node_info.children_count > 0 {
+                let colored = self.coloring.and_then(|coloring| {
+                    let color = if initial_row.node_info.children_count > 0 {
                         Some(Color::Directory)
                     } else {
-                        coloring.get(initial_row.node_info.name).copied()
-                    }
+                        coloring.map.get(initial_row.node_info.name).copied()
+                    }?;
+                    Some((color, &coloring.ansi_prefixes))
                 });
 
                 let aligned_colored_slice;
                 let aligned_plain_slice;
-                let tree = if let Some(color) = node_color {
-                    aligned_colored_slice =
-                        align_left(ColoredSlice { slice: &slice, color }, tree_width);
+                let tree = if let Some((color, ansi_prefixes)) = colored {
+                    aligned_colored_slice = align_left(
+                        ColoredTreeHorizontalSlice {
+                            slice: tree_horizontal_slice,
+                            color,
+                            ansi_prefixes,
+                        },
+                        tree_width,
+                    );
                     format_args!("{aligned_colored_slice}")
                 } else {
-                    aligned_plain_slice = align_left(&slice, tree_width);
+                    aligned_plain_slice = align_left(&tree_horizontal_slice, tree_width);
                     format_args!("{aligned_plain_slice}")
                 };
 

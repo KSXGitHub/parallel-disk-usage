@@ -10,7 +10,8 @@ use crate::{
     runtime_error::RuntimeError,
     size,
     status_board::GLOBAL_STATUS_BOARD,
-    visualizer::{BarAlignment, Color, ColumnWidthDistribution, Direction, Visualizer},
+    visualizer::{BarAlignment, Color, Coloring, ColumnWidthDistribution, Direction, Visualizer},
+    AnsiPrefixes,
 };
 use pipe_trait::Pipe;
 use serde::Serialize;
@@ -56,6 +57,8 @@ where
     pub no_sort: bool,
     /// When to use colors in the output.
     pub color: ColorWhen,
+    /// ANSI prefix strings read from `LS_COLORS`.
+    pub ansi_prefixes: AnsiPrefixes,
 }
 
 impl<Size, SizeGetter, HardlinksHandler, Report> Sub<Size, SizeGetter, HardlinksHandler, Report>
@@ -82,6 +85,7 @@ where
             min_ratio,
             no_sort,
             color,
+            ansi_prefixes,
         } = self;
 
         let max_depth = max_depth.get();
@@ -106,6 +110,7 @@ where
                 files: vec![".".into()],
                 hardlinks_handler,
                 reporter,
+                ansi_prefixes,
                 ..self
             }
             .run();
@@ -201,10 +206,10 @@ where
             ColorWhen::Auto => stdout().is_terminal(),
         };
 
-        let coloring: Option<HashMap<OsStringDisplay, Color>> = if use_color {
+        let coloring: Option<Coloring<OsStringDisplay>> = if use_color {
             let mut map = HashMap::new();
             build_coloring_map(&data_tree, PathBuf::new(), &mut map);
-            Some(map)
+            Some(Coloring::new(ansi_prefixes, map))
         } else {
             None
         };

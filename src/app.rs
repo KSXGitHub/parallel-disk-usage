@@ -12,6 +12,7 @@ use crate::{
     runtime_error::RuntimeError,
     size,
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
+    AnsiPrefixes,
 };
 use clap::Parser;
 use hdd::any_path_is_in_hdd;
@@ -27,6 +28,8 @@ use crate::get_size::{GetBlockCount, GetBlockSize};
 pub struct App {
     /// The CLI arguments.
     args: Args,
+    /// ANSI prefix strings read from `LS_COLORS`.
+    ansi_prefixes: AnsiPrefixes,
 }
 
 impl App {
@@ -34,6 +37,7 @@ impl App {
     pub fn from_env() -> Self {
         App {
             args: Args::parse(),
+            ansi_prefixes: AnsiPrefixes::from_env(),
         }
     }
 
@@ -46,6 +50,8 @@ impl App {
         //
         // The other operations which are invoked frequently should not utilize dynamic dispatch.
 
+        // Extract `ansi_prefixes` by move before `match self.args` consumes the rest of `self`.
+        let ansi_prefixes = self.ansi_prefixes;
         let column_width_distribution = self.args.column_width_distribution();
 
         if self.args.json_input {
@@ -310,6 +316,7 @@ impl App {
                     min_ratio,
                     no_sort,
                     color,
+                    ansi_prefixes,
                 }
                 .run(),
             )*} };
