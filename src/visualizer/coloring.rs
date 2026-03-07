@@ -46,19 +46,23 @@ pub enum Color {
 }
 
 impl Color {
+    // TODO: reconsider the visibility of this function once the TODOs in
+    //       `visualizer/methods.rs` have been dealt with.
     /// Get the ANSI prefix for this color from the given prefix table.
     pub(super) fn ansi_prefix(self, prefixes: &LsColors) -> AnsiPrefix<'_> {
         AnsiPrefix(prefixes.prefix_str(self))
     }
 }
 
+// TODO: reconsider the of this struct once the TODOs in
+//       `visualizer/methods.rs` have been dealt with.
 /// ANSI prefix wrapper for a [`Color`] variant, implements [`Display`].
 #[derive(Display)]
 pub(super) struct AnsiPrefix<'a>(&'a str);
 
 impl AnsiPrefix<'_> {
     /// Returns the reset suffix to emit after this prefix, or `""` if no prefix.
-    pub(super) fn suffix(&self) -> &'static str {
+    fn suffix(&self) -> &'static str {
         if self.0.is_empty() {
             ""
         } else {
@@ -69,6 +73,8 @@ impl AnsiPrefix<'_> {
 
 /// A [`TreeHorizontalSlice`] with its color applied, used for rendering.
 pub(super) struct ColoredTreeHorizontalSlice<'a> {
+    // TODO: reconsider the following visibilities once the TODOs in
+    //       `visualizer/methods.rs` have been dealt with.
     pub(super) slice: TreeHorizontalSlice<String>,
     pub(super) color: Color,
     pub(super) ls_colors: &'a LsColors,
