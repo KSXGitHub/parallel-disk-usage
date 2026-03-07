@@ -7,6 +7,9 @@ jobs:
   competing_benchmark:
     name: Benchmark
 
+    permissions:
+      contents: read
+
     # benchmark needs to run in a quiet environment, without other processes to produce noise.
     runs-on: ubuntu-latest
 
