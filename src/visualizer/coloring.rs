@@ -1,26 +1,26 @@
 use super::{ChildPosition, TreeHorizontalSlice};
 use crate::ls_colors::LsColors;
 use derive_more::Display;
-use std::{collections::HashMap, ffi::OsString, fmt};
+use std::{collections::HashMap, ffi::OsStr, fmt};
 use zero_copy_pads::Width;
 
 /// Coloring configuration: ANSI prefix strings from the environment and a full-path-to-color map.
 #[derive(Debug)]
-pub struct Coloring {
+pub struct Coloring<'a> {
     ls_colors: LsColors,
-    map: HashMap<Vec<OsString>, Color>,
+    map: HashMap<Vec<&'a OsStr>, Color>,
 }
 
-impl Coloring {
+impl<'a> Coloring<'a> {
     /// Create a new [`Coloring`] from LS_COLORS prefixes and a path-components-to-color map.
-    pub fn new(ls_colors: LsColors, map: HashMap<Vec<OsString>, Color>) -> Self {
+    pub fn new(ls_colors: LsColors, map: HashMap<Vec<&'a OsStr>, Color>) -> Self {
         Coloring { ls_colors, map }
     }
 
     /// Return `(color, ls_colors)` for a node, used to build a colored slice for rendering.
     pub(super) fn node_color(
         &self,
-        path_components: &[OsString],
+        path_components: &[&'a OsStr],
         has_children: bool,
     ) -> Option<(Color, &LsColors)> {
         let color = if has_children {

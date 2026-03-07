@@ -17,7 +17,7 @@ use pipe_trait::Pipe;
 use serde::Serialize;
 use std::{
     collections::HashMap,
-    ffi::OsString,
+    ffi::OsStr,
     io::stdout,
     iter::once,
     path::{Path, PathBuf},
@@ -288,12 +288,12 @@ where
 /// Leaf nodes (files or childless directories after pruning) are added to the map.
 /// Nodes with children are skipped because the [`Visualizer`] uses the children count to
 /// determine their color at render time.
-fn build_coloring_map(
-    node: &DataTree<OsStringDisplay, impl size::Size>,
-    path_stack: &mut Vec<OsString>,
-    map: &mut HashMap<Vec<OsString>, Color>,
+fn build_coloring_map<'a>(
+    node: &'a DataTree<OsStringDisplay, impl size::Size>,
+    path_stack: &mut Vec<&'a OsStr>,
+    map: &mut HashMap<Vec<&'a OsStr>, Color>,
 ) {
-    path_stack.push(node.name().as_os_str().to_os_string());
+    path_stack.push(node.name().as_os_str());
     if node.children().is_empty() {
         let color = file_color(&path_stack.iter().collect::<PathBuf>());
         map.insert(path_stack.clone(), color);

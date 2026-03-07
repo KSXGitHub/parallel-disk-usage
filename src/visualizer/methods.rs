@@ -14,11 +14,7 @@ use tree_table::*;
 
 use super::{coloring::ColoredTreeHorizontalSlice, ColumnWidthDistribution, Visualizer};
 use crate::size;
-use std::{
-    cmp::min,
-    ffi::{OsStr, OsString},
-    fmt::Display,
-};
+use std::{cmp::min, ffi::OsStr, fmt::Display};
 use zero_copy_pads::{align_left, align_right};
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>
@@ -96,13 +92,11 @@ where
                 } = tree_row;
 
                 let colored = self.coloring.and_then(|coloring| {
-                    let path_components: Vec<OsString> = initial_row
+                    let path_components: Vec<&OsStr> = initial_row
                         .ancestors
                         .iter()
-                        .map(|a| a.name.as_ref().to_os_string())
-                        .chain(std::iter::once(
-                            initial_row.node_info.name.as_ref().to_os_string(),
-                        ))
+                        .map(|a| a.name.as_ref())
+                        .chain(std::iter::once(initial_row.node_info.name.as_ref()))
                         .collect();
                     coloring.node_color(&path_components, initial_row.node_info.children_count > 0)
                 });
