@@ -12,7 +12,10 @@ use node_info::*;
 use table::*;
 use tree_table::*;
 
-use super::{coloring::ColoredTreeHorizontalSlice, ColumnWidthDistribution, Visualizer};
+use super::{
+    coloring::{ColoredTreeHorizontalSlice, MaybeColoredTreeHorizontalSlice},
+    ColumnWidthDistribution, Visualizer,
+};
 use crate::size;
 use pipe_trait::Pipe;
 use std::{cmp::min, ffi::OsStr, fmt::Display, iter::once};
@@ -102,21 +105,20 @@ where
                     coloring.node_color(&path_components, initial_row.node_info.children_count > 0)
                 });
 
-                let aligned_colored_slice;
-                let aligned_plain_slice;
                 let tree = if let Some((color, ls_colors)) = colored {
-                    aligned_colored_slice = align_left(
-                        ColoredTreeHorizontalSlice {
+                    align_left(
+                        MaybeColoredTreeHorizontalSlice::Colorful(ColoredTreeHorizontalSlice {
                             slice: tree_horizontal_slice,
                             color,
                             ls_colors,
-                        },
+                        }),
                         tree_width,
-                    );
-                    format_args!("{aligned_colored_slice}")
+                    )
                 } else {
-                    aligned_plain_slice = align_left(&tree_horizontal_slice, tree_width);
-                    format_args!("{aligned_plain_slice}")
+                    align_left(
+                        MaybeColoredTreeHorizontalSlice::Colorless(tree_horizontal_slice),
+                        tree_width,
+                    )
                 };
 
                 format!(
