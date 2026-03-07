@@ -12,12 +12,8 @@ use node_info::*;
 use table::*;
 use tree_table::*;
 
-use super::{
-    coloring::{ColoredTreeHorizontalSlice, MaybeColoredTreeHorizontalSlice},
-    ColumnWidthDistribution, Visualizer,
-};
+use super::{coloring::MaybeColoredTreeHorizontalSlice, ColumnWidthDistribution, Visualizer};
 use crate::size;
-use pipe_trait::Pipe;
 use std::{cmp::min, ffi::OsStr, fmt::Display, iter::once};
 use zero_copy_pads::{align_left, align_right};
 
@@ -95,25 +91,18 @@ where
                     tree_horizontal_slice,
                 } = tree_row;
 
-                // TODO: move this `colored` code block into `visualizer/coloring.rs`.
-                let colored = self.coloring.and_then(|coloring| {
-                    let path_components: Vec<&OsStr> = initial_row
-                        .ancestors
-                        .iter()
-                        .map(|node| node.name.as_ref())
-                        .chain(initial_row.node_info.name.pipe_as_ref(once))
-                        .collect();
-                    coloring.node_color(&path_components, initial_row.node_info.children_count > 0)
-                });
-
-                // TODO: move this `tree` code block into `visualizer/coloring.rs`.
-                let tree = match colored {
-                    Some((color, ls_colors)) => {
-                        MaybeColoredTreeHorizontalSlice::Colorful(ColoredTreeHorizontalSlice {
-                            slice: tree_horizontal_slice,
-                            color,
-                            ls_colors,
-                        })
+                let tree = match self.coloring {
+                    Some(coloring) => {
+                        let path_components = initial_row
+                            .ancestors
+                            .iter()
+                            .map(|node| node.name.as_ref())
+                            .chain(once(initial_row.node_info.name.as_ref()));
+                        coloring.colored_slice(
+                            path_components,
+                            initial_row.node_info.children_count > 0,
+                            tree_horizontal_slice,
+                        )
                     }
                     None => MaybeColoredTreeHorizontalSlice::Colorless(tree_horizontal_slice),
                 };

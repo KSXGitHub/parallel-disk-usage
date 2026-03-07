@@ -18,7 +18,7 @@ impl<'a> Coloring<'a> {
     }
 
     /// Return `(color, ls_colors)` for a node, used to build a colored slice for rendering.
-    pub(super) fn node_color(
+    fn node_color(
         &self,
         path_components: &[&'a OsStr],
         has_children: bool,
@@ -29,6 +29,26 @@ impl<'a> Coloring<'a> {
             self.map.get(path_components).copied()
         }?;
         Some((color, &self.ls_colors))
+    }
+
+    /// Build a [`MaybeColoredTreeHorizontalSlice`] for a node, applying color when available.
+    pub(super) fn colored_slice(
+        &'a self,
+        path_components: impl IntoIterator<Item = &'a OsStr>,
+        has_children: bool,
+        slice: TreeHorizontalSlice<String>,
+    ) -> MaybeColoredTreeHorizontalSlice<'a> {
+        let path: Vec<&'a OsStr> = path_components.into_iter().collect();
+        match self.node_color(&path, has_children) {
+            Some((color, ls_colors)) => {
+                MaybeColoredTreeHorizontalSlice::Colorful(ColoredTreeHorizontalSlice {
+                    slice,
+                    color,
+                    ls_colors,
+                })
+            }
+            None => MaybeColoredTreeHorizontalSlice::Colorless(slice),
+        }
     }
 }
 
@@ -46,19 +66,15 @@ pub enum Color {
 }
 
 impl Color {
-    // TODO: reconsider the visibility of this function once the TODOs in
-    //       `visualizer/methods.rs` have been dealt with.
     /// Get the ANSI prefix for this color from the given prefix table.
-    pub(super) fn ansi_prefix(self, prefixes: &LsColors) -> AnsiPrefix<'_> {
+    fn ansi_prefix(self, prefixes: &LsColors) -> AnsiPrefix<'_> {
         AnsiPrefix(prefixes.prefix_str(self))
     }
 }
 
-// TODO: reconsider the of this struct once the TODOs in
-//       `visualizer/methods.rs` have been dealt with.
 /// ANSI prefix wrapper for a [`Color`] variant, implements [`Display`].
 #[derive(Display)]
-pub(super) struct AnsiPrefix<'a>(&'a str);
+struct AnsiPrefix<'a>(&'a str);
 
 impl AnsiPrefix<'_> {
     /// Returns the reset suffix to emit after this prefix, or `""` if no prefix.
@@ -73,11 +89,9 @@ impl AnsiPrefix<'_> {
 
 /// A [`TreeHorizontalSlice`] with its color applied, used for rendering.
 pub(super) struct ColoredTreeHorizontalSlice<'a> {
-    // TODO: reconsider the following visibilities once the TODOs in
-    //       `visualizer/methods.rs` have been dealt with.
-    pub(super) slice: TreeHorizontalSlice<String>,
-    pub(super) color: Color,
-    pub(super) ls_colors: &'a LsColors,
+    slice: TreeHorizontalSlice<String>,
+    color: Color,
+    ls_colors: &'a LsColors,
 }
 
 impl fmt::Display for ColoredTreeHorizontalSlice<'_> {
