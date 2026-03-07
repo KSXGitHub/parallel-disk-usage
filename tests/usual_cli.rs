@@ -877,12 +877,11 @@ fn color_always_with_and_without_ls_colors() {
         .trim_end()
         .to_string();
 
-    let mut without_ls_colors_cmd = Command::new(PDU)
+    let without_ls_colors = Command::new(PDU)
         .with_current_dir(&workspace)
         .with_arg("--color=always")
-        .with_arg("--total-width=100");
-    without_ls_colors_cmd.env_remove("LS_COLORS");
-    let without_ls_colors = without_ls_colors_cmd
+        .with_arg("--total-width=100")
+        .without_env("LS_COLORS")
         .pipe(stdio)
         .output()
         .expect("spawn command with --color=always and without LS_COLORS");
