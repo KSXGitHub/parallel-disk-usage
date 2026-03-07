@@ -19,39 +19,39 @@ use std::{
     cmp::min,
     fmt::{self, Display},
     hash::Hash,
-    sync::OnceLock,
+    sync::LazyLock,
 };
 use zero_copy_pads::{align_left, align_right, Width};
 
-fn ls_colors() -> &'static LsColors {
-    static LS_COLORS: OnceLock<LsColors> = OnceLock::new();
-    LS_COLORS.get_or_init(|| LsColors::from_env().unwrap_or_default())
+struct AnsiPrefixes {
+    directory: String,
+    normal: String,
+    executable: String,
+    symlink: String,
 }
 
-fn color_ansi_prefix(color: Color) -> &'static str {
-    fn compute_prefix(indicator: Indicator) -> String {
-        ls_colors()
+static ANSI_PREFIXES: LazyLock<AnsiPrefixes> = LazyLock::new(|| {
+    let ls_colors = LsColors::from_env().unwrap_or_default();
+    let compute = |indicator: Indicator| {
+        ls_colors
             .style_for_indicator(indicator)
             .map(|s| s.to_nu_ansi_term_style().prefix().to_string())
             .unwrap_or_default()
+    };
+    AnsiPrefixes {
+        directory: compute(Indicator::Directory),
+        normal: compute(Indicator::RegularFile),
+        executable: compute(Indicator::ExecutableFile),
+        symlink: compute(Indicator::SymbolicLink),
     }
+});
+
+fn color_ansi_prefix(color: Color) -> &'static str {
     match color {
-        Color::Directory => {
-            static PREFIX: OnceLock<String> = OnceLock::new();
-            PREFIX.get_or_init(|| compute_prefix(Indicator::Directory))
-        }
-        Color::Normal => {
-            static PREFIX: OnceLock<String> = OnceLock::new();
-            PREFIX.get_or_init(|| compute_prefix(Indicator::RegularFile))
-        }
-        Color::Executable => {
-            static PREFIX: OnceLock<String> = OnceLock::new();
-            PREFIX.get_or_init(|| compute_prefix(Indicator::ExecutableFile))
-        }
-        Color::Symlink => {
-            static PREFIX: OnceLock<String> = OnceLock::new();
-            PREFIX.get_or_init(|| compute_prefix(Indicator::SymbolicLink))
-        }
+        Color::Directory => &ANSI_PREFIXES.directory,
+        Color::Normal => &ANSI_PREFIXES.normal,
+        Color::Executable => &ANSI_PREFIXES.executable,
+        Color::Symlink => &ANSI_PREFIXES.symlink,
     }
 }
 
@@ -151,33 +151,33 @@ where
         bar_table
             .into_iter()
             .map(|row| {
-                let slice = &row.tree_horizontal_slice;
+                let BarRow { tree_row, proportion_bar } = row;
+                let TreeRow { initial_row, tree_horizontal_slice: slice } = tree_row;
 
                 let node_color = self.coloring.and_then(|coloring| {
-                    if row.node_info.children_count > 0 {
+                    if initial_row.node_info.children_count > 0 {
                         Some(Color::Directory)
                     } else {
-                        coloring.get(row.node_info.name).copied()
+                        coloring.get(initial_row.node_info.name).copied()
                     }
                 });
 
-                macro_rules! render_row {
-                    ($tree:expr) => {
-                        format!(
-                            "{size} {tree}│{bar}│{ratio}",
-                            size = align_right(&row.size, size_width),
-                            tree = $tree,
-                            bar = row.proportion_bar.display(self.bar_alignment),
-                            ratio = align_right(&row.percentage, PERCENTAGE_COLUMN_MAX_WIDTH),
-                        )
-                    };
-                }
-
-                if let Some(color) = node_color {
-                    render_row!(align_left(ColoredSlice { slice, color }, tree_width))
+                let aligned_colored;
+                let aligned_normal;
+                let tree = if let Some(color) = node_color {
+                    aligned_colored = align_left(ColoredSlice { slice: &slice, color }, tree_width);
+                    format_args!("{aligned_colored}")
                 } else {
-                    render_row!(align_left(slice, tree_width))
-                }
+                    aligned_normal = align_left(&slice, tree_width);
+                    format_args!("{aligned_normal}")
+                };
+
+                format!(
+                    "{size} {tree}│{bar}│{ratio}",
+                    size = align_right(&initial_row.size, size_width),
+                    bar = proportion_bar.display(self.bar_alignment),
+                    ratio = align_right(&initial_row.percentage, PERCENTAGE_COLUMN_MAX_WIDTH),
+                )
             })
             .collect()
     }
