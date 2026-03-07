@@ -1,0 +1,136 @@
+name: Competing Benchmark (pdu vs dust vs dua)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  competing_benchmark:
+    name: Benchmark
+
+    # benchmark needs to run in a quiet environment, without other processes to produce noise.
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Cache (rust)
+        uses: actions/cache@v5
+        timeout-minutes: 2
+        continue-on-error: true
+        with:
+          path: |
+            ~/.cargo
+            target
+          key: ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('**/Cargo.lock') }}
+            ${{ github.job }}-Linux-${{ hashFiles('rust-toolchain') }}-
+
+      - name: Install Rust
+        shell: bash
+        run: |
+          installer=$(mktemp -d)/install-rustup
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > $installer
+          bash $installer --default-toolchain $(cat rust-toolchain) -y
+
+      - name: Build pdu (master)
+        run: |
+          cargo build --release
+          echo "$(pwd)/target/release" >> "$GITHUB_PATH"
+
+      - name: Install dust (latest)
+        run: |
+          DUST_VERSION=$(curl -sf https://api.github.com/repos/bootandy/dust/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          echo "Installing dust ${DUST_VERSION}"
+          mkdir -p DUST.tmp
+          archive_name="dust-v${DUST_VERSION}-x86_64-unknown-linux-gnu"
+          curl -L "https://github.com/bootandy/dust/releases/download/v${DUST_VERSION}/${archive_name}.tar.gz" > tmp.dust.tar.gz
+          tar xf tmp.dust.tar.gz --directory=DUST.tmp
+          chmod +x "DUST.tmp/${archive_name}/dust"
+          echo "$(pwd)/DUST.tmp/${archive_name}" >> "$GITHUB_PATH"
+
+      - name: Install dua (latest)
+        run: |
+          DUA_VERSION=$(curl -sf https://api.github.com/repos/Byron/dua-cli/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          echo "Installing dua ${DUA_VERSION}"
+          mkdir -p DUA.tmp
+          archive_name="dua-v${DUA_VERSION}-x86_64-unknown-linux-musl"
+          curl -L "https://github.com/Byron/dua-cli/releases/download/v${DUA_VERSION}/${archive_name}.tar.gz" > tmp.dua.tar.gz
+          tar xf tmp.dua.tar.gz --directory=DUA.tmp
+          chmod +x "DUA.tmp/${archive_name}/dua"
+          echo "$(pwd)/DUA.tmp/${archive_name}" >> "$GITHUB_PATH"
+
+      - name: Install hyperfine
+        env:
+          REPO: https://github.com/sharkdp/hyperfine
+          VERSION: '1.19.0'
+        run: |
+          mkdir -p HYPERFINE.tmp
+          archive_name="hyperfine-v${VERSION}-x86_64-unknown-linux-gnu"
+          curl -L "${REPO}/releases/download/v${VERSION}/${archive_name}.tar.gz" > tmp.hyperfine.tar.gz
+          tar xf tmp.hyperfine.tar.gz --directory=HYPERFINE.tmp
+          chmod +x "HYPERFINE.tmp/${archive_name}/hyperfine"
+          echo "$(pwd)/HYPERFINE.tmp/${archive_name}" >> "$GITHUB_PATH"
+
+      - name: Inspect command locations
+        run: |
+          which pdu
+          which dust
+          which dua
+          which hyperfine
+
+      - name: Inspect versions
+        run: |
+          pdu --version
+          dust --version
+          dua --version
+          hyperfine --version
+
+      - name: Prepare directory to be measured
+        run: |
+          mkdir -p tmp.sample
+          curl -L https://github.com/torvalds/linux/archive/refs/tags/v5.12.zip > tmp.sample.zip
+          unzip tmp.sample.zip -d tmp.sample
+          ./ci/make-tree-with-hardlinks.sh tmp.sample
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '16.1.0'
+
+      - name: Cache (pnpm)
+        uses: actions/cache@v5
+        timeout-minutes: 2
+        continue-on-error: true
+        with:
+          path: ~/.pnpm-store/v3
+          key: pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+            pnpm-
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4.2.0
+        with:
+          version: '7.9.0'
+          run_install: 'true'
+
+      - name: Compile TypeScript
+        run: |
+          cd ci/github-actions
+          pnpm exec tsc
+
+      - name: Compare benchmark of pdu against dust and dua
+        run: node ci/github-actions/competing-benchmark-pdu-dust-dua.js
+
+      - name: Create chart for benchmark reports
+        run: node ci/github-actions/illustrate-benchmark-reports.js
+
+      - name: Create archive of benchmark reports
+        run: tar czf tmp.benchmark-reports.tar.gz tmp.benchmark-report.*
+
+      - name: Upload benchmark reports
+        uses: actions/upload-artifact@v7
+        with:
+          name: benchmark-reports
+          path: tmp.benchmark-reports.tar.gz
