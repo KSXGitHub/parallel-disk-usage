@@ -96,7 +96,7 @@ where
                     let path_components: Vec<&OsStr> = initial_row
                         .ancestors
                         .iter()
-                        .map(|a| a.name.as_ref())
+                        .map(|node| node.name.as_ref())
                         .chain(initial_row.node_info.name.pipe_as_ref(once))
                         .collect();
                     coloring.node_color(&path_components, initial_row.node_info.children_count > 0)
