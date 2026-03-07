@@ -14,8 +14,7 @@ use tree_table::*;
 
 use super::{coloring::maybe_color_slice, ColumnWidthDistribution, Visualizer};
 use crate::size;
-use pipe_trait::Pipe;
-use std::{cmp::min, ffi::OsStr, fmt::Display, iter::once};
+use std::{cmp::min, ffi::OsStr, fmt::Display};
 use zero_copy_pads::{align_left, align_right};
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>
@@ -92,15 +91,10 @@ where
                     tree_horizontal_slice,
                 } = tree_row;
 
-                let path_components: Vec<&OsStr> = initial_row
-                    .ancestors
-                    .iter()
-                    .map(|node| node.name.as_ref())
-                    .chain(initial_row.node_info.name.pipe_as_ref(once))
-                    .collect();
                 let tree = maybe_color_slice(
                     self.coloring,
-                    &path_components,
+                    initial_row.ancestors.iter().map(|node| node.name.as_ref()),
+                    initial_row.node_info.name.as_ref(),
                     initial_row.node_info.children_count > 0,
                     tree_horizontal_slice,
                 );

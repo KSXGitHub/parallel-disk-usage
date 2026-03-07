@@ -110,14 +110,21 @@ impl Width for ColoredTreeHorizontalSlice<'_> {
 }
 
 /// Wrap a [`TreeHorizontalSlice`] with color if coloring is available, otherwise return it as-is.
+///
+/// Path components are only constructed when coloring is enabled, avoiding
+/// unnecessary allocation in the common no-color case.
 pub(super) fn maybe_color_slice<'a, 'b>(
     coloring: Option<&'b Coloring<'a>>,
-    path_components: &[&'a OsStr],
+    ancestors: impl Iterator<Item = &'a OsStr>,
+    name: &'a OsStr,
     has_children: bool,
     slice: TreeHorizontalSlice<String>,
 ) -> MaybeColoredTreeHorizontalSlice<'b> {
     match coloring {
-        Some(coloring) => coloring.maybe_color_tree_slice(path_components, has_children, slice),
+        Some(coloring) => {
+            let path_components: Vec<&OsStr> = ancestors.chain(std::iter::once(name)).collect();
+            coloring.maybe_color_tree_slice(&path_components, has_children, slice)
+        }
         None => MaybeColoredTreeHorizontalSlice::Colorless(slice),
     }
 }
