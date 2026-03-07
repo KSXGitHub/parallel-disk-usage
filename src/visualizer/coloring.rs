@@ -19,7 +19,7 @@ impl<'a> Coloring<'a> {
 
     /// Look up the color for a node identified by its path components and whether it has children,
     /// then wrap the given [`TreeHorizontalSlice`] in the appropriate colored or colorless variant.
-    pub(super) fn maybe_color_tree_slice(
+    fn maybe_color_tree_slice(
         &self,
         path_components: &[&'a OsStr],
         has_children: bool,
@@ -106,6 +106,19 @@ impl fmt::Display for ColoredTreeHorizontalSlice<'_> {
 impl Width for ColoredTreeHorizontalSlice<'_> {
     fn width(&self) -> usize {
         self.slice.width()
+    }
+}
+
+/// Wrap a [`TreeHorizontalSlice`] with color if coloring is available, otherwise return it as-is.
+pub(super) fn maybe_color_slice<'a, 'b>(
+    coloring: Option<&'b Coloring<'a>>,
+    path_components: &[&'a OsStr],
+    has_children: bool,
+    slice: TreeHorizontalSlice<String>,
+) -> MaybeColoredTreeHorizontalSlice<'b> {
+    match coloring {
+        Some(coloring) => coloring.maybe_color_tree_slice(path_components, has_children, slice),
+        None => MaybeColoredTreeHorizontalSlice::Colorless(slice),
     }
 }
 

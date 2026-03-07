@@ -13,7 +13,7 @@ use table::*;
 use tree_table::*;
 
 use super::{
-    coloring::MaybeColoredTreeHorizontalSlice,
+    coloring::maybe_color_slice,
     ColumnWidthDistribution, Visualizer,
 };
 use crate::size;
@@ -95,22 +95,18 @@ where
                     tree_horizontal_slice,
                 } = tree_row;
 
-                let tree = match self.coloring {
-                    Some(coloring) => {
-                        let path_components: Vec<&OsStr> = initial_row
-                            .ancestors
-                            .iter()
-                            .map(|node| node.name.as_ref())
-                            .chain(initial_row.node_info.name.pipe_as_ref(once))
-                            .collect();
-                        coloring.maybe_color_tree_slice(
-                            &path_components,
-                            initial_row.node_info.children_count > 0,
-                            tree_horizontal_slice,
-                        )
-                    }
-                    None => MaybeColoredTreeHorizontalSlice::Colorless(tree_horizontal_slice),
-                };
+                let path_components: Vec<&OsStr> = initial_row
+                    .ancestors
+                    .iter()
+                    .map(|node| node.name.as_ref())
+                    .chain(initial_row.node_info.name.pipe_as_ref(once))
+                    .collect();
+                let tree = maybe_color_slice(
+                    self.coloring,
+                    &path_components,
+                    initial_row.node_info.children_count > 0,
+                    tree_horizontal_slice,
+                );
 
                 format!(
                     "{size} {tree}│{bar}│{ratio}",
