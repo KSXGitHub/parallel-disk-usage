@@ -9,7 +9,7 @@ pub mod tree;
 
 pub use bar_alignment::BarAlignment;
 pub use child_position::ChildPosition;
-pub use coloring::Color;
+pub use coloring::{AnsiPrefix, Color, Coloring};
 pub use column_width_distribution::ColumnWidthDistribution;
 pub use direction::Direction;
 pub use parenthood::Parenthood;
@@ -17,7 +17,7 @@ pub use proportion_bar::{ProportionBar, ProportionBarBlock};
 pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
 
 use super::{data_tree::DataTree, size};
-use std::{collections::HashMap, fmt::Display};
+use std::fmt::Display;
 
 /// Visualize a [`DataTree`].
 ///
@@ -62,7 +62,7 @@ where
     /// Distribution and total number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
     /// Mapping of names to colors for colorful output.
-    pub coloring: Option<&'a HashMap<Name, Color>>,
+    pub coloring: Option<&'a Coloring<Name>>,
 }
 
 mod copy;

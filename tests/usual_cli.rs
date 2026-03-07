@@ -805,3 +805,33 @@ fn multiple_names_max_depth_1() {
     assert!(lines.next().unwrap().contains("┌──(total)"));
     assert_eq!(lines.next(), None);
 }
+
+#[test]
+fn color_always_stripped_equals_never() {
+    let workspace = SampleWorkspace::default();
+
+    let always = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--color=always")
+        .with_arg("--total-width=100")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command with --color=always");
+    inspect_stderr(&always.stderr);
+    assert!(always.status.success(), "pdu exited with non-zero status");
+    let always_stripped =
+        strip_ansi_escapes::strip_str(String::from_utf8(always.stdout).expect("UTF-8"))
+            .trim_end()
+            .to_string();
+
+    let never = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--color=never")
+        .with_arg("--total-width=100")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command with --color=never")
+        .pipe(stdout_text);
+
+    assert_eq!(always_stripped, never);
+}
