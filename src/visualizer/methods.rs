@@ -95,6 +95,7 @@ where
                     tree_horizontal_slice,
                 } = tree_row;
 
+                // TODO: move this `colored` code block into `visualizer/coloring.rs`.
                 let colored = self.coloring.and_then(|coloring| {
                     let path_components: Vec<&OsStr> = initial_row
                         .ancestors
@@ -105,6 +106,7 @@ where
                     coloring.node_color(&path_components, initial_row.node_info.children_count > 0)
                 });
 
+                // TODO: move this `tree` code block into `visualizer/coloring.rs`.
                 let tree = match colored {
                     Some((color, ls_colors)) => {
                         MaybeColoredTreeHorizontalSlice::Colorful(ColoredTreeHorizontalSlice {
