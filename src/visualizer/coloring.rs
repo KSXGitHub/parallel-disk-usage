@@ -54,7 +54,7 @@ impl Color {
 
 /// ANSI prefix wrapper for a [`Color`] variant, implements [`Display`].
 #[derive(Display)]
-pub struct AnsiPrefix<'a>(&'a str);
+pub(super) struct AnsiPrefix<'a>(&'a str);
 
 impl AnsiPrefix<'_> {
     /// Returns the reset suffix to emit after this prefix, or `""` if no prefix.
