@@ -12,46 +12,10 @@ use node_info::*;
 use table::*;
 use tree_table::*;
 
-use super::{ChildPosition, Color, ColumnWidthDistribution, TreeHorizontalSlice, Visualizer};
-use crate::{size, AnsiPrefixes};
-use std::{
-    cmp::min,
-    fmt::{self, Display},
-    hash::Hash,
-};
-use zero_copy_pads::{align_left, align_right, Width};
-
-struct ColoredTreeHorizontalSlice<'a> {
-    slice: TreeHorizontalSlice<String>,
-    color: Color,
-    ansi_prefixes: &'a AnsiPrefixes,
-}
-
-impl fmt::Display for ColoredTreeHorizontalSlice<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let TreeHorizontalSlice {
-            ancestor_relative_positions,
-            skeletal_component,
-            name,
-        } = &self.slice;
-        for pos in ancestor_relative_positions {
-            let connector = match pos {
-                ChildPosition::Init => "│ ",
-                ChildPosition::Last => "  ",
-            };
-            write!(f, "{connector}")?;
-        }
-        let prefix = self.color.ansi_prefix(self.ansi_prefixes);
-        let suffix = prefix.suffix();
-        write!(f, "{skeletal_component}{prefix}{name}{suffix}")
-    }
-}
-
-impl Width for ColoredTreeHorizontalSlice<'_> {
-    fn width(&self) -> usize {
-        self.slice.width()
-    }
-}
+use super::{coloring::ColoredTreeHorizontalSlice, ColumnWidthDistribution, Visualizer};
+use crate::size;
+use std::{cmp::min, fmt::Display, hash::Hash};
+use zero_copy_pads::{align_left, align_right};
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>
 where
@@ -128,12 +92,10 @@ where
                 } = tree_row;
 
                 let colored = self.coloring.and_then(|coloring| {
-                    let color = if initial_row.node_info.children_count > 0 {
-                        Some(Color::Directory)
-                    } else {
-                        coloring.map.get(initial_row.node_info.name).copied()
-                    }?;
-                    Some((color, &coloring.ansi_prefixes))
+                    coloring.node_color(
+                        initial_row.node_info.name,
+                        initial_row.node_info.children_count > 0,
+                    )
                 });
 
                 let aligned_colored_slice;

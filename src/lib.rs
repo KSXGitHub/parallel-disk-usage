@@ -36,7 +36,6 @@ pub use clap_complete;
 #[cfg(feature = "cli")]
 pub use clap_utilities;
 
-pub mod ansi_prefixes;
 pub mod bytes_format;
 pub mod data_tree;
 pub mod fs_tree_builder;
@@ -44,13 +43,12 @@ pub mod get_size;
 pub mod hardlink;
 pub mod inode;
 pub mod json_data;
+pub mod ls_colors;
 pub mod os_string_display;
 pub mod reporter;
 pub mod size;
 pub mod status_board;
 pub mod tree_builder;
 pub mod visualizer;
-
-pub use ansi_prefixes::AnsiPrefixes;
 
 pub use zero_copy_pads;
