@@ -1,28 +1,32 @@
 use super::{ChildPosition, TreeHorizontalSlice};
 use crate::ls_colors::LsColors;
 use derive_more::Display;
-use std::{collections::HashMap, fmt, hash::Hash};
+use std::{
+    collections::HashMap,
+    fmt,
+    path::{Path, PathBuf},
+};
 use zero_copy_pads::Width;
 
-/// Coloring configuration: ANSI prefix strings from the environment and a name-to-color map.
+/// Coloring configuration: ANSI prefix strings from the environment and a full-path-to-color map.
 #[derive(Debug)]
-pub struct Coloring<Name> {
+pub struct Coloring {
     ansi_prefixes: LsColors,
-    map: HashMap<Name, Color>,
+    map: HashMap<PathBuf, Color>,
 }
 
-impl<Name: Hash + Eq> Coloring<Name> {
-    /// Create a new [`Coloring`] from ANSI prefixes and a name-to-color map.
-    pub fn new(ansi_prefixes: LsColors, map: HashMap<Name, Color>) -> Self {
+impl Coloring {
+    /// Create a new [`Coloring`] from ANSI prefixes and a full-path-to-color map.
+    pub fn new(ansi_prefixes: LsColors, map: HashMap<PathBuf, Color>) -> Self {
         Coloring { ansi_prefixes, map }
     }
 
     /// Return `(color, prefixes)` for a node, used to build a colored slice for rendering.
-    pub(super) fn node_color(&self, name: &Name, has_children: bool) -> Option<(Color, &LsColors)> {
+    pub(super) fn node_color(&self, path: &Path, has_children: bool) -> Option<(Color, &LsColors)> {
         let color = if has_children {
             Some(Color::Directory)
         } else {
-            self.map.get(name).copied()
+            self.map.get(path).copied()
         }?;
         Some((color, &self.ansi_prefixes))
     }

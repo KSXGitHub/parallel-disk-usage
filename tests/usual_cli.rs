@@ -27,7 +27,7 @@ use parallel_disk_usage::{
     visualizer::{Color, Coloring},
 };
 #[cfg(unix)]
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 #[cfg(unix)]
 use parallel_disk_usage::get_size::{GetBlockCount, GetBlockSize};
@@ -932,39 +932,15 @@ fn color_always() {
 
     let ls_colors = LsColors::from_ls_colors_string(LS_COLORS);
     let map = HashMap::from([
-        (
-            OsStringDisplay::os_string_from("file-a1.txt"),
-            Color::Normal,
-        ),
-        (
-            OsStringDisplay::os_string_from("file-a2.txt"),
-            Color::Normal,
-        ),
-        (
-            OsStringDisplay::os_string_from("file-a3.txt"),
-            Color::Normal,
-        ),
-        (
-            OsStringDisplay::os_string_from("file-b1.txt"),
-            Color::Normal,
-        ),
-        (
-            OsStringDisplay::os_string_from("file-root.txt"),
-            Color::Normal,
-        ),
-        (OsStringDisplay::os_string_from("link-dir"), Color::Symlink),
-        (
-            OsStringDisplay::os_string_from("link-file.txt"),
-            Color::Symlink,
-        ),
-        (
-            OsStringDisplay::os_string_from("empty-dir-1"),
-            Color::Directory,
-        ),
-        (
-            OsStringDisplay::os_string_from("empty-dir-2"),
-            Color::Directory,
-        ),
+        (PathBuf::from("./dir-a/file-a1.txt"), Color::Normal),
+        (PathBuf::from("./dir-a/file-a2.txt"), Color::Normal),
+        (PathBuf::from("./dir-a/subdir-a/file-a3.txt"), Color::Normal),
+        (PathBuf::from("./dir-b/file-b1.txt"), Color::Normal),
+        (PathBuf::from("./file-root.txt"), Color::Normal),
+        (PathBuf::from("./link-dir"), Color::Symlink),
+        (PathBuf::from("./link-file.txt"), Color::Symlink),
+        (PathBuf::from("./empty-dir-1"), Color::Directory),
+        (PathBuf::from("./empty-dir-2"), Color::Directory),
     ]);
     let coloring = Coloring::new(ls_colors, map);
 

@@ -197,7 +197,7 @@ where
                 .or(deduplication_result);
         }
 
-        let coloring: Option<Coloring<OsStringDisplay>> = color.map(|ls_colors| {
+        let coloring: Option<Coloring> = color.map(|ls_colors| {
             let mut map = HashMap::new();
             build_coloring_map(&data_tree, PathBuf::new(), &mut map);
             Coloring::new(ls_colors, map)
@@ -279,7 +279,7 @@ where
     }
 }
 
-/// Recursively walk a pruned [`DataTree`] and build a map of leaf node names to [`Color`] values.
+/// Recursively walk a pruned [`DataTree`] and build a map of full paths to [`Color`] values.
 ///
 /// The `path` argument should be the current path prefix for reconstructing full filesystem paths.
 /// Leaf nodes (files or childless directories after pruning) are added to the map.
@@ -288,7 +288,7 @@ where
 fn build_coloring_map(
     node: &DataTree<OsStringDisplay, impl size::Size>,
     path: PathBuf,
-    map: &mut HashMap<OsStringDisplay, Color>,
+    map: &mut HashMap<PathBuf, Color>,
 ) {
     let node_path = path.join(node.name().as_os_str());
     if !node.children().is_empty() {
@@ -297,7 +297,8 @@ fn build_coloring_map(
         }
         return;
     }
-    map.insert(node.name().clone(), file_color(&node_path));
+    let color = file_color(&node_path);
+    map.insert(node_path, color);
 }
 
 fn file_color(path: &Path) -> Color {

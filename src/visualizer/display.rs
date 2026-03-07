@@ -1,13 +1,14 @@
 use super::{Direction::*, Visualizer};
 use crate::size;
 use std::{
+    ffi::OsStr,
     fmt::{Display, Error, Formatter},
     hash::Hash,
 };
 
 impl<'a, Name, Size> Display for Visualizer<'a, Name, Size>
 where
-    Name: Display + Hash + Eq,
+    Name: Display + Hash + Eq + AsRef<OsStr>,
     Size: size::Size + Into<u64>,
 {
     /// Create the ASCII chart.
