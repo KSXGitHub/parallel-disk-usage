@@ -105,7 +105,7 @@ where
                         ColoredTreeHorizontalSlice {
                             slice: tree_horizontal_slice,
                             color,
-                            ansi_prefixes,
+                            ls_colors: ansi_prefixes,
                         },
                         tree_width,
                     );
