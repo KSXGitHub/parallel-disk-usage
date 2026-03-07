@@ -9,7 +9,7 @@ pub mod tree;
 
 pub use bar_alignment::BarAlignment;
 pub use child_position::ChildPosition;
-pub use coloring::{AnsiPrefix, Color, Coloring};
+pub use coloring::{Color, Coloring};
 pub use column_width_distribution::ColumnWidthDistribution;
 pub use direction::Direction;
 pub use parenthood::Parenthood;
