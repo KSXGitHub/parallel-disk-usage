@@ -817,7 +817,7 @@ fn multiple_names_max_depth_1() {
 
 #[test]
 fn colorful_equals_colorless() {
-    let workspace = SampleWorkspace::default();
+    let workspace = SampleWorkspace::simple_tree_with_diverse_kinds();
 
     let colorful = Command::new(PDU)
         .with_current_dir(&workspace)
@@ -852,7 +852,7 @@ fn colorful_equals_colorless() {
 
 #[test]
 fn different_ls_colors() {
-    let workspace = SampleWorkspace::default();
+    let workspace = SampleWorkspace::simple_tree_with_diverse_kinds();
 
     let with_ls_colors = Command::new(PDU)
         .with_current_dir(&workspace)
