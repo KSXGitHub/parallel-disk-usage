@@ -14,6 +14,7 @@ use tree_table::*;
 
 use super::{coloring::ColoredTreeHorizontalSlice, ColumnWidthDistribution, Visualizer};
 use crate::size;
+use pipe_trait::Pipe;
 use std::{cmp::min, ffi::OsStr, fmt::Display, iter::once};
 use zero_copy_pads::{align_left, align_right};
 
@@ -96,7 +97,7 @@ where
                         .ancestors
                         .iter()
                         .map(|a| a.name.as_ref())
-                        .chain(once(initial_row.node_info.name.as_ref()))
+                        .chain(initial_row.node_info.name.pipe_as_ref(once))
                         .collect();
                     coloring.node_color(&path_components, initial_row.node_info.children_count > 0)
                 });
