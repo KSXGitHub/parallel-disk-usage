@@ -882,7 +882,7 @@ fn color_always() {
 
 #[test]
 fn colorful_equals_colorless() {
-    let workspace = SampleWorkspace::simple_tree_with_diverse_kinds();
+    let workspace = SampleWorkspace::default();
 
     let colorful = Command::new(PDU)
         .with_current_dir(&workspace)
@@ -917,7 +917,7 @@ fn colorful_equals_colorless() {
 
 #[test]
 fn different_ls_colors() {
-    let workspace = SampleWorkspace::simple_tree_with_diverse_kinds();
+    let workspace = SampleWorkspace::default();
 
     let with_ls_colors = Command::new(PDU)
         .with_current_dir(&workspace)
