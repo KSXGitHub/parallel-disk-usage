@@ -105,25 +105,21 @@ where
                     coloring.node_color(&path_components, initial_row.node_info.children_count > 0)
                 });
 
-                let tree = if let Some((color, ls_colors)) = colored {
-                    align_left(
+                let tree = match colored {
+                    Some((color, ls_colors)) => {
                         MaybeColoredTreeHorizontalSlice::Colorful(ColoredTreeHorizontalSlice {
                             slice: tree_horizontal_slice,
                             color,
                             ls_colors,
-                        }),
-                        tree_width,
-                    )
-                } else {
-                    align_left(
-                        MaybeColoredTreeHorizontalSlice::Colorless(tree_horizontal_slice),
-                        tree_width,
-                    )
+                        })
+                    }
+                    None => MaybeColoredTreeHorizontalSlice::Colorless(tree_horizontal_slice),
                 };
 
                 format!(
                     "{size} {tree}│{bar}│{ratio}",
                     size = align_right(&initial_row.size, size_width),
+                    tree = align_left(tree, tree_width),
                     bar = proportion_bar.display(self.bar_alignment),
                     ratio = align_right(&initial_row.percentage, PERCENTAGE_COLUMN_MAX_WIDTH),
                 )
