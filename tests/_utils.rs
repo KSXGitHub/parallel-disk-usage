@@ -169,6 +169,50 @@ impl SampleWorkspace {
 
     /// Set up a temporary directory for tests.
     ///
+    /// This directory has a diverse mix of file kinds: non-empty directories, empty directories,
+    /// regular files, and symbolic links — multiple of each kind.
+    pub fn simple_tree_with_diverse_kinds() -> Self {
+        use std::os::unix::fs::symlink;
+        let temp = Temp::new_dir().expect("create working directory for sample workspace");
+
+        MergeableFileSystemTree::<&str, String>::from(dir! {
+            "dir-a" => dir! {
+                "file-a1.txt" => file!("a".repeat(100_000))
+                "file-a2.txt" => file!("a".repeat(200_000))
+                "subdir-a" => dir! {
+                    "file-a3.txt" => file!("a".repeat(300_000))
+                }
+            }
+            "dir-b" => dir! {
+                "file-b1.txt" => file!("a".repeat(150_000))
+            }
+            "empty-dir-1" => dir! {}
+            "empty-dir-2" => dir! {}
+            "file-root.txt" => file!("a".repeat(50_000))
+        })
+        .build(&temp)
+        .expect("build filesystem tree for diverse-kinds sample workspace");
+
+        macro_rules! symlink {
+            ($link_name:literal -> $target:literal) => {
+                let link_name = $link_name;
+                let target = $target;
+                if let Err(error) = symlink(target, temp.join(link_name)) {
+                    panic!(
+                        "Failed to create symbolic link {link_name} pointing to {target}: {error}"
+                    );
+                }
+            };
+        }
+
+        symlink!("link-dir" -> "dir-a");
+        symlink!("link-file.txt" -> "file-root.txt");
+
+        SampleWorkspace(temp)
+    }
+
+    /// Set up a temporary directory for tests.
+    ///
     /// This directory would have a single file being hard-linked multiple times.
     pub fn multiple_hardlinks_to_a_single_file(bytes: usize, links: u64) -> Self {
         use std::fs::{hard_link, write as write_file};

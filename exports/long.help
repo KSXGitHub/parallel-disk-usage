@@ -88,6 +88,16 @@ Options:
       --omit-json-shared-summary
           Do not output `.shared.summary` in the JSON output
 
+      --color <COLOR>
+          Whether to show colors
+
+          Possible values:
+          - auto:   Detect if the output is a TTY and render colors accordingly
+          - always: Always render colors
+          - never:  Never render colors
+
+          [default: auto]
+
   -h, --help
           Print help (see a summary with '-h')
 
