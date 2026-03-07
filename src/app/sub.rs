@@ -1,23 +1,23 @@
 use crate::{
-    args::{ColorWhen, Depth, Fraction},
+    args::{Depth, Fraction},
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
     hardlink::{DeduplicateSharedSize, HardlinkIgnorant, RecordHardlinks},
     json_data::{BinaryVersion, JsonData, JsonDataBody, JsonShared, JsonTree, SchemaVersion},
+    ls_colors::LsColors,
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
     runtime_error::RuntimeError,
     size,
     status_board::GLOBAL_STATUS_BOARD,
     visualizer::{BarAlignment, Color, Coloring, ColumnWidthDistribution, Direction, Visualizer},
-    AnsiPrefixes,
 };
 use pipe_trait::Pipe;
 use serde::Serialize;
 use std::{
     collections::HashMap,
-    io::{stdout, IsTerminal},
+    io::stdout,
     iter::once,
     path::{Path, PathBuf},
 };
@@ -55,10 +55,8 @@ where
     pub min_ratio: Fraction,
     /// Preserve order of entries.
     pub no_sort: bool,
-    /// When to use colors in the output.
-    pub color: ColorWhen,
-    /// ANSI prefix strings read from `LS_COLORS`.
-    pub ansi_prefixes: AnsiPrefixes,
+    /// Whether to color the output.
+    pub color: Option<LsColors>,
 }
 
 impl<Size, SizeGetter, HardlinksHandler, Report> Sub<Size, SizeGetter, HardlinksHandler, Report>
@@ -85,7 +83,6 @@ where
             min_ratio,
             no_sort,
             color,
-            ansi_prefixes,
         } = self;
 
         let max_depth = max_depth.get();
@@ -110,7 +107,7 @@ where
                 files: vec![".".into()],
                 hardlinks_handler,
                 reporter,
-                ansi_prefixes,
+                color,
                 ..self
             }
             .run();
@@ -200,19 +197,11 @@ where
                 .or(deduplication_result);
         }
 
-        let use_color = match color {
-            ColorWhen::Always => true,
-            ColorWhen::Never => false,
-            ColorWhen::Auto => stdout().is_terminal(),
-        };
-
-        let coloring: Option<Coloring<OsStringDisplay>> = if use_color {
+        let coloring: Option<Coloring<OsStringDisplay>> = color.map(|ls_colors| {
             let mut map = HashMap::new();
             build_coloring_map(&data_tree, PathBuf::new(), &mut map);
-            Some(Coloring::new(ansi_prefixes, map))
-        } else {
-            None
-        };
+            Coloring::new(ls_colors, map)
+        });
 
         let visualizer = Visualizer {
             data_tree: &data_tree,
@@ -302,13 +291,13 @@ fn build_coloring_map(
     map: &mut HashMap<OsStringDisplay, Color>,
 ) {
     let node_path = path.join(node.name().as_os_str());
-    if node.children().is_empty() {
-        map.insert(node.name().clone(), file_color(&node_path));
-    } else {
+    if !node.children().is_empty() {
         for child in node.children() {
             build_coloring_map(child, node_path.clone(), map);
         }
+        return;
     }
+    map.insert(node.name().clone(), file_color(&node_path));
 }
 
 fn file_color(path: &Path) -> Color {
@@ -327,7 +316,7 @@ fn file_color(path: &Path) -> Color {
 fn is_executable(path: &Path) -> bool {
     use std::os::unix::fs::PermissionsExt;
     path.metadata()
-        .map(|m| m.permissions().mode() & 0o111 != 0)
+        .map(|stats| stats.permissions().mode() & 0o111 != 0)
         .unwrap_or(false)
 }
 
