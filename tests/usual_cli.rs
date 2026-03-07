@@ -928,62 +928,27 @@ fn color_always() {
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
 
     let ls_colors = LsColors::from_str(LS_COLORS);
-    let map = HashMap::from([
+    let leaf_colors = [
+        ("./dir-a/file-a1.txt", Color::Normal),
+        ("./dir-a/file-a2.txt", Color::Normal),
+        ("./dir-a/subdir-a/file-a3.txt", Color::Normal),
+        ("./dir-b/file-b1.txt", Color::Normal),
+        ("./file-root.txt", Color::Normal),
+        ("./link-dir", Color::Symlink),
+        ("./link-file.txt", Color::Symlink),
+        ("./empty-dir-1", Color::Directory),
+        ("./empty-dir-2", Color::Directory),
+    ];
+    let leaf_colors = HashMap::from(leaf_colors.map(|(path, color)| {
         (
-            vec![
-                OsString::from("."),
-                OsString::from("dir-a"),
-                OsString::from("file-a1.txt"),
-            ],
-            Color::Normal,
-        ),
-        (
-            vec![
-                OsString::from("."),
-                OsString::from("dir-a"),
-                OsString::from("file-a2.txt"),
-            ],
-            Color::Normal,
-        ),
-        (
-            vec![
-                OsString::from("."),
-                OsString::from("dir-a"),
-                OsString::from("subdir-a"),
-                OsString::from("file-a3.txt"),
-            ],
-            Color::Normal,
-        ),
-        (
-            vec![
-                OsString::from("."),
-                OsString::from("dir-b"),
-                OsString::from("file-b1.txt"),
-            ],
-            Color::Normal,
-        ),
-        (
-            vec![OsString::from("."), OsString::from("file-root.txt")],
-            Color::Normal,
-        ),
-        (
-            vec![OsString::from("."), OsString::from("link-dir")],
-            Color::Symlink,
-        ),
-        (
-            vec![OsString::from("."), OsString::from("link-file.txt")],
-            Color::Symlink,
-        ),
-        (
-            vec![OsString::from("."), OsString::from("empty-dir-1")],
-            Color::Directory,
-        ),
-        (
-            vec![OsString::from("."), OsString::from("empty-dir-2")],
-            Color::Directory,
-        ),
-    ]);
-    let coloring = Coloring::new(ls_colors, map);
+            path.split('/')
+                .map(ToString::to_string)
+                .map(OsString::from)
+                .collect::<Vec<_>>(),
+            color,
+        )
+    }));
+    let coloring = Coloring::new(ls_colors, leaf_colors);
 
     let visualizer = Visualizer::<OsStringDisplay, _> {
         data_tree: &data_tree,
