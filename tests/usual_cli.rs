@@ -27,7 +27,7 @@ use parallel_disk_usage::{
     visualizer::{Color, Coloring},
 };
 #[cfg(unix)]
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, ffi::OsString};
 
 #[cfg(unix)]
 use parallel_disk_usage::get_size::{GetBlockCount, GetBlockSize};
@@ -932,15 +932,59 @@ fn color_always() {
 
     let ls_colors = LsColors::from_ls_colors_string(LS_COLORS);
     let map = HashMap::from([
-        (PathBuf::from("./dir-a/file-a1.txt"), Color::Normal),
-        (PathBuf::from("./dir-a/file-a2.txt"), Color::Normal),
-        (PathBuf::from("./dir-a/subdir-a/file-a3.txt"), Color::Normal),
-        (PathBuf::from("./dir-b/file-b1.txt"), Color::Normal),
-        (PathBuf::from("./file-root.txt"), Color::Normal),
-        (PathBuf::from("./link-dir"), Color::Symlink),
-        (PathBuf::from("./link-file.txt"), Color::Symlink),
-        (PathBuf::from("./empty-dir-1"), Color::Directory),
-        (PathBuf::from("./empty-dir-2"), Color::Directory),
+        (
+            vec![
+                OsString::from("."),
+                OsString::from("dir-a"),
+                OsString::from("file-a1.txt"),
+            ],
+            Color::Normal,
+        ),
+        (
+            vec![
+                OsString::from("."),
+                OsString::from("dir-a"),
+                OsString::from("file-a2.txt"),
+            ],
+            Color::Normal,
+        ),
+        (
+            vec![
+                OsString::from("."),
+                OsString::from("dir-a"),
+                OsString::from("subdir-a"),
+                OsString::from("file-a3.txt"),
+            ],
+            Color::Normal,
+        ),
+        (
+            vec![
+                OsString::from("."),
+                OsString::from("dir-b"),
+                OsString::from("file-b1.txt"),
+            ],
+            Color::Normal,
+        ),
+        (
+            vec![OsString::from("."), OsString::from("file-root.txt")],
+            Color::Normal,
+        ),
+        (
+            vec![OsString::from("."), OsString::from("link-dir")],
+            Color::Symlink,
+        ),
+        (
+            vec![OsString::from("."), OsString::from("link-file.txt")],
+            Color::Symlink,
+        ),
+        (
+            vec![OsString::from("."), OsString::from("empty-dir-1")],
+            Color::Directory,
+        ),
+        (
+            vec![OsString::from("."), OsString::from("empty-dir-2")],
+            Color::Directory,
+        ),
     ]);
     let coloring = Coloring::new(ls_colors, map);
 

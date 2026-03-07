@@ -3,8 +3,8 @@ use crate::ls_colors::LsColors;
 use derive_more::Display;
 use std::{
     collections::HashMap,
+    ffi::OsString,
     fmt,
-    path::{Path, PathBuf},
 };
 use zero_copy_pads::Width;
 
@@ -12,21 +12,25 @@ use zero_copy_pads::Width;
 #[derive(Debug)]
 pub struct Coloring {
     ls_colors: LsColors,
-    map: HashMap<PathBuf, Color>,
+    map: HashMap<Vec<OsString>, Color>,
 }
 
 impl Coloring {
-    /// Create a new [`Coloring`] from LS_COLORS prefixes and a full-path-to-color map.
-    pub fn new(ls_colors: LsColors, map: HashMap<PathBuf, Color>) -> Self {
+    /// Create a new [`Coloring`] from LS_COLORS prefixes and a path-components-to-color map.
+    pub fn new(ls_colors: LsColors, map: HashMap<Vec<OsString>, Color>) -> Self {
         Coloring { ls_colors, map }
     }
 
     /// Return `(color, ls_colors)` for a node, used to build a colored slice for rendering.
-    pub(super) fn node_color(&self, path: &Path, has_children: bool) -> Option<(Color, &LsColors)> {
+    pub(super) fn node_color(
+        &self,
+        path_components: &[OsString],
+        has_children: bool,
+    ) -> Option<(Color, &LsColors)> {
         let color = if has_children {
             Some(Color::Directory)
         } else {
-            self.map.get(path).copied()
+            self.map.get(path_components).copied()
         }?;
         Some((color, &self.ls_colors))
     }

@@ -17,6 +17,7 @@ use pipe_trait::Pipe;
 use serde::Serialize;
 use std::{
     collections::HashMap,
+    ffi::OsString,
     io::stdout,
     iter::once,
     path::{Path, PathBuf},
@@ -199,7 +200,7 @@ where
 
         let coloring: Option<Coloring> = color.map(|ls_colors| {
             let mut map = HashMap::new();
-            build_coloring_map(&data_tree, PathBuf::new(), &mut map);
+            build_coloring_map(&data_tree, &mut Vec::new(), &mut map);
             Coloring::new(ls_colors, map)
         });
 
@@ -279,26 +280,29 @@ where
     }
 }
 
-/// Recursively walk a pruned [`DataTree`] and build a map of full paths to [`Color`] values.
+/// Recursively walk a pruned [`DataTree`] and build a map of path-component vectors to [`Color`] values.
 ///
-/// The `path` argument should be the current path prefix for reconstructing full filesystem paths.
+/// The `path_stack` argument is a reusable buffer of path components representing the current
+/// ancestor chain. Each recursive call pushes the node's name and pops it on return, so no
+/// cloning occurs during traversal — only at leaf insertions.
 /// Leaf nodes (files or childless directories after pruning) are added to the map.
 /// Nodes with children are skipped because the [`Visualizer`] uses the children count to
 /// determine their color at render time.
 fn build_coloring_map(
     node: &DataTree<OsStringDisplay, impl size::Size>,
-    path: PathBuf,
-    map: &mut HashMap<PathBuf, Color>,
+    path_stack: &mut Vec<OsString>,
+    map: &mut HashMap<Vec<OsString>, Color>,
 ) {
-    let node_path = path.join(node.name().as_os_str());
-    if !node.children().is_empty() {
+    path_stack.push(node.name().as_os_str().to_os_string());
+    if node.children().is_empty() {
+        let color = file_color(&path_stack.iter().collect::<PathBuf>());
+        map.insert(path_stack.clone(), color);
+    } else {
         for child in node.children() {
-            build_coloring_map(child, node_path.clone(), map);
+            build_coloring_map(child, path_stack, map);
         }
-        return;
     }
-    let color = file_color(&node_path);
-    map.insert(node_path, color);
+    path_stack.pop();
 }
 
 fn file_color(path: &Path) -> Color {
