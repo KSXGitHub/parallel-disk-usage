@@ -3,6 +3,10 @@
 pub enum Color {
     /// Color as a directory.
     Directory,
-    /// No color.
+    /// Color as a regular file.
     Normal,
+    /// Color as an executable file.
+    Executable,
+    /// Color as a symbolic link.
+    Symlink,
 }
