@@ -99,3 +99,19 @@ impl Width for ColoredTreeHorizontalSlice<'_> {
         self.slice.width()
     }
 }
+
+/// Either a [`TreeHorizontalSlice`] (colorless) or a [`ColoredTreeHorizontalSlice`] (colorful).
+#[derive(Display)]
+pub(super) enum MaybeColoredTreeHorizontalSlice<'a> {
+    Colorless(TreeHorizontalSlice<String>),
+    Colorful(ColoredTreeHorizontalSlice<'a>),
+}
+
+impl Width for MaybeColoredTreeHorizontalSlice<'_> {
+    fn width(&self) -> usize {
+        match self {
+            MaybeColoredTreeHorizontalSlice::Colorless(slice) => slice.width(),
+            MaybeColoredTreeHorizontalSlice::Colorful(slice) => slice.width(),
+        }
+    }
+}
