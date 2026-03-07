@@ -20,7 +20,8 @@ impl LsColors {
     /// Parse an `LS_COLORS`-format string into an [`LsColors`].
     ///
     /// Unrecognized or invalid entries are silently ignored.
-    pub fn from_ls_colors_string(input: &str) -> Self {
+    #[allow(clippy::should_implement_trait, reason = "Nonsense suggestion!")]
+    pub fn from_str(input: &str) -> Self {
         Self::from_ls_colors_crate(&lscolors::LsColors::from_string(input))
     }
 
