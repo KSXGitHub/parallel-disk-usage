@@ -1,7 +1,5 @@
 use crate::visualizer::coloring::Color;
-use lscolors::{Indicator, LsColors as LsColorsCrate};
-use std::convert::Infallible;
-use std::str::FromStr;
+use lscolors::{self, Indicator};
 
 /// ANSI color prefix strings for terminal output, initialized from the `LS_COLORS` environment
 /// variable.
@@ -16,10 +14,17 @@ pub struct LsColors {
 impl LsColors {
     /// Initialize by reading the current environment's `LS_COLORS`.
     pub fn from_env() -> Self {
-        Self::from_ls_colors_crate(&LsColorsCrate::from_env().unwrap_or_default())
+        Self::from_ls_colors_crate(&lscolors::LsColors::from_env().unwrap_or_default())
     }
 
-    fn from_ls_colors_crate(ls_colors: &LsColorsCrate) -> Self {
+    /// Parse an `LS_COLORS`-format string into an [`LsColors`].
+    ///
+    /// Unrecognized or invalid entries are silently ignored.
+    pub fn from_str(input: &str) -> Self {
+        Self::from_ls_colors_crate(&lscolors::LsColors::from_string(input))
+    }
+
+    fn from_ls_colors_crate(ls_colors: &lscolors::LsColors) -> Self {
         let prefix_for = |indicator: Indicator| {
             ls_colors
                 .style_for_indicator(indicator)
@@ -42,17 +47,5 @@ impl LsColors {
             Color::Executable => &self.executable,
             Color::Symlink => &self.symlink,
         }
-    }
-}
-
-impl FromStr for LsColors {
-    type Err = Infallible;
-    /// Parse an `LS_COLORS`-format string into an [`LsColors`].
-    ///
-    /// This never fails; unrecognized or invalid entries are silently ignored.
-    fn from_str(input: &str) -> Result<Self, Self::Err> {
-        Ok(Self::from_ls_colors_crate(&LsColorsCrate::from_string(
-            input,
-        )))
     }
 }

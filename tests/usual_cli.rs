@@ -852,6 +852,56 @@ fn colorful_equals_colorless() {
     assert_eq!(colorful_stripped, colorless);
 }
 
+#[test]
+fn color_always_with_and_without_ls_colors() {
+    let workspace = SampleWorkspace::default();
+
+    let with_ls_colors = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--color=always")
+        .with_arg("--total-width=100")
+        .with_env("LS_COLORS", LS_COLORS)
+        .pipe(stdio)
+        .output()
+        .expect("spawn command with --color=always and LS_COLORS");
+    inspect_stderr(&with_ls_colors.stderr);
+    assert!(
+        with_ls_colors.status.success(),
+        "pdu exited with non-zero status"
+    );
+    let with_ls_colors_stripped = with_ls_colors
+        .stdout
+        .pipe(String::from_utf8)
+        .expect("UTF-8")
+        .pipe(strip_ansi_escapes::strip_str)
+        .trim_end()
+        .to_string();
+
+    let mut without_ls_colors_cmd = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--color=always")
+        .with_arg("--total-width=100");
+    without_ls_colors_cmd.env_remove("LS_COLORS");
+    let without_ls_colors = without_ls_colors_cmd
+        .pipe(stdio)
+        .output()
+        .expect("spawn command with --color=always and without LS_COLORS");
+    inspect_stderr(&without_ls_colors.stderr);
+    assert!(
+        without_ls_colors.status.success(),
+        "pdu exited with non-zero status"
+    );
+    let without_ls_colors_stripped = without_ls_colors
+        .stdout
+        .pipe(String::from_utf8)
+        .expect("UTF-8")
+        .pipe(strip_ansi_escapes::strip_str)
+        .trim_end()
+        .to_string();
+
+    assert_eq!(with_ls_colors_stripped, without_ls_colors_stripped);
+}
+
 #[cfg(unix)]
 #[test]
 fn color_always() {
@@ -880,7 +930,7 @@ fn color_always() {
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
 
-    let ls_colors: LsColors = LS_COLORS.parse().expect("parse LS_COLORS");
+    let ls_colors = LsColors::from_str(LS_COLORS);
     let map = HashMap::from([
         (
             OsStringDisplay::os_string_from("file-a1.txt"),
