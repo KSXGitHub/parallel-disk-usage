@@ -815,6 +815,72 @@ fn multiple_names_max_depth_1() {
     assert_eq!(lines.next(), None);
 }
 
+#[cfg(unix)]
+#[test]
+fn color_always() {
+    let workspace = SampleWorkspace::simple_tree_with_diverse_kinds();
+
+    let actual = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--color=always")
+        .with_arg("--total-width=100")
+        .with_arg("--min-ratio=0")
+        .with_env("LS_COLORS", LS_COLORS)
+        .pipe(stdio)
+        .output()
+        .expect("spawn command with --color=always")
+        .pipe(stdout_text);
+    eprintln!("ACTUAL:\n{actual}\n");
+
+    let builder = FsTreeBuilder {
+        root: workspace.to_path_buf(),
+        size_getter: DEFAULT_GET_SIZE,
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
+    };
+    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
+    *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
+
+    let ls_colors = LsColors::from_str(LS_COLORS);
+    let leaf_colors = [
+        ("./dir-a/file-a1.txt", Color::Normal),
+        ("./dir-a/file-a2.txt", Color::Normal),
+        ("./dir-a/subdir-a/file-a3.txt", Color::Normal),
+        ("./dir-b/file-b1.txt", Color::Normal),
+        ("./file-root.txt", Color::Normal),
+        ("./link-dir", Color::Symlink),
+        ("./link-file.txt", Color::Symlink),
+        ("./empty-dir-1", Color::Directory),
+        ("./empty-dir-2", Color::Directory),
+    ];
+    let leaf_colors = HashMap::from(leaf_colors.map(|(path, color)| {
+        (
+            path.split('/')
+                .map(ToString::to_string)
+                .map(OsString::from)
+                .collect::<Vec<_>>(),
+            color,
+        )
+    }));
+    let coloring = Coloring::new(ls_colors, leaf_colors);
+
+    let visualizer = Visualizer::<OsStringDisplay, _> {
+        data_tree: &data_tree,
+        bytes_format: BytesFormat::MetricUnits,
+        direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Left,
+        column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: Some(&coloring),
+    };
+    let expected = format!("{visualizer}");
+    let expected = expected.trim_end();
+    eprintln!("EXPECTED:\n{expected}\n");
+
+    assert_eq!(actual, expected);
+}
+
 #[test]
 fn colorful_equals_colorless() {
     let workspace = SampleWorkspace::simple_tree_with_diverse_kinds();
@@ -897,70 +963,4 @@ fn different_ls_colors() {
         .to_string();
 
     assert_eq!(with_ls_colors_stripped, without_ls_colors_stripped);
-}
-
-#[cfg(unix)]
-#[test]
-fn color_always() {
-    let workspace = SampleWorkspace::simple_tree_with_diverse_kinds();
-
-    let actual = Command::new(PDU)
-        .with_current_dir(&workspace)
-        .with_arg("--color=always")
-        .with_arg("--total-width=100")
-        .with_arg("--min-ratio=0")
-        .with_env("LS_COLORS", LS_COLORS)
-        .pipe(stdio)
-        .output()
-        .expect("spawn command with --color=always")
-        .pipe(stdout_text);
-    eprintln!("ACTUAL:\n{actual}\n");
-
-    let builder = FsTreeBuilder {
-        root: workspace.to_path_buf(),
-        size_getter: DEFAULT_GET_SIZE,
-        hardlinks_recorder: &HardlinkIgnorant,
-        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        max_depth: 10,
-    };
-    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
-    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
-    *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
-
-    let ls_colors = LsColors::from_str(LS_COLORS);
-    let leaf_colors = [
-        ("./dir-a/file-a1.txt", Color::Normal),
-        ("./dir-a/file-a2.txt", Color::Normal),
-        ("./dir-a/subdir-a/file-a3.txt", Color::Normal),
-        ("./dir-b/file-b1.txt", Color::Normal),
-        ("./file-root.txt", Color::Normal),
-        ("./link-dir", Color::Symlink),
-        ("./link-file.txt", Color::Symlink),
-        ("./empty-dir-1", Color::Directory),
-        ("./empty-dir-2", Color::Directory),
-    ];
-    let leaf_colors = HashMap::from(leaf_colors.map(|(path, color)| {
-        (
-            path.split('/')
-                .map(ToString::to_string)
-                .map(OsString::from)
-                .collect::<Vec<_>>(),
-            color,
-        )
-    }));
-    let coloring = Coloring::new(ls_colors, leaf_colors);
-
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-        coloring: Some(&coloring),
-    };
-    let expected = format!("{visualizer}");
-    let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{expected}\n");
-
-    assert_eq!(actual, expected);
 }
