@@ -18,6 +18,9 @@ use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use std::process::{Command, Stdio};
 
+/// Predefined `LS_COLORS` value used in color tests to ensure deterministic output.
+const LS_COLORS: &str = "rs=0:di=01;34:ln=01;36:ex=01;32:fi=00";
+
 #[cfg(unix)]
 use parallel_disk_usage::{
     ls_colors::LsColors,
@@ -822,6 +825,7 @@ fn colorful_equals_colorless() {
         .with_current_dir(&workspace)
         .with_arg("--color=always")
         .with_arg("--total-width=100")
+        .with_env("LS_COLORS", LS_COLORS)
         .pipe(stdio)
         .output()
         .expect("spawn command with --color=always");
@@ -839,6 +843,7 @@ fn colorful_equals_colorless() {
         .with_current_dir(&workspace)
         .with_arg("--color=never")
         .with_arg("--total-width=100")
+        .with_env("LS_COLORS", LS_COLORS)
         .pipe(stdio)
         .output()
         .expect("spawn command with --color=never")
@@ -857,6 +862,7 @@ fn color_always() {
         .with_arg("--color=always")
         .with_arg("--total-width=100")
         .with_arg("--min-ratio=0")
+        .with_env("LS_COLORS", LS_COLORS)
         .pipe(stdio)
         .output()
         .expect("spawn command with --color=always")
@@ -874,6 +880,8 @@ fn color_always() {
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
 
+    // SAFETY: tests that set LS_COLORS all use the same constant value, so there is no data race.
+    unsafe { std::env::set_var("LS_COLORS", LS_COLORS) };
     let ls_colors = LsColors::from_env();
     let map = HashMap::from([
         (
