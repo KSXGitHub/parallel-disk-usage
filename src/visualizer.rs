@@ -62,7 +62,7 @@ where
     /// Distribution and total number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
     /// Mapping of names to colors for colorful output.
-    pub coloring: Option<&'a Coloring<Name>>,
+    pub coloring: Option<&'a Coloring>,
 }
 
 mod copy;

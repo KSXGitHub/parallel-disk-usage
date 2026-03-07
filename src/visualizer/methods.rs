@@ -14,12 +14,12 @@ use tree_table::*;
 
 use super::{coloring::ColoredTreeHorizontalSlice, ColumnWidthDistribution, Visualizer};
 use crate::size;
-use std::{cmp::min, fmt::Display, hash::Hash};
+use std::{cmp::min, ffi::OsStr, fmt::Display, hash::Hash, path::PathBuf};
 use zero_copy_pads::{align_left, align_right};
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>
 where
-    Name: Display + Hash + Eq,
+    Name: Display + Hash + Eq + AsRef<OsStr>,
     Size: size::Size + Into<u64>,
 {
     /// Create ASCII rows that visualize the [tree](crate::data_tree::DataTree), such rows
@@ -92,10 +92,15 @@ where
                 } = tree_row;
 
                 let colored = self.coloring.and_then(|coloring| {
-                    coloring.node_color(
-                        initial_row.node_info.name,
-                        initial_row.node_info.children_count > 0,
-                    )
+                    let path: PathBuf = initial_row
+                        .ancestors
+                        .iter()
+                        .map(|a| a.name.as_ref() as &OsStr)
+                        .chain(std::iter::once(
+                            initial_row.node_info.name.as_ref() as &OsStr
+                        ))
+                        .collect();
+                    coloring.node_color(&path, initial_row.node_info.children_count > 0)
                 });
 
                 let aligned_colored_slice;
