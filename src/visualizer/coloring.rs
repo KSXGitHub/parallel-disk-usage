@@ -16,29 +16,6 @@ impl<'a> Coloring<'a> {
     pub fn new(ls_colors: LsColors, map: HashMap<Vec<&'a OsStr>, Color>) -> Self {
         Coloring { ls_colors, map }
     }
-
-    /// Look up the color for a node identified by its path components and whether it has children,
-    /// then wrap the given [`TreeHorizontalSlice`] in the appropriate colored or colorless variant.
-    fn maybe_colored_tree_slice(
-        &self,
-        path_components: &[&'a OsStr],
-        has_children: bool,
-        slice: TreeHorizontalSlice<String>,
-    ) -> MaybeColoredTreeHorizontalSlice<'_> {
-        let color = if has_children {
-            Some(Color::Directory)
-        } else {
-            self.map.get(path_components).copied()
-        };
-        match color {
-            Some(color) => MaybeColoredTreeHorizontalSlice::Colorful(ColoredTreeHorizontalSlice {
-                slice,
-                color,
-                ls_colors: &self.ls_colors,
-            }),
-            None => MaybeColoredTreeHorizontalSlice::Colorless(slice),
-        }
-    }
 }
 
 /// The coloring to apply to a node name.
@@ -120,11 +97,22 @@ pub(super) fn maybe_colored_slice<'a, 'b>(
     has_children: bool,
     slice: TreeHorizontalSlice<String>,
 ) -> MaybeColoredTreeHorizontalSlice<'b> {
-    match coloring {
-        Some(coloring) => {
-            let path_components: Vec<&OsStr> = ancestors.chain(std::iter::once(name)).collect();
-            coloring.maybe_colored_tree_slice(&path_components, has_children, slice)
-        }
+    let coloring = match coloring {
+        Some(coloring) => coloring,
+        None => return MaybeColoredTreeHorizontalSlice::Colorless(slice),
+    };
+    let path_components: Vec<&OsStr> = ancestors.chain(std::iter::once(name)).collect();
+    let color = if has_children {
+        Some(Color::Directory)
+    } else {
+        coloring.map.get(&path_components).copied()
+    };
+    match color {
+        Some(color) => MaybeColoredTreeHorizontalSlice::Colorful(ColoredTreeHorizontalSlice {
+            slice,
+            color,
+            ls_colors: &coloring.ls_colors,
+        }),
         None => MaybeColoredTreeHorizontalSlice::Colorless(slice),
     }
 }
