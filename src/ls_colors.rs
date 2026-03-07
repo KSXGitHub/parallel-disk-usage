@@ -25,6 +25,7 @@ impl LsColors {
         Self::from_ls_colors_crate(&lscolors::LsColors::from_string(input))
     }
 
+    /// Derive a [`LsColors`] from an existing [`lscolors::LsColors`].
     fn from_ls_colors_crate(ls_colors: &lscolors::LsColors) -> Self {
         let prefix_for = |indicator: Indicator| {
             ls_colors
