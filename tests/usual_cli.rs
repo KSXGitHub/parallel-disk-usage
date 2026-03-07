@@ -10,18 +10,21 @@ use parallel_disk_usage::{
     fs_tree_builder::FsTreeBuilder,
     get_size::GetApparentSize,
     hardlink::HardlinkIgnorant,
-    ls_colors::LsColors,
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
-    visualizer::{BarAlignment, Color, Coloring, ColumnWidthDistribution, Direction, Visualizer},
+    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use std::{
-    collections::HashMap,
-    path::PathBuf,
-    process::{Command, Stdio},
+use std::process::{Command, Stdio};
+
+#[cfg(unix)]
+use parallel_disk_usage::{
+    ls_colors::LsColors,
+    visualizer::{Color, Coloring},
 };
+#[cfg(unix)]
+use std::collections::HashMap;
 
 #[cfg(unix)]
 use parallel_disk_usage::get_size::{GetBlockCount, GetBlockSize};
@@ -824,7 +827,9 @@ fn colorful_equals_colorless() {
         .expect("spawn command with --color=always");
     inspect_stderr(&colorful.stderr);
     assert!(colorful.status.success(), "pdu exited with non-zero status");
-    let colorful_stripped = String::from_utf8(colorful.stdout)
+    let colorful_stripped = colorful
+        .stdout
+        .pipe(String::from_utf8)
         .expect("UTF-8")
         .pipe(strip_ansi_escapes::strip_str)
         .trim_end()
@@ -842,37 +847,16 @@ fn colorful_equals_colorless() {
     assert_eq!(colorful_stripped, colorless);
 }
 
-/// Recursively build a coloring map from a data tree.
-fn build_coloring_map(
-    node: &DataTree<OsStringDisplay, impl parallel_disk_usage::size::Size>,
-    path: PathBuf,
-    map: &mut HashMap<OsStringDisplay, Color>,
-) {
-    let node_path = path.join(node.name().as_os_str());
-    if !node.children().is_empty() {
-        for child in node.children() {
-            build_coloring_map(child, node_path.clone(), map);
-        }
-        return;
-    }
-    let color = if node_path.is_symlink() {
-        Color::Symlink
-    } else if node_path.is_dir() {
-        Color::Directory
-    } else {
-        Color::Normal
-    };
-    map.insert(node.name().clone(), color);
-}
-
+#[cfg(unix)]
 #[test]
 fn color_always() {
-    let workspace = SampleWorkspace::default();
+    let workspace = SampleWorkspace::simple_tree_with_diverse_kinds();
 
     let actual = Command::new(PDU)
         .with_current_dir(&workspace)
         .with_arg("--color=always")
         .with_arg("--total-width=100")
+        .with_arg("--min-ratio=0")
         .pipe(stdio)
         .output()
         .expect("spawn command with --color=always")
@@ -887,13 +871,45 @@ fn color_always() {
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
-    data_tree.par_cull_insignificant_data(0.01);
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
 
     let ls_colors = LsColors::from_env();
-    let mut map = HashMap::new();
-    build_coloring_map(&data_tree, workspace.to_path_buf(), &mut map);
+    let map = HashMap::from([
+        (
+            OsStringDisplay::os_string_from("file-a1.txt"),
+            Color::Normal,
+        ),
+        (
+            OsStringDisplay::os_string_from("file-a2.txt"),
+            Color::Normal,
+        ),
+        (
+            OsStringDisplay::os_string_from("file-a3.txt"),
+            Color::Normal,
+        ),
+        (
+            OsStringDisplay::os_string_from("file-b1.txt"),
+            Color::Normal,
+        ),
+        (
+            OsStringDisplay::os_string_from("file-root.txt"),
+            Color::Normal,
+        ),
+        (OsStringDisplay::os_string_from("link-dir"), Color::Symlink),
+        (
+            OsStringDisplay::os_string_from("link-file.txt"),
+            Color::Symlink,
+        ),
+        (
+            OsStringDisplay::os_string_from("empty-dir-1"),
+            Color::Directory,
+        ),
+        (
+            OsStringDisplay::os_string_from("empty-dir-2"),
+            Color::Directory,
+        ),
+    ]);
     let coloring = Coloring::new(ls_colors, map);
 
     let visualizer = Visualizer::<OsStringDisplay, _> {

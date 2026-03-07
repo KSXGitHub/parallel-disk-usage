@@ -18,7 +18,7 @@ impl<Name: Hash + Eq> Coloring<Name> {
     }
 
     /// Return `(color, prefixes)` for a node, used to build a colored slice for rendering.
-    pub(crate) fn node_color(&self, name: &Name, has_children: bool) -> Option<(Color, &LsColors)> {
+    pub(super) fn node_color(&self, name: &Name, has_children: bool) -> Option<(Color, &LsColors)> {
         let color = if has_children {
             Some(Color::Directory)
         } else {
@@ -64,10 +64,10 @@ impl AnsiPrefix<'_> {
 }
 
 /// A [`TreeHorizontalSlice`] with its color applied, used for rendering.
-pub(crate) struct ColoredTreeHorizontalSlice<'a> {
-    pub(crate) slice: TreeHorizontalSlice<String>,
-    pub(crate) color: Color,
-    pub(crate) ansi_prefixes: &'a LsColors,
+pub(super) struct ColoredTreeHorizontalSlice<'a> {
+    pub(super) slice: TreeHorizontalSlice<String>,
+    pub(super) color: Color,
+    pub(super) ls_colors: &'a LsColors,
 }
 
 impl fmt::Display for ColoredTreeHorizontalSlice<'_> {
@@ -84,7 +84,7 @@ impl fmt::Display for ColoredTreeHorizontalSlice<'_> {
             };
             write!(f, "{connector}")?;
         }
-        let prefix = self.color.ansi_prefix(self.ansi_prefixes);
+        let prefix = self.color.ansi_prefix(self.ls_colors);
         let suffix = prefix.suffix();
         write!(f, "{skeletal_component}{prefix}{name}{suffix}")
     }

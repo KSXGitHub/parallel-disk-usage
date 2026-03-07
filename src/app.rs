@@ -174,6 +174,12 @@ impl App {
             ErrorReport::TEXT
         };
 
+        let color = match self.args.color {
+            ColorWhen::Always => Some(LsColors::from_env()),
+            ColorWhen::Never => None,
+            ColorWhen::Auto => stdout().is_terminal().then(LsColors::from_env),
+        };
+
         trait GetSizeUtils: GetSize<Size: size::Size> {
             const INSTANCE: Self;
             const QUANTITY: Quantity;
@@ -298,7 +304,6 @@ impl App {
                     no_sort,
                     omit_json_shared_details,
                     omit_json_shared_summary,
-                    color,
                     ..
                 } => Sub {
                     direction: Direction::from_top_down(top_down),
@@ -313,11 +318,7 @@ impl App {
                     max_depth,
                     min_ratio,
                     no_sort,
-                    color: match color {
-                        ColorWhen::Always => Some(LsColors::from_env()),
-                        ColorWhen::Never => None,
-                        ColorWhen::Auto => stdout().is_terminal().then(LsColors::from_env),
-                    },
+                    color,
                 }
                 .run(),
             )*} };
