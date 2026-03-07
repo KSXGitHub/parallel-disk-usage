@@ -1,11 +1,7 @@
 use super::{ChildPosition, TreeHorizontalSlice};
 use crate::ls_colors::LsColors;
 use derive_more::Display;
-use std::{
-    collections::HashMap,
-    ffi::OsString,
-    fmt,
-};
+use std::{collections::HashMap, ffi::OsString, fmt};
 use zero_copy_pads::Width;
 
 /// Coloring configuration: ANSI prefix strings from the environment and a full-path-to-color map.
