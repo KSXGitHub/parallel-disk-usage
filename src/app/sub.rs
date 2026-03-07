@@ -18,7 +18,7 @@ use std::{
     collections::HashMap,
     io::{stdout, IsTerminal},
     iter::once,
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 /// The sub program of the main application.
@@ -289,8 +289,8 @@ where
 ///
 /// The `path` argument should be the current path prefix for reconstructing full filesystem paths.
 /// Leaf nodes (files or childless directories after pruning) are added to the map.
-/// Nodes with children (directories with visible children) are skipped since the [`Visualizer`]
-/// applies the directory color to any name absent from the map.
+/// Nodes with children are skipped because the [`Visualizer`] uses the children count to
+/// determine their color at render time.
 fn build_coloring_map(
     node: &DataTree<OsStringDisplay, impl size::Size>,
     path: PathBuf,
@@ -298,17 +298,37 @@ fn build_coloring_map(
 ) {
     let node_path = path.join(node.name().as_os_str());
     if node.children().is_empty() {
-        let color = if node_path.is_dir() {
-            Color::Directory
-        } else {
-            Color::Normal
-        };
-        map.insert(node.name().clone(), color);
+        map.insert(node.name().clone(), file_color(&node_path));
     } else {
         for child in node.children() {
             build_coloring_map(child, node_path.clone(), map);
         }
     }
+}
+
+fn file_color(path: &Path) -> Color {
+    if path.is_symlink() {
+        Color::Symlink
+    } else if path.is_dir() {
+        Color::Directory
+    } else if is_executable(path) {
+        Color::Executable
+    } else {
+        Color::Normal
+    }
+}
+
+#[cfg(unix)]
+fn is_executable(path: &Path) -> bool {
+    use std::os::unix::fs::PermissionsExt;
+    path.metadata()
+        .map(|m| m.permissions().mode() & 0o111 != 0)
+        .unwrap_or(false)
+}
+
+#[cfg(not(unix))]
+fn is_executable(_path: &Path) -> bool {
+    false
 }
 
 #[cfg(unix)]

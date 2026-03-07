@@ -14,42 +14,75 @@ use tree_table::*;
 
 use super::{ChildPosition, Color, ColumnWidthDistribution, TreeHorizontalSlice, Visualizer};
 use crate::size;
+use lscolors::{Indicator, LsColors};
 use std::{
     cmp::min,
     fmt::{self, Display},
     hash::Hash,
+    sync::OnceLock,
 };
 use zero_copy_pads::{align_left, align_right, Width};
 
-const DIRECTORY_COLOR_PREFIX: &str = "\x1b[1;34m";
-const COLOR_RESET: &str = "\x1b[0m";
+fn ls_colors() -> &'static LsColors {
+    static LS_COLORS: OnceLock<LsColors> = OnceLock::new();
+    LS_COLORS.get_or_init(|| LsColors::from_env().unwrap_or_default())
+}
 
-struct ColoredSlice<'a>(&'a TreeHorizontalSlice<String>);
+fn color_ansi_prefix(color: Color) -> &'static str {
+    fn compute_prefix(indicator: Indicator) -> String {
+        ls_colors()
+            .style_for_indicator(indicator)
+            .map(|s| s.to_nu_ansi_term_style().prefix().to_string())
+            .unwrap_or_default()
+    }
+    match color {
+        Color::Directory => {
+            static PREFIX: OnceLock<String> = OnceLock::new();
+            PREFIX.get_or_init(|| compute_prefix(Indicator::Directory))
+        }
+        Color::Normal => {
+            static PREFIX: OnceLock<String> = OnceLock::new();
+            PREFIX.get_or_init(|| compute_prefix(Indicator::RegularFile))
+        }
+        Color::Executable => {
+            static PREFIX: OnceLock<String> = OnceLock::new();
+            PREFIX.get_or_init(|| compute_prefix(Indicator::ExecutableFile))
+        }
+        Color::Symlink => {
+            static PREFIX: OnceLock<String> = OnceLock::new();
+            PREFIX.get_or_init(|| compute_prefix(Indicator::SymbolicLink))
+        }
+    }
+}
+
+struct ColoredSlice<'a> {
+    slice: &'a TreeHorizontalSlice<String>,
+    color: Color,
+}
 
 impl fmt::Display for ColoredSlice<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s = self.0;
-        for pos in &s.ancestor_relative_positions {
-            write!(
-                f,
-                "{}",
-                match pos {
-                    ChildPosition::Init => "│ ",
-                    ChildPosition::Last => "  ",
-                }
-            )?;
+        let TreeHorizontalSlice {
+            ancestor_relative_positions,
+            skeletal_component,
+            name,
+        } = self.slice;
+        for pos in ancestor_relative_positions {
+            let connector = match pos {
+                ChildPosition::Init => "│ ",
+                ChildPosition::Last => "  ",
+            };
+            write!(f, "{connector}")?;
         }
-        write!(
-            f,
-            "{}{DIRECTORY_COLOR_PREFIX}{}{COLOR_RESET}",
-            s.skeletal_component, s.name
-        )
+        let prefix = color_ansi_prefix(self.color);
+        let suffix = if prefix.is_empty() { "" } else { "\x1b[0m" };
+        write!(f, "{skeletal_component}{prefix}{name}{suffix}")
     }
 }
 
 impl Width for ColoredSlice<'_> {
     fn width(&self) -> usize {
-        self.0.width()
+        self.slice.width()
     }
 }
 
@@ -120,26 +153,31 @@ where
             .map(|row| {
                 let slice = &row.tree_horizontal_slice;
 
-                let use_directory_color = self
-                    .coloring
-                    .map(|coloring| {
-                        row.node_info.children_count > 0
-                            || coloring.get(row.node_info.name) == Some(&Color::Directory)
-                    })
-                    .unwrap_or(false);
+                let node_color = self.coloring.and_then(|coloring| {
+                    if row.node_info.children_count > 0 {
+                        Some(Color::Directory)
+                    } else {
+                        coloring.get(row.node_info.name).copied()
+                    }
+                });
 
-                let tree = if use_directory_color {
-                    format!("{}", align_left(ColoredSlice(slice), tree_width))
+                macro_rules! render_row {
+                    ($tree:expr) => {
+                        format!(
+                            "{size} {tree}│{bar}│{ratio}",
+                            size = align_right(&row.size, size_width),
+                            tree = $tree,
+                            bar = row.proportion_bar.display(self.bar_alignment),
+                            ratio = align_right(&row.percentage, PERCENTAGE_COLUMN_MAX_WIDTH),
+                        )
+                    };
+                }
+
+                if let Some(color) = node_color {
+                    render_row!(align_left(ColoredSlice { slice, color }, tree_width))
                 } else {
-                    format!("{}", align_left(slice, tree_width))
-                };
-
-                format!(
-                    "{size} {tree}│{bar}│{ratio}",
-                    size = align_right(&row.size, size_width),
-                    bar = row.proportion_bar.display(self.bar_alignment),
-                    ratio = align_right(&row.percentage, PERCENTAGE_COLUMN_MAX_WIDTH),
-                )
+                    render_row!(align_left(slice, tree_width))
+                }
             })
             .collect()
     }
