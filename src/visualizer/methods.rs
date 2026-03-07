@@ -14,7 +14,7 @@ use tree_table::*;
 
 use super::{coloring::ColoredTreeHorizontalSlice, ColumnWidthDistribution, Visualizer};
 use crate::size;
-use std::{cmp::min, ffi::OsStr, fmt::Display};
+use std::{cmp::min, ffi::OsStr, fmt::Display, iter::once};
 use zero_copy_pads::{align_left, align_right};
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>
@@ -96,7 +96,7 @@ where
                         .ancestors
                         .iter()
                         .map(|a| a.name.as_ref())
-                        .chain(std::iter::once(initial_row.node_info.name.as_ref()))
+                        .chain(once(initial_row.node_info.name.as_ref()))
                         .collect();
                     coloring.node_color(&path_components, initial_row.node_info.children_count > 0)
                 });
