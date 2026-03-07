@@ -12,7 +12,7 @@ use node_info::*;
 use table::*;
 use tree_table::*;
 
-use super::{coloring::maybe_color_slice, ColumnWidthDistribution, Visualizer};
+use super::{coloring::maybe_colored_slice, ColumnWidthDistribution, Visualizer};
 use crate::size;
 use std::{cmp::min, ffi::OsStr, fmt::Display};
 use zero_copy_pads::{align_left, align_right};
@@ -91,7 +91,7 @@ where
                     tree_horizontal_slice,
                 } = tree_row;
 
-                let tree = maybe_color_slice(
+                let tree = maybe_colored_slice(
                     self.coloring,
                     initial_row.ancestors.iter().map(|node| node.name.as_ref()),
                     initial_row.node_info.name.as_ref(),
