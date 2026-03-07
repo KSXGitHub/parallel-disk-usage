@@ -109,12 +109,12 @@ where
 
                 let aligned_colored_slice;
                 let aligned_plain_slice;
-                let tree = if let Some((color, ansi_prefixes)) = colored {
+                let tree = if let Some((color, ls_colors)) = colored {
                     aligned_colored_slice = align_left(
                         ColoredTreeHorizontalSlice {
                             slice: tree_horizontal_slice,
                             color,
-                            ls_colors: ansi_prefixes,
+                            ls_colors,
                         },
                         tree_width,
                     );
