@@ -16,20 +16,6 @@ impl<'a> Coloring<'a> {
     pub fn new(ls_colors: LsColors, map: HashMap<Vec<&'a OsStr>, Color>) -> Self {
         Coloring { ls_colors, map }
     }
-
-    /// Return `(color, ls_colors)` for a node, used to build a colored slice for rendering.
-    pub(super) fn node_color(
-        &self,
-        path_components: &[&'a OsStr],
-        has_children: bool,
-    ) -> Option<(Color, &LsColors)> {
-        let color = if has_children {
-            Some(Color::Directory)
-        } else {
-            self.map.get(path_components).copied()
-        }?;
-        Some((color, &self.ls_colors))
-    }
 }
 
 /// The coloring to apply to a node name.
@@ -46,19 +32,15 @@ pub enum Color {
 }
 
 impl Color {
-    // TODO: reconsider the visibility of this function once the TODOs in
-    //       `visualizer/methods.rs` have been dealt with.
     /// Get the ANSI prefix for this color from the given prefix table.
-    pub(super) fn ansi_prefix(self, prefixes: &LsColors) -> AnsiPrefix<'_> {
+    fn ansi_prefix(self, prefixes: &LsColors) -> AnsiPrefix<'_> {
         AnsiPrefix(prefixes.prefix_str(self))
     }
 }
 
-// TODO: reconsider the of this struct once the TODOs in
-//       `visualizer/methods.rs` have been dealt with.
 /// ANSI prefix wrapper for a [`Color`] variant, implements [`Display`].
 #[derive(Display)]
-pub(super) struct AnsiPrefix<'a>(&'a str);
+struct AnsiPrefix<'a>(&'a str);
 
 impl AnsiPrefix<'_> {
     /// Returns the reset suffix to emit after this prefix, or `""` if no prefix.
@@ -73,11 +55,9 @@ impl AnsiPrefix<'_> {
 
 /// A [`TreeHorizontalSlice`] with its color applied, used for rendering.
 pub(super) struct ColoredTreeHorizontalSlice<'a> {
-    // TODO: reconsider the following visibilities once the TODOs in
-    //       `visualizer/methods.rs` have been dealt with.
-    pub(super) slice: TreeHorizontalSlice<String>,
-    pub(super) color: Color,
-    pub(super) ls_colors: &'a LsColors,
+    slice: TreeHorizontalSlice<String>,
+    color: Color,
+    ls_colors: &'a LsColors,
 }
 
 impl fmt::Display for ColoredTreeHorizontalSlice<'_> {
@@ -103,6 +83,37 @@ impl fmt::Display for ColoredTreeHorizontalSlice<'_> {
 impl Width for ColoredTreeHorizontalSlice<'_> {
     fn width(&self) -> usize {
         self.slice.width()
+    }
+}
+
+/// Wrap a [`TreeHorizontalSlice`] with color if coloring is available, otherwise return it as-is.
+///
+/// Path components are only constructed when coloring is enabled, avoiding
+/// unnecessary allocation in the common no-color case.
+pub(super) fn maybe_colored_slice<'a, 'b>(
+    coloring: Option<&'b Coloring<'a>>,
+    ancestors: impl Iterator<Item = &'a OsStr>,
+    name: &'a OsStr,
+    has_children: bool,
+    slice: TreeHorizontalSlice<String>,
+) -> MaybeColoredTreeHorizontalSlice<'b> {
+    let coloring = match coloring {
+        Some(coloring) => coloring,
+        None => return MaybeColoredTreeHorizontalSlice::Colorless(slice),
+    };
+    let path_components: Vec<&OsStr> = ancestors.chain(std::iter::once(name)).collect();
+    let color = if has_children {
+        Some(Color::Directory)
+    } else {
+        coloring.map.get(&path_components).copied()
+    };
+    match color {
+        Some(color) => MaybeColoredTreeHorizontalSlice::Colorful(ColoredTreeHorizontalSlice {
+            slice,
+            color,
+            ls_colors: &coloring.ls_colors,
+        }),
+        None => MaybeColoredTreeHorizontalSlice::Colorless(slice),
     }
 }
 

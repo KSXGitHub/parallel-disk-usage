@@ -12,13 +12,9 @@ use node_info::*;
 use table::*;
 use tree_table::*;
 
-use super::{
-    coloring::{ColoredTreeHorizontalSlice, MaybeColoredTreeHorizontalSlice},
-    ColumnWidthDistribution, Visualizer,
-};
+use super::{coloring::maybe_colored_slice, ColumnWidthDistribution, Visualizer};
 use crate::size;
-use pipe_trait::Pipe;
-use std::{cmp::min, ffi::OsStr, fmt::Display, iter::once};
+use std::{cmp::min, ffi::OsStr, fmt::Display};
 use zero_copy_pads::{align_left, align_right};
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>
@@ -95,28 +91,13 @@ where
                     tree_horizontal_slice,
                 } = tree_row;
 
-                // TODO: move this `colored` code block into `visualizer/coloring.rs`.
-                let colored = self.coloring.and_then(|coloring| {
-                    let path_components: Vec<&OsStr> = initial_row
-                        .ancestors
-                        .iter()
-                        .map(|node| node.name.as_ref())
-                        .chain(initial_row.node_info.name.pipe_as_ref(once))
-                        .collect();
-                    coloring.node_color(&path_components, initial_row.node_info.children_count > 0)
-                });
-
-                // TODO: move this `tree` code block into `visualizer/coloring.rs`.
-                let tree = match colored {
-                    Some((color, ls_colors)) => {
-                        MaybeColoredTreeHorizontalSlice::Colorful(ColoredTreeHorizontalSlice {
-                            slice: tree_horizontal_slice,
-                            color,
-                            ls_colors,
-                        })
-                    }
-                    None => MaybeColoredTreeHorizontalSlice::Colorless(tree_horizontal_slice),
-                };
+                let tree = maybe_colored_slice(
+                    self.coloring,
+                    initial_row.ancestors.iter().map(|node| node.name.as_ref()),
+                    initial_row.node_info.name.as_ref(),
+                    initial_row.node_info.children_count > 0,
+                    tree_horizontal_slice,
+                );
 
                 format!(
                     "{size} {tree}│{bar}│{ratio}",
