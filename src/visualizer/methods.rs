@@ -14,12 +14,12 @@ use tree_table::*;
 
 use super::{coloring::ColoredTreeHorizontalSlice, ColumnWidthDistribution, Visualizer};
 use crate::size;
-use std::{cmp::min, ffi::OsStr, fmt::Display, hash::Hash, path::PathBuf};
+use std::{cmp::min, ffi::OsStr, fmt::Display, path::PathBuf};
 use zero_copy_pads::{align_left, align_right};
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>
 where
-    Name: Display + Hash + Eq + AsRef<OsStr>,
+    Name: Display + AsRef<OsStr>,
     Size: size::Size + Into<u64>,
 {
     /// Create ASCII rows that visualize the [tree](crate::data_tree::DataTree), such rows

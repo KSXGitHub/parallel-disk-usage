@@ -11,24 +11,24 @@ use zero_copy_pads::Width;
 /// Coloring configuration: ANSI prefix strings from the environment and a full-path-to-color map.
 #[derive(Debug)]
 pub struct Coloring {
-    ansi_prefixes: LsColors,
+    ls_colors: LsColors,
     map: HashMap<PathBuf, Color>,
 }
 
 impl Coloring {
-    /// Create a new [`Coloring`] from ANSI prefixes and a full-path-to-color map.
-    pub fn new(ansi_prefixes: LsColors, map: HashMap<PathBuf, Color>) -> Self {
-        Coloring { ansi_prefixes, map }
+    /// Create a new [`Coloring`] from LS_COLORS prefixes and a full-path-to-color map.
+    pub fn new(ls_colors: LsColors, map: HashMap<PathBuf, Color>) -> Self {
+        Coloring { ls_colors, map }
     }
 
-    /// Return `(color, prefixes)` for a node, used to build a colored slice for rendering.
+    /// Return `(color, ls_colors)` for a node, used to build a colored slice for rendering.
     pub(super) fn node_color(&self, path: &Path, has_children: bool) -> Option<(Color, &LsColors)> {
         let color = if has_children {
             Some(Color::Directory)
         } else {
             self.map.get(path).copied()
         }?;
-        Some((color, &self.ansi_prefixes))
+        Some((color, &self.ls_colors))
     }
 }
 

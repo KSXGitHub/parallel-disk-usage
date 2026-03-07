@@ -61,7 +61,7 @@ where
     pub bar_alignment: BarAlignment,
     /// Distribution and total number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
-    /// Mapping of names to colors for colorful output.
+    /// Optional coloring configuration for colorful output, mapping full node paths to colors.
     pub coloring: Option<&'a Coloring>,
 }
 

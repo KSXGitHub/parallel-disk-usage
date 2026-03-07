@@ -50,8 +50,9 @@ required-features = ["cli"]
 
 [features]
 default = ["cli"]
+color = ["dep:lscolors"]
 json = ["serde/derive", "serde_json"]
-cli = ["clap/derive", "clap_complete", "clap-utilities", "json"]
+cli = ["color", "clap/derive", "clap_complete", "clap-utilities", "json"]
 cli-completions = ["cli"]
 
 [dependencies]
@@ -70,7 +71,7 @@ rayon = "1.10.0"
 rounded-div = "0.1.4"
 serde = { version = "1.0.228", optional = true }
 serde_json = { version = "1.0.149", optional = true }
-lscolors = { version = "0.21", features = ["nu-ansi-term"] }
+lscolors = { version = "0.21", features = ["nu-ansi-term"], optional = true }
 smart-default = "0.7.1"
 sysinfo = "0.38.2"
 terminal_size = "0.4.3"
