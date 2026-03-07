@@ -10,13 +10,17 @@ use parallel_disk_usage::{
     fs_tree_builder::FsTreeBuilder,
     get_size::GetApparentSize,
     hardlink::HardlinkIgnorant,
+    ls_colors::LsColors,
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
-    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
+    visualizer::{BarAlignment, Color, Coloring, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use std::process::{Command, Stdio};
+use std::{collections::HashMap, ffi::OsStr, process::{Command, Stdio}};
+
+/// Predefined `LS_COLORS` value used in color tests to ensure deterministic output.
+const LS_COLORS: &str = "rs=0:di=01;34:ln=01;36:ex=01;32:fi=00";
 
 #[cfg(unix)]
 use parallel_disk_usage::get_size::{GetBlockCount, GetBlockSize};
@@ -57,6 +61,7 @@ fn total_width() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -96,6 +101,7 @@ fn column_width() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::components(10, 90),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -134,6 +140,7 @@ fn min_ratio_0() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -173,6 +180,7 @@ fn min_ratio() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -212,6 +220,7 @@ fn max_depth_2() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -251,6 +260,7 @@ fn max_depth_1() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -289,6 +299,7 @@ fn top_down() {
         direction: Direction::TopDown,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -327,6 +338,7 @@ fn align_right() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -365,6 +377,7 @@ fn quantity_apparent_size() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -404,6 +417,7 @@ fn quantity_block_size() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -443,6 +457,7 @@ fn quantity_block_count() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -482,6 +497,7 @@ fn bytes_format_plain() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -521,6 +537,7 @@ fn bytes_format_metric() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -560,6 +577,7 @@ fn bytes_format_binary() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -597,6 +615,7 @@ fn path_to_workspace() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -650,6 +669,7 @@ fn multiple_names() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -715,6 +735,7 @@ fn multiple_names_max_depth_2() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -776,6 +797,7 @@ fn multiple_names_max_depth_1() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -786,4 +808,94 @@ fn multiple_names_max_depth_1() {
     let mut lines = actual.lines();
     assert!(lines.next().unwrap().contains("┌──(total)"));
     assert_eq!(lines.next(), None);
+}
+
+/// Test that `--color=always` with multiple arguments correctly colors directories, symlinks,
+/// and regular files. This exercises the code path where a synthetic `(total)` root is created.
+///
+/// The coloring map must use real filesystem paths for `file_color()` checks, not the
+/// synthetic `(total)/...` paths which don't exist on disk.
+#[cfg(unix)]
+#[test]
+fn color_always_multiple_args() {
+    let workspace = SampleWorkspace::simple_tree_with_diverse_kinds();
+
+    let actual = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--color=always")
+        .with_arg("--quantity=apparent-size")
+        .with_arg("--total-width=100")
+        .with_arg("--min-ratio=0")
+        .with_arg("dir-a")
+        .with_arg("dir-b")
+        .with_arg("empty-dir-1")
+        .with_arg("link-dir")
+        .with_arg("link-file.txt")
+        .with_env("LS_COLORS", LS_COLORS)
+        .pipe(stdio)
+        .output()
+        .expect("spawn command with --color=always and multiple args")
+        .pipe(stdout_text);
+    eprintln!("ACTUAL:\n{actual}\n");
+
+    // Build the expected tree manually, mirroring what `pdu` does with multiple args.
+    let names = ["dir-a", "dir-b", "empty-dir-1", "link-dir", "link-file.txt"];
+    let data_tree = names
+        .iter()
+        .map(|name| {
+            let builder = FsTreeBuilder {
+                root: workspace.to_path_buf().join(name),
+                size_getter: GetApparentSize,
+                hardlinks_recorder: &HardlinkIgnorant,
+                reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+                max_depth: 10,
+            };
+            let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+            *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
+            data_tree
+        })
+        .pipe(|children| {
+            DataTree::dir(
+                OsStringDisplay::os_string_from("(total)"),
+                0.into(),
+                children.collect(),
+            )
+        })
+        .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse());
+
+    // Build the coloring map using the CORRECT filesystem paths (not the `(total)/...` ones).
+    // This is what the output SHOULD look like — symlinks as Symlink, empty dirs as Directory, etc.
+    let ls_colors = LsColors::from_str(LS_COLORS);
+    let leaf_colors = [
+        ("(total)/dir-a/file-a1.txt", Color::Normal),
+        ("(total)/dir-a/file-a2.txt", Color::Normal),
+        ("(total)/dir-a/subdir-a/file-a3.txt", Color::Normal),
+        ("(total)/dir-b/file-b1.txt", Color::Normal),
+        ("(total)/empty-dir-1", Color::Directory),
+        ("(total)/link-dir", Color::Symlink),
+        ("(total)/link-file.txt", Color::Symlink),
+    ];
+    let leaf_colors = HashMap::from(leaf_colors.map(|(path, color)| {
+        (
+            path.split('/')
+                .map(AsRef::<OsStr>::as_ref)
+                .collect::<Vec<_>>(),
+            color,
+        )
+    }));
+    let coloring = Coloring::new(ls_colors, leaf_colors);
+
+    let visualizer = Visualizer::<OsStringDisplay, _> {
+        data_tree: &data_tree,
+        bytes_format: BytesFormat::MetricUnits,
+        direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Left,
+        column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: Some(&coloring),
+    };
+    let expected = format!("{visualizer}");
+    let expected = expected.trim_end();
+    eprintln!("EXPECTED:\n{expected}\n");
+
+    assert_eq!(actual, expected);
 }

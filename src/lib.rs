@@ -43,6 +43,7 @@ pub mod get_size;
 pub mod hardlink;
 pub mod inode;
 pub mod json_data;
+pub mod ls_colors;
 pub mod os_string_display;
 pub mod reporter;
 pub mod size;
