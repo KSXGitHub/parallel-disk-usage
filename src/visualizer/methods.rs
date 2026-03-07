@@ -14,7 +14,7 @@ use tree_table::*;
 
 use super::{coloring::ColoredTreeHorizontalSlice, ColumnWidthDistribution, Visualizer};
 use crate::size;
-use std::{cmp::min, ffi::OsStr, fmt::Display, path::PathBuf};
+use std::{cmp::min, ffi::{OsStr, OsString}, fmt::Display};
 use zero_copy_pads::{align_left, align_right};
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>
@@ -92,15 +92,15 @@ where
                 } = tree_row;
 
                 let colored = self.coloring.and_then(|coloring| {
-                    let path: PathBuf = initial_row
+                    let path_components: Vec<OsString> = initial_row
                         .ancestors
                         .iter()
-                        .map(|a| a.name.as_ref() as &OsStr)
+                        .map(|a| a.name.as_ref().to_os_string())
                         .chain(std::iter::once(
-                            initial_row.node_info.name.as_ref() as &OsStr
+                            initial_row.node_info.name.as_ref().to_os_string(),
                         ))
                         .collect();
-                    coloring.node_color(&path, initial_row.node_info.children_count > 0)
+                    coloring.node_color(&path_components, initial_row.node_info.children_count > 0)
                 });
 
                 let aligned_colored_slice;
