@@ -162,14 +162,15 @@ where
                     }
                 });
 
-                let aligned_colored;
-                let aligned_normal;
+                let aligned_colored_slice;
+                let aligned_plain_slice;
                 let tree = if let Some(color) = node_color {
-                    aligned_colored = align_left(ColoredSlice { slice: &slice, color }, tree_width);
-                    format_args!("{aligned_colored}")
+                    aligned_colored_slice =
+                        align_left(ColoredSlice { slice: &slice, color }, tree_width);
+                    format_args!("{aligned_colored_slice}")
                 } else {
-                    aligned_normal = align_left(&slice, tree_width);
-                    format_args!("{aligned_normal}")
+                    aligned_plain_slice = align_left(&slice, tree_width);
+                    format_args!("{aligned_plain_slice}")
                 };
 
                 format!(
