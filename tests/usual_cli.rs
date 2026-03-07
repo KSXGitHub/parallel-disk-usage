@@ -851,7 +851,7 @@ fn colorful_equals_colorless() {
 }
 
 #[test]
-fn color_always_with_and_without_ls_colors() {
+fn different_ls_colors() {
     let workspace = SampleWorkspace::default();
 
     let with_ls_colors = Command::new(PDU)
