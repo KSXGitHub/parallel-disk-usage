@@ -37,6 +37,9 @@ block-count\:"Count numbers of blocks"))' \
 '-m+[Minimal size proportion required to appear]:MIN_RATIO:_default' \
 '--min-ratio=[Minimal size proportion required to appear]:MIN_RATIO:_default' \
 '--threads=[Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer]:THREADS:_default' \
+'--color=[Whether to show colors]:COLOR:((auto\:"Detect if the output is a TTY and render colors accordingly"
+always\:"Always render colors"
+never\:"Never render colors"))' \
 '(-q --quantity -H --deduplicate-hardlinks)--json-input[Read JSON data from stdin]' \
 '--json-output[Print JSON data instead of an ASCII chart]' \
 '-H[Detect and subtract the sizes of hardlinks from their parent directory totals]' \

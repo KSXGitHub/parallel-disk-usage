@@ -146,6 +146,7 @@ fn fs_errors() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected_stdout = format!("{visualizer}");
     eprintln!("EXPECTED STDOUT:\n{}\n", &expected_stdout);

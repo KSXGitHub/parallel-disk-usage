@@ -12,14 +12,14 @@ use node_info::*;
 use table::*;
 use tree_table::*;
 
-use super::{ColumnWidthDistribution, Visualizer};
+use super::{coloring::ColoredTreeHorizontalSlice, ColumnWidthDistribution, Visualizer};
 use crate::size;
-use std::{cmp::min, fmt::Display};
+use std::{cmp::min, ffi::OsStr, fmt::Display, path::PathBuf};
 use zero_copy_pads::{align_left, align_right};
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>
 where
-    Name: Display,
+    Name: Display + AsRef<OsStr>,
     Size: size::Size + Into<u64>,
 {
     /// Create ASCII rows that visualize the [tree](crate::data_tree::DataTree), such rows
@@ -82,12 +82,49 @@ where
         bar_table
             .into_iter()
             .map(|row| {
+                let BarRow {
+                    tree_row,
+                    proportion_bar,
+                } = row;
+                let TreeRow {
+                    initial_row,
+                    tree_horizontal_slice,
+                } = tree_row;
+
+                let colored = self.coloring.and_then(|coloring| {
+                    let path: PathBuf = initial_row
+                        .ancestors
+                        .iter()
+                        .map(|a| a.name.as_ref() as &OsStr)
+                        .chain(std::iter::once(
+                            initial_row.node_info.name.as_ref() as &OsStr
+                        ))
+                        .collect();
+                    coloring.node_color(&path, initial_row.node_info.children_count > 0)
+                });
+
+                let aligned_colored_slice;
+                let aligned_plain_slice;
+                let tree = if let Some((color, ansi_prefixes)) = colored {
+                    aligned_colored_slice = align_left(
+                        ColoredTreeHorizontalSlice {
+                            slice: tree_horizontal_slice,
+                            color,
+                            ls_colors: ansi_prefixes,
+                        },
+                        tree_width,
+                    );
+                    format_args!("{aligned_colored_slice}")
+                } else {
+                    aligned_plain_slice = align_left(&tree_horizontal_slice, tree_width);
+                    format_args!("{aligned_plain_slice}")
+                };
+
                 format!(
                     "{size} {tree}│{bar}│{ratio}",
-                    size = align_right(&row.size, size_width),
-                    tree = align_left(&row.tree_horizontal_slice, tree_width),
-                    bar = row.proportion_bar.display(self.bar_alignment),
-                    ratio = align_right(&row.percentage, PERCENTAGE_COLUMN_MAX_WIDTH),
+                    size = align_right(&initial_row.size, size_width),
+                    bar = proportion_bar.display(self.bar_alignment),
+                    ratio = align_right(&initial_row.percentage, PERCENTAGE_COLUMN_MAX_WIDTH),
                 )
             })
             .collect()

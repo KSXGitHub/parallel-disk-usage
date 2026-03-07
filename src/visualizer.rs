@@ -1,5 +1,6 @@
 pub mod bar_alignment;
 pub mod child_position;
+pub mod coloring;
 pub mod column_width_distribution;
 pub mod direction;
 pub mod parenthood;
@@ -8,6 +9,7 @@ pub mod tree;
 
 pub use bar_alignment::BarAlignment;
 pub use child_position::ChildPosition;
+pub use coloring::{AnsiPrefix, Color, Coloring};
 pub use column_width_distribution::ColumnWidthDistribution;
 pub use direction::Direction;
 pub use parenthood::Parenthood;
@@ -38,6 +40,7 @@ use std::fmt::Display;
 ///     direction: Direction::BottomUp,
 ///     bar_alignment: BarAlignment::Right,
 ///     column_width_distribution: ColumnWidthDistribution::total(100),
+///     coloring: None,
 /// };
 /// println!("{visualizer}");
 /// # }
@@ -58,6 +61,8 @@ where
     pub bar_alignment: BarAlignment,
     /// Distribution and total number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
+    /// Optional coloring configuration for colorful output, mapping full node paths to colors.
+    pub coloring: Option<&'a Coloring>,
 }
 
 mod copy;
