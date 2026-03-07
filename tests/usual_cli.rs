@@ -23,14 +23,12 @@ const LS_COLORS: &str = "rs=0:di=01;34:ln=01;36:ex=01;32:fi=00";
 
 #[cfg(unix)]
 use parallel_disk_usage::{
+    get_size::{GetBlockCount, GetBlockSize},
     ls_colors::LsColors,
     visualizer::{Color, Coloring},
 };
 #[cfg(unix)]
 use std::{collections::HashMap, ffi::OsString};
-
-#[cfg(unix)]
-use parallel_disk_usage::get_size::{GetBlockCount, GetBlockSize};
 
 fn stdio(command: Command) -> Command {
     command
