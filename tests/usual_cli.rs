@@ -880,9 +880,7 @@ fn color_always() {
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
 
-    // SAFETY: tests that set LS_COLORS all use the same constant value, so there is no data race.
-    unsafe { std::env::set_var("LS_COLORS", LS_COLORS) };
-    let ls_colors = LsColors::from_env();
+    let ls_colors: LsColors = LS_COLORS.parse().expect("parse LS_COLORS");
     let map = HashMap::from([
         (
             OsStringDisplay::os_string_from("file-a1.txt"),
