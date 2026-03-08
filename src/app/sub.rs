@@ -200,7 +200,12 @@ where
 
         let coloring: Option<Coloring> = color.map(|ls_colors| {
             let mut map = HashMap::new();
-            build_coloring_map(&data_tree, &mut Vec::new(), &mut map);
+            // In the multi-arg case the root is the virtual "(total)" node, which does not
+            // correspond to a real filesystem path.  Pass `fs_path_skip = 1` so that
+            // `file_color` receives the actual relative path (e.g. "dir-a/file.txt") rather
+            // than the fake one ("(total)/dir-a/file.txt").
+            let fs_path_skip = usize::from(!only_one_arg);
+            build_coloring_map(&data_tree, &mut Vec::new(), fs_path_skip, &mut map);
             Coloring::new(ls_colors, map)
         });
 
@@ -288,18 +293,25 @@ where
 /// Leaf nodes (files or childless directories after pruning) are added to the map.
 /// Nodes with children are skipped because the [`Visualizer`] uses the children count to
 /// determine their color at render time.
+///
+/// `fs_path_skip` controls how many leading components of `path_stack` to skip when building
+/// the filesystem path passed to [`file_color`].  This is set to `1` in the multi-argument case
+/// so that the virtual `(total)` root component is excluded from the path used for filesystem
+/// queries, while still being included in the map key (which must match what
+/// [`maybe_colored_slice`](crate::visualizer::coloring::maybe_colored_slice) constructs).
 fn build_coloring_map<'a>(
     node: &'a DataTree<OsStringDisplay, impl size::Size>,
     path_stack: &mut Vec<&'a OsStr>,
+    fs_path_skip: usize,
     map: &mut HashMap<Vec<&'a OsStr>, Color>,
 ) {
     path_stack.push(node.name().as_os_str());
     if node.children().is_empty() {
-        let color = file_color(&path_stack.iter().collect::<PathBuf>());
+        let color = file_color(&path_stack[fs_path_skip..].iter().collect::<PathBuf>());
         map.insert(path_stack.clone(), color);
     } else {
         for child in node.children() {
-            build_coloring_map(child, path_stack, map);
+            build_coloring_map(child, path_stack, fs_path_skip, map);
         }
     }
     path_stack.pop();
