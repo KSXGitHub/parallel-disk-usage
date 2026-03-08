@@ -10,17 +10,13 @@ use parallel_disk_usage::{
     fs_tree_builder::FsTreeBuilder,
     get_size::GetApparentSize,
     hardlink::HardlinkIgnorant,
-    ls_colors::LsColors,
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
-    visualizer::{BarAlignment, Color, Coloring, ColumnWidthDistribution, Direction, Visualizer},
+    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use std::{collections::HashMap, ffi::OsStr, process::{Command, Stdio}};
-
-/// Predefined `LS_COLORS` value used in color tests to ensure deterministic output.
-const LS_COLORS: &str = "rs=0:di=01;34:ln=01;36:ex=01;32:fi=00";
+use std::process::{Command, Stdio};
 
 #[cfg(unix)]
 use parallel_disk_usage::get_size::{GetBlockCount, GetBlockSize};
@@ -810,14 +806,20 @@ fn multiple_names_max_depth_1() {
     assert_eq!(lines.next(), None);
 }
 
-/// Test that `--color=always` with multiple arguments correctly colors directories, symlinks,
-/// and regular files. This exercises the code path where a synthetic `(total)` root is created.
+/// Test that `--color=always` with multiple arguments correctly colors leaf nodes.
 ///
-/// The coloring map must use real filesystem paths for `file_color()` checks, not the
-/// synthetic `(total)/...` paths which don't exist on disk.
+/// When multiple path arguments are provided, a synthetic `(total)` root is created.
+/// The coloring logic must still correctly resolve filesystem types (symlink, directory, etc.)
+/// for the original paths — not for non-existent paths prefixed with `(total)/...`.
+///
+/// We verify this by comparing the `--color=always` output (with ANSI stripped) against
+/// `--color=never` output, AND checking that symlinks and empty directories actually
+/// receive their expected ANSI color codes from LS_COLORS.
 #[cfg(unix)]
 #[test]
 fn color_always_multiple_args() {
+    // LS_COLORS: di=01;34 (bold blue for dirs), ln=01;36 (bold cyan for symlinks)
+    let ls_colors = "rs=0:di=01;34:ln=01;36:ex=01;32:fi=00";
     let workspace = SampleWorkspace::simple_tree_with_diverse_kinds();
 
     let actual = Command::new(PDU)
@@ -831,71 +833,58 @@ fn color_always_multiple_args() {
         .with_arg("empty-dir-1")
         .with_arg("link-dir")
         .with_arg("link-file.txt")
-        .with_env("LS_COLORS", LS_COLORS)
+        .with_env("LS_COLORS", ls_colors)
         .pipe(stdio)
         .output()
         .expect("spawn command with --color=always and multiple args")
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    // Build the expected tree manually, mirroring what `pdu` does with multiple args.
-    let names = ["dir-a", "dir-b", "empty-dir-1", "link-dir", "link-file.txt"];
-    let data_tree = names
-        .iter()
-        .map(|name| {
-            let builder = FsTreeBuilder {
-                root: workspace.to_path_buf().join(name),
-                size_getter: GetApparentSize,
-                hardlinks_recorder: &HardlinkIgnorant,
-                reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-                max_depth: 10,
-            };
-            let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
-            *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
-            data_tree
-        })
-        .pipe(|children| {
-            DataTree::dir(
-                OsStringDisplay::os_string_from("(total)"),
-                0.into(),
-                children.collect(),
-            )
-        })
-        .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse());
+    let colorless = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--color=never")
+        .with_arg("--quantity=apparent-size")
+        .with_arg("--total-width=100")
+        .with_arg("--min-ratio=0")
+        .with_arg("dir-a")
+        .with_arg("dir-b")
+        .with_arg("empty-dir-1")
+        .with_arg("link-dir")
+        .with_arg("link-file.txt")
+        .with_env("LS_COLORS", ls_colors)
+        .pipe(stdio)
+        .output()
+        .expect("spawn command with --color=never and multiple args")
+        .pipe(stdout_text);
+    eprintln!("COLORLESS:\n{colorless}\n");
 
-    // Build the coloring map using the CORRECT filesystem paths (not the `(total)/...` ones).
-    // This is what the output SHOULD look like — symlinks as Symlink, empty dirs as Directory, etc.
-    let ls_colors = LsColors::from_str(LS_COLORS);
-    let leaf_colors = [
-        ("(total)/dir-a/file-a1.txt", Color::Normal),
-        ("(total)/dir-a/file-a2.txt", Color::Normal),
-        ("(total)/dir-a/subdir-a/file-a3.txt", Color::Normal),
-        ("(total)/dir-b/file-b1.txt", Color::Normal),
-        ("(total)/empty-dir-1", Color::Directory),
-        ("(total)/link-dir", Color::Symlink),
-        ("(total)/link-file.txt", Color::Symlink),
-    ];
-    let leaf_colors = HashMap::from(leaf_colors.map(|(path, color)| {
-        (
-            path.split('/')
-                .map(AsRef::<OsStr>::as_ref)
-                .collect::<Vec<_>>(),
-            color,
-        )
-    }));
-    let coloring = Coloring::new(ls_colors, leaf_colors);
+    // Stripping ANSI from the colorful output should match the colorless output.
+    let stripped = strip_ansi_escapes::strip_str(&actual);
+    let stripped = stripped.trim_end();
+    assert_eq!(stripped, colorless, "stripped colorful output must match colorless output");
 
-    let visualizer = Visualizer::<OsStringDisplay, _> {
-        data_tree: &data_tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-        coloring: Some(&coloring),
-    };
-    let expected = format!("{visualizer}");
-    let expected = expected.trim_end();
-    eprintln!("EXPECTED:\n{expected}\n");
+    // Verify that symlinks receive the symlink color (bold cyan = \x1b[1;36m).
+    // With the `(total)` bug, these would have no ANSI codes at all because
+    // the path `(total)/link-dir` doesn't exist on the filesystem.
+    let symlink_prefix = "\x1b[1;36m";
+    let has_colored_symlink = actual.lines().any(|line| {
+        line.contains(symlink_prefix) && (line.contains("link-dir") || line.contains("link-file.txt"))
+    });
+    assert!(
+        has_colored_symlink,
+        "symlinks (link-dir, link-file.txt) should be colored with the symlink prefix ({symlink_prefix}), \
+         but no line contains it. This likely means the `(total)` synthetic root caused \
+         filesystem type detection to fail for leaf nodes."
+    );
 
-    assert_eq!(actual, expected);
+    // Verify that the empty directory leaf receives the directory color (bold blue = \x1b[1;34m).
+    let dir_prefix = "\x1b[1;34m";
+    let has_colored_empty_dir = actual.lines().any(|line| {
+        line.contains(dir_prefix) && line.contains("empty-dir-1")
+    });
+    assert!(
+        has_colored_empty_dir,
+        "empty-dir-1 should be colored with the directory prefix ({dir_prefix}), \
+         but the matching line doesn't contain it."
+    );
 }

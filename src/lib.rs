@@ -14,6 +14,7 @@ pub use serde_json;
 pub mod app;
 #[cfg(feature = "cli")]
 pub mod args;
+pub mod coloring;
 #[cfg(feature = "cli")]
 pub mod runtime_error;
 #[cfg(feature = "cli")]
@@ -43,7 +44,6 @@ pub mod get_size;
 pub mod hardlink;
 pub mod inode;
 pub mod json_data;
-pub mod ls_colors;
 pub mod os_string_display;
 pub mod reporter;
 pub mod size;

@@ -1,27 +1,21 @@
 use crate::{
-    args::{Depth, Fraction},
+    args::{ColorOption, Depth, Fraction},
+    coloring::Coloring,
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
     hardlink::{DeduplicateSharedSize, HardlinkIgnorant, RecordHardlinks},
     json_data::{BinaryVersion, JsonData, JsonDataBody, JsonShared, JsonTree, SchemaVersion},
-    ls_colors::LsColors,
     os_string_display::OsStringDisplay,
     reporter::ParallelReporter,
     runtime_error::RuntimeError,
     size,
     status_board::GLOBAL_STATUS_BOARD,
-    visualizer::{BarAlignment, Color, Coloring, ColumnWidthDistribution, Direction, Visualizer},
+    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pipe_trait::Pipe;
 use serde::Serialize;
-use std::{
-    collections::HashMap,
-    ffi::OsStr,
-    io::stdout,
-    iter::once,
-    path::{Path, PathBuf},
-};
+use std::{io::stdout, iter::once, path::PathBuf};
 
 /// The sub program of the main application.
 pub struct Sub<Size, SizeGetter, HardlinksHandler, Report>
@@ -56,8 +50,8 @@ where
     pub min_ratio: Fraction,
     /// Preserve order of entries.
     pub no_sort: bool,
-    /// Whether to color the output.
-    pub color: Option<LsColors>,
+    /// When to colorize the output.
+    pub color: ColorOption,
 }
 
 impl<Size, SizeGetter, HardlinksHandler, Report> Sub<Size, SizeGetter, HardlinksHandler, Report>
@@ -108,7 +102,6 @@ where
                 files: vec![".".into()],
                 hardlinks_handler,
                 reporter,
-                color,
                 ..self
             }
             .run();
@@ -198,11 +191,19 @@ where
                 .or(deduplication_result);
         }
 
-        let coloring: Option<Coloring> = color.map(|ls_colors| {
-            let mut map = HashMap::new();
-            build_coloring_map(&data_tree, &mut Vec::new(), &mut map);
-            Coloring::new(ls_colors, map)
-        });
+        // Build color map AFTER pruning to save CPU/IO cycles
+        let coloring = match color {
+            ColorOption::Always => Some(Coloring::from_tree(&data_tree)),
+            ColorOption::Never => None,
+            ColorOption::Auto => {
+                use std::io::IsTerminal;
+                if std::io::stdout().is_terminal() {
+                    Some(Coloring::from_tree(&data_tree))
+                } else {
+                    None
+                }
+            }
+        };
 
         let visualizer = Visualizer {
             data_tree: &data_tree,
@@ -278,56 +279,6 @@ where
     fn json_report((): Self::Report) -> Result<Option<JsonShared<Size>>, RuntimeError> {
         Ok(None)
     }
-}
-
-/// Recursively walk a pruned [`DataTree`] and build a map of path-component vectors to [`Color`] values.
-///
-/// The `path_stack` argument is a reusable buffer of path components representing the current
-/// ancestor chain. Each recursive call pushes the node's name and pops it on return, so no
-/// cloning occurs during traversal — only at leaf insertions.
-/// Leaf nodes (files or childless directories after pruning) are added to the map.
-/// Nodes with children are skipped because the [`Visualizer`] uses the children count to
-/// determine their color at render time.
-fn build_coloring_map<'a>(
-    node: &'a DataTree<OsStringDisplay, impl size::Size>,
-    path_stack: &mut Vec<&'a OsStr>,
-    map: &mut HashMap<Vec<&'a OsStr>, Color>,
-) {
-    path_stack.push(node.name().as_os_str());
-    if node.children().is_empty() {
-        let color = file_color(&path_stack.iter().collect::<PathBuf>());
-        map.insert(path_stack.clone(), color);
-    } else {
-        for child in node.children() {
-            build_coloring_map(child, path_stack, map);
-        }
-    }
-    path_stack.pop();
-}
-
-fn file_color(path: &Path) -> Color {
-    if path.is_symlink() {
-        Color::Symlink
-    } else if path.is_dir() {
-        Color::Directory
-    } else if is_executable(path) {
-        Color::Executable
-    } else {
-        Color::Normal
-    }
-}
-
-#[cfg(unix)]
-fn is_executable(path: &Path) -> bool {
-    use std::os::unix::fs::PermissionsExt;
-    path.metadata()
-        .map(|stats| stats.permissions().mode() & 0o111 != 0)
-        .unwrap_or(false)
-}
-
-#[cfg(not(unix))]
-fn is_executable(_path: &Path) -> bool {
-    false
 }
 
 #[cfg(unix)]

@@ -125,6 +125,17 @@ Do not output `.shared.details` in the JSON output.
 
 Do not output `.shared.summary` in the JSON output.
 
+<a id="color" name="color"></a>
+### `--color`
+
+* _Default:_ `auto`.
+* _Choices:_
+  - `auto`: Colorize output only when stdout is a terminal
+  - `always`: Always colorize the output
+  - `never`: Never colorize the output
+
+When to colorize the output.
+
 <a id="option-h" name="option-h"></a><a id="help" name="help"></a>
 ### `--help`
 

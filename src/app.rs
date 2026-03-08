@@ -3,12 +3,11 @@ pub mod sub;
 pub use sub::Sub;
 
 use crate::{
-    args::{Args, ColorWhen, Quantity, Threads},
+    args::{Args, Quantity, Threads},
     bytes_format::BytesFormat,
     get_size::{GetApparentSize, GetSize},
     hardlink,
     json_data::{JsonData, JsonDataBody, JsonShared, JsonTree},
-    ls_colors::LsColors,
     reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
     runtime_error::RuntimeError,
     size,
@@ -17,10 +16,7 @@ use crate::{
 use clap::Parser;
 use hdd::any_path_is_in_hdd;
 use pipe_trait::Pipe;
-use std::{
-    io::{stdin, stdout, IsTerminal},
-    time::Duration,
-};
+use std::{io::stdin, time::Duration};
 use sub::JsonOutputParam;
 use sysinfo::Disks;
 
@@ -174,12 +170,6 @@ impl App {
             ErrorReport::TEXT
         };
 
-        let color = match self.args.color {
-            ColorWhen::Always => Some(LsColors::from_env()),
-            ColorWhen::Never => None,
-            ColorWhen::Auto => stdout().is_terminal().then(LsColors::from_env),
-        };
-
         trait GetSizeUtils: GetSize<Size: size::Size> {
             const INSTANCE: Self;
             const QUANTITY: Quantity;
@@ -302,6 +292,7 @@ impl App {
                     max_depth,
                     min_ratio,
                     no_sort,
+                    color,
                     omit_json_shared_details,
                     omit_json_shared_summary,
                     ..

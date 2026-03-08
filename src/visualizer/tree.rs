@@ -110,6 +110,28 @@ impl<Name: Width> Width for TreeHorizontalSlice<Name> {
     }
 }
 
+impl<Name: Width + Display> TreeHorizontalSlice<Name> {
+    /// Format with ANSI color codes wrapping the name portion.
+    ///
+    /// `name_prefix` and `name_suffix` are the ANSI escape sequences to wrap the name.
+    /// `total_width` is the target column width; the output is padded with spaces.
+    pub fn display_colored(
+        &self,
+        name_prefix: &str,
+        name_suffix: &str,
+        total_width: usize,
+    ) -> String {
+        let padding_len = total_width.saturating_sub(self.width());
+        format!(
+            "{}{}{name_prefix}{}{name_suffix}{:padding_len$}",
+            self.indent(),
+            self.skeletal_component,
+            self.name,
+            "",
+        )
+    }
+}
+
 impl TreeHorizontalSlice<String> {
     /// Truncate the name to fit specified `max_width`.
     ///

@@ -12,14 +12,14 @@ use node_info::*;
 use table::*;
 use tree_table::*;
 
-use super::{coloring::maybe_colored_slice, ColumnWidthDistribution, Visualizer};
+use super::{ColumnWidthDistribution, Visualizer};
 use crate::size;
-use std::{cmp::min, ffi::OsStr, fmt::Display};
+use std::{cmp::min, fmt::Display};
 use zero_copy_pads::{align_left, align_right};
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>
 where
-    Name: Display + AsRef<OsStr>,
+    Name: Display,
     Size: size::Size + Into<u64>,
 {
     /// Create ASCII rows that visualize the [tree](crate::data_tree::DataTree), such rows
@@ -82,29 +82,19 @@ where
         bar_table
             .into_iter()
             .map(|row| {
-                let BarRow {
-                    tree_row,
-                    proportion_bar,
-                } = row;
-                let TreeRow {
-                    initial_row,
-                    tree_horizontal_slice,
-                } = tree_row;
-
-                let tree = maybe_colored_slice(
-                    self.coloring,
-                    initial_row.ancestors.iter().map(|node| node.name.as_ref()),
-                    initial_row.node_info.name.as_ref(),
-                    initial_row.node_info.children_count > 0,
-                    tree_horizontal_slice,
-                );
-
+                let tree = if let Some(coloring) = self.coloring {
+                    let (prefix, suffix) =
+                        coloring.ansi_for(&row.tree_horizontal_slice.name);
+                    row.tree_horizontal_slice
+                        .display_colored(prefix, suffix, tree_width)
+                } else {
+                    align_left(&row.tree_horizontal_slice, tree_width).to_string()
+                };
                 format!(
                     "{size} {tree}│{bar}│{ratio}",
-                    size = align_right(&initial_row.size, size_width),
-                    tree = align_left(tree, tree_width),
-                    bar = proportion_bar.display(self.bar_alignment),
-                    ratio = align_right(&initial_row.percentage, PERCENTAGE_COLUMN_MAX_WIDTH),
+                    size = align_right(&row.size, size_width),
+                    bar = row.proportion_bar.display(self.bar_alignment),
+                    ratio = align_right(&row.percentage, PERCENTAGE_COLUMN_MAX_WIDTH),
                 )
             })
             .collect()

@@ -1,6 +1,5 @@
 pub mod bar_alignment;
 pub mod child_position;
-pub mod coloring;
 pub mod column_width_distribution;
 pub mod direction;
 pub mod parenthood;
@@ -9,14 +8,13 @@ pub mod tree;
 
 pub use bar_alignment::BarAlignment;
 pub use child_position::ChildPosition;
-pub use coloring::{Color, Coloring};
 pub use column_width_distribution::ColumnWidthDistribution;
 pub use direction::Direction;
 pub use parenthood::Parenthood;
 pub use proportion_bar::{ProportionBar, ProportionBarBlock};
 pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
 
-use super::{data_tree::DataTree, size};
+use super::{coloring::Coloring, data_tree::DataTree, size};
 use std::fmt::Display;
 
 /// Visualize a [`DataTree`].
@@ -61,8 +59,9 @@ where
     pub bar_alignment: BarAlignment,
     /// Distribution and total number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
-    /// Optional coloring configuration for colorful output, mapping full node paths to colors.
-    pub coloring: Option<&'a Coloring<'a>>,
+    /// Optional coloring for file/directory names.
+    /// `None` means no color; `Some` means color according to the map.
+    pub coloring: Option<&'a Coloring>,
 }
 
 mod copy;

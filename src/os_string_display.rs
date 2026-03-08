@@ -16,6 +16,7 @@ use serde::{Deserialize, Serialize};
     Default,
     Clone,
     Copy,
+    Hash,
     PartialEq,
     Eq,
     PartialOrd,

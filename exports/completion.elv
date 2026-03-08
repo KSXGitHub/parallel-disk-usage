@@ -32,6 +32,7 @@ set edit:completion:arg-completer[pdu] = {|@words|
             cand -m 'Minimal size proportion required to appear'
             cand --min-ratio 'Minimal size proportion required to appear'
             cand --threads 'Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer'
+            cand --color 'When to colorize the output'
             cand --json-input 'Read JSON data from stdin'
             cand --json-output 'Print JSON data instead of an ASCII chart'
             cand -H 'Detect and subtract the sizes of hardlinks from their parent directory totals'
