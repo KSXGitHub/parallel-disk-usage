@@ -200,7 +200,19 @@ where
 
         let coloring: Option<Coloring> = color.map(|ls_colors| {
             let mut map = HashMap::new();
-            build_coloring_map(&data_tree, &mut Vec::new(), &mut map);
+            if only_one_arg {
+                build_coloring_map(&data_tree, &mut Vec::new(), &mut Vec::new(), &mut map);
+            } else {
+                // For multi-arg invocations the root is the synthetic "(total)" node.
+                // Include it in the map key (the visualizer's ancestor chain contains it)
+                // but skip it in the filesystem path (it doesn't exist on disk).
+                let root_name = data_tree.name().as_os_str();
+                for child in data_tree.children() {
+                    let mut key_stack = vec![root_name];
+                    let mut fs_stack = Vec::new();
+                    build_coloring_map(child, &mut key_stack, &mut fs_stack, &mut map);
+                }
+            }
             Coloring::new(ls_colors, map)
         });
 
@@ -282,27 +294,33 @@ where
 
 /// Recursively walk a pruned [`DataTree`] and build a map of path-component vectors to [`Color`] values.
 ///
-/// The `path_stack` argument is a reusable buffer of path components representing the current
-/// ancestor chain. Each recursive call pushes the node's name and pops it on return, so no
-/// cloning occurs during traversal — only at leaf insertions.
+/// `key_stack` tracks the ancestor chain used as the HashMap key (must match what the
+/// [`Visualizer`] constructs). `fs_path_stack` tracks the real filesystem path used for
+/// file-type detection. These two stacks diverge when the root is a synthetic node like
+/// `(total)` that has no corresponding directory on disk.
+///
 /// Leaf nodes (files or childless directories after pruning) are added to the map.
 /// Nodes with children are skipped because the [`Visualizer`] uses the children count to
 /// determine their color at render time.
 fn build_coloring_map<'a>(
     node: &'a DataTree<OsStringDisplay, impl size::Size>,
-    path_stack: &mut Vec<&'a OsStr>,
+    key_stack: &mut Vec<&'a OsStr>,
+    fs_path_stack: &mut Vec<&'a OsStr>,
     map: &mut HashMap<Vec<&'a OsStr>, Color>,
 ) {
-    path_stack.push(node.name().as_os_str());
+    let name = node.name().as_os_str();
+    key_stack.push(name);
+    fs_path_stack.push(name);
     if node.children().is_empty() {
-        let color = file_color(&path_stack.iter().collect::<PathBuf>());
-        map.insert(path_stack.clone(), color);
+        let color = file_color(&fs_path_stack.iter().collect::<PathBuf>());
+        map.insert(key_stack.clone(), color);
     } else {
         for child in node.children() {
-            build_coloring_map(child, path_stack, map);
+            build_coloring_map(child, key_stack, fs_path_stack, map);
         }
     }
-    path_stack.pop();
+    key_stack.pop();
+    fs_path_stack.pop();
 }
 
 fn file_color(path: &Path) -> Color {
