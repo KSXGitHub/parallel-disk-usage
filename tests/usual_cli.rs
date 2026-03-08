@@ -935,7 +935,6 @@ fn color_always_multiple_args() {
             )
         })
         .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse());
-    data_tree.par_cull_insignificant_data(0.0);
 
     let ls_colors = LsColors::from_str(LS_COLORS);
     let leaf_colors = [
