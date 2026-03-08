@@ -17,7 +17,7 @@ use pipe_trait::Pipe;
 use serde::Serialize;
 use std::{
     collections::HashMap,
-    ffi::OsStr,
+    ffi::{OsStr, OsString},
     io::stdout,
     iter::once,
     path::{Path, PathBuf},
@@ -133,7 +133,7 @@ where
         }
 
         let min_ratio: f32 = min_ratio.into();
-        let (data_tree, deduplication_record) = {
+        let (mut data_tree, deduplication_record) = {
             let mut data_tree = data_tree;
             if min_ratio > 0.0 {
                 data_tree.par_cull_insignificant_data(min_ratio);
@@ -144,10 +144,40 @@ where
             let deduplication_record = hardlinks_handler.deduplicate(&mut data_tree);
             if !only_one_arg {
                 assert_eq!(data_tree.name().as_os_str().to_str(), Some(""));
-                *data_tree.name_mut() = OsStringDisplay::os_string_from("(total)");
             }
             (data_tree, deduplication_record)
         };
+
+        // Build the coloring map while the multi-arg root is still "" (a valid path prefix)
+        // so that file_color receives real filesystem paths.
+        let mut leaf_color_map: Option<HashMap<Vec<OsString>, Color>> = color.as_ref().map(|_| {
+            let mut map = HashMap::new();
+            build_coloring_map(&data_tree, &mut Vec::new(), &mut map);
+            map
+        });
+
+        // Rename the synthetic root and rekey the coloring map to match.
+        if !only_one_arg {
+            *data_tree.name_mut() = OsStringDisplay::os_string_from("(total)");
+            if let Some(map) = &mut leaf_color_map {
+                let total = OsString::from("(total)");
+                let empty = OsString::from("");
+                *map = map
+                    .drain()
+                    .map(|(mut key, color)| {
+                        if key.first() == Some(&empty) {
+                            key[0] = total.clone();
+                        }
+                        (key, color)
+                    })
+                    .collect();
+            }
+        }
+
+        let coloring: Option<Coloring> = color.map(|ls_colors| {
+            let map = leaf_color_map.take().unwrap();
+            Coloring::new(ls_colors, map)
+        });
 
         GLOBAL_STATUS_BOARD.clear_line(0);
 
@@ -197,24 +227,6 @@ where
                 .map_err(RuntimeError::SerializationFailure)
                 .or(deduplication_result);
         }
-
-        let coloring: Option<Coloring> = color.map(|ls_colors| {
-            let mut map = HashMap::new();
-            if only_one_arg {
-                build_coloring_map(&data_tree, &mut Vec::new(), &mut Vec::new(), &mut map);
-            } else {
-                // For multi-arg invocations the root is the synthetic "(total)" node.
-                // Include it in the map key (the visualizer's ancestor chain contains it)
-                // but skip it in the filesystem path (it doesn't exist on disk).
-                let root_name = data_tree.name().as_os_str();
-                for child in data_tree.children() {
-                    let mut key_stack = vec![root_name];
-                    let mut fs_stack = Vec::new();
-                    build_coloring_map(child, &mut key_stack, &mut fs_stack, &mut map);
-                }
-            }
-            Coloring::new(ls_colors, map)
-        });
 
         let visualizer = Visualizer {
             data_tree: &data_tree,
@@ -294,33 +306,27 @@ where
 
 /// Recursively walk a pruned [`DataTree`] and build a map of path-component vectors to [`Color`] values.
 ///
-/// `key_stack` tracks the ancestor chain used as the HashMap key (must match what the
-/// [`Visualizer`] constructs). `fs_path_stack` tracks the real filesystem path used for
-/// file-type detection. These two stacks diverge when the root is a synthetic node like
-/// `(total)` that has no corresponding directory on disk.
-///
+/// The `path_stack` argument is a reusable buffer of path components representing the current
+/// ancestor chain. Each recursive call pushes the node's name and pops it on return, so no
+/// cloning occurs during traversal — only at leaf insertions.
 /// Leaf nodes (files or childless directories after pruning) are added to the map.
 /// Nodes with children are skipped because the [`Visualizer`] uses the children count to
 /// determine their color at render time.
 fn build_coloring_map<'a>(
     node: &'a DataTree<OsStringDisplay, impl size::Size>,
-    key_stack: &mut Vec<&'a OsStr>,
-    fs_path_stack: &mut Vec<&'a OsStr>,
-    map: &mut HashMap<Vec<&'a OsStr>, Color>,
+    path_stack: &mut Vec<&'a OsStr>,
+    map: &mut HashMap<Vec<OsString>, Color>,
 ) {
-    let name = node.name().as_os_str();
-    key_stack.push(name);
-    fs_path_stack.push(name);
+    path_stack.push(node.name().as_os_str());
     if node.children().is_empty() {
-        let color = file_color(&fs_path_stack.iter().collect::<PathBuf>());
-        map.insert(key_stack.clone(), color);
+        let color = file_color(&path_stack.iter().collect::<PathBuf>());
+        map.insert(path_stack.iter().map(|s| s.to_os_string()).collect(), color);
     } else {
         for child in node.children() {
-            build_coloring_map(child, key_stack, fs_path_stack, map);
+            build_coloring_map(child, path_stack, map);
         }
     }
-    key_stack.pop();
-    fs_path_stack.pop();
+    path_stack.pop();
 }
 
 fn file_color(path: &Path) -> Color {

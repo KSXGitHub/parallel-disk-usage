@@ -28,7 +28,7 @@ use parallel_disk_usage::{
     visualizer::{Color, Coloring},
 };
 #[cfg(unix)]
-use std::{collections::HashMap, ffi::OsStr};
+use std::{collections::HashMap, ffi::OsString};
 
 fn stdio(command: Command) -> Command {
     command
@@ -857,9 +857,7 @@ fn color_always() {
     ];
     let leaf_colors = HashMap::from(leaf_colors.map(|(path, color)| {
         (
-            path.split('/')
-                .map(AsRef::<OsStr>::as_ref)
-                .collect::<Vec<_>>(),
+            path.split('/').map(OsString::from).collect::<Vec<_>>(),
             color,
         )
     }));
@@ -913,7 +911,7 @@ fn color_always_multiple_args() {
     };
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let mut data_tree = args
+    let data_tree = args
         .iter()
         .map(|name| {
             let builder = FsTreeBuilder {
@@ -950,9 +948,7 @@ fn color_always_multiple_args() {
     ];
     let leaf_colors = HashMap::from(leaf_colors.map(|(path, color)| {
         (
-            path.split('/')
-                .map(AsRef::<OsStr>::as_ref)
-                .collect::<Vec<_>>(),
+            path.split('/').map(OsString::from).collect::<Vec<_>>(),
             color,
         )
     }));
