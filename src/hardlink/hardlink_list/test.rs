@@ -148,3 +148,38 @@ fn detect_number_of_links_change() {
     });
     assert_eq!(actual, expected);
 }
+
+/// Files on different devices may share the same inode number, but they are
+/// unrelated — hardlinks cannot span filesystem boundaries.  Verify that two
+/// files with the same inode number but different device numbers produce
+/// separate entries in the list (i.e. the device number is actually used in
+/// the deduplication key).
+#[test]
+fn same_ino_on_different_devices_are_treated_separately() {
+    let list = HardlinkList::<Bytes>::new();
+
+    // dev=1, ino=100 — first filesystem
+    list.add(100.into(), 1, 50.into(), 2, "dev1/file_a".as_ref())
+        .expect("add dev1/file_a");
+    list.add(100.into(), 1, 50.into(), 2, "dev1/file_b".as_ref())
+        .expect("add dev1/file_b (same dev+ino → same inode group)");
+
+    // dev=2, ino=100 — second filesystem, coincidentally same inode number
+    list.add(100.into(), 2, 80.into(), 2, "dev2/file_c".as_ref())
+        .expect("add dev2/file_c (different dev → separate inode group)");
+    list.add(100.into(), 2, 80.into(), 2, "dev2/file_d".as_ref())
+        .expect("add dev2/file_d (same dev+ino → same inode group as file_c)");
+
+    // Each device should produce its own entry, so the list should have 2 entries.
+    assert_eq!(list.len(), 2, "expected one entry per (dev, ino) pair");
+
+    let reflection = list.into_reflection();
+    // Both entries expose ino=100 in the reflection (device is not part of the
+    // public JSON format), so there are still 2 entries in the vector.
+    assert_eq!(reflection.len(), 2);
+
+    // Paths are grouped per (dev, ino): each group has exactly 2 paths.
+    for entry in reflection.iter() {
+        assert_eq!(entry.paths.len(), 2);
+    }
+}
