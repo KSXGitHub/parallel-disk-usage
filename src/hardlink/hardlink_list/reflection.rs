@@ -12,11 +12,14 @@ use serde::{Deserialize, Serialize};
 /// internal content.
 ///
 /// **Guarantees:**
-/// * Every inode number is unique within the scope of a single scan (files are keyed by
-///   `(device, inode)` in the underlying [`HardlinkList`], but the reflection stores
-///   only the inode number; entries from different filesystems with the same inode number
-///   are an unsupported edge case in JSON round-trips).
-/// * The internal list is always sorted by inode numbers.
+/// * Every `(device, inode)` pair is unique within the scope of a single scan, but inode
+///   numbers alone are **not** guaranteed to be unique: when scanning multiple filesystems,
+///   two unrelated files on different devices can share the same inode number and will each
+///   produce a separate entry. The reflection stores only the inode number (the JSON format
+///   does not carry device information), so round-tripping a multi-filesystem scan through
+///   JSON is an unsupported edge case.
+/// * The internal list is always sorted by inode numbers (and by device number as a
+///   tie-breaker when two entries share the same inode number).
 ///
 /// **Equality:** `Reflection` implements `PartialEq` and `Eq` traits.
 ///
@@ -98,10 +101,17 @@ impl<Size> From<Vec<ReflectionEntry<Size>>> for Reflection<Size> {
 
 impl<Size> From<HardlinkList<Size>> for Reflection<Size> {
     fn from(HardlinkList(list): HardlinkList<Size>) -> Self {
-        list.into_iter()
+        // Collect to a vec, sort by (ino, dev) for a stable, deterministic order, then
+        // strip dev before wrapping.  Sorting here (with dev still available) avoids the
+        // nondeterminism that would arise from an unstable sort on ino alone when two
+        // entries from different filesystems share the same inode number.
+        let mut pairs: Vec<(InodeKey, Value<Size>)> = list.into_iter().collect();
+        pairs.sort_unstable_by_key(|(key, _)| (u64::from(key.ino), key.dev));
+        pairs
+            .into_iter()
             .map(|(key, value)| ReflectionEntry::new(key.ino, value))
             .collect::<Vec<_>>()
-            .pipe(Reflection::from)
+            .pipe(Reflection)
     }
 }
 
@@ -125,8 +135,10 @@ impl<Size> TryFrom<Reflection<Size>> for HardlinkList<Size> {
             // Device number is unknown when loading from a reflection (e.g. JSON input);
             // use dev=0 as a placeholder. This means that when reloading JSON output that
             // was produced by scanning multiple filesystems, files from different devices
-            // sharing the same inode number will be incorrectly merged into a single entry.
-            // This is an unsupported edge case: the JSON format does not carry device info.
+            // sharing the same inode number cannot be distinguished and therefore cannot
+            // all be represented. Such duplicates cause a ConversionError::DuplicatedInode
+            // and are treated as an unsupported edge case, since the JSON format does not
+            // carry device information.
             let key = InodeKey { dev: 0, ino };
             if map.insert(key, value).is_some() {
                 return ino.pipe(ConversionError::DuplicatedInode).pipe(Err);
