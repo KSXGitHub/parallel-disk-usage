@@ -1,4 +1,4 @@
-use super::{HardlinkList, Value};
+use super::{HardlinkList, InodeKey, Value};
 use crate::{hardlink::LinkPathList, inode::InodeNumber};
 use dashmap::{iter::Iter as DashIter, mapref::multiple::RefMulti};
 use pipe_trait::Pipe;
@@ -7,7 +7,7 @@ use pipe_trait::Pipe;
 #[derive(derive_more::Debug)]
 #[debug(bound())]
 #[debug("Iter(..)")]
-pub struct Iter<'a, Size>(DashIter<'a, InodeNumber, Value<Size>>);
+pub struct Iter<'a, Size>(DashIter<'a, InodeKey, Value<Size>>);
 
 impl<Size> HardlinkList<Size> {
     /// Iterate over the recorded entries.
@@ -20,7 +20,7 @@ impl<Size> HardlinkList<Size> {
 #[derive(derive_more::Debug)]
 #[debug(bound())]
 #[debug("Item(..)")]
-pub struct Item<'a, Size>(RefMulti<'a, InodeNumber, Value<Size>>);
+pub struct Item<'a, Size>(RefMulti<'a, InodeKey, Value<Size>>);
 
 impl<'a, Size> Iterator for Iter<'a, Size> {
     type Item = Item<'a, Size>;
@@ -33,7 +33,7 @@ impl<'a, Size> Item<'a, Size> {
     /// The inode number of the file.
     #[inline]
     pub fn ino(&self) -> InodeNumber {
-        *self.0.key()
+        self.0.key().ino
     }
 
     /// Size of the file.

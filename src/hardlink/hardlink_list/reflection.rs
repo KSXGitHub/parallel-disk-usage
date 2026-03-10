@@ -1,4 +1,4 @@
-use super::{HardlinkList, Value};
+use super::{HardlinkList, InodeKey, Value};
 use crate::{hardlink::LinkPathListReflection, inode::InodeNumber};
 use dashmap::DashMap;
 use derive_more::{Display, Error, Into, IntoIterator};
@@ -12,7 +12,10 @@ use serde::{Deserialize, Serialize};
 /// internal content.
 ///
 /// **Guarantees:**
-/// * Every inode number is unique.
+/// * Every inode number is unique within the scope of a single scan (files are keyed by
+///   `(device, inode)` in the underlying [`HardlinkList`], but the reflection stores
+///   only the inode number; entries from different filesystems with the same inode number
+///   are an unsupported edge case in JSON round-trips).
 /// * The internal list is always sorted by inode numbers.
 ///
 /// **Equality:** `Reflection` implements `PartialEq` and `Eq` traits.
@@ -96,7 +99,7 @@ impl<Size> From<Vec<ReflectionEntry<Size>>> for Reflection<Size> {
 impl<Size> From<HardlinkList<Size>> for Reflection<Size> {
     fn from(HardlinkList(list): HardlinkList<Size>) -> Self {
         list.into_iter()
-            .map(|(ino, value)| ReflectionEntry::new(ino, value))
+            .map(|(key, value)| ReflectionEntry::new(key.ino, value))
             .collect::<Vec<_>>()
             .pipe(Reflection::from)
     }
@@ -119,7 +122,13 @@ impl<Size> TryFrom<Reflection<Size>> for HardlinkList<Size> {
 
         for entry in entries {
             let (ino, value) = entry.dissolve();
-            if map.insert(ino, value).is_some() {
+            // Device number is unknown when loading from a reflection (e.g. JSON input);
+            // use dev=0 as a placeholder. This means that when reloading JSON output that
+            // was produced by scanning multiple filesystems, files from different devices
+            // sharing the same inode number will be incorrectly merged into a single entry.
+            // This is an unsupported edge case: the JSON format does not carry device info.
+            let key = InodeKey { dev: 0, ino };
+            if map.insert(key, value).is_some() {
                 return ino.pipe(ConversionError::DuplicatedInode).pipe(Err);
             }
         }
