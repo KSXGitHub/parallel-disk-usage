@@ -130,7 +130,10 @@ mod linux_tests {
             // For non-existent devices, extract_block_device_name returns None because
             // the sysfs path check fails. So we just verify it doesn't panic.
             if let Some(expected_name) = expected {
-                if std::path::Path::new("/sys/block").join(expected_name).exists() {
+                if std::path::Path::new("/sys/block")
+                    .join(expected_name)
+                    .exists()
+                {
                     assert_eq!(result.as_deref(), Some(*expected_name));
                 }
             }

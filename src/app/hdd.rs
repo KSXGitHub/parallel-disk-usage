@@ -83,14 +83,21 @@ fn extract_block_device_name(device_path: &str) -> Option<String> {
 
     let name = device_path.strip_prefix("/dev/")?;
 
-    let block_dev = if name.starts_with("sd") || name.starts_with("vd") || name.starts_with("xvd")
-    {
+    let block_dev = if name.starts_with("sd") || name.starts_with("vd") || name.starts_with("xvd") {
         // Strip trailing partition digits: "sda1" → "sda", "vda1" → "vda"
         name.trim_end_matches(|c: char| c.is_ascii_digit())
     } else if name.starts_with("nvme") || name.starts_with("mmcblk") {
         // Strip partition suffix: "nvme0n1p1" → "nvme0n1", "mmcblk0p1" → "mmcblk0"
         match name.rfind('p') {
-            Some(idx) if idx > 0 && name.as_bytes().get(idx + 1).map_or(false, |b| b.is_ascii_digit()) => &name[..idx],
+            Some(idx)
+                if idx > 0
+                    && name
+                        .as_bytes()
+                        .get(idx + 1)
+                        .is_some_and(|b| b.is_ascii_digit()) =>
+            {
+                &name[..idx]
+            }
             _ => name,
         }
     } else {
