@@ -38,7 +38,7 @@ impl App {
     }
 
     /// Run the application.
-    pub fn run(mut self) -> Result<(), RuntimeError> {
+    pub fn run(self) -> Result<(), RuntimeError> {
         // DYNAMIC DISPATCH POLICY:
         //
         // Errors rarely occur, therefore, using dynamic dispatch to report errors have an acceptable
@@ -156,11 +156,7 @@ impl App {
         }
 
         if cfg!(unix) && self.args.deduplicate_hardlinks && self.args.files.len() > 1 {
-            // Hardlinks deduplication doesn't work properly if there are more than 1 paths pointing to
-            // the same tree or if a path points to a subtree of another path. Therefore, we must find
-            // and remove such overlapping paths before they cause problems.
-            use overlapping_arguments::{remove_overlapping_paths, RealApi};
-            remove_overlapping_paths::<RealApi>(&mut self.args.files);
+            return Err(RuntimeError::DeduplicateHardlinkMultipleArgs);
         }
 
         let report_error = if self.args.silent_errors {
@@ -331,4 +327,3 @@ impl App {
 
 mod hdd;
 mod mount_point;
-mod overlapping_arguments;
