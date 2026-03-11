@@ -96,6 +96,9 @@ jobs:
       - name: Compare benchmark of pdu against other versions of itself
         run: node ci/github-actions/benchmark.js tmp.sample
 
+      - name: Compare benchmark of gnu vs musl builds
+        run: node ci/github-actions/gnu-vs-musl-benchmark.js tmp.sample
+
       - name: Create chart for benchmark reports
         run: node ci/github-actions/illustrate-benchmark-reports.js
 

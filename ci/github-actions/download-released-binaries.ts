@@ -6,53 +6,70 @@ import fetch from 'node-fetch'
 import path from 'path'
 import process from 'process'
 import { RELEASED_PDU_VERSIONS } from './benchmark/matrix'
-import { getReleasedPduName } from './benchmark/pdu-programs'
+import { getReleasedPduName, getReleasedPduMuslName } from './benchmark/pdu-programs'
 
 const REPO = 'https://github.com/KSXGitHub/parallel-disk-usage'
+
+type PduArtifactName = 'pdu-x86_64-unknown-linux-gnu' | 'pdu-x86_64-unknown-linux-musl'
+
+async function downloadBinary(
+  version: string,
+  artifact: PduArtifactName,
+  binaryPath: string,
+) {
+  const url = `${REPO}/releases/download/${version}/${artifact}` as const
+
+  const responseResult = await fetch(url, {
+    redirect: 'follow',
+  }).then(ok, err)
+  if (!responseResult.tag) {
+    const { error } = responseResult
+    return { step: 'fetch', version, url, error } as const
+  }
+
+  const response = responseResult.value
+  if (!response.ok) {
+    return { step: 'receive', version, url, response } as const
+  }
+
+  const readStream = response.body
+  const writeStream = createWriteStream(binaryPath)
+  const streamResult = await new Promise((resolve, reject) => {
+    readStream.pipe(writeStream)
+    readStream.on('error', reject)
+    writeStream.on('finish', resolve)
+  }).then(ok, err)
+  if (!streamResult.tag) {
+    const { error } = streamResult
+    return { step: 'stream', version, binaryPath, readStream, writeStream, error } as const
+  }
+
+  const chmodResult = await chmod(binaryPath, 0o755).then(ok, err)
+  if (!chmodResult.tag) {
+    const { error } = chmodResult
+    return { step: 'chmod', version, binaryPath, error } as const
+  }
+
+  return 'success' as const
+}
 
 async function main() {
   const targetDir = path.join(process.cwd(), 'RELEASED_PDU_VERSIONS.tmp')
   await ensureDir(targetDir)
   addPath(targetDir)
 
-  const promises = RELEASED_PDU_VERSIONS.map(async version => {
-    const binaryName = getReleasedPduName(version)
-    const binaryPath = path.join(targetDir, binaryName)
-    const url = `${REPO}/releases/download/${version}/pdu-x86_64-unknown-linux-gnu` as const
-
-    const responseResult = await fetch(url, {
-      redirect: 'follow',
-    }).then(ok, err)
-    if (!responseResult.tag) {
-      const { error } = responseResult
-      return { step: 'fetch', version, url, error } as const
-    }
-
-    const response = responseResult.value
-    if (!response.ok) {
-      return { step: 'receive', version, url, response } as const
-    }
-
-    const readStream = response.body
-    const writeStream = createWriteStream(binaryPath)
-    const streamResult = await new Promise((resolve, reject) => {
-      readStream.pipe(writeStream)
-      readStream.on('error', reject)
-      writeStream.on('finish', resolve)
-    }).then(ok, err)
-    if (!streamResult.tag) {
-      const { error } = streamResult
-      return { step: 'stream', version, binaryPath, readStream, writeStream, error } as const
-    }
-
-    const chmodResult = await chmod(binaryPath, 0o755).then(ok, err)
-    if (!chmodResult.tag) {
-      const { error } = chmodResult
-      return { step: 'chmod', version, binaryPath, error } as const
-    }
-
-    return 'success' as const
-  })
+  const promises = RELEASED_PDU_VERSIONS.flatMap(version => [
+    downloadBinary(
+      version,
+      'pdu-x86_64-unknown-linux-gnu',
+      path.join(targetDir, getReleasedPduName(version)),
+    ),
+    downloadBinary(
+      version,
+      'pdu-x86_64-unknown-linux-musl',
+      path.join(targetDir, getReleasedPduMuslName(version)),
+    ),
+  ])
 
   let errorCount = 0
   for await (const result of promises) {

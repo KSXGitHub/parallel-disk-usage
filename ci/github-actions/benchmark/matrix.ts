@@ -1,4 +1,4 @@
-import { getReleasedPduName } from './pdu-programs'
+import { getReleasedPduName, getReleasedPduMuslName } from './pdu-programs'
 
 export const QUANTITY = ['apparent-size', 'block-size', 'block-count'] as const
 export const MAX_DEPTH = ['1', '10'] as const
@@ -39,7 +39,7 @@ export function parseSelfBenchmarkCategory(category: SelfBenchmarkCategory) {
 }
 
 export const RELEASED_PDU_VERSIONS = [
-  '0.20.0',
+  '0.21.1',
 ] as const
 
 export const ACCEPTABLE_PERFORMANCE_REGRESSION = 1.1 // 10%
@@ -177,3 +177,17 @@ export const COMPETING_BENCHMARK_MATRIX: readonly CompetingBenchmarkCategory[] =
     ],
   },
 ]
+
+export interface GnuVsMuslBenchmarkVersion {
+  readonly version: string
+  readonly gnuExecName: string
+  readonly muslExecName: string
+}
+
+export const GNU_VS_MUSL_BENCHMARK_MATRIX: readonly GnuVsMuslBenchmarkVersion[] =
+  RELEASED_PDU_VERSIONS.map(version => ({
+    version,
+    gnuExecName: getReleasedPduName(version),
+    muslExecName: getReleasedPduMuslName(version),
+  }))
+
