@@ -60,14 +60,11 @@ fn correct_hdd_detection(_disk: &Disk) -> DiskKind {
     DiskKind::HDD
 }
 
-/// Extract the base block device name from a device path.
+/// Resolve a device path through symlinks and then parse the block device name.
 ///
-/// For example:
-/// - `/dev/vda1` → `vda`
-/// - `/dev/sda1` → `sda`
-/// - `/dev/xvda1` → `xvda`
-/// - `/dev/nvme0n1p1` → `nvme0n1`
-/// - `/dev/mapper/xxx` → follows symlink, then recurses
+/// Handles `/dev/mapper/xxx` symlinks and `/dev/root` by following them via
+/// `canonicalize`, then delegates to [`parse_block_device_name`] for parsing
+/// and [`validate_block_device`] to verify the device exists in sysfs.
 #[cfg(target_os = "linux")]
 fn extract_block_device_name(device_path: &str) -> Option<String> {
     use std::fs;
@@ -81,6 +78,25 @@ fn extract_block_device_name(device_path: &str) -> Option<String> {
         return None;
     }
 
+    let block_dev = parse_block_device_name(device_path)?;
+    validate_block_device(&block_dev)
+}
+
+/// Parse the base block device name from a device path (pure string parsing).
+///
+/// This function performs no I/O; it only strips the `/dev/` prefix and
+/// partition suffixes to recover the base block device name.
+///
+/// # Examples
+///
+/// - `/dev/vda1` → `Some("vda")`
+/// - `/dev/sda1` → `Some("sda")`
+/// - `/dev/xvda1` → `Some("xvda")`
+/// - `/dev/nvme0n1p1` → `Some("nvme0n1")`
+/// - `/dev/mmcblk0p1` → `Some("mmcblk0")`
+/// - `vda1` (no `/dev/` prefix) → `None`
+#[cfg(target_os = "linux")]
+fn parse_block_device_name(device_path: &str) -> Option<String> {
     let name = device_path.strip_prefix("/dev/")?;
 
     let block_dev = if name.starts_with("sd") || name.starts_with("vd") || name.starts_with("xvd") {
@@ -104,7 +120,14 @@ fn extract_block_device_name(device_path: &str) -> Option<String> {
         name
     };
 
-    // Verify this block device exists in sysfs
+    Some(block_dev.to_string())
+}
+
+/// Verify that a block device exists in sysfs.
+///
+/// Returns `Some(block_dev)` if `/sys/block/<block_dev>` exists, `None` otherwise.
+#[cfg(target_os = "linux")]
+fn validate_block_device(block_dev: &str) -> Option<String> {
     let sysfs_path = Path::new("/sys/block").join(block_dev);
     if sysfs_path.exists() {
         Some(block_dev.to_string())
@@ -136,7 +159,7 @@ fn is_virtual_block_device(block_dev: &str) -> bool {
 
     matches!(
         driver_name,
-        "virtio_blk" | "xen_blkfront" | "vmw_pvscsi" | "hyperv_storvsc"
+        "virtio_blk" | "xen_blkfront" | "vmw_pvscsi" | "hv_storvsc"
     )
 }
 
