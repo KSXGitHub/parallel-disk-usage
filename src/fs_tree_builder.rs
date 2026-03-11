@@ -70,6 +70,7 @@ where
 {
     /// Create a [`DataTree`] from an [`FsTreeBuilder`].
     fn from(builder: FsTreeBuilder<Size, SizeGetter, HardlinksRecorder, Report>) -> Self {
+        #[allow(unused_variables)] // root_dev is only used in #[cfg(unix)] block below
         let FsTreeBuilder {
             root,
             size_getter,
