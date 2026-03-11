@@ -374,6 +374,7 @@ where
             }),
             root: root.join(suffix),
             max_depth: 10,
+            root_dev: None,
         }
         .pipe(DataTree::<OsStringDisplay, Size>::from)
         .into_par_sorted(|left, right| left.name().cmp(right.name()))

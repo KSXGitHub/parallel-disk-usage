@@ -30,6 +30,8 @@ Options:
           Minimal size proportion required to appear [default: 0.01]
       --no-sort
           Do not sort the branches in the tree
+      --dev
+          Stay on the same filesystem, do not cross mount points (POSIX only)
   -s, --silent-errors
           Prevent filesystem error messages from appearing in stderr [aliases: --no-errors]
   -p, --progress

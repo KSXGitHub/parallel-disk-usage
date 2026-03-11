@@ -44,6 +44,7 @@ Register-ArgumentCompleter -Native -CommandName 'pdu' -ScriptBlock {
             [CompletionResult]::new('--top-down', '--top-down', [CompletionResultType]::ParameterName, 'Print the tree top-down instead of bottom-up')
             [CompletionResult]::new('--align-right', '--align-right', [CompletionResultType]::ParameterName, 'Set the root of the bars to the right')
             [CompletionResult]::new('--no-sort', '--no-sort', [CompletionResultType]::ParameterName, 'Do not sort the branches in the tree')
+            [CompletionResult]::new('--dev', '--dev', [CompletionResultType]::ParameterName, 'Stay on the same filesystem, do not cross mount points (POSIX only)')
             [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'Prevent filesystem error messages from appearing in stderr')
             [CompletionResult]::new('--silent-errors', '--silent-errors', [CompletionResultType]::ParameterName, 'Prevent filesystem error messages from appearing in stderr')
             [CompletionResult]::new('--no-errors', '--no-errors', [CompletionResultType]::ParameterName, 'Prevent filesystem error messages from appearing in stderr')
