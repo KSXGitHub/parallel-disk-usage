@@ -1,5 +1,6 @@
 use super::mount_point::find_mount_point;
 use std::{
+    ffi::OsStr,
     fs::canonicalize,
     io,
     path::{Path, PathBuf},
@@ -7,9 +8,13 @@ use std::{
 use sysinfo::{Disk, DiskKind};
 
 /// Mockable APIs to interact with the system.
+///
+/// Each method delegates to the corresponding [`sysinfo::Disk`] method,
+/// enabling dependency injection for testing.
 pub trait Api {
     type Disk;
     fn get_disk_kind(disk: &Self::Disk) -> DiskKind;
+    fn get_disk_name(disk: &Self::Disk) -> &OsStr;
     fn get_mount_point(disk: &Self::Disk) -> &Path;
     fn canonicalize(path: &Path) -> io::Result<PathBuf>;
 }
@@ -19,12 +24,14 @@ pub struct RealApi;
 impl Api for RealApi {
     type Disk = Disk;
 
+    #[inline]
     fn get_disk_kind(disk: &Self::Disk) -> DiskKind {
-        let kind = disk.kind();
-        if kind == DiskKind::HDD {
-            return correct_hdd_detection(disk);
-        }
-        kind
+        disk.kind()
+    }
+
+    #[inline]
+    fn get_disk_name(disk: &Self::Disk) -> &OsStr {
+        disk.name()
     }
 
     #[inline]
@@ -45,9 +52,11 @@ impl Api for RealApi {
 /// This function checks the block device's driver via sysfs and reclassifies
 /// known virtual drivers as `Unknown` instead of `HDD`.
 #[cfg(target_os = "linux")]
-fn correct_hdd_detection(disk: &Disk) -> DiskKind {
-    let name = disk.name().to_str().unwrap_or_default();
-    if let Some(block_dev) = extract_block_device_name(name) {
+fn correct_hdd_detection(kind: DiskKind, disk_name: &str) -> DiskKind {
+    if kind != DiskKind::HDD {
+        return kind;
+    }
+    if let Some(block_dev) = extract_block_device_name(disk_name) {
         if is_virtual_block_device(&block_dev) {
             return DiskKind::Unknown(-1);
         }
@@ -57,15 +66,15 @@ fn correct_hdd_detection(disk: &Disk) -> DiskKind {
 
 /// On non-Linux platforms (macOS, FreeBSD), `sysinfo` currently reports
 /// `DiskKind::Unknown` because there is no reliable OS API for determining
-/// rotational vs solid-state. This means `get_disk_kind` never reaches this
-/// function (the `if kind == DiskKind::HDD` guard prevents it).
+/// rotational vs solid-state. This means the `kind == DiskKind::HDD` check
+/// in [`is_in_hdd`] never matches, so this function is effectively a no-op.
 ///
 /// If `sysinfo` ever gains accurate disk-kind detection on these platforms,
 /// this function should be revisited — virtual disks on macOS (e.g. virtio
 /// in QEMU) or FreeBSD (e.g. virtio-blk) could face the same misclassification.
 #[cfg(not(target_os = "linux"))]
-fn correct_hdd_detection(_disk: &Disk) -> DiskKind {
-    DiskKind::HDD
+fn correct_hdd_detection(kind: DiskKind, _disk_name: &str) -> DiskKind {
+    kind
 }
 
 /// Resolve a device path through symlinks and then parse the block device name.
@@ -180,14 +189,24 @@ pub fn any_path_is_in_hdd<Api: self::Api>(paths: &[PathBuf], disks: &[Api::Disk]
 }
 
 /// Check if path is in any HDD.
+///
+/// Applies [`correct_hdd_detection`] to each disk's reported kind to work
+/// around virtual block devices being falsely reported as HDDs on Linux.
 fn path_is_in_hdd<Api: self::Api>(path: &Path, disks: &[Api::Disk]) -> bool {
     let Some(mount_point) = find_mount_point(path, disks.iter().map(Api::get_mount_point)) else {
         return false;
     };
     disks
         .iter()
-        .filter(|disk| Api::get_disk_kind(disk) == DiskKind::HDD)
+        .filter(|disk| is_in_hdd::<Api>(disk))
         .any(|disk| Api::get_mount_point(disk) == mount_point)
+}
+
+/// Check if a disk is an HDD after applying platform-specific corrections.
+fn is_in_hdd<Api: self::Api>(disk: &Api::Disk) -> bool {
+    let kind = Api::get_disk_kind(disk);
+    let name = Api::get_disk_name(disk).to_str().unwrap_or_default();
+    correct_hdd_detection(kind, name) == DiskKind::HDD
 }
 
 #[cfg(test)]

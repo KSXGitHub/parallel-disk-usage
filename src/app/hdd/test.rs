@@ -1,18 +1,24 @@
 use super::{any_path_is_in_hdd, path_is_in_hdd, Api};
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use sysinfo::DiskKind;
 
 /// Fake disk for [`Api`].
 struct Disk {
     kind: DiskKind,
+    name: &'static str,
     mount_point: &'static str,
 }
 
 impl Disk {
-    fn new(kind: DiskKind, mount_point: &'static str) -> Self {
-        Self { kind, mount_point }
+    fn new(kind: DiskKind, name: &'static str, mount_point: &'static str) -> Self {
+        Self {
+            kind,
+            name,
+            mount_point,
+        }
     }
 }
 
@@ -23,6 +29,10 @@ impl Api for MockedApi {
 
     fn get_disk_kind(disk: &Self::Disk) -> DiskKind {
         disk.kind
+    }
+
+    fn get_disk_name(disk: &Self::Disk) -> &OsStr {
+        OsStr::new(disk.name)
     }
 
     fn get_mount_point(disk: &Self::Disk) -> &Path {
@@ -37,11 +47,11 @@ impl Api for MockedApi {
 #[test]
 fn test_any_path_in_hdd() {
     let disks = &[
-        Disk::new(DiskKind::SSD, "/"),
-        Disk::new(DiskKind::HDD, "/home"),
-        Disk::new(DiskKind::HDD, "/mnt/hdd-data"),
-        Disk::new(DiskKind::SSD, "/mnt/ssd-data"),
-        Disk::new(DiskKind::HDD, "/mnt/hdd-data/repo"),
+        Disk::new(DiskKind::SSD, "/dev/sda", "/"),
+        Disk::new(DiskKind::HDD, "/dev/sdb", "/home"),
+        Disk::new(DiskKind::HDD, "/dev/sdc", "/mnt/hdd-data"),
+        Disk::new(DiskKind::SSD, "/dev/sdd", "/mnt/ssd-data"),
+        Disk::new(DiskKind::HDD, "/dev/sde", "/mnt/hdd-data/repo"),
     ];
 
     let cases: &[(&[&str], bool)] = &[
@@ -76,11 +86,11 @@ fn test_any_path_in_hdd() {
 #[test]
 fn test_path_in_hdd() {
     let disks = &[
-        Disk::new(DiskKind::SSD, "/"),
-        Disk::new(DiskKind::HDD, "/home"),
-        Disk::new(DiskKind::HDD, "/mnt/hdd-data"),
-        Disk::new(DiskKind::SSD, "/mnt/ssd-data"),
-        Disk::new(DiskKind::HDD, "/mnt/hdd-data/repo"),
+        Disk::new(DiskKind::SSD, "/dev/sda", "/"),
+        Disk::new(DiskKind::HDD, "/dev/sdb", "/home"),
+        Disk::new(DiskKind::HDD, "/dev/sdc", "/mnt/hdd-data"),
+        Disk::new(DiskKind::SSD, "/dev/sdd", "/mnt/ssd-data"),
+        Disk::new(DiskKind::HDD, "/dev/sde", "/mnt/hdd-data/repo"),
     ];
 
     for (path, in_hdd) in [
