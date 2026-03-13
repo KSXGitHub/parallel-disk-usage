@@ -55,6 +55,14 @@ fn correct_hdd_detection(disk: &Disk) -> DiskKind {
     DiskKind::HDD
 }
 
+/// On non-Linux platforms (macOS, FreeBSD), `sysinfo` currently reports
+/// `DiskKind::Unknown` because there is no reliable OS API for determining
+/// rotational vs solid-state. This means `get_disk_kind` never reaches this
+/// function (the `if kind == DiskKind::HDD` guard prevents it).
+///
+/// If `sysinfo` ever gains accurate disk-kind detection on these platforms,
+/// this function should be revisited — virtual disks on macOS (e.g. virtio
+/// in QEMU) or FreeBSD (e.g. virtio-blk) could face the same misclassification.
 #[cfg(not(target_os = "linux"))]
 fn correct_hdd_detection(_disk: &Disk) -> DiskKind {
     DiskKind::HDD
