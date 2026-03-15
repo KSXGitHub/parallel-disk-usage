@@ -107,6 +107,26 @@ fn correct_hdd_detection<Fs: FsApi>(kind: DiskKind, _disk_name: &str) -> DiskKin
 /// Handles `/dev/mapper/xxx` symlinks and `/dev/root` by following them via
 /// `canonicalize`, then delegates to [`parse_block_device_name`] for parsing
 /// and [`validate_block_device`] to verify the device exists in sysfs.
+///
+/// # Known limitation: LVM / device-mapper
+///
+/// On real LVM setups, `/dev/mapper/vg0-lv0` canonicalizes to `/dev/dm-0`
+/// (a device-mapper device), not to the underlying physical device like
+/// `/dev/vda1`. The `dm-0` device has no `/sys/block/dm-0/device/driver`
+/// symlink, so [`is_virtual_block_device`] cannot determine its driver and
+/// returns `false`. This means virtual-disk correction silently does nothing
+/// for LVM volumes, even when the backing device is VirtIO.
+///
+/// Fixing this would require walking `/sys/block/dm-*/slaves/` to discover
+/// the real backing device(s). That introduces three problems:
+///
+/// 1. [`FsApi`] would need a `read_dir` method, expanding the trait and
+///    every mock implementation.
+/// 2. The slave chain can be recursive (`dm` on `dm`, e.g. LUKS on LVM),
+///    requiring unbounded traversal.
+/// 3. A `dm` device can have multiple slaves (stripes, mirrors). A policy
+///    decision is needed: is the device virtual only when *all* slaves are
+///    virtual, or when *any* is? Neither answer is obviously correct.
 #[cfg(target_os = "linux")]
 fn extract_block_device_name<Fs: FsApi>(device_path: &str) -> Option<Cow<'_, str>> {
     if !device_path.starts_with("/dev/mapper/") && !device_path.starts_with("/dev/root") {
