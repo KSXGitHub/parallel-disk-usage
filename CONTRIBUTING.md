@@ -129,8 +129,8 @@ Use **descriptive names** for variables and closure parameters by default. Singl
 - **Test fixtures:** `let a`, `let b`, `let c` for interchangeable specimens with identical roles in equality or comparison tests (e.g., testing commutativity). Do not use single letters when the variables have distinct roles — use `actual`/`expected` or similar descriptive names instead.
 
   ```rust
-  let a = HardlinkList::new().add(1, "/x").add(2, "/y");
-  let b = HardlinkList::new().add(2, "/y").add(1, "/x");
+  let a = vec![3, 1, 2].into_iter().collect::<BTreeSet<_>>();
+  let b = vec![2, 3, 1].into_iter().collect::<BTreeSet<_>>();
   assert_eq!(a, b);
   ```
 
