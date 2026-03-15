@@ -185,14 +185,11 @@ fn is_virtual_block_device(block_dev: &str) -> bool {
         return false;
     };
 
-    let driver_name = target
-        .file_name()
-        .and_then(OsStr::to_str)
-        .unwrap_or_default();
+    let driver_name = target.file_name().and_then(OsStr::to_str);
 
     matches!(
         driver_name,
-        "virtio_blk" | "xen_blkfront" | "vmw_pvscsi" | "hv_storvsc"
+        Some("virtio_blk" | "xen_blkfront" | "vmw_pvscsi" | "hv_storvsc")
     )
 }
 
