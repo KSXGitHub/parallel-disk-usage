@@ -571,7 +571,11 @@ mod linux_tests {
         );
     }
 
-    /// Integration smoke test: the full pipeline should not panic on real disks.
+    /// Smoke test: the full pipeline should not panic on real disks.
+    ///
+    /// This does **not** assert any specific virtual/non-virtual classification
+    /// because the result depends on the host hardware. It only verifies that
+    /// the detection pipeline runs without errors on every mounted disk.
     #[test]
     fn test_extract_and_check_real_disks() {
         use sysinfo::Disks;
@@ -579,8 +583,6 @@ mod linux_tests {
         for disk in disks.list() {
             let name = disk.name().to_str().unwrap_or_default();
             if let Some(block_dev) = extract_block_device_name::<RealApi>(name) {
-                // Exercise the full detection pipeline without asserting a
-                // specific outcome — the result depends on the host hardware.
                 let _is_virtual = is_virtual_block_device::<RealApi>(&block_dev);
             }
         }
