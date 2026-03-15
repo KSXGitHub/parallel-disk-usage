@@ -246,8 +246,8 @@ fn path_is_in_hdd<DiskApi: self::DiskApi, FsApi: self::FsApi>(
     path: &Path,
     disks: &[DiskApi::Disk],
 ) -> bool {
-    let Some(mount_point) = find_mount_point(path, disks.iter().map(DiskApi::get_mount_point))
-    else {
+    let mount_point = find_mount_point(path, disks.iter().map(DiskApi::get_mount_point));
+    let Some(mount_point) = mount_point else {
         return false;
     };
     disks
