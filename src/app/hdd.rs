@@ -22,7 +22,9 @@ pub trait Api {
     fn get_disk_name(disk: &Self::Disk) -> &OsStr;
     fn get_mount_point(disk: &Self::Disk) -> &Path;
     fn canonicalize(path: &Path) -> io::Result<PathBuf>;
+    #[cfg(target_os = "linux")]
     fn path_exists(path: &Path) -> bool;
+    #[cfg(target_os = "linux")]
     fn read_link(path: &Path) -> io::Result<PathBuf>;
 }
 
@@ -52,11 +54,13 @@ impl Api for RealApi {
     }
 
     #[inline]
+    #[cfg(target_os = "linux")]
     fn path_exists(path: &Path) -> bool {
         path.exists()
     }
 
     #[inline]
+    #[cfg(target_os = "linux")]
     fn read_link(path: &Path) -> io::Result<PathBuf> {
         std::fs::read_link(path)
     }

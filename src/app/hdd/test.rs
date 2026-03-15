@@ -45,10 +45,12 @@ impl Api for MockedApi {
         path.to_path_buf().pipe(Ok)
     }
 
+    #[cfg(target_os = "linux")]
     fn path_exists(path: &Path) -> bool {
         path.exists()
     }
 
+    #[cfg(target_os = "linux")]
     fn read_link(path: &Path) -> std::io::Result<PathBuf> {
         std::fs::read_link(path)
     }
