@@ -261,3 +261,7 @@ fn is_in_hdd<D: DiskApi, F: FsApi>(disk: &D::Disk) -> bool {
 
 #[cfg(test)]
 mod test;
+
+#[cfg(target_os = "linux")]
+#[cfg(test)]
+mod test_linux;
