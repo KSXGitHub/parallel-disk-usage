@@ -105,7 +105,7 @@ fn extract_block_device_name(device_path: &str) -> Option<Cow<'_, str>> {
 
     canon_device_path
         .pipe(extract_block_device_name)
-        .map(|x| x.to_string())
+        .map(|x| x.to_string()) // must copy-allocate because `canon_device_path` is locally owned
         .map(Cow::Owned)
 }
 
