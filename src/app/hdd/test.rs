@@ -138,9 +138,9 @@ mod linux_tests {
         ];
 
         for (input, expected) in cases {
-            let result = parse_block_device_name(input);
-            println!("CASE: {input} → {result:?} (expected {expected:?})");
-            assert_eq!(result, *expected);
+            let actual = parse_block_device_name(input);
+            println!("CASE: {input} → {actual:?} (expected {expected:?})");
+            assert_eq!(actual, *expected);
         }
     }
 
