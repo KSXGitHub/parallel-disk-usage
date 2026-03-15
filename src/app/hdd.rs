@@ -262,7 +262,7 @@ fn path_is_in_hdd<Disk: DiskApi, Fs: FsApi>(path: &Path, disks: &[Disk]) -> bool
     disks
         .iter()
         .filter(|disk| disk.get_mount_point() == mount_point)
-        .any(|disk| is_hdd::<Fs>(disk))
+        .any(is_hdd::<Fs>)
 }
 
 /// Check if a disk is an HDD after applying platform-specific corrections.
