@@ -92,13 +92,13 @@ fn extract_block_device_name(device_path: &str) -> Option<Cow<'_, str>> {
     if device_path.starts_with("/dev/mapper/") || device_path.starts_with("/dev/root") {
         let canon_device_path = canonicalize(device_path).ok()?;
         let canon_device_path = canon_device_path.to_str()?;
-        if canon_device_path != device_path {
-            return canon_device_path
-                .pipe(extract_block_device_name)
-                .map(|x| x.to_string())
-                .map(Cow::Owned);
+        if canon_device_path == device_path {
+            return None;
         }
-        return None;
+        return canon_device_path
+            .pipe(extract_block_device_name)
+            .map(|x| x.to_string())
+            .map(Cow::Owned);
     }
 
     let block_dev = parse_block_device_name(device_path)?;
