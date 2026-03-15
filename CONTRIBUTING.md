@@ -181,7 +181,7 @@ Install the required Rust toolchain and components before running any checks:
 
 ```sh
 rustup toolchain install "$(< rust-toolchain)"
-rustup component add rustfmt clippy
+rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy
 ```
 
 ## Automated Checks
