@@ -1,5 +1,5 @@
 {
-  "name": "parallel-disk-usage",
+  "name": "parallel-disk-usage (full)",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
   "features": {
     "ghcr.io/devcontainers/features/rust:1": {
@@ -26,5 +26,5 @@
       ]
     }
   },
-  "postCreateCommand": "bash .devcontainer/post-create.sh"
+  "postCreateCommand": "bash .devcontainer/full/post-create.sh"
 }
