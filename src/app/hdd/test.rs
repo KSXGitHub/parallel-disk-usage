@@ -261,6 +261,48 @@ mod linux_tests {
         }
     }
 
+    /// Xen disk whose sysfs driver is `xen_blkfront` (the underscored kernel
+    /// module name) should be reclassified as Unknown(-1).
+    mod test_xen_blkfront_underscore_disk_is_reclassified {
+        use super::{correct_hdd_detection, FsApi};
+        use pipe_trait::Pipe;
+        use pretty_assertions::assert_eq;
+        use std::{
+            io,
+            path::{Path, PathBuf},
+        };
+        use sysinfo::DiskKind;
+
+        static SYSFS_BLOCK_DEVICES: &[&str] = &["/sys/block/xvda"];
+        static SYSFS_DRIVER_LINKS: &[(&str, &str)] =
+            &[("/sys/block/xvda/device/driver", "xen_blkfront")];
+
+        struct Fs;
+        impl FsApi for Fs {
+            fn canonicalize(path: &Path) -> io::Result<PathBuf> {
+                path.to_path_buf().pipe(Ok)
+            }
+            fn path_exists(path: &Path) -> bool {
+                SYSFS_BLOCK_DEVICES.iter().any(|p| path == Path::new(*p))
+            }
+            fn read_link(path: &Path) -> io::Result<PathBuf> {
+                SYSFS_DRIVER_LINKS
+                    .iter()
+                    .find(|(p, _)| path == Path::new(*p))
+                    .map(|(_, driver)| PathBuf::from(format!("/sys/bus/xen/drivers/{driver}")))
+                    .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
+            }
+        }
+
+        #[test]
+        fn test() {
+            assert_eq!(
+                correct_hdd_detection::<Fs>(DiskKind::HDD, "/dev/xvda1"),
+                DiskKind::Unknown(-1),
+            );
+        }
+    }
+
     /// Xen disk whose sysfs driver is `xen-blkfront` (the hyphenated module
     /// name, which may appear on some kernel versions) should also be
     /// reclassified as Unknown(-1).
