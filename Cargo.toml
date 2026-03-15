@@ -27,9 +27,6 @@ include = [
   "/README.md",
   "/USAGE.md",
   "/LICENSE",
-  "/CLAUDE.md",
-  "/AGENTS.md",
-  "/.github/copilot-instructions.md",
 ]
 
 [lib]
