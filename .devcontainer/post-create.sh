@@ -5,7 +5,7 @@ echo "Installing Python dependencies..." >&2
 pip install toml
 
 echo "Installing pnpm and project Node dependencies..." >&2
-npm install -g pnpm
+npm install -g pnpm@7.33.7
 (cd ci/github-actions && pnpm install)
 
 echo "Installing hyperfine from GitHub release..." >&2
