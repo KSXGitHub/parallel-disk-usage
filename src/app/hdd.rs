@@ -156,8 +156,7 @@ fn extract_block_device_name<Fs: FsApi>(device_path: &str) -> Option<Cow<'_, str
 /// This function performs no I/O; it only strips the `/dev/` prefix and
 /// partition suffixes to recover the base block device name.
 ///
-/// # Examples
-///
+/// **Examples:**
 /// - `/dev/vda1` → `Some("vda")`
 /// - `/dev/sda1` → `Some("sda")`
 /// - `/dev/xvda1` → `Some("xvda")`
