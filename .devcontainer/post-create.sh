@@ -10,6 +10,8 @@ npm install -g pnpm@7.33.7
 
 echo "Installing hyperfine from GitHub release..." >&2
 HYPERFINE_VERSION="1.20.0"
+HYPERFINE_ARCHIVE="hyperfine-v${HYPERFINE_VERSION}-x86_64-unknown-linux-musl"
+HYPERFINE_URL="https://github.com/sharkdp/hyperfine/releases/download/v${HYPERFINE_VERSION}/${HYPERFINE_ARCHIVE}.tar.gz"
 mkdir -p "$HOME/.local/bin"
-curl -fsSL "https://github.com/sharkdp/hyperfine/releases/download/v${HYPERFINE_VERSION}/hyperfine-v${HYPERFINE_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
-  | tar -xz --strip-components=1 -C "$HOME/.local/bin" "hyperfine-v${HYPERFINE_VERSION}-x86_64-unknown-linux-musl/hyperfine"
+curl -fsSL "$HYPERFINE_URL" \
+  | tar -xz --strip-components=1 -C "$HOME/.local/bin" "${HYPERFINE_ARCHIVE}/hyperfine"
