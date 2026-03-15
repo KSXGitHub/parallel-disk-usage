@@ -171,7 +171,7 @@ fn validate_block_device(block_dev: &str) -> Option<&str> {
 /// if it matches known virtual block device drivers.
 #[cfg(target_os = "linux")]
 fn is_virtual_block_device(block_dev: &str) -> bool {
-    use std::fs;
+    use std::fs::read_link;
 
     let driver_path = "/sys/block"
         .pipe(Path::new)
@@ -181,7 +181,7 @@ fn is_virtual_block_device(block_dev: &str) -> bool {
     // NOTE: Claude Code was responsible for the call to `read_link`.
     // NOTE: the `read_link` method is a side-effect function that is not friendly to unit tests.
     // TODO: perhaps we should create `Api::read_link` and use it in place of `read_link` here?
-    let Ok(target) = fs::read_link(&driver_path) else {
+    let Ok(target) = read_link(&driver_path) else {
         return false;
     };
 
