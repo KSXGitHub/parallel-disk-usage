@@ -178,6 +178,9 @@ fn is_virtual_block_device(block_dev: &str) -> bool {
         .join(block_dev)
         .join("device/driver");
 
+    // NOTE: Claude Code was responsible for the call to `read_link`.
+    // NOTE: the `read_link` method is a side-effect function that is not friendly to unit tests.
+    // TODO: perhaps we should create `Api::read_link` and use it in place of `read_link` here?
     let Ok(target) = fs::read_link(&driver_path) else {
         return false;
     };
