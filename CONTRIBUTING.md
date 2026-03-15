@@ -37,10 +37,9 @@ Prefer **merged imports** — combine multiple items from the same crate or modu
 Imports are grouped in this order, separated by blank lines:
 
 1. `use super::...` or `use crate::...` (internal)
-2. External crate imports (alphabetical)
-3. `use std::...` (standard library)
+2. All other imports — external crates and `std::` together, sorted alphabetically
 
-Within each group, items are ordered alphabetically. Platform-specific imports (`#[cfg(unix)]`) go in a separate block after the main imports.
+`cargo fmt` enforces alphabetical ordering across external and `std` imports (it does not distinguish between them). Platform-specific imports (`#[cfg(unix)]`) go in a separate block after the main imports.
 
 ```rust
 use crate::{
