@@ -178,15 +178,13 @@ fn parse_block_device_name(device_path: &str) -> Option<&str> {
         name.trim_end_matches(|c: char| c.is_ascii_digit())
     } else if name.starts_with("nvme") || name.starts_with("mmcblk") {
         // Strip partition suffix: "nvme0n1p1" → "nvme0n1", "mmcblk0p1" → "mmcblk0"
-        match name.rfind('p') {
-            Some(idx)
-                if idx > 0
-                    && name
-                        .as_bytes()
-                        .get(idx + 1)
-                        .is_some_and(|b| b.is_ascii_digit()) =>
+        match name.rsplit_once('p') {
+            Some((base, suffix))
+                if !base.is_empty()
+                    && !suffix.is_empty()
+                    && suffix.bytes().all(|b| b.is_ascii_digit()) =>
             {
-                &name[..idx]
+                base
             }
             _ => name,
         }
