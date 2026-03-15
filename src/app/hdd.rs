@@ -155,12 +155,10 @@ fn parse_block_device_name(device_path: &str) -> Option<&str> {
 /// Returns `Some(block_dev)` if `/sys/block/<block_dev>` exists, `None` otherwise.
 #[cfg(target_os = "linux")]
 fn validate_block_device(block_dev: &str) -> Option<&str> {
-    let sysfs_path = Path::new("/sys/block").join(block_dev);
-    if sysfs_path.exists() {
-        Some(block_dev)
-    } else {
-        None
-    }
+    Path::new("/sys/block")
+        .join(block_dev)
+        .exists()
+        .then_some(block_dev)
 }
 
 /// Check if a block device is backed by a virtual driver.
