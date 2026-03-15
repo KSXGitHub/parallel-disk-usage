@@ -126,7 +126,7 @@ where
 
 - Define custom error enums with `#[derive(Debug, Display, Error)]` from `derive_more`.
 - Mark error enums as `#[non_exhaustive]`.
-- Avoid `unwrap()` — use proper error propagation. When deliberately ignoring an error, use `.ok()` with a comment explaining why.
+- Avoid `unwrap()` in non-test code — use proper error propagation. `unwrap()` is acceptable in tests and for provably infallible operations (with a comment explaining why). When deliberately ignoring an error, use `.ok()` with a comment explaining why.
 
 ```rust
 #[derive(Debug, Display, Error)]
@@ -185,5 +185,5 @@ Before submitting, ensure:
 The CI script `test.sh` runs all of these across 5 feature combinations. You can run it locally with:
 
 ```sh
-FMT=true LINT=true BUILD=true TEST=true ./test.sh
+FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh
 ```
