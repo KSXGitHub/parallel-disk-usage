@@ -41,30 +41,36 @@ pub struct RealApi;
 impl DiskApi for RealApi {
     type Disk = Disk;
 
+    #[inline]
     fn get_disk_kind(disk: &Self::Disk) -> DiskKind {
         disk.kind()
     }
 
+    #[inline]
     fn get_disk_name(disk: &Self::Disk) -> &OsStr {
         disk.name()
     }
 
+    #[inline]
     fn get_mount_point(disk: &Self::Disk) -> &Path {
         disk.mount_point()
     }
 }
 
 impl FsApi for RealApi {
+    #[inline]
     fn canonicalize(path: &Path) -> io::Result<PathBuf> {
         canonicalize(path)
     }
 
     #[cfg(target_os = "linux")]
+    #[inline]
     fn path_exists(path: &Path) -> bool {
         path.exists()
     }
 
     #[cfg(target_os = "linux")]
+    #[inline]
     fn read_link(path: &Path) -> io::Result<PathBuf> {
         std::fs::read_link(path)
     }
