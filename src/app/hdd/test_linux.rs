@@ -49,7 +49,7 @@ fn test_parse_block_device_name() {
 /// `/sys/block/{block}/device/driver`) are derived from `block_device`,
 /// so callers only supply the four varying pieces: block device name, kernel
 /// driver name, mount-point path, and expected `DiskKind`.
-macro_rules! reclassify_test_case {
+macro_rules! identity_reclassify_test_case {
     (
         $(#[$attr:meta])*
         $name:ident where
@@ -90,7 +90,7 @@ macro_rules! reclassify_test_case {
     };
 }
 
-reclassify_test_case! {
+identity_reclassify_test_case! {
     /// VirtIO disk reported as HDD should be reclassified as `Unknown(-1)`.
     test_virtio_disk_is_reclassified where
         block_device = "vda",
@@ -99,7 +99,7 @@ reclassify_test_case! {
         expected = DiskKind::Unknown(-1),
 }
 
-reclassify_test_case! {
+identity_reclassify_test_case! {
     /// Xen disk whose sysfs driver is `vbd` (the xenbus-registered name)
     /// should be reclassified as `Unknown(-1)`.
     test_xen_vbd_disk_is_reclassified where
@@ -109,7 +109,7 @@ reclassify_test_case! {
         expected = DiskKind::Unknown(-1),
 }
 
-reclassify_test_case! {
+identity_reclassify_test_case! {
     /// Xen disk whose sysfs driver is `xen_blkfront` (the underscored kernel
     /// module name) should be reclassified as `Unknown(-1)`.
     test_xen_blkfront_underscore_disk_is_reclassified where
@@ -119,7 +119,7 @@ reclassify_test_case! {
         expected = DiskKind::Unknown(-1),
 }
 
-reclassify_test_case! {
+identity_reclassify_test_case! {
     /// Xen disk whose sysfs driver is `xen-blkfront` (the hyphenated module
     /// name, which may appear on some kernel versions) should also be
     /// reclassified as `Unknown(-1)`.
@@ -130,7 +130,7 @@ reclassify_test_case! {
         expected = DiskKind::Unknown(-1),
 }
 
-reclassify_test_case! {
+identity_reclassify_test_case! {
     /// VMware PVSCSI disk reported as `HDD` should be reclassified as `Unknown(-1)`.
     test_vmware_pvscsi_disk_is_reclassified where
         block_device = "sda",
@@ -139,7 +139,7 @@ reclassify_test_case! {
         expected = DiskKind::Unknown(-1),
 }
 
-reclassify_test_case! {
+identity_reclassify_test_case! {
     /// Hyper-V storage controller disk reported as `HDD` should be reclassified as `Unknown(-1)`.
     test_hyperv_storvsc_disk_is_reclassified where
         block_device = "sda",
@@ -148,7 +148,7 @@ reclassify_test_case! {
         expected = DiskKind::Unknown(-1),
 }
 
-reclassify_test_case! {
+identity_reclassify_test_case! {
     /// Physical SCSI disk reported as `HDD` should stay `HDD`.
     test_physical_disk_stays_hdd where
         block_device = "sda",
