@@ -89,10 +89,8 @@ fn correct_hdd_detection(kind: DiskKind, _disk_name: &str) -> DiskKind {
 /// and [`validate_block_device`] to verify the device exists in sysfs.
 #[cfg(target_os = "linux")]
 fn extract_block_device_name(device_path: &str) -> Option<Cow<'_, str>> {
-    use std::fs;
-
     if device_path.starts_with("/dev/mapper/") || device_path.starts_with("/dev/root") {
-        let real = fs::canonicalize(device_path).ok()?;
+        let real = canonicalize(device_path).ok()?;
         let real_str = real.to_str()?;
         if real_str != device_path {
             return real_str
