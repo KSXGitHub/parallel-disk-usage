@@ -111,9 +111,10 @@ Use **descriptive names** for variables and closure parameters by default. Singl
 
   ```rust
   trait Iterator {
+      type Item;
       fn nth(&mut self, n: usize) -> Option<Self::Item>;
   }
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { ... }
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { todo!() }
   ```
 
 - **Index variables (`i`, `j`, `k`):** These may only be used in two contexts: (1) short closures, and (2) index-based loops/iterations (rare in Rust). In all other cases, use `index`, `idx`, or `*_index`.
@@ -123,7 +124,7 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   left_indices.zip(right_indices).map(|(i, j)| matrix[i][j])
 
   // OK — index-based loop (rare in Rust)
-  for i in 0..len { ... }
+  for i in 0..len { /* ... */ }
 
   // Bad — use a descriptive name instead
   let i = items.iter().position(|item| item.is_active()).unwrap();
