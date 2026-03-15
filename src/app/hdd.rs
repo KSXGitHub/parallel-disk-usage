@@ -89,20 +89,21 @@ fn correct_hdd_detection(kind: DiskKind, _disk_name: &str) -> DiskKind {
 /// and [`validate_block_device`] to verify the device exists in sysfs.
 #[cfg(target_os = "linux")]
 fn extract_block_device_name(device_path: &str) -> Option<Cow<'_, str>> {
-    if device_path.starts_with("/dev/mapper/") || device_path.starts_with("/dev/root") {
-        let canon_device_path = canonicalize(device_path).ok()?;
-        let canon_device_path = canon_device_path.to_str()?;
-        if canon_device_path == device_path {
-            return None;
-        }
-        return canon_device_path
-            .pipe(extract_block_device_name)
-            .map(|x| x.to_string())
-            .map(Cow::Owned);
+    if !device_path.starts_with("/dev/mapper/") && !device_path.starts_with("/dev/root") {
+        let block_dev = parse_block_device_name(device_path)?;
+        return block_dev.pipe(validate_block_device).map(Cow::Borrowed);
     }
 
-    let block_dev = parse_block_device_name(device_path)?;
-    block_dev.pipe(validate_block_device).map(Cow::Borrowed)
+    let canon_device_path = canonicalize(device_path).ok()?;
+    let canon_device_path = canon_device_path.to_str()?;
+    if canon_device_path == device_path {
+        return None;
+    }
+
+    canon_device_path
+        .pipe(extract_block_device_name)
+        .map(|x| x.to_string())
+        .map(Cow::Owned)
 }
 
 /// Parse the base block device name from a device path (pure string parsing).
