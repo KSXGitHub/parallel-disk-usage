@@ -77,7 +77,7 @@ macro_rules! identity_reclassify_test_case {
                     DRIVERS
                         .iter()
                         .find(|(drv_path, _)| path == Path::new(*drv_path))
-                        .map(|(_, driver)| PathBuf::from(format!("/drivers/{driver}")))
+                        .map(|(_, drv_name)| PathBuf::from(format!("/drivers/{drv_name}")))
                         .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
                 }
             }
@@ -192,7 +192,7 @@ fn test_mapper_symlink_resolves_to_virtual_partition() {
             [("/sys/block/vda/device/driver", "virtio_blk")]
                 .iter()
                 .find(|(drv_path, _)| path == Path::new(*drv_path))
-                .map(|(_, driver)| PathBuf::from(format!("/drivers/{driver}")))
+                .map(|(_, drv_name)| PathBuf::from(format!("/drivers/{drv_name}")))
                 .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
         }
     }
