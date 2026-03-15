@@ -42,6 +42,14 @@ impl Api for MockedApi {
     fn canonicalize(path: &Path) -> std::io::Result<PathBuf> {
         path.to_path_buf().pipe(Ok)
     }
+
+    fn path_exists(path: &Path) -> bool {
+        path.exists()
+    }
+
+    fn read_link(path: &Path) -> std::io::Result<PathBuf> {
+        std::fs::read_link(path)
+    }
 }
 
 #[test]
@@ -107,7 +115,7 @@ fn test_path_in_hdd() {
 
 #[cfg(target_os = "linux")]
 mod linux_tests {
-    use super::super::{is_virtual_block_device, parse_block_device_name};
+    use super::super::{is_virtual_block_device, parse_block_device_name, RealApi};
     use pretty_assertions::assert_eq;
 
     /// Test pure parsing of block device names — no sysfs dependency.
@@ -151,7 +159,7 @@ mod linux_tests {
         // so it validates the logic on systems that have the relevant devices.
         if std::path::Path::new("/sys/block/vda/device/driver").exists() {
             assert!(
-                is_virtual_block_device("vda"),
+                is_virtual_block_device::<RealApi>("vda"),
                 "vda should be detected as a virtual block device"
             );
         }
@@ -172,7 +180,7 @@ mod linux_tests {
         // but we verify the function doesn't panic on non-existent devices
         // and returns false.
         assert!(
-            !is_virtual_block_device("nonexistent_device_xyz"),
+            !is_virtual_block_device::<RealApi>("nonexistent_device_xyz"),
             "non-existent device should not be detected as virtual"
         );
     }
@@ -185,7 +193,7 @@ mod linux_tests {
         let disks = Disks::new_with_refreshed_list();
         for disk in disks.list() {
             let name = disk.name().to_str().unwrap_or_default();
-            if let Some(block_dev) = extract_block_device_name(name) {
+            if let Some(block_dev) = extract_block_device_name::<RealApi>(name) {
                 // Verify the parsed name is valid: it should exist in sysfs
                 // (extract_block_device_name already validates this).
                 let sysfs_path = std::path::Path::new("/sys/block").join(block_dev.as_ref());
@@ -196,7 +204,7 @@ mod linux_tests {
 
                 // If the device has a driver symlink, verify is_virtual_block_device
                 // returns a consistent result (doesn't panic).
-                let _ = is_virtual_block_device(&block_dev);
+                let _ = is_virtual_block_device::<RealApi>(&block_dev);
             }
         }
     }

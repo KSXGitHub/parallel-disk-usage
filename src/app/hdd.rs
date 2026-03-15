@@ -14,14 +14,16 @@ use std::borrow::Cow;
 
 /// Mockable APIs to interact with the system.
 ///
-/// Each method delegates to the corresponding [`sysinfo::Disk`] method,
-/// enabling dependency injection for testing.
+/// Each method delegates to a corresponding system call or [`sysinfo::Disk`]
+/// method, enabling dependency injection for testing.
 pub trait Api {
     type Disk;
     fn get_disk_kind(disk: &Self::Disk) -> DiskKind;
     fn get_disk_name(disk: &Self::Disk) -> &OsStr;
     fn get_mount_point(disk: &Self::Disk) -> &Path;
     fn canonicalize(path: &Path) -> io::Result<PathBuf>;
+    fn path_exists(path: &Path) -> bool;
+    fn read_link(path: &Path) -> io::Result<PathBuf>;
 }
 
 /// Implementation of [`Api`] that interacts with the real system.
@@ -48,6 +50,16 @@ impl Api for RealApi {
     fn canonicalize(path: &Path) -> io::Result<PathBuf> {
         canonicalize(path)
     }
+
+    #[inline]
+    fn path_exists(path: &Path) -> bool {
+        path.exists()
+    }
+
+    #[inline]
+    fn read_link(path: &Path) -> io::Result<PathBuf> {
+        std::fs::read_link(path)
+    }
 }
 
 /// On Linux, the `rotational` sysfs flag defaults to `1` for virtual block devices
@@ -57,12 +69,12 @@ impl Api for RealApi {
 /// This function checks the block device's driver via sysfs and reclassifies
 /// known virtual drivers as `Unknown` instead of `HDD`.
 #[cfg(target_os = "linux")]
-fn correct_hdd_detection(kind: DiskKind, disk_name: &str) -> DiskKind {
+fn correct_hdd_detection<Api: self::Api>(kind: DiskKind, disk_name: &str) -> DiskKind {
     if kind != DiskKind::HDD {
         return kind;
     }
-    if let Some(block_dev) = extract_block_device_name(disk_name) {
-        if is_virtual_block_device(&block_dev) {
+    if let Some(block_dev) = extract_block_device_name::<Api>(disk_name) {
+        if is_virtual_block_device::<Api>(&block_dev) {
             return DiskKind::Unknown(-1);
         }
     }
@@ -78,7 +90,7 @@ fn correct_hdd_detection(kind: DiskKind, disk_name: &str) -> DiskKind {
 /// this function should be revisited — virtual disks on macOS (e.g. virtio
 /// in QEMU) or FreeBSD (e.g. virtio-blk) could face the same misclassification.
 #[cfg(not(target_os = "linux"))]
-fn correct_hdd_detection(kind: DiskKind, _disk_name: &str) -> DiskKind {
+fn correct_hdd_detection<Api: self::Api>(kind: DiskKind, _disk_name: &str) -> DiskKind {
     kind
 }
 
@@ -88,23 +100,22 @@ fn correct_hdd_detection(kind: DiskKind, _disk_name: &str) -> DiskKind {
 /// `canonicalize`, then delegates to [`parse_block_device_name`] for parsing
 /// and [`validate_block_device`] to verify the device exists in sysfs.
 #[cfg(target_os = "linux")]
-fn extract_block_device_name(device_path: &str) -> Option<Cow<'_, str>> {
+fn extract_block_device_name<Api: self::Api>(device_path: &str) -> Option<Cow<'_, str>> {
     if !device_path.starts_with("/dev/mapper/") && !device_path.starts_with("/dev/root") {
         let block_dev = parse_block_device_name(device_path)?;
-        return block_dev.pipe(validate_block_device).map(Cow::Borrowed);
+        return block_dev
+            .pipe(|name| validate_block_device::<Api>(name))
+            .map(Cow::Borrowed);
     }
 
-    // NOTE: Claude Code was responsible for this call to `canonicalize`.
-    // NOTE: the `canonicalize` function is a side-effect function that is not friendly to unit tests.
-    // TODO: perhaps we should replace it with `Api::canonicalize` here?
-    let canon_device_path = canonicalize(device_path).ok()?;
+    let canon_device_path = Api::canonicalize(Path::new(device_path)).ok()?;
     let canon_device_path = canon_device_path.to_str()?;
     if canon_device_path == device_path {
         return None;
     }
 
     canon_device_path
-        .pipe(extract_block_device_name)
+        .pipe(extract_block_device_name::<Api>)
         .map(|x| x.to_string()) // must copy-allocate because `canon_device_path` is locally owned
         .map(Cow::Owned)
 }
@@ -154,14 +165,11 @@ fn parse_block_device_name(device_path: &str) -> Option<&str> {
 ///
 /// Returns `Some(block_dev)` if `/sys/block/<block_dev>` exists, `None` otherwise.
 #[cfg(target_os = "linux")]
-fn validate_block_device(block_dev: &str) -> Option<&str> {
-    // NOTE: Claude Code was responsible for the call to `Path::exists`.
-    // NOTE: the `Path::exists` method is a side-effect function that is not friendly to unit tests.
-    // TODO: perhaps we should create `Api::path_exists` and use it in place of `Path::exists` here?
+fn validate_block_device<Api: self::Api>(block_dev: &str) -> Option<&str> {
     "/sys/block"
         .pipe(Path::new)
         .join(block_dev)
-        .exists()
+        .pipe(|path| Api::path_exists(&path))
         .then_some(block_dev)
 }
 
@@ -170,18 +178,13 @@ fn validate_block_device(block_dev: &str) -> Option<&str> {
 /// Reads the driver symlink at `/sys/block/<dev>/device/driver` and checks
 /// if it matches known virtual block device drivers.
 #[cfg(target_os = "linux")]
-fn is_virtual_block_device(block_dev: &str) -> bool {
-    use std::fs::read_link;
-
+fn is_virtual_block_device<Api: self::Api>(block_dev: &str) -> bool {
     let driver_path = "/sys/block"
         .pipe(Path::new)
         .join(block_dev)
         .join("device/driver");
 
-    // NOTE: Claude Code was responsible for the call to `read_link`.
-    // NOTE: the `read_link` method is a side-effect function that is not friendly to unit tests.
-    // TODO: perhaps we should create `Api::read_link` and use it in place of `read_link` here?
-    let Ok(target) = read_link(&driver_path) else {
+    let Ok(target) = Api::read_link(&driver_path) else {
         return false;
     };
 
@@ -220,7 +223,7 @@ fn is_in_hdd<Api: self::Api>(disk: &Api::Disk) -> bool {
     let kind = Api::get_disk_kind(disk);
     let name = Api::get_disk_name(disk).to_str();
     match name {
-        Some(name) => correct_hdd_detection(kind, name) == DiskKind::HDD,
+        Some(name) => correct_hdd_detection::<Api>(kind, name) == DiskKind::HDD,
         None => kind == DiskKind::HDD, // can't parse name, keep original classification
     }
 }
