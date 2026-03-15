@@ -107,13 +107,10 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   sort_reflection_by(&mut tree, |a, b| a.name.cmp(&b.name));
   ```
 
-- **Conventional single-letter names:** `n` for a natural number (unsigned integer / count), `f` for a `fmt::Formatter`, and similar well-established conventions from math or the Rust standard library. Note: for indices, use `index`, `idx`, `i`, or `*_index` (e.g., `row_index`) — not `n`.
+- **Conventional single-letter names:** `n` for a natural number (unsigned integer / count), `f` for a `fmt::Formatter`, and similar well-established conventions from math or the Rust standard library. Note: for indices, use `index`, `idx`, or `*_index` (e.g., `row_index`) — not `n`. (For `i`/`j`/`k`, see the dedicated rule below.)
 
   ```rust
-  trait Iterator {
-      type Item;
-      fn nth(&mut self, n: usize) -> Option<Self::Item>;
-  }
+  fn with_capacity(n: usize) -> Self { todo!() }
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { todo!() }
   ```
 
