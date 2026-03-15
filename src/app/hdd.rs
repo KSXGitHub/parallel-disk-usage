@@ -155,7 +155,8 @@ fn parse_block_device_name(device_path: &str) -> Option<&str> {
 /// Returns `Some(block_dev)` if `/sys/block/<block_dev>` exists, `None` otherwise.
 #[cfg(target_os = "linux")]
 fn validate_block_device(block_dev: &str) -> Option<&str> {
-    Path::new("/sys/block")
+    "/sys/block"
+        .pipe(Path::new)
         .join(block_dev)
         .exists()
         .then_some(block_dev)
@@ -169,7 +170,8 @@ fn validate_block_device(block_dev: &str) -> Option<&str> {
 fn is_virtual_block_device(block_dev: &str) -> bool {
     use std::fs;
 
-    let driver_path = Path::new("/sys/block")
+    let driver_path = "/sys/block"
+        .pipe(Path::new)
         .join(block_dev)
         .join("device/driver");
 
