@@ -187,7 +187,7 @@ fn is_virtual_block_device(block_dev: &str) -> bool {
 
     let driver_name = target
         .file_name()
-        .and_then(|n| n.to_str())
+        .and_then(OsStr::to_str)
         .unwrap_or_default();
 
     matches!(
