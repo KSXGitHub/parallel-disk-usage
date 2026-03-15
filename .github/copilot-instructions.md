@@ -8,6 +8,7 @@ Read and follow the CONTRIBUTING.md file in this repository for all code style c
 - Version releases are the only exception: just the version number (e.g. `0.21.1`)
 - Prefer merged imports
 - Use descriptive generic names (`Size`, `Report`), not single letters
+- Use descriptive variable and closure parameter names by default — single letters are only allowed in: comparison closures (`|a, b|`), trivial single-expression closures, fold accumulators, test fixtures, and macro-generated variables
 - Prefer `where` clauses for multiple trait bounds
 - Derive order: std traits → comparison traits → `Hash` → derive_more → feature-gated
 - Custom errors: `#[derive(Debug, Display, Error)]` + `#[non_exhaustive]`

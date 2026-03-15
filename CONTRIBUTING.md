@@ -95,6 +95,82 @@ Use **descriptive names** for type parameters, not single letters:
 
 Single-letter generics are acceptable only in very short, self-contained trait impls.
 
+### Variable and Closure Parameter Naming
+
+Use **descriptive names** for variables and closure parameters by default. Single-letter names are permitted only in the specific cases listed below.
+
+#### When single-letter names are allowed
+
+- **Comparison closures:** `|a, b|` in `sort_by`, `cmp`, or similar two-argument comparison callbacks — this is idiomatic Rust.
+
+  ```rust
+  sort_reflection_by(&mut tree, |a, b| a.name.cmp(&b.name));
+  ```
+
+- **Trivial single-expression closures:** A closure whose body is a single field access, method call, or wrapper may use a single letter when the type and purpose are obvious from context.
+
+  ```rust
+  .map(|n| n.as_str())
+  .all(|b| b.is_ascii_digit())
+  .pipe(|x| vec![x])
+  ```
+
+- **Fold accumulators:** `acc` (or `a`) for the accumulator and a single letter for the element in trivial folds.
+
+  ```rust
+  .fold(PathBuf::new(), |acc, x| acc.join(x))
+  ```
+
+- **Test fixtures:** `let a`, `let b`, `let c` for interchangeable specimens in equality or comparison tests.
+
+  ```rust
+  let a = HardlinkList::new().add(1, "/x").add(2, "/y");
+  let b = HardlinkList::new().add(2, "/y").add(1, "/x");
+  assert_eq!(a, b);
+  ```
+
+- **Macro-generated variables:** Single-letter names inside macro bodies (e.g., `let a = include_str!($a_path)`) where the name mirrors a macro parameter.
+
+#### When single-letter names are NOT allowed
+
+- **Multi-line closures:** If the closure body spans multiple lines or contains logic beyond a single expression, use a descriptive name.
+
+  ```rust
+  // Good
+  .map(|tree_row| {
+      let columns = build_columns(tree_row);
+      format_row(&columns)
+  })
+
+  // Bad
+  .map(|t| {
+      let columns = build_columns(t);
+      format_row(&columns)
+  })
+  ```
+
+- **`let` bindings in non-test code:** Always use descriptive names.
+
+  ```rust
+  // Good
+  let metadata = entry.metadata()?;
+  // Bad
+  let m = entry.metadata()?;
+  ```
+
+- **Function and method parameters:** Always use descriptive names.
+
+- **Closures with non-obvious context:** If the type or purpose is not immediately clear from the surrounding method chain, use a descriptive name.
+
+  ```rust
+  // Good — not obvious what the closure receives
+  .filter_map(|entry| match entry { ... })
+  .for_each(|child| child.par_sort_by(compare))
+
+  // Bad — reader must look up what .filter receives
+  .filter(|x| x.get_mount_point() == mount_point)
+  ```
+
 ### Trait Bounds
 
 Prefer `where` clauses over inline bounds when there are multiple constraints:
