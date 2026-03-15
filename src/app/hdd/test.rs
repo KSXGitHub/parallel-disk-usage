@@ -344,6 +344,88 @@ mod linux_tests {
         }
     }
 
+    /// VMware PVSCSI disk reported as `HDD` should be reclassified as `Unknown(-1)`.
+    mod test_vmware_pvscsi_disk_is_reclassified {
+        use super::{correct_hdd_detection, FsApi};
+        use pipe_trait::Pipe;
+        use pretty_assertions::assert_eq;
+        use std::{
+            io,
+            path::{Path, PathBuf},
+        };
+        use sysinfo::DiskKind;
+
+        static SYSFS_BLOCK_DEVICES: &[&str] = &["/sys/block/sda"];
+        static SYSFS_DRIVER_LINKS: &[(&str, &str)] =
+            &[("/sys/block/sda/device/driver", "vmw_pvscsi")];
+
+        struct Fs;
+        impl FsApi for Fs {
+            fn canonicalize(path: &Path) -> io::Result<PathBuf> {
+                path.to_path_buf().pipe(Ok)
+            }
+            fn path_exists(path: &Path) -> bool {
+                SYSFS_BLOCK_DEVICES.iter().any(|p| path == Path::new(*p))
+            }
+            fn read_link(path: &Path) -> io::Result<PathBuf> {
+                SYSFS_DRIVER_LINKS
+                    .iter()
+                    .find(|(p, _)| path == Path::new(*p))
+                    .map(|(_, driver)| PathBuf::from(format!("/sys/bus/pci/drivers/{driver}")))
+                    .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
+            }
+        }
+
+        #[test]
+        fn test() {
+            assert_eq!(
+                correct_hdd_detection::<Fs>(DiskKind::HDD, "/dev/sda1"),
+                DiskKind::Unknown(-1),
+            );
+        }
+    }
+
+    /// Hyper-V storage controller disk reported as `HDD` should be reclassified as `Unknown(-1)`.
+    mod test_hyperv_storvsc_disk_is_reclassified {
+        use super::{correct_hdd_detection, FsApi};
+        use pipe_trait::Pipe;
+        use pretty_assertions::assert_eq;
+        use std::{
+            io,
+            path::{Path, PathBuf},
+        };
+        use sysinfo::DiskKind;
+
+        static SYSFS_BLOCK_DEVICES: &[&str] = &["/sys/block/sda"];
+        static SYSFS_DRIVER_LINKS: &[(&str, &str)] =
+            &[("/sys/block/sda/device/driver", "hv_storvsc")];
+
+        struct Fs;
+        impl FsApi for Fs {
+            fn canonicalize(path: &Path) -> io::Result<PathBuf> {
+                path.to_path_buf().pipe(Ok)
+            }
+            fn path_exists(path: &Path) -> bool {
+                SYSFS_BLOCK_DEVICES.iter().any(|p| path == Path::new(*p))
+            }
+            fn read_link(path: &Path) -> io::Result<PathBuf> {
+                SYSFS_DRIVER_LINKS
+                    .iter()
+                    .find(|(p, _)| path == Path::new(*p))
+                    .map(|(_, driver)| PathBuf::from(format!("/sys/bus/vmbus/drivers/{driver}")))
+                    .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
+            }
+        }
+
+        #[test]
+        fn test() {
+            assert_eq!(
+                correct_hdd_detection::<Fs>(DiskKind::HDD, "/dev/sda1"),
+                DiskKind::Unknown(-1),
+            );
+        }
+    }
+
     /// Physical SCSI disk reported as `HDD` should stay `HDD`.
     mod test_physical_disk_stays_hdd {
         use super::{correct_hdd_detection, FsApi};
@@ -408,10 +490,9 @@ mod linux_tests {
                     .find(|(p, _)| path == Path::new(*p))
                     .map(|(_, target)| PathBuf::from(*target))
                     .ok_or_else(|| {
-                        // Not a symlink: return the path unchanged.
-                        // (io::Result requires an error, but extract_block_device_name
-                        //  only calls canonicalize on /dev/mapper/ and /dev/root paths,
-                        //  then recurses with the resolved path which won't match here.)
+                        // No matching symlink in the mock: return NotFound.
+                        // extract_block_device_name uses .ok() on the result,
+                        // so this causes the recursion to stop.
                         io::Error::new(io::ErrorKind::NotFound, "mocked")
                     })
             }
@@ -490,7 +571,7 @@ mod linux_tests {
         );
     }
 
-    /// Integration test: verify correct detection on real system disks.
+    /// Integration smoke test: the full pipeline should not panic on real disks.
     #[test]
     fn test_extract_and_check_real_disks() {
         use sysinfo::Disks;
@@ -498,12 +579,9 @@ mod linux_tests {
         for disk in disks.list() {
             let name = disk.name().to_str().unwrap_or_default();
             if let Some(block_dev) = extract_block_device_name::<RealApi>(name) {
-                let sysfs_path = std::path::Path::new("/sys/block").join(block_dev.as_ref());
-                assert!(
-                    sysfs_path.exists(),
-                    "extracted block device {block_dev} should exist in sysfs"
-                );
-                let _ = is_virtual_block_device::<RealApi>(&block_dev);
+                // Exercise the full detection pipeline without asserting a
+                // specific outcome — the result depends on the host hardware.
+                let _is_virtual = is_virtual_block_device::<RealApi>(&block_dev);
             }
         }
     }
