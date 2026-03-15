@@ -1,8 +1,10 @@
 use super::{any_path_is_in_hdd, path_is_in_hdd, Api};
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use std::ffi::OsStr;
-use std::path::{Path, PathBuf};
+use std::{
+    ffi::OsStr,
+    path::{Path, PathBuf},
+};
 use sysinfo::DiskKind;
 
 /// Fake disk for [`Api`].
