@@ -71,12 +71,12 @@ macro_rules! identity_reclassify_test_case {
                     path.to_path_buf().pipe(Ok)
                 }
                 fn path_exists(path: &Path) -> bool {
-                    DEVICES.iter().any(|p| path == Path::new(*p))
+                    DEVICES.iter().any(|dev| path == Path::new(*dev))
                 }
                 fn read_link(path: &Path) -> io::Result<PathBuf> {
                     DRIVERS
                         .iter()
-                        .find(|(p, _)| path == Path::new(*p))
+                        .find(|(drv_path, _)| path == Path::new(*drv_path))
                         .map(|(_, driver)| PathBuf::from(format!("/drivers/{driver}")))
                         .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
                 }
@@ -181,17 +181,17 @@ fn test_mapper_symlink_resolves_to_virtual_partition() {
         fn canonicalize(path: &Path) -> io::Result<PathBuf> {
             [("/dev/mapper/vg0-lv0", "/dev/vda1")]
                 .iter()
-                .find(|(p, _)| path == Path::new(*p))
+                .find(|(src, _)| path == Path::new(*src))
                 .map(|(_, target)| PathBuf::from(*target))
                 .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
         }
         fn path_exists(path: &Path) -> bool {
-            ["/sys/block/vda"].iter().any(|p| path == Path::new(*p))
+            ["/sys/block/vda"].iter().any(|dev| path == Path::new(*dev))
         }
         fn read_link(path: &Path) -> io::Result<PathBuf> {
             [("/sys/block/vda/device/driver", "virtio_blk")]
                 .iter()
-                .find(|(p, _)| path == Path::new(*p))
+                .find(|(drv_path, _)| path == Path::new(*drv_path))
                 .map(|(_, driver)| PathBuf::from(format!("/drivers/{driver}")))
                 .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
         }
@@ -215,7 +215,7 @@ fn test_mapper_dm_device_is_not_corrected() {
         fn canonicalize(path: &Path) -> io::Result<PathBuf> {
             [("/dev/mapper/vg0-lv0", "/dev/dm-0")]
                 .iter()
-                .find(|(p, _)| path == Path::new(*p))
+                .find(|(src, _)| path == Path::new(*src))
                 .map(|(_, target)| PathBuf::from(*target))
                 .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
         }
