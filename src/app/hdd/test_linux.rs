@@ -48,14 +48,14 @@ fn test_parse_block_device_name() {
 /// The sysfs paths (`/sys/block/{block}` and
 /// `/sys/block/{block}/device/driver`) are derived from `block_device`,
 /// so callers only supply the four varying pieces: block device name, kernel
-/// driver name, mount-point path, and expected `DiskKind`.
+/// driver name, disk name, and expected `DiskKind`.
 macro_rules! identity_reclassify_test_case {
     (
         $(#[$attr:meta])*
         $name:ident where
             block_device = $block:literal,
             driver = $driver:literal,
-            mount_point = $mount:literal,
+            disk_name = $mount:literal,
             expected = $expected:expr,
     ) => {
         $(#[$attr])*
@@ -95,7 +95,7 @@ identity_reclassify_test_case! {
     test_virtio_disk_is_reclassified where
         block_device = "vda",
         driver = "virtio_blk",
-        mount_point = "/dev/vda1",
+        disk_name ="/dev/vda1",
         expected = DiskKind::Unknown(-1),
 }
 
@@ -105,7 +105,7 @@ identity_reclassify_test_case! {
     test_xen_vbd_disk_is_reclassified where
         block_device = "xvda",
         driver = "vbd",
-        mount_point = "/dev/xvda1",
+        disk_name ="/dev/xvda1",
         expected = DiskKind::Unknown(-1),
 }
 
@@ -115,7 +115,7 @@ identity_reclassify_test_case! {
     test_xen_blkfront_underscore_disk_is_reclassified where
         block_device = "xvda",
         driver = "xen_blkfront",
-        mount_point = "/dev/xvda1",
+        disk_name ="/dev/xvda1",
         expected = DiskKind::Unknown(-1),
 }
 
@@ -126,7 +126,7 @@ identity_reclassify_test_case! {
     test_xen_blkfront_hyphen_disk_is_reclassified where
         block_device = "xvda",
         driver = "xen-blkfront",
-        mount_point = "/dev/xvda1",
+        disk_name ="/dev/xvda1",
         expected = DiskKind::Unknown(-1),
 }
 
@@ -135,7 +135,7 @@ identity_reclassify_test_case! {
     test_vmware_pvscsi_disk_is_reclassified where
         block_device = "sda",
         driver = "vmw_pvscsi",
-        mount_point = "/dev/sda1",
+        disk_name ="/dev/sda1",
         expected = DiskKind::Unknown(-1),
 }
 
@@ -144,7 +144,7 @@ identity_reclassify_test_case! {
     test_hyperv_storvsc_disk_is_reclassified where
         block_device = "sda",
         driver = "hv_storvsc",
-        mount_point = "/dev/sda1",
+        disk_name ="/dev/sda1",
         expected = DiskKind::Unknown(-1),
 }
 
@@ -153,7 +153,7 @@ identity_reclassify_test_case! {
     test_physical_disk_stays_hdd where
         block_device = "sda",
         driver = "sd",
-        mount_point = "/dev/sda1",
+        disk_name ="/dev/sda1",
         expected = DiskKind::HDD,
 }
 
