@@ -209,16 +209,16 @@ fn test_mapper_dm_device_is_not_corrected() {
                 .map(|(_, target)| PathBuf::from(*target))
                 .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
         }
-        fn path_exists(_: &Path) -> bool {
-            false
+        fn path_exists(path: &Path) -> bool {
+            path == Path::new("/sys/block/dm-0")
         }
         fn read_link(_: &Path) -> io::Result<PathBuf> {
             Err(io::Error::new(io::ErrorKind::NotFound, "mocked"))
         }
     }
 
-    // dm-0 is not a recognized block device prefix, so correction
-    // cannot determine the driver — HDD classification is preserved.
+    // dm-0 is recognized but has no /sys/block/dm-0/device/driver
+    // symlink, so driver detection fails — HDD classification is preserved.
     assert_eq!(
         reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/mapper/vg0-lv0"),
         DiskKind::HDD,
