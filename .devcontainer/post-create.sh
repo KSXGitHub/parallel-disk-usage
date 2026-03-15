@@ -13,7 +13,7 @@ case "$arch" in
   x86_64)  shellcheck_arch="linux.x86_64" ;;
   aarch64) shellcheck_arch="linux.aarch64" ;;
   *)
-    echo "Unsupported architecture for shellcheck prebuilt binary: $arch" >&2
+    echo "ERROR: Unsupported architecture for shellcheck prebuilt binary: $arch" >&2
     exit 1
     ;;
 esac
@@ -27,7 +27,7 @@ case "$arch" in
   x86_64)  shfmt_arch="linux_amd64" ;;
   aarch64) shfmt_arch="linux_arm64" ;;
   *)
-    echo "Unsupported architecture for shfmt prebuilt binary: $arch" >&2
+    echo "ERROR: Unsupported architecture for shfmt prebuilt binary: $arch" >&2
     exit 1
     ;;
 esac

@@ -7,7 +7,7 @@ case "$arch" in
   x86_64)  hyperfine_target="x86_64-unknown-linux-musl" ;;
   aarch64) hyperfine_target="aarch64-unknown-linux-musl" ;;
   *)
-    echo "Unsupported architecture for hyperfine prebuilt binary: $arch" >&2
+    echo "ERROR: Unsupported architecture for hyperfine prebuilt binary: $arch" >&2
     exit 1
     ;;
 esac
