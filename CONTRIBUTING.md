@@ -32,6 +32,8 @@ Automated tools enforce formatting (`cargo fmt`) and linting (`cargo clippy`). T
 
 ### Import Organization
 
+Prefer **merged imports** — combine multiple items from the same crate or module into a single `use` statement with braces rather than separate `use` lines.
+
 Imports are grouped in this order, separated by blank lines:
 
 1. `use super::...` or `use crate::...` (internal)
