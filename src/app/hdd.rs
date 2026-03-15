@@ -73,6 +73,11 @@ impl FsApi for RealFs {
     }
 }
 
+/// Sentinel value used to reclassify virtual block devices that were
+/// falsely reported as `DiskKind::HDD` by `sysinfo`.
+#[cfg(target_os = "linux")]
+const VIRTUAL_DISK_KIND: DiskKind = DiskKind::Unknown(-1);
+
 /// On Linux, the `rotational` sysfs flag defaults to `1` for virtual block devices
 /// (e.g. VirtIO, Xen) because the kernel cannot determine the backing storage type.
 /// This causes `sysinfo` to falsely report them as HDDs.
@@ -86,7 +91,7 @@ fn reclassify_virtual_hdd<Fs: FsApi>(kind: DiskKind, disk_name: &str) -> DiskKin
     }
     if let Some(block_dev) = extract_block_device_name::<Fs>(disk_name) {
         if is_virtual_block_device::<Fs>(&block_dev) {
-            return DiskKind::Unknown(-1);
+            return VIRTUAL_DISK_KIND;
         }
     }
     DiskKind::HDD

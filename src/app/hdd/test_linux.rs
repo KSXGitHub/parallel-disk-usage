@@ -1,4 +1,4 @@
-use super::{parse_block_device_name, reclassify_virtual_hdd, FsApi};
+use super::{parse_block_device_name, reclassify_virtual_hdd, FsApi, VIRTUAL_DISK_KIND};
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use std::{
@@ -91,71 +91,71 @@ macro_rules! identity_reclassify_test_case {
 }
 
 identity_reclassify_test_case! {
-    /// VirtIO disk reported as HDD should be reclassified as `Unknown(-1)`.
+    /// VirtIO disk reported as HDD should be reclassified as [`VIRTUAL_DISK_KIND`].
     test_virtio_disk_is_reclassified where
         block_device = "vda",
         driver = "virtio_blk",
         disk_name ="/dev/vda1",
-        expected = DiskKind::Unknown(-1),
+        expected = VIRTUAL_DISK_KIND,
 }
 
 identity_reclassify_test_case! {
     /// VirtIO disk whose sysfs driver is `virtio-blk` (the hyphenated
-    /// variant) should also be reclassified as `Unknown(-1)`.
+    /// variant) should also be reclassified as [`VIRTUAL_DISK_KIND`].
     test_virtio_blk_hyphen_disk_is_reclassified where
         block_device = "vda",
         driver = "virtio-blk",
         disk_name ="/dev/vda1",
-        expected = DiskKind::Unknown(-1),
+        expected = VIRTUAL_DISK_KIND,
 }
 
 identity_reclassify_test_case! {
     /// Xen disk whose sysfs driver is `vbd` (the xenbus-registered name)
-    /// should be reclassified as `Unknown(-1)`.
+    /// should be reclassified as [`VIRTUAL_DISK_KIND`].
     test_xen_vbd_disk_is_reclassified where
         block_device = "xvda",
         driver = "vbd",
         disk_name ="/dev/xvda1",
-        expected = DiskKind::Unknown(-1),
+        expected = VIRTUAL_DISK_KIND,
 }
 
 identity_reclassify_test_case! {
     /// Xen disk whose sysfs driver is `xen_blkfront` (the underscored kernel
-    /// module name) should be reclassified as `Unknown(-1)`.
+    /// module name) should be reclassified as [`VIRTUAL_DISK_KIND`].
     test_xen_blkfront_underscore_disk_is_reclassified where
         block_device = "xvda",
         driver = "xen_blkfront",
         disk_name ="/dev/xvda1",
-        expected = DiskKind::Unknown(-1),
+        expected = VIRTUAL_DISK_KIND,
 }
 
 identity_reclassify_test_case! {
     /// Xen disk whose sysfs driver is `xen-blkfront` (the hyphenated module
     /// name, which may appear on some kernel versions) should also be
-    /// reclassified as `Unknown(-1)`.
+    /// reclassified as [`VIRTUAL_DISK_KIND`].
     test_xen_blkfront_hyphen_disk_is_reclassified where
         block_device = "xvda",
         driver = "xen-blkfront",
         disk_name ="/dev/xvda1",
-        expected = DiskKind::Unknown(-1),
+        expected = VIRTUAL_DISK_KIND,
 }
 
 identity_reclassify_test_case! {
-    /// VMware PVSCSI disk reported as `HDD` should be reclassified as `Unknown(-1)`.
+    /// VMware PVSCSI disk reported as `HDD` should be reclassified as [`VIRTUAL_DISK_KIND`].
     test_vmware_pvscsi_disk_is_reclassified where
         block_device = "sda",
         driver = "vmw_pvscsi",
         disk_name ="/dev/sda1",
-        expected = DiskKind::Unknown(-1),
+        expected = VIRTUAL_DISK_KIND,
 }
 
 identity_reclassify_test_case! {
-    /// Hyper-V storage controller disk reported as `HDD` should be reclassified as `Unknown(-1)`.
+    /// Hyper-V storage controller disk reported as `HDD` should be reclassified as [`VIRTUAL_DISK_KIND`].
     test_hyperv_storvsc_disk_is_reclassified where
         block_device = "sda",
         driver = "hv_storvsc",
         disk_name ="/dev/sda1",
-        expected = DiskKind::Unknown(-1),
+        expected = VIRTUAL_DISK_KIND,
 }
 
 identity_reclassify_test_case! {
@@ -199,7 +199,7 @@ fn test_mapper_symlink_resolves_to_virtual_partition() {
 
     assert_eq!(
         reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/mapper/vg0-lv0"),
-        DiskKind::Unknown(-1),
+        VIRTUAL_DISK_KIND,
     );
 }
 
