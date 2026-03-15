@@ -107,6 +107,13 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   sort_reflection_by(&mut tree, |a, b| a.name.cmp(&b.name));
   ```
 
+- **Conventional single-letter names:** `n` for a natural number (unsigned integer / count / index), `f` for a `fmt::Formatter`, and similar well-established conventions from math or the Rust standard library.
+
+  ```rust
+  fn nth(&mut self, n: usize) -> Option<Self::Item>
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result
+  ```
+
 - **Trivial single-expression closures:** A closure whose body is a single field access, method call, or wrapper may use a single letter when the type and purpose are obvious from context.
 
   ```rust
