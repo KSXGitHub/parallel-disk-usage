@@ -155,6 +155,9 @@ fn parse_block_device_name(device_path: &str) -> Option<&str> {
 /// Returns `Some(block_dev)` if `/sys/block/<block_dev>` exists, `None` otherwise.
 #[cfg(target_os = "linux")]
 fn validate_block_device(block_dev: &str) -> Option<&str> {
+    // NOTE: Claude Code was responsible for the call to `Path::exists`.
+    // NOTE: the `Path::exists` method is a side-effect function that is not friendly to unit tests.
+    // TODO: perhaps we should create `Api::path_exists` and use it in place of `Path::exists` here?
     "/sys/block"
         .pipe(Path::new)
         .join(block_dev)
