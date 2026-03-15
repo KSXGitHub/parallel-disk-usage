@@ -228,33 +228,40 @@ fn is_virtual_block_device<Fs: FsApi>(block_dev: &str) -> bool {
 }
 
 /// Check if any path is in any HDD.
-pub fn any_path_is_in_hdd<D: DiskApi, F: FsApi>(paths: &[PathBuf], disks: &[D::Disk]) -> bool {
+pub fn any_path_is_in_hdd<DiskApi: self::DiskApi, FsApi: self::FsApi>(
+    paths: &[PathBuf],
+    disks: &[DiskApi::Disk],
+) -> bool {
     paths
         .iter()
-        .filter_map(|file| F::canonicalize(file).ok())
-        .any(|path| path_is_in_hdd::<D, F>(&path, disks))
+        .filter_map(|file| FsApi::canonicalize(file).ok())
+        .any(|path| path_is_in_hdd::<DiskApi, FsApi>(&path, disks))
 }
 
 /// Check if path is in any HDD.
 ///
 /// Applies [`correct_hdd_detection`] to each disk's reported kind to work
 /// around virtual block devices being falsely reported as HDDs on Linux.
-fn path_is_in_hdd<D: DiskApi, F: FsApi>(path: &Path, disks: &[D::Disk]) -> bool {
-    let Some(mount_point) = find_mount_point(path, disks.iter().map(D::get_mount_point)) else {
+fn path_is_in_hdd<DiskApi: self::DiskApi, FsApi: self::FsApi>(
+    path: &Path,
+    disks: &[DiskApi::Disk],
+) -> bool {
+    let Some(mount_point) = find_mount_point(path, disks.iter().map(DiskApi::get_mount_point))
+    else {
         return false;
     };
     disks
         .iter()
-        .filter(|disk| D::get_mount_point(disk) == mount_point)
-        .any(|disk| is_in_hdd::<D, F>(disk))
+        .filter(|disk| DiskApi::get_mount_point(disk) == mount_point)
+        .any(|disk| is_in_hdd::<DiskApi, FsApi>(disk))
 }
 
 /// Check if a disk is an HDD after applying platform-specific corrections.
-fn is_in_hdd<D: DiskApi, F: FsApi>(disk: &D::Disk) -> bool {
-    let kind = D::get_disk_kind(disk);
-    let name = D::get_disk_name(disk).to_str();
+fn is_in_hdd<DiskApi: self::DiskApi, FsApi: self::FsApi>(disk: &DiskApi::Disk) -> bool {
+    let kind = DiskApi::get_disk_kind(disk);
+    let name = DiskApi::get_disk_name(disk).to_str();
     match name {
-        Some(name) => correct_hdd_detection::<F>(kind, name) == DiskKind::HDD,
+        Some(name) => correct_hdd_detection::<FsApi>(kind, name) == DiskKind::HDD,
         None => kind == DiskKind::HDD, // can't parse name, keep original classification
     }
 }
