@@ -107,7 +107,7 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   sort_reflection_by(&mut tree, |a, b| a.name.cmp(&b.name));
   ```
 
-- **Conventional single-letter names:** `n` for a natural number (unsigned integer / count / index), `f` for a `fmt::Formatter`, and similar well-established conventions from math or the Rust standard library.
+- **Conventional single-letter names:** `n` for a natural number (unsigned integer / count), `f` for a `fmt::Formatter`, and similar well-established conventions from math or the Rust standard library. Note: for indices, use `index`, `idx`, `i`, or `*_index` (e.g., `row_index`) — not `n`.
 
   ```rust
   fn nth(&mut self, n: usize) -> Option<Self::Item>
@@ -136,7 +136,7 @@ Use **descriptive names** for variables and closure parameters by default. Singl
 
 #### When single-letter names are NOT allowed
 
-- **Multi-line closures:** If the closure body spans multiple lines or contains logic beyond a single expression, use a descriptive name.
+- **Multi-statement functions and closures:** If the function or closure body contains more than one statement, use a descriptive name.
 
   ```rust
   // Good
@@ -161,7 +161,7 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   let m = entry.metadata()?;
   ```
 
-- **Function and method parameters:** Always use descriptive names.
+- **Function and method parameters:** Always use descriptive names, except for conventional single-letter names listed above (`n`, `f`, etc.).
 
 - **Closures with non-obvious context:** If the type or purpose is not immediately clear from the surrounding method chain, use a descriptive name.
 
