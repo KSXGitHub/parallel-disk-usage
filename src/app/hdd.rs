@@ -90,10 +90,10 @@ fn correct_hdd_detection(kind: DiskKind, _disk_name: &str) -> DiskKind {
 #[cfg(target_os = "linux")]
 fn extract_block_device_name(device_path: &str) -> Option<Cow<'_, str>> {
     if device_path.starts_with("/dev/mapper/") || device_path.starts_with("/dev/root") {
-        let real = canonicalize(device_path).ok()?;
-        let real_str = real.to_str()?;
-        if real_str != device_path {
-            return real_str
+        let canon_device_path = canonicalize(device_path).ok()?;
+        let canon_device_path = canon_device_path.to_str()?;
+        if canon_device_path != device_path {
+            return canon_device_path
                 .pipe(extract_block_device_name)
                 .map(|x| x.to_string())
                 .map(Cow::Owned);
