@@ -205,33 +205,33 @@ fn is_virtual_block_device<Fs: FsApi>(block_dev: &str) -> bool {
 }
 
 /// Check if any path is in any HDD.
-pub fn any_path_is_in_hdd<Api: DiskApi + FsApi>(paths: &[PathBuf], disks: &[Api::Disk]) -> bool {
+pub fn any_path_is_in_hdd<D: DiskApi, F: FsApi>(paths: &[PathBuf], disks: &[D::Disk]) -> bool {
     paths
         .iter()
-        .filter_map(|file| Api::canonicalize(file).ok())
-        .any(|path| path_is_in_hdd::<Api>(&path, disks))
+        .filter_map(|file| F::canonicalize(file).ok())
+        .any(|path| path_is_in_hdd::<D, F>(&path, disks))
 }
 
 /// Check if path is in any HDD.
 ///
 /// Applies [`correct_hdd_detection`] to each disk's reported kind to work
 /// around virtual block devices being falsely reported as HDDs on Linux.
-fn path_is_in_hdd<Api: DiskApi + FsApi>(path: &Path, disks: &[Api::Disk]) -> bool {
-    let Some(mount_point) = find_mount_point(path, disks.iter().map(Api::get_mount_point)) else {
+fn path_is_in_hdd<D: DiskApi, F: FsApi>(path: &Path, disks: &[D::Disk]) -> bool {
+    let Some(mount_point) = find_mount_point(path, disks.iter().map(D::get_mount_point)) else {
         return false;
     };
     disks
         .iter()
-        .filter(|disk| is_in_hdd::<Api>(disk))
-        .any(|disk| Api::get_mount_point(disk) == mount_point)
+        .filter(|disk| is_in_hdd::<D, F>(disk))
+        .any(|disk| D::get_mount_point(disk) == mount_point)
 }
 
 /// Check if a disk is an HDD after applying platform-specific corrections.
-fn is_in_hdd<Api: DiskApi + FsApi>(disk: &Api::Disk) -> bool {
-    let kind = Api::get_disk_kind(disk);
-    let name = Api::get_disk_name(disk).to_str();
+fn is_in_hdd<D: DiskApi, F: FsApi>(disk: &D::Disk) -> bool {
+    let kind = D::get_disk_kind(disk);
+    let name = D::get_disk_name(disk).to_str();
     match name {
-        Some(name) => correct_hdd_detection::<Api>(kind, name) == DiskKind::HDD,
+        Some(name) => correct_hdd_detection::<F>(kind, name) == DiskKind::HDD,
         None => kind == DiskKind::HDD, // can't parse name, keep original classification
     }
 }
