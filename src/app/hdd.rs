@@ -150,7 +150,7 @@ fn extract_block_device_name<Fs: FsApi>(device_path: &str) -> Option<Cow<'_, str
 
     canon_device_path
         .pipe(extract_block_device_name::<Fs>)
-        .map(|x| x.into_owned()) // must copy-allocate because `canon_device_path` is locally owned
+        .map(Cow::into_owned) // must copy-allocate because `canon_device_path` is locally owned
         .map(Cow::Owned)
 }
 
