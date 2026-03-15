@@ -218,17 +218,11 @@ fn path_is_in_hdd<Api: self::Api>(path: &Path, disks: &[Api::Disk]) -> bool {
 /// Check if a disk is an HDD after applying platform-specific corrections.
 fn is_in_hdd<Api: self::Api>(disk: &Api::Disk) -> bool {
     let kind = Api::get_disk_kind(disk);
-
-    // QUESTION TO CLAUDE CODE:
-    //     I don't quite understand the `unwrap_or_default` here.
-    //     I was almost tempted to just return `false` when `to_str` returns `None`,
-    //     but I paused.
-    //     Usually, `None` means the disk name was not UTF-8.
-    //     So, what should be the correct behavior here?
-    //     Regardless though, I don't like the complicated branching caused by empty string.
-    let name = Api::get_disk_name(disk).to_str().unwrap_or_default();
-
-    correct_hdd_detection(kind, name) == DiskKind::HDD
+    let name = Api::get_disk_name(disk).to_str();
+    match name {
+        Some(name) => correct_hdd_detection(kind, name) == DiskKind::HDD,
+        None => kind == DiskKind::HDD, // can't parse name, keep original classification
+    }
 }
 
 #[cfg(test)]
