@@ -127,6 +127,9 @@ fn correct_hdd_detection<Fs: FsApi>(kind: DiskKind, _disk_name: &str) -> DiskKin
 /// 3. A `dm` device can have multiple slaves (stripes, mirrors). A policy
 ///    decision is needed: is the device virtual only when *all* slaves are
 ///    virtual, or when *any* is? Neither answer is obviously correct.
+///
+/// Given the complexity and the relative importance of auto HDD detection feature,
+/// we have chosen to ignore it.
 #[cfg(target_os = "linux")]
 fn extract_block_device_name<Fs: FsApi>(device_path: &str) -> Option<Cow<'_, str>> {
     if !device_path.starts_with("/dev/mapper/") && !device_path.starts_with("/dev/root") {
