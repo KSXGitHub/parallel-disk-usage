@@ -200,7 +200,7 @@ fn is_virtual_block_device<Fs: FsApi>(block_dev: &str) -> bool {
 
     matches!(
         driver_name,
-        Some("virtio_blk" | "xen_blkfront" | "vmw_pvscsi" | "hv_storvsc")
+        Some("virtio_blk" | "xen_blkfront" | "xen-blkfront" | "vbd" | "vmw_pvscsi" | "hv_storvsc")
     )
 }
 
@@ -222,8 +222,8 @@ fn path_is_in_hdd<D: DiskApi, F: FsApi>(path: &Path, disks: &[D::Disk]) -> bool 
     };
     disks
         .iter()
-        .filter(|disk| is_in_hdd::<D, F>(disk))
-        .any(|disk| D::get_mount_point(disk) == mount_point)
+        .filter(|disk| D::get_mount_point(disk) == mount_point)
+        .any(|disk| is_in_hdd::<D, F>(disk))
 }
 
 /// Check if a disk is an HDD after applying platform-specific corrections.
