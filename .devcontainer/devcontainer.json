@@ -1,0 +1,14 @@
+{
+  "name": "parallel-disk-usage (Rust only)",
+  "image": "mcr.microsoft.com/devcontainers/rust:1",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "timonwong.shellcheck",
+        "mkhl.shfmt"
+      ]
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh"
+}
