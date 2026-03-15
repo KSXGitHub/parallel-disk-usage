@@ -100,7 +100,7 @@ fn reclassify_virtual_hdd<Fs: FsApi>(kind: DiskKind, disk_name: &str) -> DiskKin
 /// On non-Linux platforms (macOS, FreeBSD), `sysinfo` currently reports
 /// `DiskKind::Unknown` because there is no reliable OS API for determining
 /// rotational vs solid-state. This means the `kind == DiskKind::HDD` check
-/// in [`is_in_hdd`] never matches, so this function is effectively a no-op.
+/// in [`is_hdd`] never matches, so this function is effectively a no-op.
 ///
 /// If `sysinfo` ever gains accurate disk-kind detection on these platforms,
 /// this function should be revisited — virtual disks on macOS (e.g. virtio
