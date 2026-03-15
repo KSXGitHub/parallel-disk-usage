@@ -219,7 +219,7 @@ mod linux_tests {
     }
 
     /// Xen disk whose sysfs driver is `vbd` (the xenbus-registered name)
-    /// should be reclassified as Unknown(-1).
+    /// should be reclassified as `Unknown(-1)`.
     mod test_xen_vbd_disk_is_reclassified {
         use super::{correct_hdd_detection, FsApi};
         use pipe_trait::Pipe;
@@ -260,7 +260,7 @@ mod linux_tests {
     }
 
     /// Xen disk whose sysfs driver is `xen_blkfront` (the underscored kernel
-    /// module name) should be reclassified as Unknown(-1).
+    /// module name) should be reclassified as `Unknown(-1)`.
     mod test_xen_blkfront_underscore_disk_is_reclassified {
         use super::{correct_hdd_detection, FsApi};
         use pipe_trait::Pipe;
