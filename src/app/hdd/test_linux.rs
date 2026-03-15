@@ -209,10 +209,10 @@ fn test_mapper_dm_device_is_not_corrected() {
                 .map(|(_, target)| PathBuf::from(*target))
                 .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
         }
-        fn path_exists(_path: &Path) -> bool {
+        fn path_exists(_: &Path) -> bool {
             false
         }
-        fn read_link(_path: &Path) -> io::Result<PathBuf> {
+        fn read_link(_: &Path) -> io::Result<PathBuf> {
             Err(io::Error::new(io::ErrorKind::NotFound, "mocked"))
         }
     }
@@ -230,13 +230,13 @@ fn test_mapper_dm_device_is_not_corrected() {
 fn test_ssd_is_not_corrected() {
     struct Fs;
     impl FsApi for Fs {
-        fn canonicalize(_path: &Path) -> io::Result<PathBuf> {
+        fn canonicalize(_: &Path) -> io::Result<PathBuf> {
             panic!("canonicalize should not be called for non-HDD disks");
         }
-        fn path_exists(_path: &Path) -> bool {
+        fn path_exists(_: &Path) -> bool {
             panic!("path_exists should not be called for non-HDD disks");
         }
-        fn read_link(_path: &Path) -> io::Result<PathBuf> {
+        fn read_link(_: &Path) -> io::Result<PathBuf> {
             panic!("read_link should not be called for non-HDD disks");
         }
     }

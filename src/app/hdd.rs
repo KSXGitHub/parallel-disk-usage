@@ -101,7 +101,7 @@ fn reclassify_virtual_hdd<Fs: FsApi>(kind: DiskKind, disk_name: &str) -> DiskKin
 /// this function should be revisited — virtual disks on macOS (e.g. virtio
 /// in QEMU) or FreeBSD (e.g. virtio-blk) could face the same misclassification.
 #[cfg(not(target_os = "linux"))]
-fn reclassify_virtual_hdd<Fs: FsApi>(kind: DiskKind, _disk_name: &str) -> DiskKind {
+fn reclassify_virtual_hdd<Fs: FsApi>(kind: DiskKind, _: &str) -> DiskKind {
     kind
 }
 

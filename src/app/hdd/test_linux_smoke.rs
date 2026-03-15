@@ -30,7 +30,7 @@ fn full_pipeline_does_not_panic() {
     for disk in disks.list() {
         let name = disk.name().to_str().unwrap_or_default();
         if let Some(block_dev) = extract_block_device_name::<RealFs>(name) {
-            let _is_virtual = is_virtual_block_device::<RealFs>(&block_dev);
+            let _ = is_virtual_block_device::<RealFs>(&block_dev);
         }
     }
 }

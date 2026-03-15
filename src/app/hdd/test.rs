@@ -53,12 +53,12 @@ impl FsApi for EmptyFs {
     }
 
     #[cfg(target_os = "linux")]
-    fn path_exists(_path: &Path) -> bool {
+    fn path_exists(_: &Path) -> bool {
         false
     }
 
     #[cfg(target_os = "linux")]
-    fn read_link(_path: &Path) -> io::Result<PathBuf> {
+    fn read_link(_: &Path) -> io::Result<PathBuf> {
         Err(io::Error::new(io::ErrorKind::NotFound, "mocked"))
     }
 }
