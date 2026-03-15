@@ -148,6 +148,8 @@ fn extract_block_device_name<Fs: FsApi>(device_path: &str) -> Option<Cow<'_, str
         return None;
     }
 
+    // Safe to recurse: `canonicalize` resolves all symlinks, so the
+    // canonical path will not start with `/dev/mapper/` or `/dev/root`.
     canon_device_path
         .pipe(extract_block_device_name::<Fs>)
         .map(Cow::into_owned) // must copy-allocate because `canon_device_path` is locally owned
@@ -223,7 +225,15 @@ fn is_virtual_block_device<Fs: FsApi>(block_dev: &str) -> bool {
 
     matches!(
         driver_name,
-        Some("virtio_blk" | "xen_blkfront" | "xen-blkfront" | "vbd" | "vmw_pvscsi" | "hv_storvsc")
+        Some(
+            "virtio_blk"
+                | "virtio-blk"
+                | "xen_blkfront"
+                | "xen-blkfront"
+                | "vbd"
+                | "vmw_pvscsi"
+                | "hv_storvsc"
+        )
     )
 }
 

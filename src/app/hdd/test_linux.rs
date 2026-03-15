@@ -100,6 +100,16 @@ identity_reclassify_test_case! {
 }
 
 identity_reclassify_test_case! {
+    /// VirtIO disk whose sysfs driver is `virtio-blk` (the hyphenated
+    /// variant) should also be reclassified as `Unknown(-1)`.
+    test_virtio_blk_hyphen_disk_is_reclassified where
+        block_device = "vda",
+        driver = "virtio-blk",
+        disk_name ="/dev/vda1",
+        expected = DiskKind::Unknown(-1),
+}
+
+identity_reclassify_test_case! {
     /// Xen disk whose sysfs driver is `vbd` (the xenbus-registered name)
     /// should be reclassified as `Unknown(-1)`.
     test_xen_vbd_disk_is_reclassified where
