@@ -177,7 +177,7 @@ mod linux_tests {
         }
     }
 
-    /// VirtIO disk reported as HDD should be reclassified as Unknown(-1).
+    /// VirtIO disk reported as HDD should be reclassified as `Unknown(-1)`.
     mod test_virtio_disk_is_reclassified {
         use super::{correct_hdd_detection, FsApi};
         use pipe_trait::Pipe;
@@ -303,7 +303,7 @@ mod linux_tests {
 
     /// Xen disk whose sysfs driver is `xen-blkfront` (the hyphenated module
     /// name, which may appear on some kernel versions) should also be
-    /// reclassified as Unknown(-1).
+    /// reclassified as `Unknown(-1)`.
     mod test_xen_blkfront_hyphen_disk_is_reclassified {
         use super::{correct_hdd_detection, FsApi};
         use pipe_trait::Pipe;
