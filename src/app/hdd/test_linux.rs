@@ -1,7 +1,4 @@
-use super::{
-    correct_hdd_detection, extract_block_device_name, is_virtual_block_device,
-    parse_block_device_name, FsApi, RealApi,
-};
+use super::{parse_block_device_name, reclassify_virtual_hdd, FsApi};
 use pretty_assertions::assert_eq;
 
 /// Test pure parsing of block device names — no sysfs dependency.
@@ -40,7 +37,7 @@ fn test_parse_block_device_name() {
 
 /// VirtIO disk reported as HDD should be reclassified as `Unknown(-1)`.
 mod test_virtio_disk_is_reclassified {
-    use super::{correct_hdd_detection, FsApi};
+    use super::{reclassify_virtual_hdd, FsApi};
     use pipe_trait::Pipe;
     use pretty_assertions::assert_eq;
     use std::{
@@ -72,7 +69,7 @@ mod test_virtio_disk_is_reclassified {
     #[test]
     fn test() {
         assert_eq!(
-            correct_hdd_detection::<Fs>(DiskKind::HDD, "/dev/vda1"),
+            reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/vda1"),
             DiskKind::Unknown(-1),
         );
     }
@@ -81,7 +78,7 @@ mod test_virtio_disk_is_reclassified {
 /// Xen disk whose sysfs driver is `vbd` (the xenbus-registered name)
 /// should be reclassified as `Unknown(-1)`.
 mod test_xen_vbd_disk_is_reclassified {
-    use super::{correct_hdd_detection, FsApi};
+    use super::{reclassify_virtual_hdd, FsApi};
     use pipe_trait::Pipe;
     use pretty_assertions::assert_eq;
     use std::{
@@ -113,7 +110,7 @@ mod test_xen_vbd_disk_is_reclassified {
     #[test]
     fn test() {
         assert_eq!(
-            correct_hdd_detection::<Fs>(DiskKind::HDD, "/dev/xvda1"),
+            reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/xvda1"),
             DiskKind::Unknown(-1),
         );
     }
@@ -122,7 +119,7 @@ mod test_xen_vbd_disk_is_reclassified {
 /// Xen disk whose sysfs driver is `xen_blkfront` (the underscored kernel
 /// module name) should be reclassified as `Unknown(-1)`.
 mod test_xen_blkfront_underscore_disk_is_reclassified {
-    use super::{correct_hdd_detection, FsApi};
+    use super::{reclassify_virtual_hdd, FsApi};
     use pipe_trait::Pipe;
     use pretty_assertions::assert_eq;
     use std::{
@@ -155,7 +152,7 @@ mod test_xen_blkfront_underscore_disk_is_reclassified {
     #[test]
     fn test() {
         assert_eq!(
-            correct_hdd_detection::<Fs>(DiskKind::HDD, "/dev/xvda1"),
+            reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/xvda1"),
             DiskKind::Unknown(-1),
         );
     }
@@ -165,7 +162,7 @@ mod test_xen_blkfront_underscore_disk_is_reclassified {
 /// name, which may appear on some kernel versions) should also be
 /// reclassified as `Unknown(-1)`.
 mod test_xen_blkfront_hyphen_disk_is_reclassified {
-    use super::{correct_hdd_detection, FsApi};
+    use super::{reclassify_virtual_hdd, FsApi};
     use pipe_trait::Pipe;
     use pretty_assertions::assert_eq;
     use std::{
@@ -198,7 +195,7 @@ mod test_xen_blkfront_hyphen_disk_is_reclassified {
     #[test]
     fn test() {
         assert_eq!(
-            correct_hdd_detection::<Fs>(DiskKind::HDD, "/dev/xvda1"),
+            reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/xvda1"),
             DiskKind::Unknown(-1),
         );
     }
@@ -206,7 +203,7 @@ mod test_xen_blkfront_hyphen_disk_is_reclassified {
 
 /// VMware PVSCSI disk reported as `HDD` should be reclassified as `Unknown(-1)`.
 mod test_vmware_pvscsi_disk_is_reclassified {
-    use super::{correct_hdd_detection, FsApi};
+    use super::{reclassify_virtual_hdd, FsApi};
     use pipe_trait::Pipe;
     use pretty_assertions::assert_eq;
     use std::{
@@ -238,7 +235,7 @@ mod test_vmware_pvscsi_disk_is_reclassified {
     #[test]
     fn test() {
         assert_eq!(
-            correct_hdd_detection::<Fs>(DiskKind::HDD, "/dev/sda1"),
+            reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/sda1"),
             DiskKind::Unknown(-1),
         );
     }
@@ -246,7 +243,7 @@ mod test_vmware_pvscsi_disk_is_reclassified {
 
 /// Hyper-V storage controller disk reported as `HDD` should be reclassified as `Unknown(-1)`.
 mod test_hyperv_storvsc_disk_is_reclassified {
-    use super::{correct_hdd_detection, FsApi};
+    use super::{reclassify_virtual_hdd, FsApi};
     use pipe_trait::Pipe;
     use pretty_assertions::assert_eq;
     use std::{
@@ -278,7 +275,7 @@ mod test_hyperv_storvsc_disk_is_reclassified {
     #[test]
     fn test() {
         assert_eq!(
-            correct_hdd_detection::<Fs>(DiskKind::HDD, "/dev/sda1"),
+            reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/sda1"),
             DiskKind::Unknown(-1),
         );
     }
@@ -286,7 +283,7 @@ mod test_hyperv_storvsc_disk_is_reclassified {
 
 /// Physical SCSI disk reported as `HDD` should stay `HDD`.
 mod test_physical_disk_stays_hdd {
-    use super::{correct_hdd_detection, FsApi};
+    use super::{reclassify_virtual_hdd, FsApi};
     use pipe_trait::Pipe;
     use pretty_assertions::assert_eq;
     use std::{
@@ -318,7 +315,7 @@ mod test_physical_disk_stays_hdd {
     #[test]
     fn test() {
         assert_eq!(
-            correct_hdd_detection::<Fs>(DiskKind::HDD, "/dev/sda1"),
+            reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/sda1"),
             DiskKind::HDD,
         );
     }
@@ -332,7 +329,7 @@ mod test_physical_disk_stays_hdd {
 /// `/dev/dm-0`, not a partition device. See `test_mapper_dm_device_is_not_corrected`
 /// for that case.
 mod test_mapper_symlink_resolves_to_virtual_partition {
-    use super::{correct_hdd_detection, FsApi};
+    use super::{reclassify_virtual_hdd, FsApi};
     use pretty_assertions::assert_eq;
     use std::{
         io,
@@ -373,7 +370,7 @@ mod test_mapper_symlink_resolves_to_virtual_partition {
     #[test]
     fn test() {
         assert_eq!(
-            correct_hdd_detection::<Fs>(DiskKind::HDD, "/dev/mapper/vg0-lv0"),
+            reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/mapper/vg0-lv0"),
             DiskKind::Unknown(-1),
         );
     }
@@ -385,7 +382,7 @@ mod test_mapper_symlink_resolves_to_virtual_partition {
 ///
 /// See the doc comment on [`extract_block_device_name`] for details.
 mod test_mapper_dm_device_is_not_corrected {
-    use super::{correct_hdd_detection, FsApi};
+    use super::{reclassify_virtual_hdd, FsApi};
     use pretty_assertions::assert_eq;
     use std::{
         io,
@@ -417,7 +414,7 @@ mod test_mapper_dm_device_is_not_corrected {
         // dm-0 is not a recognized block device prefix, so correction
         // cannot determine the driver — HDD classification is preserved.
         assert_eq!(
-            correct_hdd_detection::<Fs>(DiskKind::HDD, "/dev/mapper/vg0-lv0"),
+            reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/mapper/vg0-lv0"),
             DiskKind::HDD,
         );
     }
@@ -425,7 +422,7 @@ mod test_mapper_dm_device_is_not_corrected {
 
 /// SSD disk should pass through unchanged — correction is not applied.
 mod test_ssd_is_not_corrected {
-    use super::{correct_hdd_detection, FsApi};
+    use super::{reclassify_virtual_hdd, FsApi};
     use pretty_assertions::assert_eq;
     use std::{
         io,
@@ -449,54 +446,8 @@ mod test_ssd_is_not_corrected {
     #[test]
     fn test() {
         assert_eq!(
-            correct_hdd_detection::<Fs>(DiskKind::SSD, "/dev/sda1"),
+            reclassify_virtual_hdd::<Fs>(DiskKind::SSD, "/dev/sda1"),
             DiskKind::SSD,
         );
-    }
-}
-
-/// Host-dependent smoke tests.
-///
-/// These tests use [`RealApi`] and read from the real `/sys` filesystem.
-/// They are designed to always pass regardless of the host hardware, but
-/// the code paths they exercise vary by machine. They complement the
-/// hermetic mocked tests above by verifying that the detection pipeline
-/// works end-to-end on real devices without panicking.
-mod host_dependent_smoke_tests {
-    use super::{extract_block_device_name, is_virtual_block_device, RealApi};
-
-    /// On hosts with a `/sys/block/vda` device, exercises the detection
-    /// pipeline without panicking. Silently skips if `vda` does not exist.
-    #[test]
-    fn real_sysfs_vda_does_not_panic() {
-        if std::path::Path::new("/sys/block/vda").exists() {
-            let _ = is_virtual_block_device::<RealApi>("vda");
-        }
-    }
-
-    /// A non-existent device name must return `false` without panicking.
-    #[test]
-    fn nonexistent_device_is_not_virtual() {
-        assert!(
-            !is_virtual_block_device::<RealApi>("nonexistent_device_xyz"),
-            "non-existent device should not be detected as virtual"
-        );
-    }
-
-    /// Runs the full detection pipeline on every mounted disk.
-    ///
-    /// Does **not** assert any specific virtual/non-virtual classification
-    /// because the result depends on the host hardware. Only verifies that
-    /// the pipeline completes without panicking.
-    #[test]
-    fn full_pipeline_does_not_panic() {
-        use sysinfo::Disks;
-        let disks = Disks::new_with_refreshed_list();
-        for disk in disks.list() {
-            let name = disk.name().to_str().unwrap_or_default();
-            if let Some(block_dev) = extract_block_device_name::<RealApi>(name) {
-                let _is_virtual = is_virtual_block_device::<RealApi>(&block_dev);
-            }
-        }
     }
 }

@@ -80,7 +80,7 @@ impl FsApi for RealApi {
 /// This function checks the block device's driver via sysfs and reclassifies
 /// known virtual drivers as `Unknown` instead of `HDD`.
 #[cfg(target_os = "linux")]
-fn correct_hdd_detection<Fs: FsApi>(kind: DiskKind, disk_name: &str) -> DiskKind {
+fn reclassify_virtual_hdd<Fs: FsApi>(kind: DiskKind, disk_name: &str) -> DiskKind {
     if kind != DiskKind::HDD {
         return kind;
     }
@@ -101,7 +101,7 @@ fn correct_hdd_detection<Fs: FsApi>(kind: DiskKind, disk_name: &str) -> DiskKind
 /// this function should be revisited — virtual disks on macOS (e.g. virtio
 /// in QEMU) or FreeBSD (e.g. virtio-blk) could face the same misclassification.
 #[cfg(not(target_os = "linux"))]
-fn correct_hdd_detection<Fs: FsApi>(kind: DiskKind, _disk_name: &str) -> DiskKind {
+fn reclassify_virtual_hdd<Fs: FsApi>(kind: DiskKind, _disk_name: &str) -> DiskKind {
     kind
 }
 
@@ -237,7 +237,7 @@ pub fn any_path_is_in_hdd<Disk: DiskApi, Fs: FsApi>(paths: &[PathBuf], disks: &[
 
 /// Check if path is in any HDD.
 ///
-/// Applies [`correct_hdd_detection`] to each disk's reported kind to work
+/// Applies [`reclassify_virtual_hdd`] to each disk's reported kind to work
 /// around virtual block devices being falsely reported as HDDs on Linux.
 fn path_is_in_hdd<Disk: DiskApi, Fs: FsApi>(path: &Path, disks: &[Disk]) -> bool {
     let mount_point = find_mount_point(path, disks.iter().map(Disk::get_mount_point));
@@ -255,7 +255,7 @@ fn is_in_hdd<Fs: FsApi>(disk: &impl DiskApi) -> bool {
     let kind = disk.get_disk_kind();
     let name = disk.get_disk_name().to_str();
     match name {
-        Some(name) => correct_hdd_detection::<Fs>(kind, name) == DiskKind::HDD,
+        Some(name) => reclassify_virtual_hdd::<Fs>(kind, name) == DiskKind::HDD,
         None => kind == DiskKind::HDD, // can't parse name, keep original classification
     }
 }
@@ -266,3 +266,7 @@ mod test;
 #[cfg(target_os = "linux")]
 #[cfg(test)]
 mod test_linux;
+
+#[cfg(target_os = "linux")]
+#[cfg(test)]
+mod test_linux_smoke;
