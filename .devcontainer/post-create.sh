@@ -3,6 +3,7 @@ set -euo pipefail
 
 mkdir -p "$HOME/.local/bin"
 
+bash "$(dirname "$0")/install-rust-toolchain.sh"
 bash "$(dirname "$0")/install-hyperfine.sh"
 
 arch="$(uname -m)"
