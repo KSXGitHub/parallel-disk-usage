@@ -177,8 +177,6 @@ mod linux_tests {
         }
     }
 
-    // ── Mocked FsApi tests ─────────────────────────────────────────────
-
     /// VirtIO disk reported as HDD should be reclassified as Unknown(-1).
     mod test_virtio_disk_is_reclassified {
         use super::{correct_hdd_detection, FsApi};
@@ -469,8 +467,6 @@ mod linux_tests {
             );
         }
     }
-
-    // ── Real-sysfs integration tests ───────────────────────────────────
 
     /// Test is_virtual_block_device against real sysfs.
     #[test]
