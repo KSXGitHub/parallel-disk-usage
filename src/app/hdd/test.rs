@@ -344,7 +344,7 @@ mod linux_tests {
         }
     }
 
-    /// Physical SCSI disk reported as HDD should stay HDD.
+    /// Physical SCSI disk reported as `HDD` should stay `HDD`.
     mod test_physical_disk_stays_hdd {
         use super::{correct_hdd_detection, FsApi};
         use pipe_trait::Pipe;
@@ -481,7 +481,7 @@ mod linux_tests {
         }
     }
 
-    /// Verify that non-existent devices return false without panicking.
+    /// Verify that non-existent devices return `false` without panicking.
     #[test]
     fn test_virtual_driver_names() {
         assert!(
