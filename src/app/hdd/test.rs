@@ -98,7 +98,7 @@ fn test_any_path_in_hdd() {
     for (paths, in_hdd) in cases {
         let paths: Vec<_> = paths.iter().map(PathBuf::from).collect();
         println!("CASE: {paths:?} → {in_hdd:?}");
-        assert_eq!(any_path_is_in_hdd::<Disk, EmptyFs>(&paths, disks), *in_hdd,);
+        assert_eq!(any_path_is_in_hdd::<Disk, EmptyFs>(&paths, disks), *in_hdd);
     }
 }
 
