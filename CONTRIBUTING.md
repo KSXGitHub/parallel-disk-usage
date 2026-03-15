@@ -175,6 +175,15 @@ Use macros to reduce boilerplate for repetitive patterns (e.g. newtype wrappers,
 
 The crate uses `#![deny(warnings)]` — all warnings are treated as errors. Code must compile warning-free.
 
+## Setup
+
+Install the required Rust toolchain and components before running any checks:
+
+```sh
+rustup toolchain install "$(< rust-toolchain)"
+rustup component add rustfmt clippy
+```
+
 ## Automated Checks
 
 Before submitting, ensure:
