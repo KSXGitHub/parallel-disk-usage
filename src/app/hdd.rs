@@ -108,7 +108,7 @@ fn correct_hdd_detection<Fs: FsApi>(kind: DiskKind, _disk_name: &str) -> DiskKin
 /// `canonicalize`, then delegates to [`parse_block_device_name`] for parsing
 /// and [`validate_block_device`] to verify the device exists in sysfs.
 ///
-/// # Known limitation: LVM / device-mapper
+/// **Known limitation:** LVM / device-mapper
 ///
 /// On real LVM setups, `/dev/mapper/vg0-lv0` canonicalizes to `/dev/dm-0`
 /// (a device-mapper device), not to the underlying physical device like
