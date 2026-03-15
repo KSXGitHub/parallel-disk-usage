@@ -94,6 +94,9 @@ fn extract_block_device_name(device_path: &str) -> Option<Cow<'_, str>> {
         return block_dev.pipe(validate_block_device).map(Cow::Borrowed);
     }
 
+    // NOTE: Claude Code was responsible for this call to `canonicalize`.
+    // NOTE: the `canonicalize` function is a side-effect function that is not friendly to unit tests.
+    // TODO: perhaps we should replace it with `Api::canonicalize` here?
     let canon_device_path = canonicalize(device_path).ok()?;
     let canon_device_path = canon_device_path.to_str()?;
     if canon_device_path == device_path {
