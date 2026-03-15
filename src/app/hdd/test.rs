@@ -108,6 +108,7 @@ fn test_path_in_hdd() {
 #[cfg(target_os = "linux")]
 mod linux_tests {
     use super::super::{is_virtual_block_device, parse_block_device_name};
+    use pretty_assertions::assert_eq;
 
     /// Test pure parsing of block device names — no sysfs dependency.
     #[test]
