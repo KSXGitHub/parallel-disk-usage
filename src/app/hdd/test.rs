@@ -139,7 +139,7 @@ mod linux_tests {
         for (input, expected) in cases {
             let result = parse_block_device_name(input);
             println!("CASE: {input} → {result:?} (expected {expected:?})");
-            assert_eq!(result.as_deref(), *expected, "failed for input {input}");
+            assert_eq!(result.as_deref(), *expected);
         }
     }
 
