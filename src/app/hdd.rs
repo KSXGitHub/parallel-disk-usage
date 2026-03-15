@@ -128,7 +128,7 @@ fn correct_hdd_detection<Fs: FsApi>(kind: DiskKind, _disk_name: &str) -> DiskKin
 ///    decision is needed: is the device virtual only when *all* slaves are
 ///    virtual, or when *any* is? Neither answer is obviously correct.
 ///
-/// Given the complexity and the relative importance of auto HDD detection feature,
+/// Given the complexity and the relative importance of the auto HDD detection feature,
 /// we have chosen to ignore it.
 #[cfg(target_os = "linux")]
 fn extract_block_device_name<Fs: FsApi>(device_path: &str) -> Option<Cow<'_, str>> {
