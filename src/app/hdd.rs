@@ -7,6 +7,11 @@ use std::{
 };
 use sysinfo::{Disk, DiskKind};
 
+#[cfg(target_os = "linux")]
+use pipe_trait::Pipe;
+#[cfg(target_os = "linux")]
+use std::borrow::Cow;
+
 /// Mockable APIs to interact with the system.
 ///
 /// Each method delegates to the corresponding [`sysinfo::Disk`] method,
@@ -83,20 +88,24 @@ fn correct_hdd_detection(kind: DiskKind, _disk_name: &str) -> DiskKind {
 /// `canonicalize`, then delegates to [`parse_block_device_name`] for parsing
 /// and [`validate_block_device`] to verify the device exists in sysfs.
 #[cfg(target_os = "linux")]
-fn extract_block_device_name(device_path: &str) -> Option<String> {
+fn extract_block_device_name(device_path: &str) -> Option<Cow<'_, str>> {
     use std::fs;
 
     if device_path.starts_with("/dev/mapper/") || device_path.starts_with("/dev/root") {
         let real = fs::canonicalize(device_path).ok()?;
         let real_str = real.to_str()?;
         if real_str != device_path {
-            return extract_block_device_name(real_str);
+            return real_str
+                .pipe(extract_block_device_name)
+                .map(|x| x.to_string())
+                .map(Cow::Owned);
         }
         return None;
     }
 
     let block_dev = parse_block_device_name(device_path)?;
-    validate_block_device(&block_dev)
+    // validate_block_device(block_dev)
+    block_dev.pipe(validate_block_device).map(Cow::Borrowed)
 }
 
 /// Parse the base block device name from a device path (pure string parsing).
@@ -113,7 +122,7 @@ fn extract_block_device_name(device_path: &str) -> Option<String> {
 /// - `/dev/mmcblk0p1` → `Some("mmcblk0")`
 /// - `vda1` (no `/dev/` prefix) → `None`
 #[cfg(target_os = "linux")]
-fn parse_block_device_name(device_path: &str) -> Option<String> {
+fn parse_block_device_name(device_path: &str) -> Option<&str> {
     let name = device_path.strip_prefix("/dev/")?;
 
     let block_dev = if name.starts_with("sd") || name.starts_with("vd") || name.starts_with("xvd") {
@@ -137,17 +146,17 @@ fn parse_block_device_name(device_path: &str) -> Option<String> {
         name
     };
 
-    Some(block_dev.to_string())
+    Some(block_dev)
 }
 
 /// Verify that a block device exists in sysfs.
 ///
 /// Returns `Some(block_dev)` if `/sys/block/<block_dev>` exists, `None` otherwise.
 #[cfg(target_os = "linux")]
-fn validate_block_device(block_dev: &str) -> Option<String> {
+fn validate_block_device(block_dev: &str) -> Option<&str> {
     let sysfs_path = Path::new("/sys/block").join(block_dev);
     if sysfs_path.exists() {
-        Some(block_dev.to_string())
+        Some(block_dev)
     } else {
         None
     }

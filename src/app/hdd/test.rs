@@ -140,7 +140,7 @@ mod linux_tests {
         for (input, expected) in cases {
             let result = parse_block_device_name(input);
             println!("CASE: {input} → {result:?} (expected {expected:?})");
-            assert_eq!(result.as_deref(), *expected);
+            assert_eq!(result, *expected);
         }
     }
 
@@ -188,7 +188,7 @@ mod linux_tests {
             if let Some(block_dev) = extract_block_device_name(name) {
                 // Verify the parsed name is valid: it should exist in sysfs
                 // (extract_block_device_name already validates this).
-                let sysfs_path = std::path::Path::new("/sys/block").join(&block_dev);
+                let sysfs_path = std::path::Path::new("/sys/block").join(block_dev.as_ref());
                 assert!(
                     sysfs_path.exists(),
                     "extracted block device {block_dev} should exist in sysfs"
