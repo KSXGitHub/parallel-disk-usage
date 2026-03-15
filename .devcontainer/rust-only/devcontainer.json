@@ -10,8 +10,11 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "rust-lang.rust-analyzer"
+        "rust-lang.rust-analyzer",
+        "timonwong.shellcheck",
+        "mkhl.shfmt"
       ]
     }
-  }
+  },
+  "postCreateCommand": "bash .devcontainer/rust-only/post-create.sh"
 }
