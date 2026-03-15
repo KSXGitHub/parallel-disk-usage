@@ -6,7 +6,7 @@ Read and follow the CONTRIBUTING.md file in this repository for all code style c
 
 - Commit format: Conventional Commits — `type(scope): lowercase description`
 - Version releases are the only exception: just the version number (e.g. `0.21.1`)
-- Import order: internal (`crate::`/`super::`) → external crates → `std::`, prefer merged imports
+- Prefer merged imports
 - Use descriptive generic names (`Size`, `Report`), not single letters
 - Prefer `where` clauses for multiple trait bounds
 - Derive order: std traits → comparison traits → `Hash` → derive_more → feature-gated
