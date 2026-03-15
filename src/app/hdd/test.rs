@@ -1,13 +1,14 @@
-use super::{any_path_is_in_hdd, path_is_in_hdd, Api};
+use super::{any_path_is_in_hdd, path_is_in_hdd, DiskApi, FsApi};
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use std::{
     ffi::OsStr,
+    io,
     path::{Path, PathBuf},
 };
 use sysinfo::DiskKind;
 
-/// Fake disk for [`Api`].
+/// Fake disk for [`DiskApi`].
 struct Disk {
     kind: DiskKind,
     name: &'static str,
@@ -24,9 +25,15 @@ impl Disk {
     }
 }
 
-/// Mocked implementation of [`Api`] for testing purposes.
+/// Mocked implementation of [`DiskApi`] and [`FsApi`] for testing purposes.
+///
+/// [`DiskApi`] methods return values from the fake [`Disk`] struct.
+/// [`FsApi`] methods simulate a filesystem where no sysfs entries exist,
+/// so [`correct_hdd_detection`](super::correct_hdd_detection) is effectively
+/// a no-op and disk kinds pass through unchanged.
 struct MockedApi;
-impl Api for MockedApi {
+
+impl DiskApi for MockedApi {
     type Disk = Disk;
 
     fn get_disk_kind(disk: &Self::Disk) -> DiskKind {
@@ -40,37 +47,21 @@ impl Api for MockedApi {
     fn get_mount_point(disk: &Self::Disk) -> &Path {
         Path::new(disk.mount_point)
     }
+}
 
-    fn canonicalize(path: &Path) -> std::io::Result<PathBuf> {
+impl FsApi for MockedApi {
+    fn canonicalize(path: &Path) -> io::Result<PathBuf> {
         path.to_path_buf().pipe(Ok)
     }
 
     #[cfg(target_os = "linux")]
-    fn path_exists(path: &Path) -> bool {
-        // NOTE: Claude Code was responsible for this atrocity
-        // NOTE: The side-effect function `Path::exists` was moved from `RealApi` to here.
-        // NOTE: The form changes, yet the substance remains the same.
-        // NOTE: The unit tests continue to be unreliable.
-        // NOTE: Was this because `Api` was only about `Disk`?
-        // NOTE: Was this the reason why `MockedApi` could not fake a filesystem in-memory?
-        // TODO: Perhaps the real solution was to create a different mockable trait?
-        // TODO: Perhaps `Api::canonicalize` should be moved to this new mockable trait?
-        // TODO: Perhaps the existing `Api` trait should be renamed to something else?
-        path.exists()
+    fn path_exists(_path: &Path) -> bool {
+        false // no sysfs in tests
     }
 
     #[cfg(target_os = "linux")]
-    fn read_link(path: &Path) -> std::io::Result<PathBuf> {
-        // NOTE: Claude Code was responsible for this atrocity
-        // NOTE: The side-effect function `read_link` was moved from `RealApi` to here.
-        // NOTE: The form changes, yet the substance remains the same.
-        // NOTE: The unit tests continue to be unreliable.
-        // NOTE: Was this because `Api` was only about `Disk`?
-        // NOTE: Was this the reason why `MockedApi` could not fake a filesystem in-memory?
-        // TODO: Perhaps the real solution was to create a different mockable trait?
-        // TODO: Perhaps `Api::canonicalize` should be moved to this new mockable trait?
-        // TODO: Perhaps the existing `Api` trait should be renamed to something else?
-        std::fs::read_link(path)
+    fn read_link(_path: &Path) -> io::Result<PathBuf> {
+        Err(io::Error::new(io::ErrorKind::NotFound, "mocked"))
     }
 }
 
@@ -138,6 +129,7 @@ fn test_path_in_hdd() {
 #[cfg(target_os = "linux")]
 mod linux_tests {
     use super::super::{is_virtual_block_device, parse_block_device_name, RealApi};
+    // RealApi implements FsApi, so real-sysfs tests use it to hit the actual filesystem.
     use pretty_assertions::assert_eq;
 
     /// Test pure parsing of block device names — no sysfs dependency.

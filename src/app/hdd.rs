@@ -12,15 +12,22 @@ use pipe_trait::Pipe;
 #[cfg(target_os = "linux")]
 use std::borrow::Cow;
 
-/// Mockable APIs to interact with the system.
+/// Mockable interface to [`sysinfo::Disk`] methods.
 ///
-/// Each method delegates to a corresponding system call or [`sysinfo::Disk`]
-/// method, enabling dependency injection for testing.
-pub trait Api {
+/// Each method delegates to a corresponding [`sysinfo::Disk`] method,
+/// enabling dependency injection for testing.
+pub trait DiskApi {
     type Disk;
     fn get_disk_kind(disk: &Self::Disk) -> DiskKind;
     fn get_disk_name(disk: &Self::Disk) -> &OsStr;
     fn get_mount_point(disk: &Self::Disk) -> &Path;
+}
+
+/// Mockable interface to filesystem operations.
+///
+/// Abstracts system calls like [`canonicalize`], [`Path::exists`], and
+/// [`std::fs::read_link`] so tests can substitute an in-memory fake.
+pub trait FsApi {
     fn canonicalize(path: &Path) -> io::Result<PathBuf>;
     #[cfg(target_os = "linux")]
     fn path_exists(path: &Path) -> bool;
@@ -28,9 +35,10 @@ pub trait Api {
     fn read_link(path: &Path) -> io::Result<PathBuf>;
 }
 
-/// Implementation of [`Api`] that interacts with the real system.
+/// Implementation of [`DiskApi`] and [`FsApi`] that interacts with the real system.
 pub struct RealApi;
-impl Api for RealApi {
+
+impl DiskApi for RealApi {
     type Disk = Disk;
 
     #[inline]
@@ -47,7 +55,9 @@ impl Api for RealApi {
     fn get_mount_point(disk: &Self::Disk) -> &Path {
         disk.mount_point()
     }
+}
 
+impl FsApi for RealApi {
     #[inline]
     fn canonicalize(path: &Path) -> io::Result<PathBuf> {
         canonicalize(path)
@@ -73,12 +83,12 @@ impl Api for RealApi {
 /// This function checks the block device's driver via sysfs and reclassifies
 /// known virtual drivers as `Unknown` instead of `HDD`.
 #[cfg(target_os = "linux")]
-fn correct_hdd_detection<Api: self::Api>(kind: DiskKind, disk_name: &str) -> DiskKind {
+fn correct_hdd_detection<Fs: FsApi>(kind: DiskKind, disk_name: &str) -> DiskKind {
     if kind != DiskKind::HDD {
         return kind;
     }
-    if let Some(block_dev) = extract_block_device_name::<Api>(disk_name) {
-        if is_virtual_block_device::<Api>(&block_dev) {
+    if let Some(block_dev) = extract_block_device_name::<Fs>(disk_name) {
+        if is_virtual_block_device::<Fs>(&block_dev) {
             return DiskKind::Unknown(-1);
         }
     }
@@ -94,7 +104,7 @@ fn correct_hdd_detection<Api: self::Api>(kind: DiskKind, disk_name: &str) -> Dis
 /// this function should be revisited — virtual disks on macOS (e.g. virtio
 /// in QEMU) or FreeBSD (e.g. virtio-blk) could face the same misclassification.
 #[cfg(not(target_os = "linux"))]
-fn correct_hdd_detection<Api: self::Api>(kind: DiskKind, _disk_name: &str) -> DiskKind {
+fn correct_hdd_detection<Fs: FsApi>(kind: DiskKind, _disk_name: &str) -> DiskKind {
     kind
 }
 
@@ -104,22 +114,22 @@ fn correct_hdd_detection<Api: self::Api>(kind: DiskKind, _disk_name: &str) -> Di
 /// `canonicalize`, then delegates to [`parse_block_device_name`] for parsing
 /// and [`validate_block_device`] to verify the device exists in sysfs.
 #[cfg(target_os = "linux")]
-fn extract_block_device_name<Api: self::Api>(device_path: &str) -> Option<Cow<'_, str>> {
+fn extract_block_device_name<Fs: FsApi>(device_path: &str) -> Option<Cow<'_, str>> {
     if !device_path.starts_with("/dev/mapper/") && !device_path.starts_with("/dev/root") {
         let block_dev = parse_block_device_name(device_path)?;
         return block_dev
-            .pipe(|name| validate_block_device::<Api>(name))
+            .pipe(|name| validate_block_device::<Fs>(name))
             .map(Cow::Borrowed);
     }
 
-    let canon_device_path = Api::canonicalize(Path::new(device_path)).ok()?;
+    let canon_device_path = Fs::canonicalize(Path::new(device_path)).ok()?;
     let canon_device_path = canon_device_path.to_str()?;
     if canon_device_path == device_path {
         return None;
     }
 
     canon_device_path
-        .pipe(extract_block_device_name::<Api>)
+        .pipe(extract_block_device_name::<Fs>)
         .map(|x| x.to_string()) // must copy-allocate because `canon_device_path` is locally owned
         .map(Cow::Owned)
 }
@@ -169,11 +179,11 @@ fn parse_block_device_name(device_path: &str) -> Option<&str> {
 ///
 /// Returns `Some(block_dev)` if `/sys/block/<block_dev>` exists, `None` otherwise.
 #[cfg(target_os = "linux")]
-fn validate_block_device<Api: self::Api>(block_dev: &str) -> Option<&str> {
+fn validate_block_device<Fs: FsApi>(block_dev: &str) -> Option<&str> {
     "/sys/block"
         .pipe(Path::new)
         .join(block_dev)
-        .pipe(|path| Api::path_exists(&path))
+        .pipe(|path| Fs::path_exists(&path))
         .then_some(block_dev)
 }
 
@@ -182,13 +192,13 @@ fn validate_block_device<Api: self::Api>(block_dev: &str) -> Option<&str> {
 /// Reads the driver symlink at `/sys/block/<dev>/device/driver` and checks
 /// if it matches known virtual block device drivers.
 #[cfg(target_os = "linux")]
-fn is_virtual_block_device<Api: self::Api>(block_dev: &str) -> bool {
+fn is_virtual_block_device<Fs: FsApi>(block_dev: &str) -> bool {
     let driver_path = "/sys/block"
         .pipe(Path::new)
         .join(block_dev)
         .join("device/driver");
 
-    let Ok(target) = Api::read_link(&driver_path) else {
+    let Ok(target) = Fs::read_link(&driver_path) else {
         return false;
     };
 
@@ -201,7 +211,7 @@ fn is_virtual_block_device<Api: self::Api>(block_dev: &str) -> bool {
 }
 
 /// Check if any path is in any HDD.
-pub fn any_path_is_in_hdd<Api: self::Api>(paths: &[PathBuf], disks: &[Api::Disk]) -> bool {
+pub fn any_path_is_in_hdd<Api: DiskApi + FsApi>(paths: &[PathBuf], disks: &[Api::Disk]) -> bool {
     paths
         .iter()
         .filter_map(|file| Api::canonicalize(file).ok())
@@ -212,7 +222,7 @@ pub fn any_path_is_in_hdd<Api: self::Api>(paths: &[PathBuf], disks: &[Api::Disk]
 ///
 /// Applies [`correct_hdd_detection`] to each disk's reported kind to work
 /// around virtual block devices being falsely reported as HDDs on Linux.
-fn path_is_in_hdd<Api: self::Api>(path: &Path, disks: &[Api::Disk]) -> bool {
+fn path_is_in_hdd<Api: DiskApi + FsApi>(path: &Path, disks: &[Api::Disk]) -> bool {
     let Some(mount_point) = find_mount_point(path, disks.iter().map(Api::get_mount_point)) else {
         return false;
     };
@@ -223,7 +233,7 @@ fn path_is_in_hdd<Api: self::Api>(path: &Path, disks: &[Api::Disk]) -> bool {
 }
 
 /// Check if a disk is an HDD after applying platform-specific corrections.
-fn is_in_hdd<Api: self::Api>(disk: &Api::Disk) -> bool {
+fn is_in_hdd<Api: DiskApi + FsApi>(disk: &Api::Disk) -> bool {
     let kind = Api::get_disk_kind(disk);
     let name = Api::get_disk_name(disk).to_str();
     match name {
