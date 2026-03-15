@@ -1,0 +1,26 @@
+{
+  "name": "parallel-disk-usage (full)",
+  "image": "mcr.microsoft.com/devcontainers/rust:1",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts",
+      "nodeGypDependencies": true
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12",
+      "installTools": true
+    },
+    "ghcr.io/devcontainers-contrib/features/shellcheck:1": {},
+    "ghcr.io/devcontainers-contrib/features/shfmt:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "timonwong.shellcheck",
+        "mkhl.shfmt"
+      ]
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/full/post-create.sh"
+}
