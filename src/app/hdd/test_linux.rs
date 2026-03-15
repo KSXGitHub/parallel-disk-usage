@@ -55,7 +55,7 @@ macro_rules! identity_reclassify_test_case {
         $name:ident where
             block_device = $block:literal,
             driver = $driver:literal,
-            disk_name = $mount:literal,
+            disk_name = $disk_name:literal,
             expected = $expected:expr,
     ) => {
         $(#[$attr])*
@@ -83,7 +83,7 @@ macro_rules! identity_reclassify_test_case {
             }
 
             assert_eq!(
-                reclassify_virtual_hdd::<Fs>(DiskKind::HDD, $mount),
+                reclassify_virtual_hdd::<Fs>(DiskKind::HDD, $disk_name),
                 $expected,
             );
         }

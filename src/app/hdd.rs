@@ -262,11 +262,11 @@ fn path_is_in_hdd<Disk: DiskApi, Fs: FsApi>(path: &Path, disks: &[Disk]) -> bool
     disks
         .iter()
         .filter(|disk| disk.get_mount_point() == mount_point)
-        .any(|disk| is_in_hdd::<Fs>(disk))
+        .any(|disk| is_hdd::<Fs>(disk))
 }
 
 /// Check if a disk is an HDD after applying platform-specific corrections.
-fn is_in_hdd<Fs: FsApi>(disk: &impl DiskApi) -> bool {
+fn is_hdd<Fs: FsApi>(disk: &impl DiskApi) -> bool {
     let kind = disk.get_disk_kind();
     let name = disk.get_disk_name().to_str();
     match name {
