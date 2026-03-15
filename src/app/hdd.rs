@@ -34,7 +34,7 @@ pub trait FsApi {
     fn read_link(path: &Path) -> io::Result<PathBuf>;
 }
 
-/// Implementation of [`DiskApi`] and [`FsApi`] that interacts with the real system.
+/// Implementation of [`FsApi`] that interacts with the real system.
 pub struct RealApi;
 
 impl DiskApi for Disk {
