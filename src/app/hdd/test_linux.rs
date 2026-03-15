@@ -95,7 +95,7 @@ identity_reclassify_test_case! {
     test_virtio_disk_is_reclassified where
         block_device = "vda",
         driver = "virtio_blk",
-        disk_name ="/dev/vda1",
+        disk_name = "/dev/vda1",
         expected = VIRTUAL_DISK_KIND,
 }
 
@@ -105,7 +105,7 @@ identity_reclassify_test_case! {
     test_virtio_blk_hyphen_disk_is_reclassified where
         block_device = "vda",
         driver = "virtio-blk",
-        disk_name ="/dev/vda1",
+        disk_name = "/dev/vda1",
         expected = VIRTUAL_DISK_KIND,
 }
 
@@ -115,7 +115,7 @@ identity_reclassify_test_case! {
     test_xen_vbd_disk_is_reclassified where
         block_device = "xvda",
         driver = "vbd",
-        disk_name ="/dev/xvda1",
+        disk_name = "/dev/xvda1",
         expected = VIRTUAL_DISK_KIND,
 }
 
@@ -125,7 +125,7 @@ identity_reclassify_test_case! {
     test_xen_blkfront_underscore_disk_is_reclassified where
         block_device = "xvda",
         driver = "xen_blkfront",
-        disk_name ="/dev/xvda1",
+        disk_name = "/dev/xvda1",
         expected = VIRTUAL_DISK_KIND,
 }
 
@@ -136,7 +136,7 @@ identity_reclassify_test_case! {
     test_xen_blkfront_hyphen_disk_is_reclassified where
         block_device = "xvda",
         driver = "xen-blkfront",
-        disk_name ="/dev/xvda1",
+        disk_name = "/dev/xvda1",
         expected = VIRTUAL_DISK_KIND,
 }
 
@@ -145,7 +145,7 @@ identity_reclassify_test_case! {
     test_vmware_pvscsi_disk_is_reclassified where
         block_device = "sda",
         driver = "vmw_pvscsi",
-        disk_name ="/dev/sda1",
+        disk_name = "/dev/sda1",
         expected = VIRTUAL_DISK_KIND,
 }
 
@@ -154,7 +154,7 @@ identity_reclassify_test_case! {
     test_hyperv_storvsc_disk_is_reclassified where
         block_device = "sda",
         driver = "hv_storvsc",
-        disk_name ="/dev/sda1",
+        disk_name = "/dev/sda1",
         expected = VIRTUAL_DISK_KIND,
 }
 
@@ -163,7 +163,7 @@ identity_reclassify_test_case! {
     test_physical_disk_stays_hdd where
         block_device = "sda",
         driver = "sd",
-        disk_name ="/dev/sda1",
+        disk_name = "/dev/sda1",
         expected = DiskKind::HDD,
 }
 
