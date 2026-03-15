@@ -11,7 +11,7 @@ Read and follow the CONTRIBUTING.md file in this repository for all code style c
 - Prefer `where` clauses for multiple trait bounds
 - Derive order: std traits → comparison traits → `Hash` → derive_more → feature-gated
 - Custom errors: `#[derive(Debug, Display, Error)]` + `#[non_exhaustive]`
-- No `unwrap()` — use proper error handling
+- Minimize `unwrap()` in non-test code — use proper error handling
 - `#![deny(warnings)]` is active — code must be warning-free
 - Install toolchain before running tests: `rustup toolchain install "$(< rust-toolchain)" && rustup component add rustfmt clippy`
 - If the AI agent is Claude Code, `gh` (GitHub CLI) is not installed — do not attempt to use it

@@ -128,7 +128,7 @@ where
 
 - Define custom error enums with `#[derive(Debug, Display, Error)]` from `derive_more`.
 - Mark error enums as `#[non_exhaustive]`.
-- Avoid `unwrap()` in non-test code — use proper error propagation. `unwrap()` is acceptable in tests and for provably infallible operations (with a comment explaining why). When deliberately ignoring an error, use `.ok()` with a comment explaining why.
+- Minimize `unwrap()` in non-test code — use proper error propagation. `unwrap()` is acceptable in tests and for provably infallible operations (with a comment explaining why). When deliberately ignoring an error, use `.ok()` with a comment explaining why.
 
 ```rust
 #[derive(Debug, Display, Error)]
