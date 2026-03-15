@@ -17,10 +17,9 @@ use std::borrow::Cow;
 /// Each method delegates to a corresponding [`sysinfo::Disk`] method,
 /// enabling dependency injection for testing.
 pub trait DiskApi {
-    type Disk;
-    fn get_disk_kind(disk: &Self::Disk) -> DiskKind;
-    fn get_disk_name(disk: &Self::Disk) -> &OsStr;
-    fn get_mount_point(disk: &Self::Disk) -> &Path;
+    fn get_disk_kind(&self) -> DiskKind;
+    fn get_disk_name(&self) -> &OsStr;
+    fn get_mount_point(&self) -> &Path;
 }
 
 /// Mockable interface to filesystem operations.
@@ -38,22 +37,20 @@ pub trait FsApi {
 /// Implementation of [`DiskApi`] and [`FsApi`] that interacts with the real system.
 pub struct RealApi;
 
-impl DiskApi for RealApi {
-    type Disk = Disk;
-
+impl DiskApi for Disk {
     #[inline]
-    fn get_disk_kind(disk: &Self::Disk) -> DiskKind {
-        disk.kind()
+    fn get_disk_kind(&self) -> DiskKind {
+        self.kind()
     }
 
     #[inline]
-    fn get_disk_name(disk: &Self::Disk) -> &OsStr {
-        disk.name()
+    fn get_disk_name(&self) -> &OsStr {
+        self.name()
     }
 
     #[inline]
-    fn get_mount_point(disk: &Self::Disk) -> &Path {
-        disk.mount_point()
+    fn get_mount_point(&self) -> &Path {
+        self.mount_point()
     }
 }
 
@@ -231,40 +228,34 @@ fn is_virtual_block_device<Fs: FsApi>(block_dev: &str) -> bool {
 }
 
 /// Check if any path is in any HDD.
-pub fn any_path_is_in_hdd<DiskApi: self::DiskApi, FsApi: self::FsApi>(
-    paths: &[PathBuf],
-    disks: &[DiskApi::Disk],
-) -> bool {
+pub fn any_path_is_in_hdd<Disk: DiskApi, Fs: FsApi>(paths: &[PathBuf], disks: &[Disk]) -> bool {
     paths
         .iter()
-        .filter_map(|file| FsApi::canonicalize(file).ok())
-        .any(|path| path_is_in_hdd::<DiskApi, FsApi>(&path, disks))
+        .filter_map(|file| Fs::canonicalize(file).ok())
+        .any(|path| path_is_in_hdd::<Disk, Fs>(&path, disks))
 }
 
 /// Check if path is in any HDD.
 ///
 /// Applies [`correct_hdd_detection`] to each disk's reported kind to work
 /// around virtual block devices being falsely reported as HDDs on Linux.
-fn path_is_in_hdd<DiskApi: self::DiskApi, FsApi: self::FsApi>(
-    path: &Path,
-    disks: &[DiskApi::Disk],
-) -> bool {
-    let mount_point = find_mount_point(path, disks.iter().map(DiskApi::get_mount_point));
+fn path_is_in_hdd<Disk: DiskApi, Fs: FsApi>(path: &Path, disks: &[Disk]) -> bool {
+    let mount_point = find_mount_point(path, disks.iter().map(Disk::get_mount_point));
     let Some(mount_point) = mount_point else {
         return false;
     };
     disks
         .iter()
-        .filter(|disk| DiskApi::get_mount_point(disk) == mount_point)
-        .any(|disk| is_in_hdd::<DiskApi, FsApi>(disk))
+        .filter(|disk| disk.get_mount_point() == mount_point)
+        .any(|disk| is_in_hdd::<Fs>(disk))
 }
 
 /// Check if a disk is an HDD after applying platform-specific corrections.
-fn is_in_hdd<DiskApi: self::DiskApi, FsApi: self::FsApi>(disk: &DiskApi::Disk) -> bool {
-    let kind = DiskApi::get_disk_kind(disk);
-    let name = DiskApi::get_disk_name(disk).to_str();
+fn is_in_hdd<Fs: FsApi>(disk: &impl DiskApi) -> bool {
+    let kind = disk.get_disk_kind();
+    let name = disk.get_disk_name().to_str();
     match name {
-        Some(name) => correct_hdd_detection::<FsApi>(kind, name) == DiskKind::HDD,
+        Some(name) => correct_hdd_detection::<Fs>(kind, name) == DiskKind::HDD,
         None => kind == DiskKind::HDD, // can't parse name, keep original classification
     }
 }

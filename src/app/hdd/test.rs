@@ -25,22 +25,17 @@ impl Disk {
     }
 }
 
-/// Mocked [`DiskApi`] that returns values from the fake [`Disk`] struct.
-struct MockedDiskApi;
-
-impl DiskApi for MockedDiskApi {
-    type Disk = Disk;
-
-    fn get_disk_kind(disk: &Self::Disk) -> DiskKind {
-        disk.kind
+impl DiskApi for Disk {
+    fn get_disk_kind(&self) -> DiskKind {
+        self.kind
     }
 
-    fn get_disk_name(disk: &Self::Disk) -> &OsStr {
-        OsStr::new(disk.name)
+    fn get_disk_name(&self) -> &OsStr {
+        OsStr::new(self.name)
     }
 
-    fn get_mount_point(disk: &Self::Disk) -> &Path {
-        Path::new(disk.mount_point)
+    fn get_mount_point(&self) -> &Path {
+        Path::new(self.mount_point)
     }
 }
 
@@ -103,10 +98,7 @@ fn test_any_path_in_hdd() {
     for (paths, in_hdd) in cases {
         let paths: Vec<_> = paths.iter().map(PathBuf::from).collect();
         println!("CASE: {paths:?} → {in_hdd:?}");
-        assert_eq!(
-            any_path_is_in_hdd::<MockedDiskApi, EmptyFs>(&paths, disks),
-            *in_hdd,
-        );
+        assert_eq!(any_path_is_in_hdd::<Disk, EmptyFs>(&paths, disks), *in_hdd,);
     }
 }
 
@@ -129,7 +121,7 @@ fn test_path_in_hdd() {
     ] {
         println!("CASE: {path} → {in_hdd:?}");
         assert_eq!(
-            path_is_in_hdd::<MockedDiskApi, EmptyFs>(Path::new(path), disks),
+            path_is_in_hdd::<Disk, EmptyFs>(Path::new(path), disks),
             in_hdd,
         );
     }
