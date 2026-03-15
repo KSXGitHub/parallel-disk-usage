@@ -110,26 +110,22 @@ Use **descriptive names** for variables and closure parameters by default. Singl
 - **Trivial single-expression closures:** A closure whose body is a single field access, method call, or wrapper may use a single letter when the type and purpose are obvious from context.
 
   ```rust
-  .map(|n| n.as_str())
-  .all(|b| b.is_ascii_digit())
   .pipe(|x| vec![x])
   ```
 
-- **Fold accumulators:** `acc` (or `a`) for the accumulator and a single letter for the element in trivial folds.
+- **Fold accumulators:** `acc` for the accumulator and a single letter for the element in trivial folds.
 
   ```rust
   .fold(PathBuf::new(), |acc, x| acc.join(x))
   ```
 
-- **Test fixtures:** `let a`, `let b`, `let c` for interchangeable specimens in equality or comparison tests.
+- **Test fixtures:** `let a`, `let b`, `let c` for interchangeable specimens with identical roles in equality or comparison tests (e.g., testing commutativity). Do not use single letters when the variables have distinct roles — use `actual`/`expected` or similar descriptive names instead.
 
   ```rust
   let a = HardlinkList::new().add(1, "/x").add(2, "/y");
   let b = HardlinkList::new().add(2, "/y").add(1, "/x");
   assert_eq!(a, b);
   ```
-
-- **Macro-generated variables:** Single-letter names inside macro bodies (e.g., `let a = include_str!($a_path)`) where the name mirrors a macro parameter.
 
 #### When single-letter names are NOT allowed
 
