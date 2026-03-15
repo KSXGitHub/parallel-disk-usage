@@ -35,6 +35,35 @@ fn test_parse_block_device_name() {
     }
 }
 
+/// Build a mock `FsApi` whose `canonicalize` is the identity function and
+/// whose `path_exists` / `read_link` are driven by static lookup tables.
+///
+/// Tests that need a custom `canonicalize` (e.g. symlink resolution) define
+/// their own `FsApi` impl instead.
+///
+/// Production code only inspects the **file-name** component of the
+/// `read_link` target, so the macro uses a fixed `/drivers/{driver}` prefix.
+macro_rules! identity_fs_api {
+    ($fs:ident, $devices:expr, $drivers:expr) => {
+        struct $fs;
+        impl FsApi for $fs {
+            fn canonicalize(path: &Path) -> io::Result<PathBuf> {
+                path.to_path_buf().pipe(Ok)
+            }
+            fn path_exists(path: &Path) -> bool {
+                $devices.iter().any(|p| path == Path::new(*p))
+            }
+            fn read_link(path: &Path) -> io::Result<PathBuf> {
+                $drivers
+                    .iter()
+                    .find(|(p, _)| path == Path::new(*p))
+                    .map(|(_, driver)| PathBuf::from(format!("/drivers/{driver}")))
+                    .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
+            }
+        }
+    };
+}
+
 /// VirtIO disk reported as HDD should be reclassified as `Unknown(-1)`.
 mod test_virtio_disk_is_reclassified {
     use super::{reclassify_virtual_hdd, FsApi};
@@ -49,22 +78,7 @@ mod test_virtio_disk_is_reclassified {
     static SYSFS_BLOCK_DEVICES: &[&str] = &["/sys/block/vda"];
     static SYSFS_DRIVER_LINKS: &[(&str, &str)] = &[("/sys/block/vda/device/driver", "virtio_blk")];
 
-    struct Fs;
-    impl FsApi for Fs {
-        fn canonicalize(path: &Path) -> io::Result<PathBuf> {
-            path.to_path_buf().pipe(Ok)
-        }
-        fn path_exists(path: &Path) -> bool {
-            SYSFS_BLOCK_DEVICES.iter().any(|p| path == Path::new(*p))
-        }
-        fn read_link(path: &Path) -> io::Result<PathBuf> {
-            SYSFS_DRIVER_LINKS
-                .iter()
-                .find(|(p, _)| path == Path::new(*p))
-                .map(|(_, driver)| PathBuf::from(format!("/sys/bus/virtio/drivers/{driver}")))
-                .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
-        }
-    }
+    identity_fs_api!(Fs, SYSFS_BLOCK_DEVICES, SYSFS_DRIVER_LINKS);
 
     #[test]
     fn test() {
@@ -90,22 +104,7 @@ mod test_xen_vbd_disk_is_reclassified {
     static SYSFS_BLOCK_DEVICES: &[&str] = &["/sys/block/xvda"];
     static SYSFS_DRIVER_LINKS: &[(&str, &str)] = &[("/sys/block/xvda/device/driver", "vbd")];
 
-    struct Fs;
-    impl FsApi for Fs {
-        fn canonicalize(path: &Path) -> io::Result<PathBuf> {
-            path.to_path_buf().pipe(Ok)
-        }
-        fn path_exists(path: &Path) -> bool {
-            SYSFS_BLOCK_DEVICES.iter().any(|p| path == Path::new(*p))
-        }
-        fn read_link(path: &Path) -> io::Result<PathBuf> {
-            SYSFS_DRIVER_LINKS
-                .iter()
-                .find(|(p, _)| path == Path::new(*p))
-                .map(|(_, driver)| PathBuf::from(format!("/sys/bus/xen/drivers/{driver}")))
-                .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
-        }
-    }
+    identity_fs_api!(Fs, SYSFS_BLOCK_DEVICES, SYSFS_DRIVER_LINKS);
 
     #[test]
     fn test() {
@@ -132,22 +131,7 @@ mod test_xen_blkfront_underscore_disk_is_reclassified {
     static SYSFS_DRIVER_LINKS: &[(&str, &str)] =
         &[("/sys/block/xvda/device/driver", "xen_blkfront")];
 
-    struct Fs;
-    impl FsApi for Fs {
-        fn canonicalize(path: &Path) -> io::Result<PathBuf> {
-            path.to_path_buf().pipe(Ok)
-        }
-        fn path_exists(path: &Path) -> bool {
-            SYSFS_BLOCK_DEVICES.iter().any(|p| path == Path::new(*p))
-        }
-        fn read_link(path: &Path) -> io::Result<PathBuf> {
-            SYSFS_DRIVER_LINKS
-                .iter()
-                .find(|(p, _)| path == Path::new(*p))
-                .map(|(_, driver)| PathBuf::from(format!("/sys/bus/xen/drivers/{driver}")))
-                .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
-        }
-    }
+    identity_fs_api!(Fs, SYSFS_BLOCK_DEVICES, SYSFS_DRIVER_LINKS);
 
     #[test]
     fn test() {
@@ -175,22 +159,7 @@ mod test_xen_blkfront_hyphen_disk_is_reclassified {
     static SYSFS_DRIVER_LINKS: &[(&str, &str)] =
         &[("/sys/block/xvda/device/driver", "xen-blkfront")];
 
-    struct Fs;
-    impl FsApi for Fs {
-        fn canonicalize(path: &Path) -> io::Result<PathBuf> {
-            path.to_path_buf().pipe(Ok)
-        }
-        fn path_exists(path: &Path) -> bool {
-            SYSFS_BLOCK_DEVICES.iter().any(|p| path == Path::new(*p))
-        }
-        fn read_link(path: &Path) -> io::Result<PathBuf> {
-            SYSFS_DRIVER_LINKS
-                .iter()
-                .find(|(p, _)| path == Path::new(*p))
-                .map(|(_, driver)| PathBuf::from(format!("/sys/bus/xen/drivers/{driver}")))
-                .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
-        }
-    }
+    identity_fs_api!(Fs, SYSFS_BLOCK_DEVICES, SYSFS_DRIVER_LINKS);
 
     #[test]
     fn test() {
@@ -215,22 +184,7 @@ mod test_vmware_pvscsi_disk_is_reclassified {
     static SYSFS_BLOCK_DEVICES: &[&str] = &["/sys/block/sda"];
     static SYSFS_DRIVER_LINKS: &[(&str, &str)] = &[("/sys/block/sda/device/driver", "vmw_pvscsi")];
 
-    struct Fs;
-    impl FsApi for Fs {
-        fn canonicalize(path: &Path) -> io::Result<PathBuf> {
-            path.to_path_buf().pipe(Ok)
-        }
-        fn path_exists(path: &Path) -> bool {
-            SYSFS_BLOCK_DEVICES.iter().any(|p| path == Path::new(*p))
-        }
-        fn read_link(path: &Path) -> io::Result<PathBuf> {
-            SYSFS_DRIVER_LINKS
-                .iter()
-                .find(|(p, _)| path == Path::new(*p))
-                .map(|(_, driver)| PathBuf::from(format!("/sys/bus/pci/drivers/{driver}")))
-                .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
-        }
-    }
+    identity_fs_api!(Fs, SYSFS_BLOCK_DEVICES, SYSFS_DRIVER_LINKS);
 
     #[test]
     fn test() {
@@ -255,22 +209,7 @@ mod test_hyperv_storvsc_disk_is_reclassified {
     static SYSFS_BLOCK_DEVICES: &[&str] = &["/sys/block/sda"];
     static SYSFS_DRIVER_LINKS: &[(&str, &str)] = &[("/sys/block/sda/device/driver", "hv_storvsc")];
 
-    struct Fs;
-    impl FsApi for Fs {
-        fn canonicalize(path: &Path) -> io::Result<PathBuf> {
-            path.to_path_buf().pipe(Ok)
-        }
-        fn path_exists(path: &Path) -> bool {
-            SYSFS_BLOCK_DEVICES.iter().any(|p| path == Path::new(*p))
-        }
-        fn read_link(path: &Path) -> io::Result<PathBuf> {
-            SYSFS_DRIVER_LINKS
-                .iter()
-                .find(|(p, _)| path == Path::new(*p))
-                .map(|(_, driver)| PathBuf::from(format!("/sys/bus/vmbus/drivers/{driver}")))
-                .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
-        }
-    }
+    identity_fs_api!(Fs, SYSFS_BLOCK_DEVICES, SYSFS_DRIVER_LINKS);
 
     #[test]
     fn test() {
@@ -295,22 +234,7 @@ mod test_physical_disk_stays_hdd {
     static SYSFS_BLOCK_DEVICES: &[&str] = &["/sys/block/sda"];
     static SYSFS_DRIVER_LINKS: &[(&str, &str)] = &[("/sys/block/sda/device/driver", "sd")];
 
-    struct Fs;
-    impl FsApi for Fs {
-        fn canonicalize(path: &Path) -> io::Result<PathBuf> {
-            path.to_path_buf().pipe(Ok)
-        }
-        fn path_exists(path: &Path) -> bool {
-            SYSFS_BLOCK_DEVICES.iter().any(|p| path == Path::new(*p))
-        }
-        fn read_link(path: &Path) -> io::Result<PathBuf> {
-            SYSFS_DRIVER_LINKS
-                .iter()
-                .find(|(p, _)| path == Path::new(*p))
-                .map(|(_, driver)| PathBuf::from(format!("/sys/bus/scsi/drivers/{driver}")))
-                .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
-        }
-    }
+    identity_fs_api!(Fs, SYSFS_BLOCK_DEVICES, SYSFS_DRIVER_LINKS);
 
     #[test]
     fn test() {
@@ -362,7 +286,7 @@ mod test_mapper_symlink_resolves_to_virtual_partition {
             SYSFS_DRIVER_LINKS
                 .iter()
                 .find(|(p, _)| path == Path::new(*p))
-                .map(|(_, driver)| PathBuf::from(format!("/sys/bus/virtio/drivers/{driver}")))
+                .map(|(_, driver)| PathBuf::from(format!("/drivers/{driver}")))
                 .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
         }
     }
