@@ -47,11 +47,29 @@ impl Api for MockedApi {
 
     #[cfg(target_os = "linux")]
     fn path_exists(path: &Path) -> bool {
+        // NOTE: Claude Code was responsible for this atrocity
+        // NOTE: The side-effect function `Path::exists` was moved from `RealApi` to here.
+        // NOTE: The form changes, yet the substance remains the same.
+        // NOTE: The unit tests continue to be unreliable.
+        // NOTE: Was this because `Api` was only about `Disk`?
+        // NOTE: Was this the reason why `MockedApi` could not fake a filesystem in-memory?
+        // TODO: Perhaps the real solution was to create a different mockable trait?
+        // TODO: Perhaps `Api::canonicalize` should be moved to this new mockable trait?
+        // TODO: Perhaps the existing `Api` trait should be renamed to something else?
         path.exists()
     }
 
     #[cfg(target_os = "linux")]
     fn read_link(path: &Path) -> std::io::Result<PathBuf> {
+        // NOTE: Claude Code was responsible for this atrocity
+        // NOTE: The side-effect function `read_link` was moved from `RealApi` to here.
+        // NOTE: The form changes, yet the substance remains the same.
+        // NOTE: The unit tests continue to be unreliable.
+        // NOTE: Was this because `Api` was only about `Disk`?
+        // NOTE: Was this the reason why `MockedApi` could not fake a filesystem in-memory?
+        // TODO: Perhaps the real solution was to create a different mockable trait?
+        // TODO: Perhaps `Api::canonicalize` should be moved to this new mockable trait?
+        // TODO: Perhaps the existing `Api` trait should be renamed to something else?
         std::fs::read_link(path)
     }
 }
