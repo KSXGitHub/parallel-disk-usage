@@ -406,41 +406,51 @@ mod test_ssd_is_not_corrected {
     }
 }
 
-/// Test is_virtual_block_device against real sysfs.
-#[test]
-fn test_is_virtual_block_device_with_real_sysfs() {
-    // This test only asserts when the sysfs driver path actually exists,
-    // so it validates the logic on systems that have the relevant devices.
-    if std::path::Path::new("/sys/block/vda/device/driver").exists() {
+/// Host-dependent smoke tests.
+///
+/// These tests use [`RealApi`] and read from the real `/sys` filesystem.
+/// They are designed to always pass regardless of the host hardware, but
+/// the code paths they exercise vary by machine. They complement the
+/// hermetic mocked tests above by verifying that the detection pipeline
+/// works end-to-end on real devices without panicking.
+mod host_dependent_smoke_tests {
+    use super::{extract_block_device_name, is_virtual_block_device, RealApi};
+
+    /// On hosts with a VirtIO root disk (`/sys/block/vda/device/driver`),
+    /// asserts that it is detected as virtual. Silently skips otherwise.
+    #[test]
+    fn real_sysfs_vda_detected_as_virtual() {
+        if std::path::Path::new("/sys/block/vda/device/driver").exists() {
+            assert!(
+                is_virtual_block_device::<RealApi>("vda"),
+                "vda should be detected as a virtual block device"
+            );
+        }
+    }
+
+    /// A non-existent device name must return `false` without panicking.
+    #[test]
+    fn nonexistent_device_is_not_virtual() {
         assert!(
-            is_virtual_block_device::<RealApi>("vda"),
-            "vda should be detected as a virtual block device"
+            !is_virtual_block_device::<RealApi>("nonexistent_device_xyz"),
+            "non-existent device should not be detected as virtual"
         );
     }
-}
 
-/// Verify that non-existent devices return `false` without panicking.
-#[test]
-fn test_virtual_driver_names() {
-    assert!(
-        !is_virtual_block_device::<RealApi>("nonexistent_device_xyz"),
-        "non-existent device should not be detected as virtual"
-    );
-}
-
-/// Smoke test: the full pipeline should not panic on real disks.
-///
-/// This does **not** assert any specific virtual/non-virtual classification
-/// because the result depends on the host hardware. It only verifies that
-/// the detection pipeline runs without errors on every mounted disk.
-#[test]
-fn test_extract_and_check_real_disks() {
-    use sysinfo::Disks;
-    let disks = Disks::new_with_refreshed_list();
-    for disk in disks.list() {
-        let name = disk.name().to_str().unwrap_or_default();
-        if let Some(block_dev) = extract_block_device_name::<RealApi>(name) {
-            let _is_virtual = is_virtual_block_device::<RealApi>(&block_dev);
+    /// Runs the full detection pipeline on every mounted disk.
+    ///
+    /// Does **not** assert any specific virtual/non-virtual classification
+    /// because the result depends on the host hardware. Only verifies that
+    /// the pipeline completes without panicking.
+    #[test]
+    fn full_pipeline_does_not_panic() {
+        use sysinfo::Disks;
+        let disks = Disks::new_with_refreshed_list();
+        for disk in disks.list() {
+            let name = disk.name().to_str().unwrap_or_default();
+            if let Some(block_dev) = extract_block_device_name::<RealApi>(name) {
+                let _is_virtual = is_virtual_block_device::<RealApi>(&block_dev);
+            }
         }
     }
 }
