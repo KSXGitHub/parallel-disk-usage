@@ -1,6 +1,6 @@
 {
   "name": "parallel-disk-usage",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
   "features": {
     "ghcr.io/devcontainers/features/rust:1": {
       "version": "none",
@@ -11,7 +11,7 @@
       "nodeGypDependencies": true
     },
     "ghcr.io/devcontainers/features/python:1": {
-      "version": "latest",
+      "version": "3.12",
       "installTools": true
     },
     "ghcr.io/devcontainers-contrib/features/shellcheck:1": {},

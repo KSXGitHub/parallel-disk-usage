@@ -2,11 +2,11 @@
 set -euo pipefail
 
 echo "Installing Python dependencies..." >&2
-pip install toml
+python3 -m pip install --user toml
 
 echo "Installing pnpm and project Node dependencies..." >&2
 npm install -g pnpm@7.33.7
-(cd ci/github-actions && pnpm install)
+(cd ci/github-actions && pnpm install --frozen-lockfile)
 
 echo "Installing hyperfine from GitHub release..." >&2
 hyperfine_version="1.20.0"
