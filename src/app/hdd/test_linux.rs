@@ -41,121 +41,120 @@ fn test_parse_block_device_name() {
     }
 }
 
-/// Build a mock `FsApi` whose `canonicalize` is the identity function and
-/// whose `path_exists` / `read_link` are driven by static lookup tables.
+/// Generate a test that builds a mock `FsApi` with identity `canonicalize`,
+/// then asserts that `reclassify_virtual_hdd` maps `DiskKind::HDD` to the
+/// expected `DiskKind`.
 ///
-/// Tests that need a custom `canonicalize` (e.g. symlink resolution) define
-/// their own `FsApi` impl instead.
-///
-/// Production code only inspects the **file-name** component of the
-/// `read_link` target, so the macro uses a fixed `/drivers/{driver}` prefix.
-macro_rules! identity_fs_api {
-    ($fs:ident, $devices:expr, $drivers:expr) => {
-        struct $fs;
-        impl FsApi for $fs {
-            fn canonicalize(path: &Path) -> io::Result<PathBuf> {
-                path.to_path_buf().pipe(Ok)
+/// The sysfs paths (`/sys/block/{block}` and
+/// `/sys/block/{block}/device/driver`) are derived from `block_device`,
+/// so callers only supply the four varying pieces: block device name, kernel
+/// driver name, mount-point path, and expected `DiskKind`.
+macro_rules! reclassify_test_case {
+    (
+        $(#[$attr:meta])*
+        $name:ident where
+            block_device = $block:literal,
+            driver = $driver:literal,
+            mount_point = $mount:literal,
+            expected = $expected:expr,
+    ) => {
+        $(#[$attr])*
+        #[test]
+        fn $name() {
+            static DEVICES: &[&str] = &[concat!("/sys/block/", $block)];
+            static DRIVERS: &[(&str, &str)] =
+                &[(concat!("/sys/block/", $block, "/device/driver"), $driver)];
+
+            struct Fs;
+            impl FsApi for Fs {
+                fn canonicalize(path: &Path) -> io::Result<PathBuf> {
+                    path.to_path_buf().pipe(Ok)
+                }
+                fn path_exists(path: &Path) -> bool {
+                    DEVICES.iter().any(|p| path == Path::new(*p))
+                }
+                fn read_link(path: &Path) -> io::Result<PathBuf> {
+                    DRIVERS
+                        .iter()
+                        .find(|(p, _)| path == Path::new(*p))
+                        .map(|(_, driver)| PathBuf::from(format!("/drivers/{driver}")))
+                        .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
+                }
             }
-            fn path_exists(path: &Path) -> bool {
-                $devices.iter().any(|p| path == Path::new(*p))
-            }
-            fn read_link(path: &Path) -> io::Result<PathBuf> {
-                $drivers
-                    .iter()
-                    .find(|(p, _)| path == Path::new(*p))
-                    .map(|(_, driver)| PathBuf::from(format!("/drivers/{driver}")))
-                    .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
-            }
+
+            assert_eq!(
+                reclassify_virtual_hdd::<Fs>(DiskKind::HDD, $mount),
+                $expected,
+            );
         }
     };
 }
 
-/// VirtIO disk reported as HDD should be reclassified as `Unknown(-1)`.
-#[test]
-fn test_virtio_disk_is_reclassified() {
-    static DEVICES: &[&str] = &["/sys/block/vda"];
-    static DRIVERS: &[(&str, &str)] = &[("/sys/block/vda/device/driver", "virtio_blk")];
-    identity_fs_api!(Fs, DEVICES, DRIVERS);
-    assert_eq!(
-        reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/vda1"),
-        DiskKind::Unknown(-1),
-    );
+reclassify_test_case! {
+    /// VirtIO disk reported as HDD should be reclassified as `Unknown(-1)`.
+    test_virtio_disk_is_reclassified where
+        block_device = "vda",
+        driver = "virtio_blk",
+        mount_point = "/dev/vda1",
+        expected = DiskKind::Unknown(-1),
 }
 
-/// Xen disk whose sysfs driver is `vbd` (the xenbus-registered name)
-/// should be reclassified as `Unknown(-1)`.
-#[test]
-fn test_xen_vbd_disk_is_reclassified() {
-    static DEVICES: &[&str] = &["/sys/block/xvda"];
-    static DRIVERS: &[(&str, &str)] = &[("/sys/block/xvda/device/driver", "vbd")];
-    identity_fs_api!(Fs, DEVICES, DRIVERS);
-    assert_eq!(
-        reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/xvda1"),
-        DiskKind::Unknown(-1),
-    );
+reclassify_test_case! {
+    /// Xen disk whose sysfs driver is `vbd` (the xenbus-registered name)
+    /// should be reclassified as `Unknown(-1)`.
+    test_xen_vbd_disk_is_reclassified where
+        block_device = "xvda",
+        driver = "vbd",
+        mount_point = "/dev/xvda1",
+        expected = DiskKind::Unknown(-1),
 }
 
-/// Xen disk whose sysfs driver is `xen_blkfront` (the underscored kernel
-/// module name) should be reclassified as `Unknown(-1)`.
-#[test]
-fn test_xen_blkfront_underscore_disk_is_reclassified() {
-    static DEVICES: &[&str] = &["/sys/block/xvda"];
-    static DRIVERS: &[(&str, &str)] = &[("/sys/block/xvda/device/driver", "xen_blkfront")];
-    identity_fs_api!(Fs, DEVICES, DRIVERS);
-    assert_eq!(
-        reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/xvda1"),
-        DiskKind::Unknown(-1),
-    );
+reclassify_test_case! {
+    /// Xen disk whose sysfs driver is `xen_blkfront` (the underscored kernel
+    /// module name) should be reclassified as `Unknown(-1)`.
+    test_xen_blkfront_underscore_disk_is_reclassified where
+        block_device = "xvda",
+        driver = "xen_blkfront",
+        mount_point = "/dev/xvda1",
+        expected = DiskKind::Unknown(-1),
 }
 
-/// Xen disk whose sysfs driver is `xen-blkfront` (the hyphenated module
-/// name, which may appear on some kernel versions) should also be
-/// reclassified as `Unknown(-1)`.
-#[test]
-fn test_xen_blkfront_hyphen_disk_is_reclassified() {
-    static DEVICES: &[&str] = &["/sys/block/xvda"];
-    static DRIVERS: &[(&str, &str)] = &[("/sys/block/xvda/device/driver", "xen-blkfront")];
-    identity_fs_api!(Fs, DEVICES, DRIVERS);
-    assert_eq!(
-        reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/xvda1"),
-        DiskKind::Unknown(-1),
-    );
+reclassify_test_case! {
+    /// Xen disk whose sysfs driver is `xen-blkfront` (the hyphenated module
+    /// name, which may appear on some kernel versions) should also be
+    /// reclassified as `Unknown(-1)`.
+    test_xen_blkfront_hyphen_disk_is_reclassified where
+        block_device = "xvda",
+        driver = "xen-blkfront",
+        mount_point = "/dev/xvda1",
+        expected = DiskKind::Unknown(-1),
 }
 
-/// VMware PVSCSI disk reported as `HDD` should be reclassified as `Unknown(-1)`.
-#[test]
-fn test_vmware_pvscsi_disk_is_reclassified() {
-    static DEVICES: &[&str] = &["/sys/block/sda"];
-    static DRIVERS: &[(&str, &str)] = &[("/sys/block/sda/device/driver", "vmw_pvscsi")];
-    identity_fs_api!(Fs, DEVICES, DRIVERS);
-    assert_eq!(
-        reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/sda1"),
-        DiskKind::Unknown(-1),
-    );
+reclassify_test_case! {
+    /// VMware PVSCSI disk reported as `HDD` should be reclassified as `Unknown(-1)`.
+    test_vmware_pvscsi_disk_is_reclassified where
+        block_device = "sda",
+        driver = "vmw_pvscsi",
+        mount_point = "/dev/sda1",
+        expected = DiskKind::Unknown(-1),
 }
 
-/// Hyper-V storage controller disk reported as `HDD` should be reclassified as `Unknown(-1)`.
-#[test]
-fn test_hyperv_storvsc_disk_is_reclassified() {
-    static DEVICES: &[&str] = &["/sys/block/sda"];
-    static DRIVERS: &[(&str, &str)] = &[("/sys/block/sda/device/driver", "hv_storvsc")];
-    identity_fs_api!(Fs, DEVICES, DRIVERS);
-    assert_eq!(
-        reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/sda1"),
-        DiskKind::Unknown(-1),
-    );
+reclassify_test_case! {
+    /// Hyper-V storage controller disk reported as `HDD` should be reclassified as `Unknown(-1)`.
+    test_hyperv_storvsc_disk_is_reclassified where
+        block_device = "sda",
+        driver = "hv_storvsc",
+        mount_point = "/dev/sda1",
+        expected = DiskKind::Unknown(-1),
 }
 
-/// Physical SCSI disk reported as `HDD` should stay `HDD`.
-#[test]
-fn test_physical_disk_stays_hdd() {
-    static DEVICES: &[&str] = &["/sys/block/sda"];
-    static DRIVERS: &[(&str, &str)] = &[("/sys/block/sda/device/driver", "sd")];
-    identity_fs_api!(Fs, DEVICES, DRIVERS);
-    assert_eq!(
-        reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/sda1"),
-        DiskKind::HDD,
-    );
+reclassify_test_case! {
+    /// Physical SCSI disk reported as `HDD` should stay `HDD`.
+    test_physical_disk_stays_hdd where
+        block_device = "sda",
+        driver = "sd",
+        mount_point = "/dev/sda1",
+        expected = DiskKind::HDD,
 }
 
 /// Synthetic scenario: `/dev/mapper/vg0-lv0` canonicalizes directly to a
