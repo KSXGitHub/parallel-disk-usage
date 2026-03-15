@@ -43,7 +43,7 @@ impl DiskApi for Disk {
 ///
 /// `canonicalize` returns the path unchanged (all paths are canonical).
 /// `path_exists` returns `false` and `read_link` returns `NotFound`,
-/// so [`correct_hdd_detection`](super::correct_hdd_detection) is
+/// so [`reclassify_virtual_hdd`](super::reclassify_virtual_hdd) is
 /// effectively a no-op: disk kinds pass through unchanged.
 struct EmptyFs;
 
