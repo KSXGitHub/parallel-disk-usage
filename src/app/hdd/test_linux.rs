@@ -324,9 +324,14 @@ mod test_physical_disk_stays_hdd {
     }
 }
 
-/// Device mapper path should be resolved through canonicalize and
-/// then reclassified if the underlying device is virtual.
-mod test_mapper_resolves_to_virtual_disk {
+/// Synthetic scenario: `/dev/mapper/vg0-lv0` canonicalizes directly to a
+/// VirtIO partition (`/dev/vda1`), exercising the symlink-resolution →
+/// recursive-call → reclassify path.
+///
+/// **Note:** On real LVM setups, `/dev/mapper/vg0-lv0` canonicalizes to
+/// `/dev/dm-0`, not a partition device. See `test_mapper_dm_device_is_not_corrected`
+/// for that case.
+mod test_mapper_symlink_resolves_to_virtual_partition {
     use super::{correct_hdd_detection, FsApi};
     use pretty_assertions::assert_eq;
     use std::{
@@ -370,6 +375,50 @@ mod test_mapper_resolves_to_virtual_disk {
         assert_eq!(
             correct_hdd_detection::<Fs>(DiskKind::HDD, "/dev/mapper/vg0-lv0"),
             DiskKind::Unknown(-1),
+        );
+    }
+}
+
+/// Known limitation: on real LVM setups, `/dev/mapper/vg0-lv0` canonicalizes
+/// to `/dev/dm-0`. The `dm-0` device has no `/sys/block/dm-0/device/driver`
+/// symlink, so virtual-disk correction silently does nothing.
+///
+/// See the doc comment on [`extract_block_device_name`] for details.
+mod test_mapper_dm_device_is_not_corrected {
+    use super::{correct_hdd_detection, FsApi};
+    use pretty_assertions::assert_eq;
+    use std::{
+        io,
+        path::{Path, PathBuf},
+    };
+    use sysinfo::DiskKind;
+
+    static SYMLINKS: &[(&str, &str)] = &[("/dev/mapper/vg0-lv0", "/dev/dm-0")];
+
+    struct Fs;
+    impl FsApi for Fs {
+        fn canonicalize(path: &Path) -> io::Result<PathBuf> {
+            SYMLINKS
+                .iter()
+                .find(|(p, _)| path == Path::new(*p))
+                .map(|(_, target)| PathBuf::from(*target))
+                .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
+        }
+        fn path_exists(_path: &Path) -> bool {
+            false
+        }
+        fn read_link(_path: &Path) -> io::Result<PathBuf> {
+            Err(io::Error::new(io::ErrorKind::NotFound, "mocked"))
+        }
+    }
+
+    #[test]
+    fn test() {
+        // dm-0 is not a recognized block device prefix, so correction
+        // cannot determine the driver — HDD classification is preserved.
+        assert_eq!(
+            correct_hdd_detection::<Fs>(DiskKind::HDD, "/dev/mapper/vg0-lv0"),
+            DiskKind::HDD,
         );
     }
 }
