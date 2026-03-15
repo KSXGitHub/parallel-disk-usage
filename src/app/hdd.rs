@@ -102,7 +102,6 @@ fn extract_block_device_name(device_path: &str) -> Option<Cow<'_, str>> {
     }
 
     let block_dev = parse_block_device_name(device_path)?;
-    // validate_block_device(block_dev)
     block_dev.pipe(validate_block_device).map(Cow::Borrowed)
 }
 
