@@ -1,11 +1,11 @@
-use super::{extract_block_device_name, is_virtual_block_device, RealApi};
+use super::{extract_block_device_name, is_virtual_block_device, RealFs};
 
 /// On hosts with a `/sys/block/vda` device, exercises the detection
 /// pipeline without panicking. Silently skips if `vda` does not exist.
 #[test]
 fn real_sysfs_vda_does_not_panic() {
     if std::path::Path::new("/sys/block/vda").exists() {
-        let _ = is_virtual_block_device::<RealApi>("vda");
+        let _ = is_virtual_block_device::<RealFs>("vda");
     }
 }
 
@@ -13,7 +13,7 @@ fn real_sysfs_vda_does_not_panic() {
 #[test]
 fn nonexistent_device_is_not_virtual() {
     assert!(
-        !is_virtual_block_device::<RealApi>("nonexistent_device_xyz"),
+        !is_virtual_block_device::<RealFs>("nonexistent_device_xyz"),
         "non-existent device should not be detected as virtual"
     );
 }
@@ -29,8 +29,8 @@ fn full_pipeline_does_not_panic() {
     let disks = Disks::new_with_refreshed_list();
     for disk in disks.list() {
         let name = disk.name().to_str().unwrap_or_default();
-        if let Some(block_dev) = extract_block_device_name::<RealApi>(name) {
-            let _is_virtual = is_virtual_block_device::<RealApi>(&block_dev);
+        if let Some(block_dev) = extract_block_device_name::<RealFs>(name) {
+            let _is_virtual = is_virtual_block_device::<RealFs>(&block_dev);
         }
     }
 }

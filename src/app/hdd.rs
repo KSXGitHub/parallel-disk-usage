@@ -35,7 +35,7 @@ pub trait FsApi {
 }
 
 /// Implementation of [`FsApi`] that interacts with the real system.
-pub struct RealApi;
+pub struct RealFs;
 
 impl DiskApi for Disk {
     #[inline]
@@ -54,7 +54,7 @@ impl DiskApi for Disk {
     }
 }
 
-impl FsApi for RealApi {
+impl FsApi for RealFs {
     #[inline]
     fn canonicalize(path: &Path) -> io::Result<PathBuf> {
         canonicalize(path)
