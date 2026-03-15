@@ -141,7 +141,7 @@ fn extract_block_device_name<Fs: FsApi>(device_path: &str) -> Option<Cow<'_, str
     if !device_path.starts_with("/dev/mapper/") && !device_path.starts_with("/dev/root") {
         let block_dev = parse_block_device_name(device_path)?;
         return block_dev
-            .pipe(|name| validate_block_device::<Fs>(name))
+            .pipe(validate_block_device::<Fs>)
             .map(Cow::Borrowed);
     }
 
@@ -203,7 +203,7 @@ fn validate_block_device<Fs: FsApi>(block_dev: &str) -> Option<&str> {
     "/sys/block"
         .pipe(Path::new)
         .join(block_dev)
-        .pipe(|path| Fs::path_exists(&path))
+        .pipe_as_ref(Fs::path_exists)
         .then_some(block_dev)
 }
 
