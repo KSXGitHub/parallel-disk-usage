@@ -16,5 +16,5 @@
       ]
     }
   },
-  "postCreateCommand": "bash .devcontainer/rust-only/post-create.sh"
+  "postCreateCommand": "bash .devcontainer/post-create.sh"
 }
