@@ -175,6 +175,14 @@ sudo pacman -S parallel-disk-usage
 
 [![Packaging Status](https://repology.org/badge/vertical-allrepos/parallel-disk-usage.svg)](https://repology.org/project/parallel-disk-usage/versions)
 
+## Frequently Asked Questions
+
+### Is this project vibe-coded?
+
+No. "Vibe coding" means letting AI do everything without human involvement. This project uses AI-assisted workflows with active human direction and reviews.
+
+Using AI also does not mean poor quality. On the contrary, AI reviews have helped detect previously undetected bugs.
+
 ## Similar programs
 
 * **CLI:**
