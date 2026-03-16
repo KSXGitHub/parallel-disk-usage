@@ -900,7 +900,7 @@ fn color_always_multiple_args() {
         .pipe(stdout_text);
     eprintln!("ACTUAL:\n{actual}\n");
 
-    let mut data_tree = ["dir-a", "link-dir"]
+    let data_tree = ["dir-a", "link-dir"]
         .iter()
         .map(|name| {
             let builder = FsTreeBuilder {
