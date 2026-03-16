@@ -17,7 +17,7 @@ use pipe_trait::Pipe;
 use serde::Serialize;
 use std::{
     collections::HashMap,
-    ffi::OsStr,
+    ffi::{OsStr, OsString},
     io::stdout,
     iter::once,
     path::{Path, PathBuf},
@@ -133,7 +133,7 @@ where
         }
 
         let min_ratio: f32 = min_ratio.into();
-        let (data_tree, deduplication_record) = {
+        let (mut data_tree, deduplication_record) = {
             let mut data_tree = data_tree;
             if min_ratio > 0.0 {
                 data_tree.par_cull_insignificant_data(min_ratio);
@@ -144,10 +144,40 @@ where
             let deduplication_record = hardlinks_handler.deduplicate(&mut data_tree);
             if !only_one_arg {
                 assert_eq!(data_tree.name().as_os_str().to_str(), Some(""));
-                *data_tree.name_mut() = OsStringDisplay::os_string_from("(total)");
             }
             (data_tree, deduplication_record)
         };
+
+        // Build the coloring map while the multi-arg root is still "" (a valid path prefix)
+        // so that file_color receives real filesystem paths.
+        let mut leaf_color_map: Option<HashMap<Vec<OsString>, Color>> = color.as_ref().map(|_| {
+            let mut map = HashMap::new();
+            build_coloring_map(&data_tree, &mut Vec::new(), &mut map);
+            map
+        });
+
+        // Rename the synthetic root and rekey the coloring map to match.
+        if !only_one_arg {
+            *data_tree.name_mut() = OsStringDisplay::os_string_from("(total)");
+            if let Some(map) = &mut leaf_color_map {
+                let total = OsString::from("(total)");
+                let empty = OsString::from("");
+                *map = map
+                    .drain()
+                    .map(|(mut key, color)| {
+                        if key.first() == Some(&empty) {
+                            key[0] = total.clone();
+                        }
+                        (key, color)
+                    })
+                    .collect();
+            }
+        }
+
+        let coloring: Option<Coloring> = color.map(|ls_colors| {
+            let map = leaf_color_map.take().unwrap();
+            Coloring::new(ls_colors, map)
+        });
 
         GLOBAL_STATUS_BOARD.clear_line(0);
 
@@ -197,12 +227,6 @@ where
                 .map_err(RuntimeError::SerializationFailure)
                 .or(deduplication_result);
         }
-
-        let coloring: Option<Coloring> = color.map(|ls_colors| {
-            let mut map = HashMap::new();
-            build_coloring_map(&data_tree, &mut Vec::new(), &mut map);
-            Coloring::new(ls_colors, map)
-        });
 
         let visualizer = Visualizer {
             data_tree: &data_tree,
@@ -291,12 +315,12 @@ where
 fn build_coloring_map<'a>(
     node: &'a DataTree<OsStringDisplay, impl size::Size>,
     path_stack: &mut Vec<&'a OsStr>,
-    map: &mut HashMap<Vec<&'a OsStr>, Color>,
+    map: &mut HashMap<Vec<OsString>, Color>,
 ) {
     path_stack.push(node.name().as_os_str());
     if node.children().is_empty() {
         let color = file_color(&path_stack.iter().collect::<PathBuf>());
-        map.insert(path_stack.clone(), color);
+        map.insert(path_stack.iter().map(|s| s.to_os_string()).collect(), color);
     } else {
         for child in node.children() {
             build_coloring_map(child, path_stack, map);

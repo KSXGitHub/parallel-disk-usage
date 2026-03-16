@@ -1,19 +1,23 @@
 use super::{ChildPosition, TreeHorizontalSlice};
 use crate::ls_colors::LsColors;
 use derive_more::Display;
-use std::{collections::HashMap, ffi::OsStr, fmt};
+use std::{
+    collections::HashMap,
+    ffi::{OsStr, OsString},
+    fmt,
+};
 use zero_copy_pads::Width;
 
 /// Coloring configuration: ANSI prefix strings from the environment and a full-path-to-color map.
 #[derive(Debug)]
-pub struct Coloring<'a> {
+pub struct Coloring {
     ls_colors: LsColors,
-    map: HashMap<Vec<&'a OsStr>, Color>,
+    map: HashMap<Vec<OsString>, Color>,
 }
 
-impl<'a> Coloring<'a> {
+impl Coloring {
     /// Create a new [`Coloring`] from LS_COLORS prefixes and a path-components-to-color map.
-    pub fn new(ls_colors: LsColors, map: HashMap<Vec<&'a OsStr>, Color>) -> Self {
+    pub fn new(ls_colors: LsColors, map: HashMap<Vec<OsString>, Color>) -> Self {
         Coloring { ls_colors, map }
     }
 }
@@ -91,7 +95,7 @@ impl Width for ColoredTreeHorizontalSlice<'_> {
 /// Path components are only constructed when coloring is enabled, avoiding
 /// unnecessary allocation in the common no-color case.
 pub(super) fn maybe_colored_slice<'a, 'b>(
-    coloring: Option<&'b Coloring<'a>>,
+    coloring: Option<&'b Coloring>,
     ancestors: impl Iterator<Item = &'a OsStr>,
     name: &'a OsStr,
     has_children: bool,
@@ -101,7 +105,10 @@ pub(super) fn maybe_colored_slice<'a, 'b>(
         Some(coloring) => coloring,
         None => return MaybeColoredTreeHorizontalSlice::Colorless(slice),
     };
-    let path_components: Vec<&OsStr> = ancestors.chain(std::iter::once(name)).collect();
+    let path_components: Vec<OsString> = ancestors
+        .chain(std::iter::once(name))
+        .map(OsString::from)
+        .collect();
     let color = if has_children {
         Some(Color::Directory)
     } else {
