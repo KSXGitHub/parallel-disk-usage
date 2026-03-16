@@ -181,7 +181,7 @@ sudo pacman -S parallel-disk-usage
 
 No. "Vibe coding" means letting AI do everything without human involvement. This project uses AI-assisted workflows with active human direction and reviews.
 
-Using AI also does not mean poor quality. On the contrary, AI reviews have helped detect new bugs.
+Using AI also does not mean poor quality. On the contrary, AI reviews have helped detect previously undetected bugs.
 
 ## Similar programs
 
