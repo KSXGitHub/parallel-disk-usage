@@ -22,7 +22,7 @@ use std::{
     time::Duration,
 };
 use sub::JsonOutputParam;
-use sysinfo::Disks;
+use sysinfo::{Disk, Disks};
 
 #[cfg(unix)]
 use crate::get_size::{GetBlockCount, GetBlockSize};
@@ -141,7 +141,7 @@ impl App {
         let threads = match self.args.threads {
             Threads::Auto => {
                 let disks = Disks::new_with_refreshed_list();
-                if any_path_is_in_hdd::<hdd::RealApi>(&self.args.files, &disks) {
+                if any_path_is_in_hdd::<Disk, hdd::RealFs>(&self.args.files, &disks) {
                     eprintln!("warning: HDD detected, the thread limit will be set to 1");
                     eprintln!("hint: You can pass --threads=max disable this behavior");
                     Some(1)

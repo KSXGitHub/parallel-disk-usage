@@ -95,6 +95,98 @@ Use **descriptive names** for type parameters, not single letters:
 
 Single-letter generics are acceptable only in very short, self-contained trait impls.
 
+### Variable and Closure Parameter Naming
+
+Use **descriptive names** for variables and closure parameters by default. Single-letter names are permitted only in the specific cases listed below.
+
+#### When single-letter names are allowed
+
+- **Comparison closures:** `|a, b|` in `sort_by`, `cmp`, or similar two-argument comparison callbacks — this is idiomatic Rust.
+
+  ```rust
+  sort_reflection_by(&mut tree, |a, b| a.name.cmp(&b.name));
+  ```
+
+- **Conventional single-letter names:** `n` for a natural number (unsigned integer / count), `f` for a `fmt::Formatter`, and similar well-established conventions from math or the Rust standard library. Note: for indices, use `index`, `idx`, or `*_index` (e.g., `row_index`) — not `n`. (For `i`/`j`/`k`, see the dedicated rule below.)
+
+  ```rust
+  fn with_capacity(n: usize) -> Self { todo!() }
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { todo!() }
+  ```
+
+- **Index variables (`i`, `j`, `k`):** These may only be used in two contexts: (1) short closures, and (2) index-based loops/iterations (rare in Rust). In all other cases, use `index`, `idx`, or `*_index`.
+
+  ```rust
+  // OK — short closure
+  left_indices.zip(right_indices).map(|(i, j)| matrix[i][j])
+
+  // OK — index-based loop (rare in Rust)
+  for i in 0..len { /* ... */ }
+
+  // Bad — use a descriptive name instead
+  let i = items.iter().position(|item| item.is_active()).unwrap();
+  ```
+
+- **Trivial single-expression closures:** A closure whose body is a single field access, method call, or wrapper may use a single letter when the type and purpose are obvious from context.
+
+  ```rust
+  .pipe(|x| vec![x])
+  ```
+
+- **Fold accumulators:** `acc` for the accumulator and a single letter for the element in trivial folds.
+
+  ```rust
+  .fold(PathBuf::new(), |acc, x| acc.join(x))
+  ```
+
+- **Test fixtures:** `let a`, `let b`, `let c` for interchangeable specimens with identical roles in equality or comparison tests (e.g., testing commutativity). Do not use single letters when the variables have distinct roles — use `actual`/`expected` or similar descriptive names instead.
+
+  ```rust
+  let a = vec![3, 1, 2].into_iter().collect::<BTreeSet<_>>();
+  let b = vec![2, 3, 1].into_iter().collect::<BTreeSet<_>>();
+  assert_eq!(a, b);
+  ```
+
+#### When single-letter names are NOT allowed
+
+- **Multi-line functions and closures:** If a function or closure body spans multiple lines (e.g., contains a `let` binding followed by another expression, or multiple chained operations), use a descriptive name.
+
+  ```rust
+  // Good
+  .map(|tree_row| {
+      let columns = build_columns(tree_row);
+      format_row(&columns)
+  })
+
+  // Bad
+  .map(|t| {
+      let columns = build_columns(t);
+      format_row(&columns)
+  })
+  ```
+
+- **`let` bindings in non-test code:** Always use descriptive names.
+
+  ```rust
+  // Good
+  let metadata = entry.metadata()?;
+  // Bad
+  let m = entry.metadata()?;
+  ```
+
+- **Function and method parameters:** Always use descriptive names, except for conventional single-letter names listed above (`n`, `f`, etc.).
+
+- **Closures with non-obvious context:** If the type or purpose is not immediately clear from the surrounding method chain, use a descriptive name.
+
+  ```rust
+  // Good — not obvious what the closure receives
+  .filter_map(|entry| match entry { _ => todo!() })
+  .for_each(|child| child.par_sort_by(compare))
+
+  // Bad — reader must look up what .filter receives
+  .filter(|x| x.get_mount_point() == mount_point)
+  ```
+
 ### Trait Bounds
 
 Prefer `where` clauses over inline bounds when there are multiple constraints:
