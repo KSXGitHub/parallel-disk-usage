@@ -64,12 +64,6 @@ pub use error_report::ErrorReport;
 pub use event::Event;
 ```
 
-- Type aliases using `pub use ... as ...` are used to provide semantic alternative names:
-
-```rust
-pub use Reflection as DataTreeReflection;
-```
-
 ### Derive Macro Ordering
 
 When deriving multiple traits, use this order and split across multiple `#[derive(...)]` lines for readability:
@@ -202,12 +196,6 @@ where
     HardlinksRecorder: RecordHardlinks<Size, Report> + Sync + ?Sized,
 ```
 
-### Visibility
-
-- Use `pub` for the public API surface.
-- Use `pub(crate)` for items shared within the crate but not exposed externally.
-- Default to private for everything else.
-
 ### Error Handling
 
 - Define custom error enums with `#[derive(Debug, Display, Error)]` from `derive_more`.
@@ -232,14 +220,6 @@ ExitCode::from(match self {
     RuntimeError::DeserializationFailure(_) => 3,
 })
 ```
-
-### Struct Field Ordering
-
-Order fields logically by purpose, not alphabetically. Group related fields together. Document every public field with `///` comments.
-
-### Macros
-
-Use macros to reduce boilerplate for repetitive patterns (e.g. newtype wrappers, trait impls for multiple numeric types). Keep macros well-scoped and documented.
 
 ## Setup
 
