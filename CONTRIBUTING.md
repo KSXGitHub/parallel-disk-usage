@@ -211,7 +211,6 @@ where
 ### Error Handling
 
 - Define custom error enums with `#[derive(Debug, Display, Error)]` from `derive_more`.
-- Mark error enums as `#[non_exhaustive]`.
 - Minimize `unwrap()` in non-test code — use proper error propagation. `unwrap()` is acceptable in tests and for provably infallible operations (with a comment explaining why). When deliberately ignoring an error, use `.ok()` with a comment explaining why.
 
 ```rust
@@ -223,22 +222,9 @@ pub enum RuntimeError {
 }
 ```
 
-### Documentation Comments
-
-- Use `///` doc comments for all public types, traits, functions, and fields.
-- Use `//!` module-level doc comments at the top of `lib.rs` and significant modules.
-- Include usage examples with `/// ```no_run` blocks for key public APIs.
-- Reference related types with `[`backtick links`](crate::path)` syntax.
-
-### Feature Gating
-
-- Use `#[cfg(feature = "...")]` for optional functionality (e.g., `json`, `cli`).
-- Use `#[cfg(unix)]` for POSIX-specific code.
-- Use `#[cfg_attr(feature = "json", derive(Deserialize, Serialize))]` for conditional derives.
-
 ### Pattern Matching
 
-Use exhaustive matching. When mapping enum variants to values, prefer the concise wrapping style:
+When mapping enum variants to values, prefer the concise wrapping style:
 
 ```rust
 ExitCode::from(match self {
@@ -254,10 +240,6 @@ Order fields logically by purpose, not alphabetically. Group related fields toge
 ### Macros
 
 Use macros to reduce boilerplate for repetitive patterns (e.g. newtype wrappers, trait impls for multiple numeric types). Keep macros well-scoped and documented.
-
-### Warnings Policy
-
-The crate uses `#![deny(warnings)]` — all warnings are treated as errors. Code must compile warning-free.
 
 ## Setup
 
