@@ -11,9 +11,8 @@ Read and follow the CONTRIBUTING.md file in this repository for all code style c
 - Use descriptive variable and closure parameter names by default — single letters are only allowed in: conventional names (`n` for count, `f` for formatter), comparison closures (`|a, b|`), trivial single-expression closures, fold accumulators, index variables (`i`/`j`/`k` in short closures or index-based loops only), and test fixtures (identical roles only). Never use single letters in multi-line functions or closures
 - Prefer `where` clauses for multiple trait bounds
 - Derive order: std traits → comparison traits → `Hash` → derive_more → feature-gated
-- Custom errors: `#[derive(Debug, Display, Error)]` + `#[non_exhaustive]`
+- Custom errors: `#[derive(Debug, Display, Error)]`
 - Minimize `unwrap()` in non-test code — use proper error handling
-- `#![deny(warnings)]` is active — code must be warning-free
 - Install toolchain before running tests: `rustup toolchain install "$(< rust-toolchain)" && rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy`
 - If the AI agent is Claude Code, `gh` (GitHub CLI) is not installed — do not attempt to use it
 - Run `FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh` to validate changes
