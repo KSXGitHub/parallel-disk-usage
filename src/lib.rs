@@ -5,6 +5,10 @@
 
 #![deny(warnings)]
 
+#[cfg(feature = "jemalloc")]
+#[global_allocator]
+static GLOBAL_ALLOCATOR: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
+
 #[cfg(feature = "json")]
 pub use serde;
 #[cfg(feature = "json")]
