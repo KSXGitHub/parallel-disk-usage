@@ -18,8 +18,17 @@ use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use std::process::{Command, Stdio};
 
+/// Predefined `LS_COLORS` value used in color tests to ensure deterministic output.
+const LS_COLORS: &str = "rs=0:di=01;34:ln=01;36:ex=01;32:fi=00";
+
 #[cfg(unix)]
-use parallel_disk_usage::get_size::{GetBlockCount, GetBlockSize};
+use parallel_disk_usage::{
+    get_size::{GetBlockCount, GetBlockSize},
+    ls_colors::LsColors,
+    visualizer::{Color, Coloring},
+};
+#[cfg(unix)]
+use std::{collections::HashMap, ffi::OsStr};
 
 fn stdio(command: Command) -> Command {
     command
@@ -57,6 +66,7 @@ fn total_width() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -96,6 +106,7 @@ fn column_width() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::components(10, 90),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -134,6 +145,7 @@ fn min_ratio_0() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -173,6 +185,7 @@ fn min_ratio() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -212,6 +225,7 @@ fn max_depth_2() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -251,6 +265,7 @@ fn max_depth_1() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -289,6 +304,7 @@ fn top_down() {
         direction: Direction::TopDown,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -327,6 +343,7 @@ fn align_right() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Right,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -365,6 +382,7 @@ fn quantity_apparent_size() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -404,6 +422,7 @@ fn quantity_block_size() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -443,6 +462,7 @@ fn quantity_block_count() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -482,6 +502,7 @@ fn bytes_format_plain() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -521,6 +542,7 @@ fn bytes_format_metric() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -560,6 +582,7 @@ fn bytes_format_binary() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -597,6 +620,7 @@ fn path_to_workspace() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -650,6 +674,7 @@ fn multiple_names() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -715,6 +740,7 @@ fn multiple_names_max_depth_2() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -776,6 +802,7 @@ fn multiple_names_max_depth_1() {
         direction: Direction::BottomUp,
         bar_alignment: BarAlignment::Left,
         column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: None,
     };
     let expected = format!("{visualizer}");
     let expected = expected.trim_end();
@@ -786,4 +813,153 @@ fn multiple_names_max_depth_1() {
     let mut lines = actual.lines();
     assert!(lines.next().unwrap().contains("┌──(total)"));
     assert_eq!(lines.next(), None);
+}
+
+#[cfg(unix)]
+#[test]
+fn color_always() {
+    let workspace = SampleWorkspace::simple_tree_with_diverse_kinds();
+
+    let actual = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--color=always")
+        .with_arg("--total-width=100")
+        .with_arg("--min-ratio=0")
+        .with_env("LS_COLORS", LS_COLORS)
+        .pipe(stdio)
+        .output()
+        .expect("spawn command with --color=always")
+        .pipe(stdout_text);
+    eprintln!("ACTUAL:\n{actual}\n");
+
+    let builder = FsTreeBuilder {
+        root: workspace.to_path_buf(),
+        size_getter: DEFAULT_GET_SIZE,
+        hardlinks_recorder: &HardlinkIgnorant,
+        reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        max_depth: 10,
+    };
+    let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
+    data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
+    *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
+
+    let ls_colors = LsColors::from_str(LS_COLORS);
+    let leaf_colors = [
+        ("./dir-a/file-a1.txt", Color::Normal),
+        ("./dir-a/file-a2.txt", Color::Normal),
+        ("./dir-a/subdir-a/file-a3.txt", Color::Normal),
+        ("./dir-b/file-b1.txt", Color::Normal),
+        ("./file-root.txt", Color::Normal),
+        ("./link-dir", Color::Symlink),
+        ("./link-file.txt", Color::Symlink),
+        ("./empty-dir-1", Color::Directory),
+        ("./empty-dir-2", Color::Directory),
+    ];
+    let leaf_colors = HashMap::from(leaf_colors.map(|(path, color)| {
+        (
+            path.split('/')
+                .map(AsRef::<OsStr>::as_ref)
+                .collect::<Vec<_>>(),
+            color,
+        )
+    }));
+    let coloring = Coloring::new(ls_colors, leaf_colors);
+
+    let visualizer = Visualizer::<OsStringDisplay, _> {
+        data_tree: &data_tree,
+        bytes_format: BytesFormat::MetricUnits,
+        direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Left,
+        column_width_distribution: ColumnWidthDistribution::total(100),
+        coloring: Some(&coloring),
+    };
+    let expected = format!("{visualizer}");
+    let expected = expected.trim_end();
+    eprintln!("EXPECTED:\n{expected}\n");
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn colorful_equals_colorless() {
+    let workspace = SampleWorkspace::default();
+
+    let colorful = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--color=always")
+        .with_arg("--total-width=100")
+        .with_env("LS_COLORS", LS_COLORS)
+        .pipe(stdio)
+        .output()
+        .expect("spawn command with --color=always");
+    inspect_stderr(&colorful.stderr);
+    assert!(colorful.status.success(), "pdu exited with non-zero status");
+    let colorful_stripped = colorful
+        .stdout
+        .pipe(String::from_utf8)
+        .expect("UTF-8")
+        .pipe(strip_ansi_escapes::strip_str)
+        .trim_end()
+        .to_string();
+
+    let colorless = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--color=never")
+        .with_arg("--total-width=100")
+        .with_env("LS_COLORS", LS_COLORS)
+        .pipe(stdio)
+        .output()
+        .expect("spawn command with --color=never")
+        .pipe(stdout_text);
+
+    assert_eq!(colorful_stripped, colorless);
+}
+
+#[test]
+fn different_ls_colors() {
+    let workspace = SampleWorkspace::default();
+
+    let with_ls_colors = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--color=always")
+        .with_arg("--total-width=100")
+        .with_env("LS_COLORS", LS_COLORS)
+        .pipe(stdio)
+        .output()
+        .expect("spawn command with --color=always and LS_COLORS");
+    inspect_stderr(&with_ls_colors.stderr);
+    assert!(
+        with_ls_colors.status.success(),
+        "pdu exited with non-zero status"
+    );
+    let with_ls_colors_stripped = with_ls_colors
+        .stdout
+        .pipe(String::from_utf8)
+        .expect("UTF-8")
+        .pipe(strip_ansi_escapes::strip_str)
+        .trim_end()
+        .to_string();
+
+    let without_ls_colors = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--color=always")
+        .with_arg("--total-width=100")
+        .without_env("LS_COLORS")
+        .pipe(stdio)
+        .output()
+        .expect("spawn command with --color=always and without LS_COLORS");
+    inspect_stderr(&without_ls_colors.stderr);
+    assert!(
+        without_ls_colors.status.success(),
+        "pdu exited with non-zero status"
+    );
+    let without_ls_colors_stripped = without_ls_colors
+        .stdout
+        .pipe(String::from_utf8)
+        .expect("UTF-8")
+        .pipe(strip_ansi_escapes::strip_str)
+        .trim_end()
+        .to_string();
+
+    assert_eq!(with_ls_colors_stripped, without_ls_colors_stripped);
 }

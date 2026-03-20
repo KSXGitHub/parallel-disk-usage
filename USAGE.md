@@ -125,6 +125,17 @@ Do not output `.shared.details` in the JSON output.
 
 Do not output `.shared.summary` in the JSON output.
 
+<a id="color" name="color"></a>
+### `--color`
+
+* _Default:_ `auto`.
+* _Choices:_
+  - `auto`: Detect if the output is a TTY and render colors accordingly
+  - `always`: Always render colors
+  - `never`: Never render colors
+
+Whether to show colors.
+
 <a id="option-h" name="option-h"></a><a id="help" name="help"></a>
 ### `--help`
 

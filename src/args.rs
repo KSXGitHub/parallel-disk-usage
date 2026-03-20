@@ -1,8 +1,10 @@
+pub mod color;
 pub mod depth;
 pub mod fraction;
 pub mod quantity;
 pub mod threads;
 
+pub use color::ColorWhen;
 pub use depth::Depth;
 pub use fraction::Fraction;
 pub use quantity::Quantity;
@@ -170,6 +172,10 @@ pub struct Args {
     /// Do not output `.shared.summary` in the JSON output.
     #[clap(long, requires = "json_output", requires = "deduplicate_hardlinks")]
     pub omit_json_shared_summary: bool,
+
+    /// Whether to show colors.
+    #[clap(long, value_enum, default_value_t = ColorWhen::Auto)]
+    pub color: ColorWhen,
 }
 
 impl Args {
