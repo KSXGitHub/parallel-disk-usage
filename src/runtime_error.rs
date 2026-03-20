@@ -22,6 +22,10 @@ pub enum RuntimeError {
     /// When the user attempts to use unavailable platform-specific features.
     #[display("UnsupportedFeature: {_0}")]
     UnsupportedFeature(UnsupportedFeature),
+    /// When `--deduplicate-hardlinks` is used with more than 1 argument.
+    #[cfg(unix)]
+    #[display("DeduplicateHardlinkMultipleArgs: --deduplicate-hardlinks cannot be used with multiple arguments")]
+    DeduplicateHardlinkMultipleArgs,
 }
 
 /// Error caused by the user attempting to use unavailable platform-specific features.
@@ -49,6 +53,8 @@ impl RuntimeError {
             RuntimeError::JsonInputArgConflict => 4,
             RuntimeError::InvalidInputReflection(_) => 5,
             RuntimeError::UnsupportedFeature(_) => 6,
+            #[cfg(unix)]
+            RuntimeError::DeduplicateHardlinkMultipleArgs => 7,
         })
     }
 }
