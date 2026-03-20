@@ -20,6 +20,20 @@ use pipe_trait::Pipe;
 #[cfg(any(unix, test))]
 use std::path::Path;
 
+/// Internal key used to uniquely identify an inode across all filesystems.
+///
+/// Hardlinks cannot span filesystems, so including the device number prevents
+/// false deduplication of files from different filesystems that happen to share
+/// the same inode number. Both du-dust and dua-cli track `(device, inode)` pairs
+/// for the same reason.
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+struct InodeKey {
+    /// Device number of the filesystem the inode belongs to.
+    dev: u64,
+    /// Inode number within the device.
+    ino: InodeNumber,
+}
+
 /// Map value in [`HardlinkList`].
 #[derive(Debug, Clone)]
 struct Value<Size> {
@@ -38,8 +52,8 @@ struct Value<Size> {
 /// [`Reflection`] which implement these traits.
 #[derive(Debug, SmartDefault, Clone)]
 pub struct HardlinkList<Size>(
-    /// Map an inode number to its size, number of links, and detected paths.
-    DashMap<InodeNumber, Value<Size>>,
+    /// Map an inode key (device + inode number) to its size, number of links, and detected paths.
+    DashMap<InodeKey, Value<Size>>,
 );
 
 impl<Size> HardlinkList<Size> {
@@ -112,13 +126,15 @@ where
     pub(crate) fn add(
         &self,
         ino: InodeNumber,
+        dev: u64,
         size: Size,
         links: u64,
         path: &Path,
     ) -> Result<(), AddError<Size>> {
+        let key = InodeKey { dev, ino };
         let mut assertions = Ok(());
         self.0
-            .entry(ino)
+            .entry(key)
             .and_modify(|recorded| {
                 if size != recorded.size {
                     assertions = Err(AddError::SizeConflict(SizeConflictError {
