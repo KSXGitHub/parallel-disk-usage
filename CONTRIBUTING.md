@@ -210,6 +210,97 @@ pub enum RuntimeError {
 }
 ```
 
+### Using `pipe-trait`
+
+This codebase uses the [`pipe-trait`](https://docs.rs/pipe-trait) crate extensively. The `Pipe` trait enables method-chaining through free functions and constructors, keeping code in a natural left-to-right reading order. Import it as `use pipe_trait::Pipe;`.
+
+#### When to use pipe
+
+**Wrapping in a constructor or newtype at the end of a chain:**
+
+```rust
+// Good — pipe keeps the chain flowing left-to-right
+stats.ino().pipe(InodeNumber)
+list.into_sorted_unstable_by_key(|entry| u64::from(entry.ino))
+    .pipe(Reflection)
+value.0.into_iter().collect::<HashSet<_>>().pipe(Reflection)
+```
+
+**Avoiding deeply nested function calls:**
+
+```rust
+// Nested calls are harder to read
+let data = serde_json::from_reader::<_, JsonData>(stdin());
+let name = Some(OsStringDisplay::from(entry.file_name()));
+
+// Prefer piping instead
+let data = stdin().pipe(serde_json::from_reader::<_, JsonData>);
+let name = entry.file_name().pipe(OsStringDisplay::from).pipe(Some);
+```
+
+**Chaining through multiple wrapper constructors:**
+
+```rust
+// Good — clear wrapping pipeline
+ino.pipe(ConversionError::DuplicatedInode).pipe(Err)
+map.pipe(HardlinkList).pipe(Ok)
+```
+
+**Continuing a method chain through a free function and back to methods:**
+
+```rust
+// Good — pipe bridges from methods to a free function and back
+block_dev
+    .pipe(validate_block_device::<Fs>)
+    .map(Cow::Borrowed)
+
+"/sys/block"
+    .pipe(Path::new)
+    .join(block_dev)
+    .pipe_as_ref(Fs::path_exists)
+    .then_some(block_dev)
+```
+
+**Using `.pipe_as_ref()` to pass a reference mid-chain** — avoids introducing a temporary variable when a free function takes `&T`:
+
+```rust
+// Good — pipe_as_ref calls .as_ref() then passes to the function
+path_buf.pipe_as_ref(Fs::path_exists)
+
+// Without pipe, you'd need a temporary or nested call
+Fs::path_exists(path_buf.as_ref())
+```
+
+#### When NOT to use pipe
+
+**Simple single function calls** — pipe adds noise with no readability benefit:
+
+```rust
+// Bad — unnecessary pipe
+let result = value.pipe(foo);
+
+// Good — just call the function directly
+let result = foo(value);
+```
+
+**Standalone wrapping in `Some`/`Ok`/`Err`** — pipe is unnecessary when there is no preceding chain:
+
+```rust
+// Bad — pipe adds nothing here
+let result = value.pipe(Some);
+
+// Good — direct wrapping is clearer
+let result = Some(value);
+```
+
+However, `.pipe(Some)`, `.pipe(Ok)`, and `.pipe(Err)` **are** preferred when they continue an existing chain:
+
+```rust
+// Good — continues a chain
+report.summarize().pipe(Some)
+entry.file_name().pipe(OsStringDisplay::from).pipe(Some)
+```
+
 ### Pattern Matching
 
 When mapping enum variants to values, prefer the concise wrapping style:
