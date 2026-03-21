@@ -9,7 +9,7 @@ Read and follow the CONTRIBUTING.md file in this repository for all code style c
 - Prefer merged imports
 - Use descriptive generic names (`Size`, `Report`), not single letters
 - Use descriptive variable and closure parameter names by default — single letters are only allowed in: conventional names (`n` for count, `f` for formatter), comparison closures (`|a, b|`), trivial single-expression closures, fold accumulators, index variables (`i`/`j`/`k` in short closures or index-based loops only), and test fixtures (identical roles only). Never use single letters in multi-line functions or closures
-- Use `pipe-trait` for chaining through constructors, avoiding nested calls, and continuing method chains through free functions — but not for simple standalone function calls (prefer `foo(value)` over `value.pipe(foo)`)
+- Use `pipe-trait` for chaining through unary functions (constructors, `Some`, `Ok`, free functions, etc.), avoiding nested calls, and continuing method chains — but not for simple standalone calls (prefer `foo(value)` over `value.pipe(foo)`)
 - Prefer `where` clauses for multiple trait bounds
 - Derive order: std traits → comparison traits → `Hash` → derive_more → feature-gated
 - Custom errors: `#[derive(Debug, Display, Error)]`
