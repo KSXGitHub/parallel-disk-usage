@@ -210,6 +210,104 @@ pub enum RuntimeError {
 }
 ```
 
+### Using `pipe-trait`
+
+This codebase uses the [`pipe-trait`](https://docs.rs/pipe-trait) crate extensively. The `Pipe` trait enables method-chaining through unary functions, keeping code in a natural left-to-right reading order. Import it as `use pipe_trait::Pipe;`.
+
+Any callable that takes a single argument works with `.pipe()` — free functions, closures, newtype constructors, enum variant constructors, `Some`, `Ok`, `Err`, trait methods like `From::from`, etc. The guidance below applies equally to all of them.
+
+#### When to use pipe
+
+**Chaining through a unary function at the end of an expression chain:**
+
+```rust
+// Good — pipe keeps the chain flowing left-to-right
+stats.ino().pipe(InodeNumber)
+list.into_sorted_unstable_by_key(|entry| u64::from(entry.ino))
+    .pipe(Reflection)
+value.0.into_iter().collect::<HashSet<_>>().pipe(Reflection)
+METRIC.parse_value(bytes).pipe(Output::Units)
+```
+
+**Avoiding deeply nested function calls:**
+
+```rust
+// Nested calls are harder to read
+let data = serde_json::from_reader::<_, JsonData>(stdin());
+let name = Some(OsStringDisplay::from(entry.file_name()));
+
+// Prefer piping instead
+let data = stdin().pipe(serde_json::from_reader::<_, JsonData>);
+let name = entry.file_name().pipe(OsStringDisplay::from).pipe(Some);
+```
+
+**Chaining through multiple unary functions:**
+
+```rust
+// Good — clear wrapping pipeline
+ino.pipe(ConversionError::DuplicatedInode).pipe(Err)
+map.pipe(HardlinkList).pipe(Ok)
+
+UnsupportedFeature::DeduplicateHardlink
+    .pipe(RuntimeError::UnsupportedFeature)
+    .pipe(Err)
+```
+
+**Continuing a method chain through a free function and back to methods:**
+
+```rust
+// Good — pipe bridges from methods to a free function and back
+block_dev
+    .pipe(validate_block_device::<Fs>)
+    .map(Cow::Borrowed)
+
+"/sys/block"
+    .pipe(Path::new)
+    .join(block_dev)
+    .pipe_as_ref(Fs::path_exists)
+    .then_some(block_dev)
+```
+
+**Using `.pipe_as_ref()` to pass a reference mid-chain** — avoids introducing a temporary variable when a free function takes `&T`:
+
+```rust
+// Good — pipe_as_ref calls .as_ref() then passes to the function
+path_buf.pipe_as_ref(Fs::path_exists)
+
+// Without pipe, you'd need a temporary or nested call
+Fs::path_exists(path_buf.as_ref())
+```
+
+#### When NOT to use pipe
+
+**Simple standalone function calls** — pipe adds noise with no readability benefit:
+
+```rust
+// Bad — unnecessary pipe
+let result = value.pipe(foo);
+
+// Good — just call the function directly
+let result = foo(value);
+```
+
+This applies to any unary callable — `Some`, `Ok`, constructors, etc. — when there is no preceding chain to continue:
+
+```rust
+// Bad — pipe adds nothing here
+let result = value.pipe(Some);
+
+// Good — direct call is clearer
+let result = Some(value);
+```
+
+However, piping through any unary function **is** preferred when it continues an existing chain:
+
+```rust
+// Good — continues a chain
+report.summarize().pipe(Some)
+entry.file_name().pipe(OsStringDisplay::from).pipe(Some)
+```
+
 ### Pattern Matching
 
 When mapping enum variants to values, prefer the concise wrapping style:
