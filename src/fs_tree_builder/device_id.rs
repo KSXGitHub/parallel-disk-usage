@@ -41,7 +41,9 @@ mod tests {
         );
     }
 
+    /// `/proc` is a virtual filesystem mounted separately from `/` on Linux.
     #[test]
+    #[cfg(target_os = "linux")]
     fn different_filesystem_returns_different_ids() {
         let root_stats = symlink_metadata("/").expect("stat /");
         let proc_stats = symlink_metadata("/proc").expect("stat /proc");
@@ -49,6 +51,19 @@ mod tests {
             get_device_id(&root_stats),
             get_device_id(&proc_stats),
             "/ and /proc should be on different devices",
+        );
+    }
+
+    /// `/dev` is a separate filesystem (`devfs`) from `/` on macOS.
+    #[test]
+    #[cfg(target_os = "macos")]
+    fn different_filesystem_returns_different_ids() {
+        let root_stats = symlink_metadata("/").expect("stat /");
+        let dev_stats = symlink_metadata("/dev").expect("stat /dev");
+        assert_ne!(
+            get_device_id(&root_stats),
+            get_device_id(&dev_stats),
+            "/ and /dev should be on different devices",
         );
     }
 }

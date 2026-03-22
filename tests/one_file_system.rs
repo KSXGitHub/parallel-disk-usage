@@ -62,6 +62,7 @@ fn same_device_on_sample_workspace() {
 }
 
 /// Returns `true` if `unshare --user --mount --map-root-user` is available.
+#[cfg(target_os = "linux")]
 fn unshare_available() -> bool {
     std::process::Command::new("unshare")
         .args(["--user", "--mount", "--map-root-user", "true"])
@@ -76,6 +77,7 @@ fn unshare_available() -> bool {
 /// Uses `unshare --user --mount --map-root-user` to avoid requiring root privileges.
 /// Skipped when user namespaces are unavailable.
 #[test]
+#[cfg(target_os = "linux")]
 fn cross_device_excludes_mount() {
     if !unshare_available() {
         eprintln!("skipping cross_device_excludes_mount: unshare not available");
