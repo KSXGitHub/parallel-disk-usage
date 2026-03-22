@@ -156,7 +156,7 @@ pub struct Args {
     pub silent_errors: bool,
 
     /// Skip directories on different filesystems.
-    #[clap(long, short = 'x', visible_alias = "one-file-system")]
+    #[clap(long, short = 'x')]
     #[cfg_attr(not(unix), clap(hide = true))]
     pub one_file_system: bool,
 

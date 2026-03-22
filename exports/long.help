@@ -77,8 +77,6 @@ Options:
   -x, --one-file-system
           Skip directories on different filesystems
 
-          [aliases: --one-file-system]
-
   -p, --progress
           Report progress being made at the expense of performance
 

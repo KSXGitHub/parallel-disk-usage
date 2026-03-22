@@ -46,7 +46,6 @@ set edit:completion:arg-completer[pdu] = {|@words|
             cand --no-errors 'Prevent filesystem error messages from appearing in stderr'
             cand -x 'Skip directories on different filesystems'
             cand --one-file-system 'Skip directories on different filesystems'
-            cand --one-file-system 'Skip directories on different filesystems'
             cand -p 'Report progress being made at the expense of performance'
             cand --progress 'Report progress being made at the expense of performance'
             cand --omit-json-shared-details 'Do not output `.shared.details` in the JSON output'
