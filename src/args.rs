@@ -157,6 +157,7 @@ pub struct Args {
 
     /// Skip directories on different filesystems.
     #[clap(long, short = 'x', visible_alias = "one-file-system")]
+    #[cfg_attr(not(unix), clap(hide = true))]
     pub one_file_system: bool,
 
     /// Report progress being made at the expense of performance.
