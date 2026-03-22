@@ -9,15 +9,18 @@ use std::borrow::Cow;
 #[derive(Debug, Display, Error)]
 #[non_exhaustive]
 pub enum RenderUsageMdError {
-    /// A `visible_alias` or `visible_short_alias` duplicates the argument's own flag name.
-    #[display("redundant visible alias: {_0}")]
-    RedundantVisibleAlias(#[error(not(source))] String),
+    /// A `visible_alias` duplicates the argument's own long flag name.
+    #[display("--{_0} has a visible_alias that duplicates its own flag name")]
+    RedundantVisibleLongAlias(#[error(not(source))] String),
+    /// A `visible_short_alias` duplicates the argument's own short flag name.
+    #[display("-{_0} has a visible_short_alias that duplicates its own flag name")]
+    RedundantVisibleShortAlias(#[error(not(source))] char),
 }
 
 /// Renders a Markdown reference page for `pdu`'s CLI.
 pub fn render_usage_md() -> Result<String, RenderUsageMdError> {
     let mut command: Command = Args::command();
-    validate_no_redundant_visible_aliases(&command)?;
+    check_visible_aliases(&command)?;
     let mut out = String::new();
 
     let usage = command.render_usage().to_string();
@@ -246,17 +249,17 @@ fn ensure_ends_with_punctuation(line: &str) -> Cow<'_, str> {
 
 /// Checks that no argument has a visible alias that duplicates its own primary flag name.
 ///
-/// A `visible_alias` matching the argument's own `--long` name, or a `visible_short_alias`
-/// matching its own `-short` flag, is a coding mistake that produces redundant output in
-/// USAGE.md. This function detects such mistakes and terminates the process.
-fn validate_no_redundant_visible_aliases(command: &Command) -> Result<(), RenderUsageMdError> {
+/// A visible alias matching the argument's own long name, or a visible short alias
+/// matching its own short flag, is a coding mistake that produces redundant output in
+/// USAGE.md.
+fn check_visible_aliases(command: &Command) -> Result<(), RenderUsageMdError> {
     for arg in command.get_arguments() {
         if let Some(primary_long) = arg.get_long() {
             for alias in arg.get_visible_aliases().unwrap_or_default() {
                 if alias == primary_long {
-                    return Err(RenderUsageMdError::RedundantVisibleAlias(format!(
-                        "--{primary_long} has visible_alias \"{alias}\" that duplicates its own flag name",
-                    )));
+                    return Err(RenderUsageMdError::RedundantVisibleLongAlias(
+                        primary_long.to_owned(),
+                    ));
                 }
             }
         }
@@ -264,9 +267,9 @@ fn validate_no_redundant_visible_aliases(command: &Command) -> Result<(), Render
         if let Some(primary_short) = arg.get_short() {
             for alias in arg.get_visible_short_aliases().unwrap_or_default() {
                 if alias == primary_short {
-                    return Err(RenderUsageMdError::RedundantVisibleAlias(format!(
-                        "-{primary_short} has visible_short_alias '{alias}' that duplicates its own flag name",
-                    )));
+                    return Err(RenderUsageMdError::RedundantVisibleShortAlias(
+                        primary_short,
+                    ));
                 }
             }
         }
