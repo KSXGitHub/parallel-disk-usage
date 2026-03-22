@@ -11,7 +11,8 @@ true | false) ;;
   ;;
 esac
 
-has_failures=false
+failure_marker=$(mktemp)
+rm -f "$failure_marker"
 
 run() (
   echo >&2
@@ -28,7 +29,13 @@ run_if() (
   condition="$1"
   shift
   case "$condition" in
-  true) run "$@" ;;
+  true)
+    if [[ $no_fail_fast == 'true' ]]; then
+      run "$@" || touch "$failure_marker"
+    else
+      run "$@"
+    fi
+    ;;
   false) skip "$@" ;;
   *)
     echo "error: Invalid condition: $condition" >&2
@@ -44,24 +51,17 @@ unit() (
   eval run_if "${TEST:-true}" cargo test "${TEST_FLAGS:-}" "$@"
 )
 
-execute() {
-  if [[ "$no_fail_fast" == "true" ]]; then
-    "$@" || has_failures=true
-  else
-    "$@"
-  fi
-}
+run_if "${FMT:-true}" cargo fmt -- --check
+unit "$@"
+unit --no-default-features "$@"
+unit --all-features "$@"
+unit --features cli "$@"
+unit --features cli-completions "$@"
+unit --features ai-instructions "$@"
 
-execute run_if "${FMT:-true}" cargo fmt -- --check
-execute unit "$@"
-execute unit --no-default-features "$@"
-execute unit --all-features "$@"
-execute unit --features cli "$@"
-execute unit --features cli-completions "$@"
-execute unit --features ai-instructions "$@"
-
-if [[ "$has_failures" == "true" ]]; then
+if [[ -f $failure_marker ]]; then
+  rm -f "$failure_marker"
   echo >&2
-  echo "error: Some checks have failed. Review the output above for details." >&2
+  echo 'error: Some checks have failed. Review the output above for details.' >&2
   exit 1
 fi
