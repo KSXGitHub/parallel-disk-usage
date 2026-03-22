@@ -108,6 +108,11 @@ fn max_depth_0() {
 #[cfg(unix)]
 #[test]
 fn fs_errors() {
+    if unsafe { libc::geteuid() } == 0 {
+        eprintln!("SKIPPED: fs_errors test cannot work as root (permission checks are bypassed)");
+        return;
+    }
+
     let workspace = SampleWorkspace::default();
     fs_permission(workspace.join("empty-dir"), "-r", false);
     fs_permission(workspace.join("nested").join("0"), "-r", false);

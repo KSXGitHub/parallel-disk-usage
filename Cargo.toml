@@ -86,6 +86,7 @@ zero-copy-pads = "0.2.0"
 [dev-dependencies]
 build-fs-tree = "0.8.1"
 command-extra = "1.0.0"
+libc = "0.2"
 maplit = "1.0.2"
 normalize-path = "0.2.1"
 pretty_assertions = "1.4.1"
