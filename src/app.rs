@@ -133,6 +133,13 @@ impl App {
                 .pipe(Err);
         }
 
+        #[cfg(not(unix))]
+        if self.args.one_file_system {
+            return crate::runtime_error::UnsupportedFeature::OneFileSystem
+                .pipe(RuntimeError::UnsupportedFeature)
+                .pipe(Err);
+        }
+
         let threads = match self.args.threads {
             Threads::Auto => {
                 let disks = Disks::new_with_refreshed_list();
