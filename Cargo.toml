@@ -83,9 +83,6 @@ terminal_size = "0.4.3"
 text-block-macros = "0.2.0"
 zero-copy-pads = "0.2.0"
 
-[lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(pdu_test_skip_fs_errors)'] }
-
 [dev-dependencies]
 build-fs-tree = "0.8.1"
 command-extra = "1.0.0"
@@ -94,3 +91,6 @@ maplit = "1.0.2"
 normalize-path = "0.2.1"
 pretty_assertions = "1.4.1"
 rand = "0.10.0"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(pdu_test_skip_fs_errors)'] }
