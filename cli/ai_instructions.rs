@@ -108,8 +108,8 @@ fn main() -> ExitCode {
 
 fn write_files(repository: &Path) -> Result<(), RuntimeError> {
     for (path, fragments) in FILES {
-        let full_path = repository.join(path);
-        let mut output = full_path
+        let mut output = repository
+            .join(path)
             .pipe(File::create)
             .map_err(|error| RuntimeError::WriteFile { path, error })?;
         write!(output, "{fragments}").map_err(|error| RuntimeError::WriteFile { path, error })?;
@@ -121,8 +121,8 @@ fn write_files(repository: &Path) -> Result<(), RuntimeError> {
 fn check_files(repository: &Path) -> Result<(), RuntimeError> {
     let mut result: Result<(), RuntimeError> = Ok(());
     for &(path, fragments) in FILES {
-        let full_path = repository.join(path);
-        let actual = full_path
+        let actual = repository
+            .join(path)
             .pipe(read_to_string)
             .map_err(|error| RuntimeError::ReadFile { path, error })?;
         if !fragments.matches(&actual) {
