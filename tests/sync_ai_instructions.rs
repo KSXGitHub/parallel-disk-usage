@@ -12,8 +12,12 @@ fn ai_instructions_up_to_date() {
         .output()
         .expect("spawn pdu-ai-instructions");
     let stderr = String::from_utf8_lossy(&output.stderr);
+    let stderr = stderr.trim();
+    if !stderr.is_empty() {
+        eprintln!("STDERR:\n{stderr}\n");
+    }
     assert!(
         output.status.success(),
-        "AI instruction files are outdated. Run `./run.sh pdu-ai-instructions --generate` to update.\n\n{stderr}",
+        "AI instruction files are outdated. Run `./run.sh pdu-ai-instructions --generate` to update.",
     );
 }

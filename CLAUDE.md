@@ -16,4 +16,4 @@ Read and follow the CONTRIBUTING.md file in this repository for all code style c
 - Minimize `unwrap()` in non-test code — use proper error handling
 - Install toolchain before running tests: `rustup toolchain install "$(< rust-toolchain)" && rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy`
 - Run `FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh` to validate changes
-- If the AI agent is Claude Code, `gh` (GitHub CLI) is not installed — do not attempt to use it
+- `gh` (GitHub CLI) is not installed — do not attempt to use it
