@@ -26,6 +26,7 @@ include = [
   "/Cargo.toml",
   "/README.md",
   "/USAGE.md",
+  "/template/ai-instructions",
   "/LICENSE",
 ]
 
@@ -48,11 +49,17 @@ name = "pdu-usage-md"
 path = "cli/usage_md.rs"
 required-features = ["cli"]
 
+[[bin]]
+name = "pdu-ai-instructions"
+path = "cli/ai_instructions.rs"
+required-features = ["ai-instructions"]
+
 [features]
 default = ["cli"]
 json = ["serde/derive", "serde_json"]
 cli = ["clap/derive", "clap_complete", "clap-utilities", "json"]
 cli-completions = ["cli"]
+ai-instructions = []
 
 [dependencies]
 assert-cmp = "0.3.0"

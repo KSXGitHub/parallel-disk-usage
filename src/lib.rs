@@ -19,6 +19,9 @@ pub mod runtime_error;
 #[cfg(feature = "cli")]
 pub mod usage_md;
 
+#[cfg(feature = "ai-instructions")]
+pub mod ai_instructions;
+
 /// The main program.
 #[cfg(feature = "cli")]
 pub fn main() -> std::process::ExitCode {

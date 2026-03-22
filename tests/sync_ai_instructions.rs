@@ -1,25 +1,19 @@
-//! The following tests check whether the AI instruction files are in sync.
-//!
-//! All three files (CLAUDE.md, AGENTS.md, .github/copilot-instructions.md) should be identical.
+#![cfg(feature = "ai-instructions")]
 
-macro_rules! check {
-    ($name:ident: $a_path:literal == $b_path:literal) => {
-        #[test]
-        fn $name() {
-            let a = include_str!($a_path);
-            let b = include_str!($b_path);
-            assert!(
-                a == b,
-                concat!(
-                    "AI instruction files are out of sync: ",
-                    $a_path,
-                    " != ",
-                    $b_path,
-                ),
-            );
-        }
-    };
+use command_extra::CommandExtra;
+use std::process::Command;
+
+const PDU_AI_INSTRUCTIONS: &str = env!("CARGO_BIN_EXE_pdu-ai-instructions");
+
+#[test]
+fn ai_instructions_up_to_date() {
+    let output = Command::new(PDU_AI_INSTRUCTIONS)
+        .with_current_dir(env!("CARGO_MANIFEST_DIR"))
+        .output()
+        .expect("spawn pdu-ai-instructions");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        output.status.success(),
+        "AI instruction files are outdated. Run `./run.sh pdu-ai-instructions --generate` to update.\n\n{stderr}",
+    );
 }
-
-check!(claude_md_vs_agents_md: "../CLAUDE.md" == "../AGENTS.md");
-check!(claude_md_vs_copilot_instructions: "../CLAUDE.md" == "../.github/copilot-instructions.md");
