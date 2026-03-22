@@ -7,6 +7,7 @@ use std::borrow::Cow;
 /// Renders a Markdown reference page for `pdu`'s CLI.
 pub fn render_usage_md() -> String {
     let mut command: Command = Args::command();
+    validate_no_redundant_visible_aliases(&command);
     let mut out = String::new();
 
     let usage = command.render_usage().to_string();
@@ -230,5 +231,43 @@ fn ensure_ends_with_punctuation(line: &str) -> Cow<'_, str> {
         Cow::Borrowed(line)
     } else {
         Cow::Owned(format!("{line}."))
+    }
+}
+
+/// Checks that no argument has a visible alias that duplicates its own primary flag name.
+///
+/// A `visible_alias` matching the argument's own `--long` name, or a `visible_short_alias`
+/// matching its own `-short` flag, is a coding mistake that produces redundant output in
+/// USAGE.md. This function detects such mistakes and terminates the process.
+fn validate_no_redundant_visible_aliases(command: &Command) {
+    let mut errors = Vec::<String>::new();
+
+    for arg in command.get_arguments() {
+        if let Some(primary_long) = arg.get_long() {
+            for alias in arg.get_visible_aliases().unwrap_or_default() {
+                if alias == primary_long {
+                    errors.push(format!(
+                        "--{primary_long} has visible_alias \"{alias}\" that duplicates its own flag name",
+                    ));
+                }
+            }
+        }
+
+        if let Some(primary_short) = arg.get_short() {
+            for alias in arg.get_visible_short_aliases().unwrap_or_default() {
+                if alias == primary_short {
+                    errors.push(format!(
+                        "-{primary_short} has visible_short_alias '{alias}' that duplicates its own flag name",
+                    ));
+                }
+            }
+        }
+    }
+
+    if !errors.is_empty() {
+        for error in &errors {
+            eprintln!("error: {error}");
+        }
+        std::process::exit(1);
     }
 }
