@@ -1,12 +1,27 @@
 use crate::args::Args;
 use clap::builder::PossibleValue;
 use clap::{Arg, ArgAction, Command, CommandFactory};
+use derive_more::{Display, Error};
 use itertools::Itertools;
+use pipe_trait::Pipe;
 use std::borrow::Cow;
 
+/// Error produced when generating the usage Markdown.
+#[derive(Debug, Display, Error)]
+#[non_exhaustive]
+pub enum RenderUsageMdError {
+    /// A `visible_alias` duplicates the argument's own long flag name.
+    #[display("--{_0} has a visible_alias that duplicates its own flag name")]
+    RedundantVisibleLongAlias(#[error(not(source))] String),
+    /// A `visible_short_alias` duplicates the argument's own short flag name.
+    #[display("-{_0} has a visible_short_alias that duplicates its own flag name")]
+    RedundantVisibleShortAlias(#[error(not(source))] char),
+}
+
 /// Renders a Markdown reference page for `pdu`'s CLI.
-pub fn render_usage_md() -> String {
+pub fn render_usage_md() -> Result<String, RenderUsageMdError> {
     let mut command: Command = Args::command();
+    reject_redundant_aliases(&command)?;
     let mut out = String::new();
 
     let usage = command.render_usage().to_string();
@@ -59,7 +74,7 @@ pub fn render_usage_md() -> String {
         }
     }
 
-    out
+    Ok(out)
 }
 
 fn render_argument(out: &mut String, arg: &Arg) {
@@ -231,4 +246,36 @@ fn ensure_ends_with_punctuation(line: &str) -> Cow<'_, str> {
     } else {
         Cow::Owned(format!("{line}."))
     }
+}
+
+/// Rejects any argument whose visible alias duplicates its own primary flag name.
+///
+/// A visible alias matching the argument's own long name, or a visible short alias
+/// matching its own short flag, is a coding mistake that produces redundant output in
+/// USAGE.md.
+fn reject_redundant_aliases(command: &Command) -> Result<(), RenderUsageMdError> {
+    for arg in command.get_arguments() {
+        if let Some(primary_long) = arg.get_long() {
+            for alias in arg.get_visible_aliases().unwrap_or_default() {
+                if alias == primary_long {
+                    return primary_long
+                        .to_owned()
+                        .pipe(RenderUsageMdError::RedundantVisibleLongAlias)
+                        .pipe(Err);
+                }
+            }
+        }
+
+        if let Some(primary_short) = arg.get_short() {
+            for alias in arg.get_visible_short_aliases().unwrap_or_default() {
+                if alias == primary_short {
+                    return primary_short
+                        .pipe(RenderUsageMdError::RedundantVisibleShortAlias)
+                        .pipe(Err);
+                }
+            }
+        }
+    }
+
+    Ok(())
 }
