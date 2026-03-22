@@ -46,6 +46,7 @@ fn total_width() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -85,6 +86,7 @@ fn column_width() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -124,6 +126,7 @@ fn min_ratio_0() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
@@ -162,6 +165,7 @@ fn min_ratio() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.1);
@@ -201,6 +205,7 @@ fn max_depth_2() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 2,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -240,6 +245,7 @@ fn max_depth_1() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 1,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -278,6 +284,7 @@ fn top_down() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -316,6 +323,7 @@ fn align_right() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -354,6 +362,7 @@ fn quantity_apparent_size() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -393,6 +402,7 @@ fn quantity_block_size() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -432,6 +442,7 @@ fn quantity_block_count() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -471,6 +482,7 @@ fn bytes_format_plain() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -510,6 +522,7 @@ fn bytes_format_metric() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -549,6 +562,7 @@ fn bytes_format_binary() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -587,6 +601,7 @@ fn path_to_workspace() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
+        root_dev: None,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
     data_tree.par_cull_insignificant_data(0.01);
@@ -630,6 +645,7 @@ fn multiple_names() {
                 hardlinks_recorder: &HardlinkIgnorant,
                 reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
                 max_depth: 10,
+                root_dev: None,
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
@@ -695,6 +711,7 @@ fn multiple_names_max_depth_2() {
                 hardlinks_recorder: &HardlinkIgnorant,
                 reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
                 max_depth: 1,
+                root_dev: None,
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);
@@ -755,6 +772,7 @@ fn multiple_names_max_depth_1() {
                 hardlinks_recorder: &HardlinkIgnorant,
                 reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
                 max_depth: 10,
+                root_dev: None,
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
             *data_tree.name_mut() = OsStringDisplay::os_string_from(name);

@@ -151,6 +151,11 @@ pub struct Args {
     #[clap(long)]
     pub no_sort: bool,
 
+    /// Stay on the same filesystem, do not cross mount points (POSIX only).
+    #[clap(long)]
+    #[cfg_attr(not(unix), clap(hide = true))]
+    pub dev: bool,
+
     /// Prevent filesystem error messages from appearing in stderr.
     #[clap(long, short, visible_alias = "no-errors")]
     pub silent_errors: bool,

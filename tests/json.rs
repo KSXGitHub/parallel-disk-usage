@@ -86,6 +86,7 @@ fn json_output() {
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
         max_depth: 10,
+        root_dev: None,
     };
     let expected = builder
         .pipe(DataTree::<_, Bytes>::from)

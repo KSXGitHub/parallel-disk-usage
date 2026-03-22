@@ -49,6 +49,8 @@ where
     pub min_ratio: Fraction,
     /// Preserve order of entries.
     pub no_sort: bool,
+    /// Device ID of the root directory. When `Some`, entries on different devices are skipped.
+    pub root_dev: Option<u64>,
 }
 
 impl<Size, SizeGetter, HardlinksHandler, Report> Sub<Size, SizeGetter, HardlinksHandler, Report>
@@ -74,6 +76,7 @@ where
             reporter,
             min_ratio,
             no_sort,
+            root_dev,
         } = self;
 
         let max_depth = max_depth.get();
@@ -87,6 +90,7 @@ where
                     size_getter,
                     hardlinks_recorder: &hardlinks_handler,
                     max_depth,
+                    root_dev,
                 }
                 .into()
             });

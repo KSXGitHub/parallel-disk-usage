@@ -33,6 +33,7 @@ use std::{
 ///     size_getter: GetApparentSize,
 ///     reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
 ///     max_depth: 10,
+///     root_dev: None,
 /// };
 /// let data_tree: DataTree<OsStringDisplay, Bytes> = builder.into();
 /// ```
@@ -54,6 +55,8 @@ where
     pub reporter: &'a Report,
     /// Deepest level of descendant display in the graph. The sizes beyond the max depth still count toward total.
     pub max_depth: u64,
+    /// Device ID of the root directory. When `Some`, entries on different devices are skipped.
+    pub root_dev: Option<u64>,
 }
 
 impl<'a, Size, SizeGetter, HardlinksRecorder, Report>
@@ -67,12 +70,14 @@ where
 {
     /// Create a [`DataTree`] from an [`FsTreeBuilder`].
     fn from(builder: FsTreeBuilder<Size, SizeGetter, HardlinksRecorder, Report>) -> Self {
+        #[allow(unused_variables)] // root_dev is only used in #[cfg(unix)] block below
         let FsTreeBuilder {
             root,
             size_getter,
             hardlinks_recorder,
             reporter,
             max_depth,
+            root_dev,
         } = builder;
 
         TreeBuilder::<PathBuf, OsStringDisplay, Size, _, _> {
@@ -94,6 +99,17 @@ where
                         };
                     }
                     Ok(stats) => {
+                        // When --dev is active, skip entries on different filesystems
+                        #[cfg(unix)]
+                        if let Some(root_dev) = root_dev {
+                            use std::os::unix::fs::MetadataExt;
+                            if stats.dev() != root_dev {
+                                return Info {
+                                    size: Size::default(),
+                                    children: Vec::new(),
+                                };
+                            }
+                        }
                         // `stats` should be dropped ASAP to avoid piling up kernel memory usage
                         let is_dir = stats.is_dir();
                         let size = size_getter.get_size(&stats);

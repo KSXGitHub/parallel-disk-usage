@@ -15,6 +15,7 @@ complete -c pdu -s H -l deduplicate-hardlinks -l detect-links -l dedupe-links -d
 complete -c pdu -l top-down -d 'Print the tree top-down instead of bottom-up'
 complete -c pdu -l align-right -d 'Set the root of the bars to the right'
 complete -c pdu -l no-sort -d 'Do not sort the branches in the tree'
+complete -c pdu -l dev -d 'Stay on the same filesystem, do not cross mount points (POSIX only)'
 complete -c pdu -s s -l silent-errors -l no-errors -d 'Prevent filesystem error messages from appearing in stderr'
 complete -c pdu -s p -l progress -d 'Report progress being made at the expense of performance'
 complete -c pdu -l omit-json-shared-details -d 'Do not output `.shared.details` in the JSON output'

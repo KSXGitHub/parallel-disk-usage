@@ -41,6 +41,7 @@ set edit:completion:arg-completer[pdu] = {|@words|
             cand --top-down 'Print the tree top-down instead of bottom-up'
             cand --align-right 'Set the root of the bars to the right'
             cand --no-sort 'Do not sort the branches in the tree'
+            cand --dev 'Stay on the same filesystem, do not cross mount points (POSIX only)'
             cand -s 'Prevent filesystem error messages from appearing in stderr'
             cand --silent-errors 'Prevent filesystem error messages from appearing in stderr'
             cand --no-errors 'Prevent filesystem error messages from appearing in stderr'

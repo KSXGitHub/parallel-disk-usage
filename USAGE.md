@@ -94,6 +94,11 @@ Minimal size proportion required to appear.
 
 Do not sort the branches in the tree.
 
+<a id="dev" name="dev"></a>
+### `--dev`
+
+Stay on the same filesystem, do not cross mount points (POSIX only).
+
 <a id="option-s" name="option-s"></a><a id="silent-errors" name="silent-errors"></a><a id="no-errors" name="no-errors"></a>
 ### `--silent-errors`
 

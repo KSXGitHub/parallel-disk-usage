@@ -19,6 +19,9 @@ pub enum RuntimeError {
     /// When input JSON data is not a valid tree.
     #[display("InvalidInputReflection: {_0}")]
     InvalidInputReflection(#[error(not(source))] String),
+    /// When `--dev` is used with more than one argument.
+    #[display("DevArgConflict: --dev cannot be used with more than one path argument")]
+    DevArgConflict,
     /// When the user attempts to use unavailable platform-specific features.
     #[display("UnsupportedFeature: {_0}")]
     UnsupportedFeature(UnsupportedFeature),
@@ -32,6 +35,10 @@ pub enum UnsupportedFeature {
     #[cfg(not(unix))]
     #[display("Feature --deduplicate-hardlinks is not available on this platform")]
     DeduplicateHardlink,
+    /// Using `--dev` on non-POSIX.
+    #[cfg(not(unix))]
+    #[display("Feature --dev is not available on this platform")]
+    Dev,
 }
 
 impl From<Infallible> for RuntimeError {
@@ -48,7 +55,8 @@ impl RuntimeError {
             RuntimeError::DeserializationFailure(_) => 3,
             RuntimeError::JsonInputArgConflict => 4,
             RuntimeError::InvalidInputReflection(_) => 5,
-            RuntimeError::UnsupportedFeature(_) => 6,
+            RuntimeError::DevArgConflict => 6,
+            RuntimeError::UnsupportedFeature(_) => 7,
         })
     }
 }

@@ -16,7 +16,7 @@ use crate::{
 use clap::Parser;
 use hdd::any_path_is_in_hdd;
 use pipe_trait::Pipe;
-use std::{io::stdin, time::Duration};
+use std::{io::stdin, path::PathBuf, time::Duration};
 use sub::JsonOutputParam;
 use sysinfo::{Disk, Disks};
 
@@ -131,6 +131,17 @@ impl App {
             return crate::runtime_error::UnsupportedFeature::DeduplicateHardlink
                 .pipe(RuntimeError::UnsupportedFeature)
                 .pipe(Err);
+        }
+
+        #[cfg(not(unix))]
+        if self.args.dev {
+            return crate::runtime_error::UnsupportedFeature::Dev
+                .pipe(RuntimeError::UnsupportedFeature)
+                .pipe(Err);
+        }
+
+        if self.args.dev && self.args.files.len() > 1 {
+            return Err(RuntimeError::DevArgConflict);
         }
 
         let threads = match self.args.threads {
@@ -275,7 +286,7 @@ impl App {
         macro_rules! run {
             ($(
                 $(#[$variant_attrs:meta])*
-                $size_getter:ident, $progress:literal, $hardlinks:ident;
+                $size_getter:ident, $progress:literal, $hardlinks:ident, $dev:ident;
             )*) => { match self.args {$(
                 $(#[$variant_attrs])*
                 Args {
@@ -283,6 +294,8 @@ impl App {
                     progress: $progress,
                     #[cfg(unix)] deduplicate_hardlinks: $hardlinks,
                     #[cfg(not(unix))] deduplicate_hardlinks: _,
+                    #[cfg(unix)] dev: $dev,
+                    #[cfg(not(unix))] dev: _,
                     files,
                     json_output,
                     bytes_format,
@@ -294,39 +307,76 @@ impl App {
                     omit_json_shared_details,
                     omit_json_shared_summary,
                     ..
-                } => Sub {
-                    direction: Direction::from_top_down(top_down),
-                    bar_alignment: BarAlignment::from_align_right(align_right),
-                    size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
-                    hardlinks_handler: <$size_getter as CreateHardlinksHandler<{ cfg!(unix) && $hardlinks }, $progress>>::create_hardlinks_handler(),
-                    reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
-                    bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
-                    files,
-                    json_output: JsonOutputParam::from_cli_flags(json_output, omit_json_shared_details, omit_json_shared_summary),
-                    column_width_distribution,
-                    max_depth,
-                    min_ratio,
-                    no_sort,
-                }
-                .run(),
+                } => {
+                    let root_dev = if cfg!(unix) && $dev {
+                        get_root_dev(&files)
+                    } else {
+                        None
+                    };
+                    Sub {
+                        direction: Direction::from_top_down(top_down),
+                        bar_alignment: BarAlignment::from_align_right(align_right),
+                        size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
+                        hardlinks_handler: <$size_getter as CreateHardlinksHandler<{ cfg!(unix) && $hardlinks }, $progress>>::create_hardlinks_handler(),
+                        reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
+                        bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
+                        files,
+                        json_output: JsonOutputParam::from_cli_flags(json_output, omit_json_shared_details, omit_json_shared_summary),
+                        column_width_distribution,
+                        max_depth,
+                        min_ratio,
+                        no_sort,
+                        root_dev,
+                    }
+                    .run()
+                },
             )*} };
         }
 
         run! {
-            GetApparentSize, false, false;
-            GetApparentSize, true, false;
-            #[cfg(unix)] GetBlockSize, false, false;
-            #[cfg(unix)] GetBlockSize, true, false;
-            #[cfg(unix)] GetBlockCount, false, false;
-            #[cfg(unix)] GetBlockCount, true, false;
-            #[cfg(unix)] GetApparentSize, false, true;
-            #[cfg(unix)] GetApparentSize, true, true;
-            #[cfg(unix)] GetBlockSize, false, true;
-            #[cfg(unix)] GetBlockSize, true, true;
-            #[cfg(unix)] GetBlockCount, false, true;
-            #[cfg(unix)] GetBlockCount, true, true;
+            GetApparentSize, false, false, false;
+            GetApparentSize, true, false, false;
+            #[cfg(unix)] GetBlockSize, false, false, false;
+            #[cfg(unix)] GetBlockSize, true, false, false;
+            #[cfg(unix)] GetBlockCount, false, false, false;
+            #[cfg(unix)] GetBlockCount, true, false, false;
+            #[cfg(unix)] GetApparentSize, false, true, false;
+            #[cfg(unix)] GetApparentSize, true, true, false;
+            #[cfg(unix)] GetBlockSize, false, true, false;
+            #[cfg(unix)] GetBlockSize, true, true, false;
+            #[cfg(unix)] GetBlockCount, false, true, false;
+            #[cfg(unix)] GetBlockCount, true, true, false;
+            #[cfg(unix)] GetApparentSize, false, false, true;
+            #[cfg(unix)] GetApparentSize, true, false, true;
+            #[cfg(unix)] GetBlockSize, false, false, true;
+            #[cfg(unix)] GetBlockSize, true, false, true;
+            #[cfg(unix)] GetBlockCount, false, false, true;
+            #[cfg(unix)] GetBlockCount, true, false, true;
+            #[cfg(unix)] GetApparentSize, false, true, true;
+            #[cfg(unix)] GetApparentSize, true, true, true;
+            #[cfg(unix)] GetBlockSize, false, true, true;
+            #[cfg(unix)] GetBlockSize, true, true, true;
+            #[cfg(unix)] GetBlockCount, false, true, true;
+            #[cfg(unix)] GetBlockCount, true, true, true;
         }
     }
+}
+
+/// Get the device ID of the root path for `--dev` filtering.
+#[cfg(unix)]
+fn get_root_dev(files: &[PathBuf]) -> Option<u64> {
+    use std::os::unix::fs::MetadataExt;
+    let root_path = files
+        .first()
+        .map(|p| p.as_path())
+        .unwrap_or(std::path::Path::new("."));
+    std::fs::symlink_metadata(root_path).ok().map(|m| m.dev())
+}
+
+/// Get the device ID of the root path for `--dev` filtering.
+#[cfg(not(unix))]
+fn get_root_dev(_files: &[PathBuf]) -> Option<u64> {
+    None
 }
 
 mod hdd;

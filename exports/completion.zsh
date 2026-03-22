@@ -46,6 +46,7 @@ block-count\:"Count numbers of blocks"))' \
 '--top-down[Print the tree top-down instead of bottom-up]' \
 '--align-right[Set the root of the bars to the right]' \
 '--no-sort[Do not sort the branches in the tree]' \
+'--dev[Stay on the same filesystem, do not cross mount points (POSIX only)]' \
 '-s[Prevent filesystem error messages from appearing in stderr]' \
 '--silent-errors[Prevent filesystem error messages from appearing in stderr]' \
 '--no-errors[Prevent filesystem error messages from appearing in stderr]' \
