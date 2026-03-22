@@ -91,7 +91,7 @@ fn main() -> ExitCode {
 }
 
 fn write_files() -> Result<(), RuntimeError> {
-    for &(path, fragments) in FILES {
+    for (path, fragments) in FILES {
         if let Some(parent) = Path::new(path).parent() {
             fs::create_dir_all(parent).map_err(|error| RuntimeError::CreateDir { path, error })?;
         }
