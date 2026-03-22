@@ -3,6 +3,7 @@ use clap::builder::PossibleValue;
 use clap::{Arg, ArgAction, Command, CommandFactory};
 use derive_more::{Display, Error};
 use itertools::Itertools;
+use pipe_trait::Pipe;
 use std::borrow::Cow;
 
 /// Error produced when generating the usage Markdown.
@@ -20,7 +21,7 @@ pub enum RenderUsageMdError {
 /// Renders a Markdown reference page for `pdu`'s CLI.
 pub fn render_usage_md() -> Result<String, RenderUsageMdError> {
     let mut command: Command = Args::command();
-    check_visible_aliases(&command)?;
+    reject_redundant_aliases(&command)?;
     let mut out = String::new();
 
     let usage = command.render_usage().to_string();
@@ -247,19 +248,20 @@ fn ensure_ends_with_punctuation(line: &str) -> Cow<'_, str> {
     }
 }
 
-/// Checks that no argument has a visible alias that duplicates its own primary flag name.
+/// Rejects any argument whose visible alias duplicates its own primary flag name.
 ///
 /// A visible alias matching the argument's own long name, or a visible short alias
 /// matching its own short flag, is a coding mistake that produces redundant output in
 /// USAGE.md.
-fn check_visible_aliases(command: &Command) -> Result<(), RenderUsageMdError> {
+fn reject_redundant_aliases(command: &Command) -> Result<(), RenderUsageMdError> {
     for arg in command.get_arguments() {
         if let Some(primary_long) = arg.get_long() {
             for alias in arg.get_visible_aliases().unwrap_or_default() {
                 if alias == primary_long {
-                    return Err(RenderUsageMdError::RedundantVisibleLongAlias(
-                        primary_long.to_owned(),
-                    ));
+                    return primary_long
+                        .to_owned()
+                        .pipe(RenderUsageMdError::RedundantVisibleLongAlias)
+                        .pipe(Err);
                 }
             }
         }
@@ -267,9 +269,9 @@ fn check_visible_aliases(command: &Command) -> Result<(), RenderUsageMdError> {
         if let Some(primary_short) = arg.get_short() {
             for alias in arg.get_visible_short_aliases().unwrap_or_default() {
                 if alias == primary_short {
-                    return Err(RenderUsageMdError::RedundantVisibleShortAlias(
-                        primary_short,
-                    ));
+                    return primary_short
+                        .pipe(RenderUsageMdError::RedundantVisibleShortAlias)
+                        .pipe(Err);
                 }
             }
         }
