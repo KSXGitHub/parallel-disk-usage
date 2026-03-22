@@ -112,8 +112,8 @@ fn fs_errors() {
     if unsafe { libc::geteuid() } == 0 {
         panic!(
             "{}\n{}",
-            "error: Attempt to run this test on root environment was detected. Such an environment would affect the accuracy of this test.",
-            "hint: Either run this test on non-root environment or set `RUSTFLAGS='--cfg pdu_test_skip_fs_errors'` to skip this error.",
+            "error: This test must not be run as root because running with elevated privileges would affect its accuracy.",
+            "hint: Either run this test as a non-root user or set `RUSTFLAGS='--cfg pdu_test_skip_fs_errors'` to skip this test.",
         );
     }
 
