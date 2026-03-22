@@ -342,3 +342,5 @@ The CI script `test.sh` runs all of these across 5 feature combinations. You can
 ```sh
 FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh
 ```
+
+**Important:** Always run the full test suite before committing, even for seemingly trivial changes such as documentation edits, comment changes, or config updates. Any change can break formatting, linting, building, tests, or doc generation across the different feature combinations.
