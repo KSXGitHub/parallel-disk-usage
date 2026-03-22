@@ -17,7 +17,8 @@ struct Fragments(&'static [&'static str]);
 
 impl fmt::Display for Fragments {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for fragment in self.0 {
+        let Fragments(fragments) = self;
+        for fragment in *fragments {
             f.write_str(fragment)?;
         }
         Ok(())
@@ -26,8 +27,9 @@ impl fmt::Display for Fragments {
 
 impl Fragments {
     fn matches(&self, actual: &str) -> bool {
+        let Fragments(fragments) = self;
         let mut remaining = actual;
-        for fragment in self.0 {
+        for fragment in *fragments {
             match remaining.strip_prefix(fragment) {
                 Some(rest) => remaining = rest,
                 None => return false,
@@ -37,16 +39,13 @@ impl Fragments {
     }
 }
 
-#[derive(Clone, Copy)]
-struct AiInstructionFile(&'static str, Fragments);
-
-const FILES: &[AiInstructionFile] = &[
-    AiInstructionFile("CLAUDE.md", Fragments(&[SHARED, CLAUDE])),
-    AiInstructionFile(
+const FILES: &[(&str, Fragments)] = &[
+    ("CLAUDE.md", Fragments(&[SHARED, CLAUDE])),
+    (
         ".github/copilot-instructions.md",
         Fragments(&[SHARED, COPILOT]),
     ),
-    AiInstructionFile("AGENTS.md", Fragments(&[SHARED, AGENTS])),
+    ("AGENTS.md", Fragments(&[SHARED, AGENTS])),
 ];
 
 #[derive(Debug, Display)]
@@ -66,8 +65,8 @@ enum RuntimeError {
         path: &'static str,
         error: io::Error,
     },
-    #[display("outdated files:\n  {}\n\nRun `./run.sh pdu-ai-instructions --generate` to update.", outdated.join("\n  "))]
-    Outdated { outdated: Vec<&'static str> },
+    #[display("Run `./run.sh pdu-ai-instructions --generate` to update.")]
+    Outdated,
 }
 
 /// Check or generate AI instruction files from templates.
@@ -92,7 +91,7 @@ fn main() -> ExitCode {
 }
 
 fn write_files() -> Result<(), RuntimeError> {
-    for &AiInstructionFile(path, fragments) in FILES {
+    for &(path, fragments) in FILES {
         if let Some(parent) = Path::new(path).parent() {
             fs::create_dir_all(parent).map_err(|error| RuntimeError::CreateDir { path, error })?;
         }
@@ -105,20 +104,18 @@ fn write_files() -> Result<(), RuntimeError> {
 }
 
 fn check_files() -> Result<(), RuntimeError> {
-    let mut outdated = Vec::new();
-    for &AiInstructionFile(path, fragments) in FILES {
+    let mut has_outdated = false;
+    for &(path, fragments) in FILES {
         let actual =
             fs::read_to_string(path).map_err(|error| RuntimeError::ReadFile { path, error })?;
-        if fragments.matches(&actual) {
-            eprintln!("info: ok {path}");
-        } else {
-            eprintln!("warning: outdated {path}");
-            outdated.push(path);
+        if !fragments.matches(&actual) {
+            eprintln!("error: File {path} is out-of-date");
+            has_outdated = true;
         }
     }
-    if outdated.is_empty() {
-        Ok(())
+    if has_outdated {
+        Err(RuntimeError::Outdated)
     } else {
-        Err(RuntimeError::Outdated { outdated })
+        Ok(())
     }
 }
