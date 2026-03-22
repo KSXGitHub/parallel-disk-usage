@@ -3,9 +3,8 @@ use derive_more::Display;
 use pipe_trait::Pipe;
 use std::{
     fmt,
-    fs::{create_dir_all, read_to_string, File},
+    fs::{read_to_string, File},
     io::{self, Write},
-    path::Path,
     process::ExitCode,
 };
 
@@ -52,11 +51,6 @@ const FILES: &[(&str, Fragments)] = &[
 
 #[derive(Debug, Display)]
 enum RuntimeError {
-    #[display("failed to create directory for {path}: {error}")]
-    CreateDir {
-        path: &'static str,
-        error: io::Error,
-    },
     #[display("failed to write {path}: {error}")]
     WriteFile {
         path: &'static str,
@@ -94,9 +88,6 @@ fn main() -> ExitCode {
 
 fn write_files() -> Result<(), RuntimeError> {
     for (path, fragments) in FILES {
-        if let Some(parent) = Path::new(path).parent() {
-            create_dir_all(parent).map_err(|error| RuntimeError::CreateDir { path, error })?;
-        }
         let mut output = path
             .pipe(File::create)
             .map_err(|error| RuntimeError::WriteFile { path, error })?;
