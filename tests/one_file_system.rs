@@ -63,14 +63,22 @@ fn same_device_on_sample_workspace() {
     );
 }
 
-/// Returns `true` if `unshare --user --mount --map-root-user` is available.
+/// Returns `true` if `unshare --user --mount --map-root-user` is available and allows
+/// mounting a tmpfs inside the created namespace.
 #[cfg(target_os = "linux")]
 #[cfg(not(pdu_test_skip_cross_device))]
 fn unshare_available() -> bool {
     use command_extra::CommandExtra;
     use std::process::{Command, Stdio};
     Command::new("unshare")
-        .with_args(["--user", "--mount", "--map-root-user", "true"])
+        .with_args([
+            "--user",
+            "--mount",
+            "--map-root-user",
+            "sh",
+            "-c",
+            "mountpoint=$(mktemp -d) && mount -t tmpfs tmpfs \"$mountpoint\" && umount \"$mountpoint\"",
+        ])
         .with_stdout(Stdio::null())
         .with_stderr(Stdio::null())
         .status()
