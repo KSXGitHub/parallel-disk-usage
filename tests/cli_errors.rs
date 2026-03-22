@@ -9,9 +9,9 @@ use pretty_assertions::assert_eq;
 use std::process::{Command, Output, Stdio};
 use text_block_macros::text_block;
 
-#[cfg(unix)]
+#[cfg(all(unix, not(pdu_test_skip_fs_errors)))]
 use maplit::btreeset;
-#[cfg(unix)]
+#[cfg(all(unix, not(pdu_test_skip_fs_errors)))]
 use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::DataTree,
@@ -22,7 +22,7 @@ use parallel_disk_usage::{
     reporter::{ErrorOnlyReporter, ErrorReport},
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
-#[cfg(unix)]
+#[cfg(all(unix, not(pdu_test_skip_fs_errors)))]
 use std::{collections::BTreeSet, path::Path};
 
 fn stdio(command: Command) -> Command {
@@ -32,7 +32,7 @@ fn stdio(command: Command) -> Command {
         .with_stderr(Stdio::piped())
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(pdu_test_skip_fs_errors)))]
 fn fs_permission(path: impl AsRef<Path>, permission: &'static str, recursive: bool) {
     let Output { status, stderr, .. } = Command::new("chmod")
         .pipe(|cmd| if recursive { cmd.with_arg("-R") } else { cmd })
