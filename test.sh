@@ -1,6 +1,18 @@
 #! /bin/bash
 set -o errexit -o pipefail -o nounset
 
+# Validate PDU_NO_FAIL_FAST
+no_fail_fast="${PDU_NO_FAIL_FAST:-false}"
+case "$no_fail_fast" in
+true | false) ;;
+*)
+  echo "error: Invalid value for PDU_NO_FAIL_FAST: $no_fail_fast (expected 'true' or 'false')" >&2
+  exit 1
+  ;;
+esac
+
+has_failures=false
+
 run() (
   echo >&2
   echo "exec> $*" >&2
@@ -32,10 +44,24 @@ unit() (
   eval run_if "${TEST:-true}" cargo test "${TEST_FLAGS:-}" "$@"
 )
 
-run_if "${FMT:-true}" cargo fmt -- --check
-unit "$@"
-unit --no-default-features "$@"
-unit --all-features "$@"
-unit --features cli "$@"
-unit --features cli-completions "$@"
-unit --features ai-instructions "$@"
+execute() {
+  if [[ "$no_fail_fast" == "true" ]]; then
+    "$@" || has_failures=true
+  else
+    "$@"
+  fi
+}
+
+execute run_if "${FMT:-true}" cargo fmt -- --check
+execute unit "$@"
+execute unit --no-default-features "$@"
+execute unit --all-features "$@"
+execute unit --features cli "$@"
+execute unit --features cli-completions "$@"
+execute unit --features ai-instructions "$@"
+
+if [[ "$has_failures" == "true" ]]; then
+  echo >&2
+  echo "error: Some checks have failed. Review the output above for details." >&2
+  exit 1
+fi
