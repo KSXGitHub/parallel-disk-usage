@@ -61,7 +61,7 @@ enum RuntimeError {
         path: &'static str,
         error: io::Error,
     },
-    #[display("Some ai instruction files were outdated.")]
+    #[display("Some AI instruction files were outdated.")]
     Outdated,
 }
 
