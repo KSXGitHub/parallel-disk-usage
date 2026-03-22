@@ -373,6 +373,7 @@ where
                 panic!("Unexpected call to report_error: {error:?}")
             }),
             root: root.join(suffix),
+            one_file_system: false,
             max_depth: 10,
         }
         .pipe(DataTree::<OsStringDisplay, Size>::from)

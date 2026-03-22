@@ -45,6 +45,7 @@ fn total_width() {
         size_getter: DEFAULT_GET_SIZE,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -84,6 +85,7 @@ fn column_width() {
         size_getter: DEFAULT_GET_SIZE,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -123,6 +125,7 @@ fn min_ratio_0() {
         size_getter: GetApparentSize,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -161,6 +164,7 @@ fn min_ratio() {
         size_getter: GetApparentSize,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -200,6 +204,7 @@ fn max_depth_2() {
         size_getter: GetApparentSize,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 2,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -239,6 +244,7 @@ fn max_depth_1() {
         size_getter: GetApparentSize,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 1,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -277,6 +283,7 @@ fn top_down() {
         size_getter: DEFAULT_GET_SIZE,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -315,6 +322,7 @@ fn align_right() {
         size_getter: DEFAULT_GET_SIZE,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -353,6 +361,7 @@ fn quantity_apparent_size() {
         size_getter: GetApparentSize,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -392,6 +401,7 @@ fn quantity_block_size() {
         size_getter: GetBlockSize,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -431,6 +441,7 @@ fn quantity_block_count() {
         size_getter: GetBlockCount,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -470,6 +481,7 @@ fn bytes_format_plain() {
         size_getter: GetApparentSize,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -509,6 +521,7 @@ fn bytes_format_metric() {
         size_getter: GetApparentSize,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -548,6 +561,7 @@ fn bytes_format_binary() {
         size_getter: GetApparentSize,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -586,6 +600,7 @@ fn path_to_workspace() {
         size_getter: DEFAULT_GET_SIZE,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 10,
     };
     let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -629,6 +644,7 @@ fn multiple_names() {
                 size_getter: GetApparentSize,
                 hardlinks_recorder: &HardlinkIgnorant,
                 reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+                one_file_system: false,
                 max_depth: 10,
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -694,6 +710,7 @@ fn multiple_names_max_depth_2() {
                 size_getter: GetApparentSize,
                 hardlinks_recorder: &HardlinkIgnorant,
                 reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+                one_file_system: false,
                 max_depth: 1,
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();
@@ -754,6 +771,7 @@ fn multiple_names_max_depth_1() {
                 size_getter: GetApparentSize,
                 hardlinks_recorder: &HardlinkIgnorant,
                 reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+                one_file_system: false,
                 max_depth: 10,
             };
             let mut data_tree: DataTree<OsStringDisplay, _> = builder.into();

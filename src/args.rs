@@ -155,6 +155,10 @@ pub struct Args {
     #[clap(long, short, visible_alias = "no-errors")]
     pub silent_errors: bool,
 
+    /// Skip directories on different filesystems.
+    #[clap(long, short = 'x', visible_alias = "one-file-system")]
+    pub one_file_system: bool,
+
     /// Report progress being made at the expense of performance.
     #[clap(long, short)]
     pub progress: bool,
