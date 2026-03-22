@@ -11,6 +11,11 @@ fn ai_instructions_up_to_date() {
         .with_arg(env!("CARGO_MANIFEST_DIR"))
         .output()
         .expect("spawn pdu-ai-instructions");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stdout = stdout.trim();
+    if !stdout.is_empty() {
+        eprintln!("STDOUT:\n{stdout}\n");
+    }
     let stderr = String::from_utf8_lossy(&output.stderr);
     let stderr = stderr.trim();
     if !stderr.is_empty() {

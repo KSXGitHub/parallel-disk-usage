@@ -67,12 +67,13 @@ enum RuntimeError {
 }
 
 impl RuntimeError {
-    fn hint(&self) -> Option<impl fmt::Display> {
+    fn hint(&self, args: &Args) -> Option<impl fmt::Display> {
         match self {
             RuntimeError::ReadFile { .. } | RuntimeError::WriteFile { .. } => None,
-            RuntimeError::Outdated => {
-                Some("Run `./run.sh pdu-ai-instructions --generate .` to update.")
-            }
+            RuntimeError::Outdated => Some(format!(
+                "Run `./run.sh pdu-ai-instructions --generate {}` to update.",
+                args.repository.display(),
+            )),
         }
     }
 }
@@ -97,7 +98,7 @@ fn main() -> ExitCode {
     };
     if let Err(error) = result {
         eprintln!("error: {error}");
-        if let Some(hint) = error.hint() {
+        if let Some(hint) = error.hint(&args) {
             eprintln!("hint: {hint}");
         }
         return ExitCode::FAILURE;
