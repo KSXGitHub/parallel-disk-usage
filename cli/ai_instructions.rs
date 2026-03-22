@@ -1,18 +1,24 @@
 use clap::Parser;
 use derive_more::Display;
-use std::{fs, path::Path, process::ExitCode};
+use std::{
+    fmt, fs,
+    io::{self, Write},
+    path::Path,
+    process::ExitCode,
+};
 
 const SHARED: &str = include_str!("../template/ai-instructions/shared.md");
 const CLAUDE: &str = include_str!("../template/ai-instructions/claude.md");
 const COPILOT: &str = include_str!("../template/ai-instructions/copilot.md");
 const AGENTS: &str = include_str!("../template/ai-instructions/agents.md");
 
+#[derive(Clone, Copy)]
 struct AiInstructionFile {
     path: &'static str,
     fragments: &'static [&'static str],
 }
 
-const FILES: [AiInstructionFile; 3] = [
+const FILES: &[AiInstructionFile] = &[
     AiInstructionFile {
         path: "CLAUDE.md",
         fragments: &[SHARED, CLAUDE],
@@ -27,9 +33,25 @@ const FILES: [AiInstructionFile; 3] = [
     },
 ];
 
+impl fmt::Display for AiInstructionFile {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for fragment in self.fragments {
+            f.write_str(fragment)?;
+        }
+        Ok(())
+    }
+}
+
 impl AiInstructionFile {
-    fn content(&self) -> String {
-        self.fragments.concat()
+    fn matches(&self, actual: &str) -> bool {
+        let mut remaining = actual;
+        for fragment in self.fragments {
+            match remaining.strip_prefix(fragment) {
+                Some(rest) => remaining = rest,
+                None => return false,
+            }
+        }
+        remaining.is_empty()
     }
 }
 
@@ -38,29 +60,20 @@ enum RuntimeError {
     #[display("failed to create directory for {path}: {error}")]
     CreateDir {
         path: &'static str,
-        error: std::io::Error,
+        error: io::Error,
     },
     #[display("failed to write {path}: {error}")]
     WriteFile {
         path: &'static str,
-        error: std::io::Error,
+        error: io::Error,
     },
     #[display("failed to read {path}: {error}")]
     ReadFile {
         path: &'static str,
-        error: std::io::Error,
+        error: io::Error,
     },
-    #[display("{}", display_outdated(outdated))]
+    #[display("outdated files:\n  {}\n\nRun `./run.sh pdu-ai-instructions --generate` to update.", outdated.join("\n  "))]
     Outdated { outdated: Vec<&'static str> },
-}
-
-fn display_outdated(outdated: &[&str]) -> String {
-    let mut message = String::from("outdated files:");
-    for path in outdated {
-        message.push_str(&format!("\n  {path}"));
-    }
-    message.push_str("\n\nRun `./run.sh pdu-ai-instructions --generate` to update.");
-    message
 }
 
 /// Check or generate AI instruction files from templates.
@@ -81,40 +94,44 @@ fn main() -> ExitCode {
     match result {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
-            eprintln!("[error] {error}");
+            eprintln!("error: {error}");
             ExitCode::FAILURE
         }
     }
 }
 
 fn write_files() -> Result<(), RuntimeError> {
-    for file in &FILES {
+    for file in FILES {
         if let Some(parent) = Path::new(file.path).parent() {
             fs::create_dir_all(parent).map_err(|error| RuntimeError::CreateDir {
                 path: file.path,
                 error,
             })?;
         }
-        fs::write(file.path, file.content()).map_err(|error| RuntimeError::WriteFile {
+        let mut output = fs::File::create(file.path).map_err(|error| RuntimeError::WriteFile {
             path: file.path,
             error,
         })?;
-        eprintln!("wrote {}", file.path);
+        write!(output, "{file}").map_err(|error| RuntimeError::WriteFile {
+            path: file.path,
+            error,
+        })?;
+        eprintln!("info: wrote {}", file.path);
     }
     Ok(())
 }
 
 fn check_files() -> Result<(), RuntimeError> {
     let mut outdated = Vec::new();
-    for file in &FILES {
+    for file in FILES {
         let actual = fs::read_to_string(file.path).map_err(|error| RuntimeError::ReadFile {
             path: file.path,
             error,
         })?;
-        if actual == file.content() {
-            eprintln!("ok: {}", file.path);
+        if file.matches(&actual) {
+            eprintln!("info: ok {}", file.path);
         } else {
-            eprintln!("outdated: {}", file.path);
+            eprintln!("warning: outdated {}", file.path);
             outdated.push(file.path);
         }
     }
