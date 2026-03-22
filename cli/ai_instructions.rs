@@ -61,7 +61,7 @@ enum RuntimeError {
         path: &'static str,
         error: io::Error,
     },
-    #[display("Run `./run.sh pdu-ai-instructions --generate` to update.")]
+    #[display("Some ai instruction files were outdated. Run `./run.sh pdu-ai-instructions --generate` to update.")]
     Outdated,
 }
 
