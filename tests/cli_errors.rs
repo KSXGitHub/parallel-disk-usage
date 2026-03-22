@@ -106,6 +106,7 @@ fn max_depth_0() {
 }
 
 #[cfg(unix)]
+#[allow(unexpected_cfgs)]
 #[cfg(not(pdu_test_skip_fs_errors))]
 #[test]
 fn fs_errors() {
