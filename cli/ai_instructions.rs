@@ -13,39 +13,21 @@ const COPILOT: &str = include_str!("../template/ai-instructions/copilot.md");
 const AGENTS: &str = include_str!("../template/ai-instructions/agents.md");
 
 #[derive(Clone, Copy)]
-struct AiInstructionFile {
-    path: &'static str,
-    fragments: &'static [&'static str],
-}
+struct Fragments(&'static [&'static str]);
 
-const FILES: &[AiInstructionFile] = &[
-    AiInstructionFile {
-        path: "CLAUDE.md",
-        fragments: &[SHARED, CLAUDE],
-    },
-    AiInstructionFile {
-        path: ".github/copilot-instructions.md",
-        fragments: &[SHARED, COPILOT],
-    },
-    AiInstructionFile {
-        path: "AGENTS.md",
-        fragments: &[SHARED, AGENTS],
-    },
-];
-
-impl fmt::Display for AiInstructionFile {
+impl fmt::Display for Fragments {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for fragment in self.fragments {
+        for fragment in self.0 {
             f.write_str(fragment)?;
         }
         Ok(())
     }
 }
 
-impl AiInstructionFile {
+impl Fragments {
     fn matches(&self, actual: &str) -> bool {
         let mut remaining = actual;
-        for fragment in self.fragments {
+        for fragment in self.0 {
             match remaining.strip_prefix(fragment) {
                 Some(rest) => remaining = rest,
                 None => return false,
@@ -54,6 +36,27 @@ impl AiInstructionFile {
         remaining.is_empty()
     }
 }
+
+#[derive(Clone, Copy)]
+struct AiInstructionFile {
+    path: &'static str,
+    fragments: Fragments,
+}
+
+const FILES: &[AiInstructionFile] = &[
+    AiInstructionFile {
+        path: "CLAUDE.md",
+        fragments: Fragments(&[SHARED, CLAUDE]),
+    },
+    AiInstructionFile {
+        path: ".github/copilot-instructions.md",
+        fragments: Fragments(&[SHARED, COPILOT]),
+    },
+    AiInstructionFile {
+        path: "AGENTS.md",
+        fragments: Fragments(&[SHARED, AGENTS]),
+    },
+];
 
 #[derive(Debug, Display)]
 enum RuntimeError {
@@ -86,18 +89,15 @@ struct Args {
 
 fn main() -> ExitCode {
     let args = Args::parse();
-    let result = if args.generate {
+    if let Err(error) = if args.generate {
         write_files()
     } else {
         check_files()
-    };
-    match result {
-        Ok(()) => ExitCode::SUCCESS,
-        Err(error) => {
-            eprintln!("error: {error}");
-            ExitCode::FAILURE
-        }
+    } {
+        eprintln!("error: {error}");
+        return ExitCode::FAILURE;
     }
+    ExitCode::SUCCESS
 }
 
 fn write_files() -> Result<(), RuntimeError> {
@@ -112,11 +112,11 @@ fn write_files() -> Result<(), RuntimeError> {
             path: file.path,
             error,
         })?;
-        write!(output, "{file}").map_err(|error| RuntimeError::WriteFile {
+        write!(output, "{}", file.fragments).map_err(|error| RuntimeError::WriteFile {
             path: file.path,
             error,
         })?;
-        eprintln!("info: wrote {}", file.path);
+        eprintln!("info: Generated file {}", file.path);
     }
     Ok(())
 }
@@ -128,7 +128,7 @@ fn check_files() -> Result<(), RuntimeError> {
             path: file.path,
             error,
         })?;
-        if file.matches(&actual) {
+        if file.fragments.matches(&actual) {
             eprintln!("info: ok {}", file.path);
         } else {
             eprintln!("warning: outdated {}", file.path);
