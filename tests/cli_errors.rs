@@ -10,8 +10,10 @@ use std::process::{Command, Output, Stdio};
 use text_block_macros::text_block;
 
 #[cfg(unix)]
+#[cfg(not(pdu_test_skip_fs_errors))]
 use maplit::btreeset;
 #[cfg(unix)]
+#[cfg(not(pdu_test_skip_fs_errors))]
 use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::DataTree,
@@ -23,6 +25,7 @@ use parallel_disk_usage::{
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 #[cfg(unix)]
+#[cfg(not(pdu_test_skip_fs_errors))]
 use std::{collections::BTreeSet, path::Path};
 
 fn stdio(command: Command) -> Command {
@@ -33,6 +36,7 @@ fn stdio(command: Command) -> Command {
 }
 
 #[cfg(unix)]
+#[cfg(not(pdu_test_skip_fs_errors))]
 fn fs_permission(path: impl AsRef<Path>, permission: &'static str, recursive: bool) {
     let Output { status, stderr, .. } = Command::new("chmod")
         .pipe(|cmd| if recursive { cmd.with_arg("-R") } else { cmd })
@@ -106,8 +110,17 @@ fn max_depth_0() {
 }
 
 #[cfg(unix)]
+#[cfg(not(pdu_test_skip_fs_errors))]
 #[test]
 fn fs_errors() {
+    if unsafe { libc::geteuid() } == 0 {
+        panic!(
+            "{}\n{}",
+            "error: This test must not be run as root because running with elevated privileges would affect its accuracy.",
+            "hint: Either run this test as a non-root user or set `RUSTFLAGS='--cfg pdu_test_skip_fs_errors'` to skip this test.",
+        );
+    }
+
     let workspace = SampleWorkspace::default();
     fs_permission(workspace.join("empty-dir"), "-r", false);
     fs_permission(workspace.join("nested").join("0"), "-r", false);
