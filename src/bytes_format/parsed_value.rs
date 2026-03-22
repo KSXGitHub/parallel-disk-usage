@@ -1,7 +1,7 @@
-use derive_more::Display;
+use derive_more::{Display, Error};
 
 /// Return value of [`Formatter::parse_value`](super::Formatter::parse_value).
-#[derive(Debug, Display, Clone, Copy)]
+#[derive(Debug, Display, Clone, Copy, Error)]
 pub enum ParsedValue {
     /// When input value is less than `scale_base`.
     #[display("{value}   ")]
