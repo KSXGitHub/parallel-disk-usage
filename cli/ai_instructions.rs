@@ -38,24 +38,15 @@ impl Fragments {
 }
 
 #[derive(Clone, Copy)]
-struct AiInstructionFile {
-    path: &'static str,
-    fragments: Fragments,
-}
+struct AiInstructionFile(&'static str, Fragments);
 
 const FILES: &[AiInstructionFile] = &[
-    AiInstructionFile {
-        path: "CLAUDE.md",
-        fragments: Fragments(&[SHARED, CLAUDE]),
-    },
-    AiInstructionFile {
-        path: ".github/copilot-instructions.md",
-        fragments: Fragments(&[SHARED, COPILOT]),
-    },
-    AiInstructionFile {
-        path: "AGENTS.md",
-        fragments: Fragments(&[SHARED, AGENTS]),
-    },
+    AiInstructionFile("CLAUDE.md", Fragments(&[SHARED, CLAUDE])),
+    AiInstructionFile(
+        ".github/copilot-instructions.md",
+        Fragments(&[SHARED, COPILOT]),
+    ),
+    AiInstructionFile("AGENTS.md", Fragments(&[SHARED, AGENTS])),
 ];
 
 #[derive(Debug, Display)]
@@ -101,38 +92,28 @@ fn main() -> ExitCode {
 }
 
 fn write_files() -> Result<(), RuntimeError> {
-    for file in FILES {
-        if let Some(parent) = Path::new(file.path).parent() {
-            fs::create_dir_all(parent).map_err(|error| RuntimeError::CreateDir {
-                path: file.path,
-                error,
-            })?;
+    for &AiInstructionFile(path, fragments) in FILES {
+        if let Some(parent) = Path::new(path).parent() {
+            fs::create_dir_all(parent).map_err(|error| RuntimeError::CreateDir { path, error })?;
         }
-        let mut output = fs::File::create(file.path).map_err(|error| RuntimeError::WriteFile {
-            path: file.path,
-            error,
-        })?;
-        write!(output, "{}", file.fragments).map_err(|error| RuntimeError::WriteFile {
-            path: file.path,
-            error,
-        })?;
-        eprintln!("info: Generated file {}", file.path);
+        let mut output =
+            fs::File::create(path).map_err(|error| RuntimeError::WriteFile { path, error })?;
+        write!(output, "{fragments}").map_err(|error| RuntimeError::WriteFile { path, error })?;
+        eprintln!("info: Generated file {path}");
     }
     Ok(())
 }
 
 fn check_files() -> Result<(), RuntimeError> {
     let mut outdated = Vec::new();
-    for file in FILES {
-        let actual = fs::read_to_string(file.path).map_err(|error| RuntimeError::ReadFile {
-            path: file.path,
-            error,
-        })?;
-        if file.fragments.matches(&actual) {
-            eprintln!("info: ok {}", file.path);
+    for &AiInstructionFile(path, fragments) in FILES {
+        let actual =
+            fs::read_to_string(path).map_err(|error| RuntimeError::ReadFile { path, error })?;
+        if fragments.matches(&actual) {
+            eprintln!("info: ok {path}");
         } else {
-            eprintln!("warning: outdated {}", file.path);
-            outdated.push(file.path);
+            eprintln!("warning: outdated {path}");
+            outdated.push(path);
         }
     }
     if outdated.is_empty() {
