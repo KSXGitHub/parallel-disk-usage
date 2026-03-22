@@ -23,3 +23,32 @@ pub(crate) fn get_device_id(stats: &std::fs::Metadata) -> DeviceId {
 pub(crate) fn get_device_id(_stats: &std::fs::Metadata) -> DeviceId {
     DeviceId(())
 }
+
+#[cfg(test)]
+#[cfg(unix)]
+mod tests {
+    use super::get_device_id;
+    use std::fs::symlink_metadata;
+
+    #[test]
+    fn same_filesystem_returns_equal_ids() {
+        let root_stats = symlink_metadata("/").expect("stat /");
+        let root_stats2 = symlink_metadata("/").expect("stat / again");
+        assert_eq!(
+            get_device_id(&root_stats),
+            get_device_id(&root_stats2),
+            "same path should yield the same DeviceId",
+        );
+    }
+
+    #[test]
+    fn different_filesystem_returns_different_ids() {
+        let root_stats = symlink_metadata("/").expect("stat /");
+        let proc_stats = symlink_metadata("/proc").expect("stat /proc");
+        assert_ne!(
+            get_device_id(&root_stats),
+            get_device_id(&proc_stats),
+            "/ and /proc should be on different devices",
+        );
+    }
+}
