@@ -1,0 +1,1 @@
+- `gh` (GitHub CLI) is not installed — do not attempt to use it
