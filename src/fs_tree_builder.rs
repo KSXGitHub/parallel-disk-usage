@@ -7,6 +7,7 @@ use super::{
     size,
     tree_builder::{Info, TreeBuilder},
 };
+use device_id::get_device_id;
 use pipe_trait::Pipe;
 use std::{
     fs::{read_dir, symlink_metadata},
@@ -75,13 +76,27 @@ where
             max_depth,
         } = builder;
 
+        // `root` would be inspected multiple times, but its impact on performance is insignificant
+        // before the (usually) massive fs tree `root` contains.
+        let root_dev = match symlink_metadata(&root) {
+            Err(error) => {
+                reporter.report(Event::EncounterError(ErrorReport {
+                    operation: SymlinkMetadata,
+                    path: &root,
+                    error,
+                }));
+                return DataTree::file(OsStringDisplay::os_string_from(&root), Size::default());
+            }
+            Ok(stats) => get_device_id(&stats),
+        };
+
         TreeBuilder::<PathBuf, OsStringDisplay, Size, _, _> {
             name: OsStringDisplay::os_string_from(&root),
 
             path: root,
 
             get_info: |path| {
-                let (is_dir, size) = match symlink_metadata(path) {
+                let (is_dir, dev, size) = match symlink_metadata(path) {
                     Err(error) => {
                         reporter.report(Event::EncounterError(ErrorReport {
                             operation: SymlinkMetadata,
@@ -96,6 +111,7 @@ where
                     Ok(stats) => {
                         // `stats` should be dropped ASAP to avoid piling up kernel memory usage
                         let is_dir = stats.is_dir();
+                        let dev = get_device_id(&stats);
                         let size = size_getter.get_size(&stats);
                         reporter.report(Event::ReceiveData(size));
                         hardlinks_recorder
@@ -103,11 +119,11 @@ where
                                 path, &stats, size, reporter,
                             ))
                             .ok(); // ignore the error for now
-                        (is_dir, size)
+                        (is_dir, dev, size)
                     }
                 };
 
-                let children: Vec<_> = if is_dir {
+                let children: Vec<_> = if is_dir && dev == root_dev {
                     match read_dir(path) {
                         Err(error) => {
                             reporter.report(Event::EncounterError(ErrorReport {
@@ -145,3 +161,5 @@ where
         .into()
     }
 }
+
+mod device_id;
