@@ -11,7 +11,9 @@ use parallel_disk_usage::usage_md::render_usage_md;
 
 #[test]
 fn usage_md() {
-    let actual = render_usage_md().unwrap();
+    let actual = render_usage_md().unwrap_or_else(|error| {
+        panic!("failed to render usage markdown: {error}");
+    });
     let expected = include_str!("../USAGE.md");
     assert!(
         actual.trim_end() == expected.trim_end(),
