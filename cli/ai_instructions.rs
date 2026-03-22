@@ -61,8 +61,19 @@ enum RuntimeError {
         path: &'static str,
         error: io::Error,
     },
-    #[display("Some ai instruction files were outdated. Run `./run.sh pdu-ai-instructions --generate` to update.")]
+    #[display("Some ai instruction files were outdated.")]
     Outdated,
+}
+
+impl RuntimeError {
+    fn hint(&self) -> Option<impl fmt::Display> {
+        match self {
+            RuntimeError::ReadFile { .. } | RuntimeError::WriteFile { .. } => None,
+            RuntimeError::Outdated => {
+                Some("Run `./run.sh pdu-ai-instructions --generate` to update.")
+            }
+        }
+    }
 }
 
 /// Check or generate AI instruction files from templates.
@@ -81,6 +92,9 @@ fn main() -> ExitCode {
     };
     if let Err(error) = result {
         eprintln!("error: {error}");
+        if let Some(hint) = error.hint() {
+            eprintln!("hint: {hint}");
+        }
         return ExitCode::FAILURE;
     }
     ExitCode::SUCCESS
