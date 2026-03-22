@@ -63,14 +63,16 @@ fn same_device_on_sample_workspace() {
     );
 }
 
-/// Returns `true` if `unshare --user --mount --map-root-user` is available and allows
+/// Checks that `unshare --user --mount --map-root-user` is available and allows
 /// mounting a tmpfs inside the created namespace.
+///
+/// Returns `Ok(())` on success, or `Err` with a diagnostic message on failure.
 #[cfg(target_os = "linux")]
 #[cfg(not(pdu_test_skip_cross_device))]
-fn unshare_available() -> bool {
+fn unshare_available() -> Result<(), String> {
     use command_extra::CommandExtra;
-    use std::process::{Command, Stdio};
-    Command::new("unshare")
+    use std::process::Command;
+    let output = Command::new("unshare")
         .with_args([
             "--user",
             "--mount",
@@ -79,10 +81,18 @@ fn unshare_available() -> bool {
             "-c",
             "mountpoint=$(mktemp -d) && mount -t tmpfs tmpfs \"$mountpoint\" && umount \"$mountpoint\"",
         ])
-        .with_stdout(Stdio::null())
-        .with_stderr(Stdio::null())
-        .status()
-        .is_ok_and(|status| status.success())
+        .output()
+        .map_err(|error| format!("failed to execute unshare: {error}"))?;
+    if output.status.success() {
+        Ok(())
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        Err(format!(
+            "unshare probe exited with {}: {}",
+            output.status,
+            stderr.trim(),
+        ))
+    }
 }
 
 /// When a subdirectory is a mount point for a different filesystem, `-x` should exclude it.
@@ -99,11 +109,11 @@ fn cross_device_excludes_mount() {
         process::{Command, Stdio},
     };
 
-    if !unshare_available() {
+    if let Err(reason) = unshare_available() {
         panic!(
-            "{}\n{}",
-            "error: This test requires `unshare --user --mount --map-root-user` but the command is not available.",
-            "hint: Either enable user namespaces or set `RUSTFLAGS='--cfg pdu_test_skip_cross_device'` to skip this test.",
+            "error: This test requires `unshare --user --mount --map-root-user` but the probe failed.\n\
+             reason: {reason}\n\
+             hint: Either enable user namespaces or set `RUSTFLAGS='--cfg pdu_test_skip_cross_device'` to skip this test.",
         );
     }
 
