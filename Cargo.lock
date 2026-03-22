@@ -643,6 +643,7 @@ dependencies = [
  "fmt-iter",
  "into-sorted",
  "itertools 0.14.0",
+ "libc",
  "maplit",
  "normalize-path",
  "pipe-trait",
