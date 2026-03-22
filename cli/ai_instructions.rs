@@ -51,12 +51,12 @@ const FILES: &[(&str, Fragments)] = &[
 
 #[derive(Debug, Display)]
 enum RuntimeError {
-    #[display("failed to write {path}: {error}")]
+    #[display("Failed to write {path}: {error}")]
     WriteFile {
         path: &'static str,
         error: io::Error,
     },
-    #[display("failed to read {path}: {error}")]
+    #[display("Failed to read {path}: {error}")]
     ReadFile {
         path: &'static str,
         error: io::Error,
