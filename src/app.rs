@@ -133,6 +133,13 @@ impl App {
                 .pipe(Err);
         }
 
+        #[cfg(not(unix))]
+        if self.args.one_file_system {
+            return crate::runtime_error::UnsupportedFeature::OneFileSystem
+                .pipe(RuntimeError::UnsupportedFeature)
+                .pipe(Err);
+        }
+
         let threads = match self.args.threads {
             Threads::Auto => {
                 let disks = Disks::new_with_refreshed_list();
@@ -288,6 +295,7 @@ impl App {
                     bytes_format,
                     top_down,
                     align_right,
+                    one_file_system,
                     max_depth,
                     min_ratio,
                     no_sort,
@@ -304,6 +312,7 @@ impl App {
                     files,
                     json_output: JsonOutputParam::from_cli_flags(json_output, omit_json_shared_details, omit_json_shared_summary),
                     column_width_distribution,
+                    one_file_system,
                     max_depth,
                     min_ratio,
                     no_sort,

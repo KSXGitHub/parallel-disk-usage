@@ -7,6 +7,7 @@ use super::{
     size,
     tree_builder::{Info, TreeBuilder},
 };
+use device_id::get_device_id;
 use pipe_trait::Pipe;
 use std::{
     fs::{read_dir, symlink_metadata},
@@ -32,6 +33,7 @@ use std::{
 ///     hardlinks_recorder: &HardlinkIgnorant,
 ///     size_getter: GetApparentSize,
 ///     reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+///     one_file_system: false,
 ///     max_depth: 10,
 /// };
 /// let data_tree: DataTree<OsStringDisplay, Bytes> = builder.into();
@@ -52,6 +54,8 @@ where
     pub hardlinks_recorder: &'a HardlinksRecorder,
     /// Reports progress to external system.
     pub reporter: &'a Report,
+    /// Skip directories on different filesystems.
+    pub one_file_system: bool,
     /// Deepest level of descendant display in the graph. The sizes beyond the max depth still count toward total.
     pub max_depth: u64,
 }
@@ -72,8 +76,27 @@ where
             size_getter,
             hardlinks_recorder,
             reporter,
+            one_file_system,
             max_depth,
         } = builder;
+
+        // `root` would be inspected multiple times, but its impact on performance is insignificant
+        // before the (usually) massive fs tree `root` contains.
+        let root_dev = if one_file_system {
+            match symlink_metadata(&root) {
+                Err(error) => {
+                    reporter.report(Event::EncounterError(ErrorReport {
+                        operation: SymlinkMetadata,
+                        path: &root,
+                        error,
+                    }));
+                    return DataTree::file(OsStringDisplay::os_string_from(&root), Size::default());
+                }
+                Ok(stats) => Some(get_device_id(&stats)),
+            }
+        } else {
+            None
+        };
 
         TreeBuilder::<PathBuf, OsStringDisplay, Size, _, _> {
             name: OsStringDisplay::os_string_from(&root),
@@ -81,7 +104,7 @@ where
             path: root,
 
             get_info: |path| {
-                let (is_dir, size) = match symlink_metadata(path) {
+                let (is_dir, size, same_device) = match symlink_metadata(path) {
                     Err(error) => {
                         reporter.report(Event::EncounterError(ErrorReport {
                             operation: SymlinkMetadata,
@@ -96,6 +119,8 @@ where
                     Ok(stats) => {
                         // `stats` should be dropped ASAP to avoid piling up kernel memory usage
                         let is_dir = stats.is_dir();
+                        let same_device =
+                            root_dev.is_none_or(|root_dev| get_device_id(&stats) == root_dev);
                         let size = size_getter.get_size(&stats);
                         reporter.report(Event::ReceiveData(size));
                         hardlinks_recorder
@@ -103,11 +128,11 @@ where
                                 path, &stats, size, reporter,
                             ))
                             .ok(); // ignore the error for now
-                        (is_dir, size)
+                        (is_dir, size, same_device)
                     }
                 };
 
-                let children: Vec<_> = if is_dir {
+                let children: Vec<_> = if is_dir && same_device {
                     match read_dir(path) {
                         Err(error) => {
                             reporter.report(Event::EncounterError(ErrorReport {
@@ -145,3 +170,5 @@ where
         .into()
     }
 }
+
+mod device_id;

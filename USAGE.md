@@ -101,6 +101,13 @@ Do not sort the branches in the tree.
 
 Prevent filesystem error messages from appearing in stderr.
 
+<a id="option-x" name="option-x"></a><a id="one-file-system" name="one-file-system"></a>
+### `--one-file-system`
+
+* _Aliases:_ `-x`.
+
+Skip directories on different filesystems.
+
 <a id="option-p" name="option-p"></a><a id="progress" name="progress"></a>
 ### `--progress`
 

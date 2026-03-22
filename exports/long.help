@@ -74,6 +74,9 @@ Options:
 
           [aliases: --no-errors]
 
+  -x, --one-file-system
+          Skip directories on different filesystems
+
   -p, --progress
           Report progress being made at the expense of performance
 

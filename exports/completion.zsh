@@ -49,6 +49,8 @@ block-count\:"Count numbers of blocks"))' \
 '-s[Prevent filesystem error messages from appearing in stderr]' \
 '--silent-errors[Prevent filesystem error messages from appearing in stderr]' \
 '--no-errors[Prevent filesystem error messages from appearing in stderr]' \
+'-x[Skip directories on different filesystems]' \
+'--one-file-system[Skip directories on different filesystems]' \
 '-p[Report progress being made at the expense of performance]' \
 '--progress[Report progress being made at the expense of performance]' \
 '--omit-json-shared-details[Do not output \`.shared.details\` in the JSON output]' \

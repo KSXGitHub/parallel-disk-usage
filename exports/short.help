@@ -32,6 +32,8 @@ Options:
           Do not sort the branches in the tree
   -s, --silent-errors
           Prevent filesystem error messages from appearing in stderr [aliases: --no-errors]
+  -x, --one-file-system
+          Skip directories on different filesystems
   -p, --progress
           Report progress being made at the expense of performance
       --threads <THREADS>

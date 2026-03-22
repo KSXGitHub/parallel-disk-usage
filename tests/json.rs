@@ -85,6 +85,7 @@ fn json_output() {
         size_getter: GetApparentSize,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+        one_file_system: false,
         max_depth: 10,
     };
     let expected = builder
