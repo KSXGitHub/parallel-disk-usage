@@ -79,11 +79,12 @@ struct Args {
 
 fn main() -> ExitCode {
     let args = Args::parse();
-    if let Err(error) = if args.generate {
+    let result = if args.generate {
         write_files()
     } else {
         check_files()
-    } {
+    };
+    if let Err(error) = result {
         eprintln!("error: {error}");
         return ExitCode::FAILURE;
     }
@@ -104,18 +105,14 @@ fn write_files() -> Result<(), RuntimeError> {
 }
 
 fn check_files() -> Result<(), RuntimeError> {
-    let mut has_outdated = false;
+    let mut result: Result<(), RuntimeError> = Ok(());
     for &(path, fragments) in FILES {
         let actual =
             fs::read_to_string(path).map_err(|error| RuntimeError::ReadFile { path, error })?;
         if !fragments.matches(&actual) {
             eprintln!("error: File {path} is out-of-date");
-            has_outdated = true;
+            result = Err(RuntimeError::Outdated);
         }
     }
-    if has_outdated {
-        Err(RuntimeError::Outdated)
-    } else {
-        Ok(())
-    }
+    result
 }
