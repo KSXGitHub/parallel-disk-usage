@@ -79,10 +79,9 @@ struct Args {
 
 fn main() -> ExitCode {
     let args = Args::parse();
-    let result = if args.generate {
-        write_files()
-    } else {
-        check_files()
+    let result = match args.generate {
+        true => write_files(),
+        false => check_files(),
     };
     if let Err(error) = result {
         eprintln!("error: {error}");
