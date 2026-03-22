@@ -1,5 +1,6 @@
 use clap::Parser;
 use derive_more::Display;
+use pipe_trait::Pipe;
 use std::{
     fmt, fs,
     io::{self, Write},
@@ -95,8 +96,9 @@ fn write_files() -> Result<(), RuntimeError> {
         if let Some(parent) = Path::new(path).parent() {
             fs::create_dir_all(parent).map_err(|error| RuntimeError::CreateDir { path, error })?;
         }
-        let mut output =
-            fs::File::create(path).map_err(|error| RuntimeError::WriteFile { path, error })?;
+        let mut output = path
+            .pipe(fs::File::create)
+            .map_err(|error| RuntimeError::WriteFile { path, error })?;
         write!(output, "{fragments}").map_err(|error| RuntimeError::WriteFile { path, error })?;
         eprintln!("info: Generated file {path}");
     }
@@ -106,8 +108,9 @@ fn write_files() -> Result<(), RuntimeError> {
 fn check_files() -> Result<(), RuntimeError> {
     let mut result: Result<(), RuntimeError> = Ok(());
     for &(path, fragments) in FILES {
-        let actual =
-            fs::read_to_string(path).map_err(|error| RuntimeError::ReadFile { path, error })?;
+        let actual = path
+            .pipe(fs::read_to_string)
+            .map_err(|error| RuntimeError::ReadFile { path, error })?;
         if !fragments.matches(&actual) {
             eprintln!("error: File {path} is out-of-date");
             result = Err(RuntimeError::Outdated);
