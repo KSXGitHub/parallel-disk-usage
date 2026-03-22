@@ -106,11 +106,15 @@ fn max_depth_0() {
 }
 
 #[cfg(unix)]
+#[cfg(not(pdu_test_skip_fs_errors))]
 #[test]
 fn fs_errors() {
     if unsafe { libc::geteuid() } == 0 {
-        eprintln!("SKIPPED: fs_errors test cannot work as root (permission checks are bypassed)");
-        return;
+        panic!(
+            "{}\n{}",
+            "error: Attempt to run this test on root environment was detected. Such an environment would affect the accuracy of this test.",
+            "hint: Either run this test on non-root environment or set `RUSTFLAGS='--cfg pdu_test_skip_fs_errors'` to skip this error.",
+        );
     }
 
     let workspace = SampleWorkspace::default();
