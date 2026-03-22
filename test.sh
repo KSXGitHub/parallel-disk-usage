@@ -11,6 +11,8 @@ true | false) ;;
   ;;
 esac
 
+# A temporary file is used instead of a variable because run_if and unit are
+# subshells, so variable assignments inside them don't propagate to the parent.
 failure_marker=$(mktemp)
 rm -f "$failure_marker"
 
@@ -31,7 +33,10 @@ run_if() (
   case "$condition" in
   true)
     if [[ $no_fail_fast == 'true' ]]; then
-      run "$@" || touch "$failure_marker"
+      run "$@" || {
+        echo "error: Command $@ failed with exit code $?" >&2
+        touch "$failure_marker"
+      }
     else
       run "$@"
     fi
