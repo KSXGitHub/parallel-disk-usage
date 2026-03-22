@@ -76,8 +76,9 @@ impl RuntimeError {
     }
 }
 
-/// Check or generate AI instruction files from templates.
+/// The CLI arguments.
 #[derive(Debug, Parser)]
+#[clap(about = "Check or generate AI instruction files from templates")]
 struct Args {
     /// Generate the AI instruction files instead of checking them.
     #[clap(long)]
