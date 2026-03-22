@@ -8,7 +8,7 @@ const PDU_AI_INSTRUCTIONS: &str = env!("CARGO_BIN_EXE_pdu-ai-instructions");
 #[test]
 fn ai_instructions_up_to_date() {
     let output = Command::new(PDU_AI_INSTRUCTIONS)
-        .with_current_dir(env!("CARGO_MANIFEST_DIR"))
+        .with_arg(env!("CARGO_MANIFEST_DIR"))
         .output()
         .expect("spawn pdu-ai-instructions");
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -18,6 +18,6 @@ fn ai_instructions_up_to_date() {
     }
     assert!(
         output.status.success(),
-        "AI instruction files are outdated. Run `./run.sh pdu-ai-instructions --generate` to update.",
+        "AI instruction files are outdated. Run `./run.sh pdu-ai-instructions --generate .` to update.",
     );
 }

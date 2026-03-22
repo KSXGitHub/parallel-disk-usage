@@ -5,6 +5,7 @@ use std::{
     fmt,
     fs::{read_to_string, File},
     io::{self, Write},
+    path::{Path, PathBuf},
     process::ExitCode,
 };
 
@@ -70,7 +71,7 @@ impl RuntimeError {
         match self {
             RuntimeError::ReadFile { .. } | RuntimeError::WriteFile { .. } => None,
             RuntimeError::Outdated => {
-                Some("Run `./run.sh pdu-ai-instructions --generate` to update.")
+                Some("Run `./run.sh pdu-ai-instructions --generate .` to update.")
             }
         }
     }
@@ -83,13 +84,16 @@ struct Args {
     /// Generate the AI instruction files instead of checking them.
     #[clap(long)]
     generate: bool,
+
+    /// Path to the top-level directory of the repository.
+    repository: PathBuf,
 }
 
 fn main() -> ExitCode {
     let args = Args::parse();
     let result = match args.generate {
-        true => write_files(),
-        false => check_files(),
+        true => write_files(&args.repository),
+        false => check_files(&args.repository),
     };
     if let Err(error) = result {
         eprintln!("error: {error}");
@@ -101,9 +105,10 @@ fn main() -> ExitCode {
     ExitCode::SUCCESS
 }
 
-fn write_files() -> Result<(), RuntimeError> {
+fn write_files(repository: &Path) -> Result<(), RuntimeError> {
     for (path, fragments) in FILES {
-        let mut output = path
+        let full_path = repository.join(path);
+        let mut output = full_path
             .pipe(File::create)
             .map_err(|error| RuntimeError::WriteFile { path, error })?;
         write!(output, "{fragments}").map_err(|error| RuntimeError::WriteFile { path, error })?;
@@ -112,10 +117,11 @@ fn write_files() -> Result<(), RuntimeError> {
     Ok(())
 }
 
-fn check_files() -> Result<(), RuntimeError> {
+fn check_files(repository: &Path) -> Result<(), RuntimeError> {
     let mut result: Result<(), RuntimeError> = Ok(());
     for &(path, fragments) in FILES {
-        let actual = path
+        let full_path = repository.join(path);
+        let actual = full_path
             .pipe(read_to_string)
             .map_err(|error| RuntimeError::ReadFile { path, error })?;
         if !fragments.matches(&actual) {
