@@ -113,12 +113,28 @@ fn cross_device_excludes_mount() {
         "printf '%s' '{inside_content}' > \"$TMPDIR/mounted/inside.txt\""
     )
     .unwrap();
-    writeln!(script, "echo '=== WITHOUT_X ==='").unwrap();
-    writeln!(script, "\"{pdu}\" --bytes-format=plain \"$TMPDIR\" 2>&1").unwrap();
-    writeln!(script, "echo '=== WITH_X ==='").unwrap();
-    writeln!(script, "\"{pdu}\" --bytes-format=plain -x \"$TMPDIR\" 2>&1").unwrap();
+    // Write each pdu invocation's output to a separate file so we don't need
+    // to parse markers from a combined stdout.
+    writeln!(script, "WITHOUT_X=$(mktemp)").unwrap();
+    writeln!(script, "WITH_X=$(mktemp)").unwrap();
+    writeln!(
+        script,
+        "\"{pdu}\" --bytes-format=plain \"$TMPDIR\" >\"$WITHOUT_X\" 2>&1"
+    )
+    .unwrap();
+    writeln!(
+        script,
+        "\"{pdu}\" --bytes-format=plain -x \"$TMPDIR\" >\"$WITH_X\" 2>&1"
+    )
+    .unwrap();
     writeln!(script, "umount \"$TMPDIR/mounted\"").unwrap();
     writeln!(script, "rm -rf \"$TMPDIR\"").unwrap();
+    writeln!(script, "printf 'WITHOUT_X\\0'").unwrap();
+    writeln!(script, "cat \"$WITHOUT_X\"").unwrap();
+    writeln!(script, "printf '\\0WITH_X\\0'").unwrap();
+    writeln!(script, "cat \"$WITH_X\"").unwrap();
+    writeln!(script, "printf '\\0'").unwrap();
+    writeln!(script, "rm -f \"$WITHOUT_X\" \"$WITH_X\"").unwrap();
 
     let output = Command::new("unshare")
         .with_args([
@@ -134,20 +150,29 @@ fn cross_device_excludes_mount() {
         .output()
         .expect("run unshare");
 
-    let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
-    eprintln!("STDOUT:\n{stdout}");
     if !stderr.is_empty() {
         eprintln!("STDERR:\n{stderr}");
     }
     assert!(output.status.success(), "unshare command failed");
 
-    let sections: Vec<&str> = stdout.split("===").collect();
-    // sections: ["", " WITHOUT_X ", "\n...\n", " WITH_X ", "\n...\n"]
-    assert!(sections.len() >= 5, "unexpected output format: {stdout}",);
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    eprintln!("STDOUT:\n{stdout}");
 
-    let without_x = sections[2].trim();
-    let with_x = sections[4].trim();
+    let find_section = |label: &str| -> &str {
+        let label_start = stdout
+            .find(label)
+            .unwrap_or_else(|| panic!("missing {label} section in output:\n{stdout}"));
+        let content_start = label_start + label.len() + 1; // skip label + NUL
+        let content_end = stdout[content_start..]
+            .find('\0')
+            .map(|pos| content_start + pos)
+            .unwrap_or(stdout.len());
+        stdout[content_start..content_end].trim()
+    };
+
+    let without_x = find_section("WITHOUT_X");
+    let with_x = find_section("WITH_X");
 
     // Without -x: should contain both "inside.txt" and "outside.txt"
     assert!(
