@@ -11,7 +11,7 @@ use parallel_disk_usage::usage_md::render_usage_md;
 
 #[test]
 fn usage_md() {
-    let actual = render_usage_md();
+    let actual = render_usage_md().expect("render_usage_md failed");
     let expected = include_str!("../USAGE.md");
     assert!(
         actual.trim_end() == expected.trim_end(),
