@@ -11,7 +11,8 @@
 //! a tmpfs mount inside a user namespace (no root required) and checks that `-x` correctly
 //! excludes entries on the mounted filesystem.
 //!
-//! The `unshare` test is skipped when user namespaces are unavailable.
+//! The `unshare` test panics when user namespaces are unavailable.
+//! It can be excluded via `RUSTFLAGS='--cfg pdu_test_skip_cross_device'`.
 
 #![cfg(unix)]
 #![cfg(feature = "cli")]
@@ -64,6 +65,7 @@ fn same_device_on_sample_workspace() {
 
 /// Returns `true` if `unshare --user --mount --map-root-user` is available.
 #[cfg(target_os = "linux")]
+#[cfg(not(pdu_test_skip_cross_device))]
 fn unshare_available() -> bool {
     use command_extra::CommandExtra;
     use std::process::{Command, Stdio};
@@ -81,6 +83,7 @@ fn unshare_available() -> bool {
 /// Skipped when user namespaces are unavailable.
 #[test]
 #[cfg(target_os = "linux")]
+#[cfg(not(pdu_test_skip_cross_device))]
 fn cross_device_excludes_mount() {
     use command_extra::CommandExtra;
     use std::{
@@ -89,8 +92,11 @@ fn cross_device_excludes_mount() {
     };
 
     if !unshare_available() {
-        eprintln!("skipping cross_device_excludes_mount: unshare not available");
-        return;
+        panic!(
+            "{}\n{}",
+            "error: This test requires `unshare --user --mount --map-root-user` but the command is not available.",
+            "hint: Either enable user namespaces or set `RUSTFLAGS='--cfg pdu_test_skip_cross_device'` to skip this test.",
+        );
     }
 
     let pdu = env!("CARGO_BIN_EXE_pdu");

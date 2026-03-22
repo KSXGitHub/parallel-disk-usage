@@ -93,4 +93,4 @@ pretty_assertions = "1.4.1"
 rand = "0.10.0"
 
 [lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(pdu_test_skip_fs_errors)'] }
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(pdu_test_skip_fs_errors)', 'cfg(pdu_test_skip_cross_device)'] }
