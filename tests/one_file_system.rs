@@ -38,7 +38,7 @@ use std::{
     fs::{create_dir_all, write as write_file},
     path::{Path, PathBuf},
     process::{Command, Stdio},
-    thread,
+    thread::sleep,
     time::Duration,
 };
 use which::which;
@@ -222,7 +222,7 @@ fn cross_device_excludes_mount() {
     let poll_result = (0..5)
         .map(|exponent| wait_ms_base << exponent)
         .map(Duration::from_millis)
-        .map(thread::sleep)
+        .map(sleep)
         .filter_map(|()| mount_point.read_dir().ok())
         .find_map(|mut entry| entry.next());
     assert!(
