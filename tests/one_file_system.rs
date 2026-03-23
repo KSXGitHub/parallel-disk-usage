@@ -7,12 +7,12 @@
 //!
 //! ## Integration test via FUSE
 //!
-//! [`cross_device_excludes_mount`] uses `fuse2fs` to mount an ext2 filesystem image via FUSE
+//! [`cross_device_excludes_mount`] uses `squashfuse` to mount a squashfs image via FUSE
 //! (no root or user namespaces required) and checks that `-x` correctly excludes entries on
 //! the mounted filesystem.
 //!
-//! The FUSE test panics when `fuse2fs`, `/dev/fuse`, or `fusermount` are unavailable.
-//! It can be excluded via `RUSTFLAGS='--cfg pdu_test_skip_cross_device'`.
+//! The FUSE test panics when `mksquashfs`, `squashfuse`, `/dev/fuse`, or `fusermount` are
+//! unavailable. It can be excluded via `RUSTFLAGS='--cfg pdu_test_skip_cross_device'`.
 
 #![cfg(unix)]
 #![cfg(feature = "cli")]
@@ -71,12 +71,13 @@ struct FuseTools {
     fusermount: &'static str,
 }
 
-/// Probes for `fuse2fs` and FUSE infrastructure.
+/// Probes for `squashfuse`, `mksquashfs`, and FUSE infrastructure.
 ///
 /// Verifies:
-/// 1. `fuse2fs` binary exists
-/// 2. `/dev/fuse` is accessible
-/// 3. `fusermount` (or `fusermount3`) binary exists
+/// 1. `mksquashfs` binary exists
+/// 2. `squashfuse` binary exists
+/// 3. `/dev/fuse` is accessible
+/// 4. `fusermount` (or `fusermount3`) binary exists
 ///
 /// Returns `Ok(FuseTools)` with the discovered tool paths, or `Err` with a diagnostic message.
 #[cfg(target_os = "linux")]
@@ -84,14 +85,25 @@ struct FuseTools {
 fn fuse_probe() -> Result<FuseTools, String> {
     use std::{path::Path, process::Command};
 
-    // Check that fuse2fs is installed
-    Command::new("fuse2fs")
+    // Check that mksquashfs is installed
+    Command::new("mksquashfs")
+        .arg("-version")
+        .output()
+        .map_err(|error| {
+            format!(
+                "`mksquashfs` not found: {error}. \
+                 Install via `apt install squashfs-tools`."
+            )
+        })?;
+
+    // Check that squashfuse is installed
+    Command::new("squashfuse")
         .arg("--help")
         .output()
         .map_err(|error| {
             format!(
-                "`fuse2fs` not found: {error}. \
-                 Install the `fuse2fs` package (or `e2fsprogs` on distros that bundle it)."
+                "`squashfuse` not found: {error}. \
+                 Install via `apt install squashfuse`."
             )
         })?;
 
@@ -111,9 +123,9 @@ fn fuse_probe() -> Result<FuseTools, String> {
         (true, _) => "fusermount",
         (_, true) => "fusermount3",
         _ => {
-            return Err(
-                "Neither `fusermount` nor `fusermount3` found. Install fuse or fuse3.".to_string(),
-            );
+            return Err("Neither `fusermount` nor `fusermount3` found. \
+                 Install via `apt install fuse3`."
+                .to_string());
         }
     };
 
@@ -122,8 +134,9 @@ fn fuse_probe() -> Result<FuseTools, String> {
 
 /// When a subdirectory is a mount point for a different filesystem, `-x` should exclude it.
 ///
-/// Uses `fuse2fs` to mount an ext2 filesystem image via FUSE — no root privileges or
-/// user namespaces required.
+/// Uses `squashfuse` to mount a squashfs image via FUSE — no root privileges or
+/// user namespaces required. The image is pre-built with `mksquashfs` containing the
+/// test file, so the mount is read-only (which is fine since `pdu` only reads).
 /// Skipped when FUSE infrastructure is unavailable.
 #[test]
 #[cfg(target_os = "linux")]
@@ -140,9 +153,10 @@ fn cross_device_excludes_mount() {
     let fuse_tools = match fuse_probe() {
         Ok(tools) => tools,
         Err(reason) => panic!(
-            "error: This test requires FUSE (`fuse2fs`, `/dev/fuse`, `fusermount`) but the probe failed.\n\
+            "error: This test requires FUSE (`mksquashfs`, `squashfuse`, `/dev/fuse`, \
+             `fusermount`) but the probe failed.\n\
              reason: {reason}\n\
-             hint: Install `fuse2fs` and `fuse3` packages, or set \
+             hint: Install via `apt install squashfs-tools squashfuse fuse3`, or set \
              `RUSTFLAGS='--cfg pdu_test_skip_cross_device'` to skip this test.",
         ),
     };
@@ -151,55 +165,54 @@ fn cross_device_excludes_mount() {
     let temp = Temp::new_dir().expect("create temp dir for cross-device test");
     let workspace = temp.join("workspace");
     let mount_point = workspace.join("mounted");
-    let image_path = temp.join("ext2.img");
+    let image_path = temp.join("squash.img");
+    let staging_dir = temp.join("staging");
 
     fs::create_dir_all(&mount_point).expect("create workspace and mount point");
+    fs::create_dir_all(&staging_dir).expect("create staging directory");
 
     // Write a file on the root filesystem
     let outside_content = "A".repeat(1000);
     fs::write(workspace.join("outside.txt"), &outside_content).expect("write outside.txt");
 
-    // Create a small ext2 filesystem image (4 MiB)
-    let mkfs_output = Command::new("mkfs.ext2")
-        .with_args(["-F", "-q"])
+    // Create a file in the staging directory to be packed into the squashfs image
+    let inside_content = "B".repeat(2000);
+    fs::write(staging_dir.join("inside.txt"), &inside_content).expect("write staging/inside.txt");
+
+    // Build a squashfs image from the staging directory
+    let mksquashfs_output = Command::new("mksquashfs")
+        .with_arg(&staging_dir)
         .with_arg(&image_path)
-        .with_arg("4096") // 4096 × 1K blocks = 4 MiB
+        .with_args(["-noappend", "-quiet"])
         .with_stdout(Stdio::piped())
         .with_stderr(Stdio::piped())
         .output()
-        .expect("run mkfs.ext2");
+        .expect("run mksquashfs");
     assert!(
-        mkfs_output.status.success(),
-        "mkfs.ext2 failed: {}",
-        String::from_utf8_lossy(&mkfs_output.stderr),
+        mksquashfs_output.status.success(),
+        "mksquashfs failed: {}",
+        String::from_utf8_lossy(&mksquashfs_output.stderr),
     );
 
-    // Mount the image via fuse2fs
-    let mount_output = Command::new("fuse2fs")
+    // Mount the squashfs image via squashfuse (read-only)
+    let mount_output = Command::new("squashfuse")
         .with_arg(&image_path)
         .with_arg(&mount_point)
-        .with_args(["-o", "rw,fakeroot"])
         .with_stdout(Stdio::piped())
         .with_stderr(Stdio::piped())
         .output()
-        .expect("run fuse2fs");
+        .expect("run squashfuse");
     assert!(
         mount_output.status.success(),
-        "fuse2fs mount failed: {}",
+        "squashfuse mount failed: {}",
         String::from_utf8_lossy(&mount_output.stderr),
     );
 
     // Small delay to let FUSE settle
     thread::sleep(Duration::from_millis(100));
 
-    // Write a file on the mounted (different) filesystem
-    let inside_content = "B".repeat(2000);
-    let write_result = fs::write(mount_point.join("inside.txt"), &inside_content);
-
     // Ensure we unmount even if assertions fail
     let test_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        write_result.expect("write inside.txt on mounted filesystem");
-
         // Run pdu WITHOUT -x — should see both files
         let without_x = Command::new(pdu)
             .with_args(["--bytes-format=plain"])
