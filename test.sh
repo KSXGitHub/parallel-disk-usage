@@ -14,6 +14,7 @@ esac
 # A temporary file is used instead of a variable because run_if and unit are
 # subshells, so variable assignments inside them don't propagate to the parent.
 failure_dir=$(mktemp -d)
+trap 'rm -rf "$failure_dir"' EXIT
 failure_marker="$failure_dir/failed"
 
 run() (
@@ -65,9 +66,7 @@ unit --features cli-completions "$@"
 unit --features ai-instructions "$@"
 
 if [[ -f "$failure_marker" ]]; then
-  rm -rf "$failure_dir"
   echo >&2
   echo 'error: Some checks have failed. Review the output above for details.' >&2
   exit 1
 fi
-rm -rf "$failure_dir"
