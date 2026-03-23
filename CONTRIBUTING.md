@@ -361,6 +361,28 @@ rustup toolchain install "$(< rust-toolchain)"
 rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy
 ```
 
+## Optional External Dependencies
+
+Some integration tests require external (non-Cargo) tools that are **not** managed by `Cargo.toml`. These tests are skipped or excluded when the tools are absent, but CI installs them to get full coverage.
+
+| Package | Provides | Used by |
+|---|---|---|
+| `squashfs-tools` | `mksquashfs` | Cross-device (`--one-file-system`) FUSE test |
+| `squashfuse` | `squashfuse` | Cross-device (`--one-file-system`) FUSE test |
+| `fuse3` | `fusermount3`, `/dev/fuse` | Cross-device (`--one-file-system`) FUSE test |
+
+On Debian/Ubuntu:
+
+```sh
+sudo apt install squashfs-tools squashfuse fuse3
+```
+
+Tests that need these tools will panic with a diagnostic message if they are missing. To skip them instead, set:
+
+```sh
+export RUSTFLAGS='--cfg pdu_test_skip_cross_device'
+```
+
 ## Automated Checks
 
 Before submitting, ensure:
