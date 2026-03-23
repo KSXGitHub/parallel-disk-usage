@@ -1,4 +1,4 @@
-//! Tests for the `--one-file-system` / `-x` flag.
+//! Tests for the `--one-file-system` flag.
 //!
 //! ## Unit-style test
 //!
@@ -8,8 +8,8 @@
 //! ## Integration test via FUSE
 //!
 //! [`cross_device_excludes_mount`] uses `squashfuse` to mount a squashfs image via FUSE
-//! (no root or user namespaces required) and checks that `-x` correctly excludes entries on
-//! the mounted filesystem.
+//! (no root or user namespaces required) and checks that `--one-file-system` correctly
+//! excludes entries on the mounted filesystem.
 //!
 //! The FUSE test panics when `mksquashfs`, `squashfuse`, `/dev/fuse`, or `fusermount` are
 //! unavailable. It can be excluded via `RUSTFLAGS='--cfg pdu_test_skip_cross_device'`.
@@ -22,6 +22,7 @@ pub use _utils::*;
 
 use command_extra::CommandExtra;
 use parallel_disk_usage::{
+    bytes_format::BytesFormat,
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetApparentSize,
@@ -29,6 +30,7 @@ use parallel_disk_usage::{
     os_string_display::OsStringDisplay,
     reporter::{ErrorOnlyReporter, ErrorReport},
     size::Bytes,
+    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
@@ -139,7 +141,8 @@ impl Drop for FuseMount {
     }
 }
 
-/// When a subdirectory is a mount point for a different filesystem, `-x` should exclude it.
+/// When a subdirectory is a mount point for a different filesystem,
+/// `--one-file-system` should exclude it.
 ///
 /// Uses `squashfuse` to mount a squashfs image via FUSE — no root privileges or
 /// user namespaces required. The image is pre-built with `mksquashfs` containing the
@@ -162,7 +165,6 @@ fn cross_device_excludes_mount() {
         )
     });
 
-    let pdu = env!("CARGO_BIN_EXE_pdu");
     let temp = Temp::new_dir().expect("create temp dir for cross-device test");
     let workspace = temp.join("workspace");
     let mount_point = workspace.join("mounted");
@@ -232,58 +234,59 @@ fn cross_device_excludes_mount() {
         wait_ms *= 2;
     }
 
-    // Run pdu WITHOUT -x — should see both files
-    let without_x = Command::new(pdu)
-        .with_arg("--bytes-format=plain")
-        .with_arg(&workspace)
-        .with_stdout(Stdio::piped())
-        .with_stderr(Stdio::piped())
-        .output()
-        .expect("run pdu without -x");
-    let without_x_stdout = String::from_utf8_lossy(&without_x.stdout);
-    let without_x_stderr = String::from_utf8_lossy(&without_x.stderr);
-    if !without_x_stderr.is_empty() {
-        eprintln!("pdu (no -x) STDERR:\n{without_x_stderr}");
-    }
-    eprintln!("pdu (no -x) STDOUT:\n{without_x_stdout}");
-    assert!(
-        without_x.status.success(),
-        "pdu without -x failed: {without_x_stderr}",
-    );
-    assert!(
-        without_x_stdout.contains("inside.txt"),
-        "without -x should show inside.txt:\n{without_x_stdout}",
-    );
-    assert!(
-        without_x_stdout.contains("outside.txt"),
-        "without -x should show outside.txt:\n{without_x_stdout}",
-    );
+    let build_expected_tree = |one_file_system: bool| -> String {
+        let builder = FsTreeBuilder {
+            root: workspace.clone(),
+            size_getter: GetApparentSize,
+            hardlinks_recorder: &HardlinkIgnorant,
+            reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
+            one_file_system,
+            max_depth: 10,
+        };
+        let mut data_tree: DataTree<OsStringDisplay, Bytes> = builder.into();
+        data_tree.par_cull_insignificant_data(0.01);
+        data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
+        *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
+        let visualizer = Visualizer::<OsStringDisplay, _> {
+            data_tree: &data_tree,
+            bytes_format: BytesFormat::PlainNumber,
+            direction: Direction::BottomUp,
+            bar_alignment: BarAlignment::Left,
+            column_width_distribution: ColumnWidthDistribution::total(100),
+        };
+        let expected = format!("{visualizer}");
+        expected.trim_end().to_string()
+    };
 
-    // Run pdu WITH -x — should only see outside.txt
-    let with_x = Command::new(pdu)
-        .with_arg("--bytes-format=plain")
-        .with_arg("-x")
-        .with_arg(&workspace)
-        .with_stdout(Stdio::piped())
-        .with_stderr(Stdio::piped())
-        .output()
-        .expect("run pdu with -x");
-    let with_x_stdout = String::from_utf8_lossy(&with_x.stdout);
-    let with_x_stderr = String::from_utf8_lossy(&with_x.stderr);
-    if !with_x_stderr.is_empty() {
-        eprintln!("pdu (-x) STDERR:\n{with_x_stderr}");
-    }
-    eprintln!("pdu (-x) STDOUT:\n{with_x_stdout}");
-    assert!(
-        with_x.status.success(),
-        "pdu with -x failed: {with_x_stderr}",
-    );
-    assert!(
-        with_x_stdout.contains("outside.txt"),
-        "with -x should show outside.txt:\n{with_x_stdout}",
-    );
-    assert!(
-        !with_x_stdout.contains("inside.txt"),
-        "with -x should exclude inside.txt (on different filesystem):\n{with_x_stdout}",
-    );
+    let run_pdu = |one_file_system: bool| -> String {
+        let command = Command::new(PDU)
+            .with_arg("--quantity=apparent-size")
+            .with_arg("--total-width=100")
+            .with_arg("--bytes-format=plain")
+            .with_stdin(Stdio::null())
+            .with_stdout(Stdio::piped())
+            .with_stderr(Stdio::piped());
+        let command = if one_file_system {
+            command.with_arg("--one-file-system")
+        } else {
+            command
+        };
+        command
+            .with_arg(&workspace)
+            .output()
+            .expect("run pdu")
+            .pipe(stdout_text)
+    };
+
+    // Run pdu WITHOUT --one-file-system — should see both files
+    let actual = run_pdu(false);
+    let expected = build_expected_tree(false);
+    eprintln!("WITHOUT --one-file-system:\nACTUAL:\n{actual}\n\nEXPECTED:\n{expected}\n");
+    assert_eq!(actual, expected);
+
+    // Run pdu WITH --one-file-system — should only see outside.txt
+    let actual = run_pdu(true);
+    let expected = build_expected_tree(true);
+    eprintln!("WITH --one-file-system:\nACTUAL:\n{actual}\n\nEXPECTED:\n{expected}\n");
+    assert_eq!(actual, expected);
 }
