@@ -377,7 +377,7 @@ On Debian/Ubuntu:
 sudo apt install squashfs-tools squashfuse fuse3
 ```
 
-Tests that need these tools will panic with a diagnostic message if they are missing. To skip them instead, set:
+Tests that need these tools will panic with a diagnostic message if they are missing. The panic message includes the specific `RUSTFLAGS='--cfg pdu_test_skip_*'` flag to skip the test. For example:
 
 ```sh
 export RUSTFLAGS='--cfg pdu_test_skip_cross_device'

@@ -86,10 +86,10 @@ struct FuseTools {
 /// Verifies:
 /// 1. `mksquashfs` binary exists
 /// 2. `squashfuse` binary exists
-/// 3. `/dev/fuse` is accessible
+/// 3. `/dev/fuse` exists
 /// 4. `fusermount3` (or `fusermount`) binary exists
 ///
-/// Returns `Ok(FuseTools)` with the discovered tool paths, or `Err` with a diagnostic message.
+/// Returns `Ok(FuseTools)` with the discovered tool names, or `Err` with a diagnostic message.
 fn fuse_probe() -> Result<FuseTools, String> {
     which("mksquashfs").map_err(|error| {
         format!("`mksquashfs` not found: {error}. Install squashfs-tools for your platform.")
