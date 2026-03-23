@@ -104,7 +104,6 @@ fn fuse_probe() -> Result<FuseTools, String> {
         );
     }
 
-    // Prefer fusermount3 (libfuse v3, actively developed) over fusermount (libfuse v2)
     let fusermount = if which("fusermount3").is_ok() {
         "fusermount3"
     } else if which("fusermount").is_ok() {
@@ -119,7 +118,6 @@ fn fuse_probe() -> Result<FuseTools, String> {
     Ok(FuseTools { fusermount })
 }
 
-/// RAII guard that unmounts a FUSE mount point on drop.
 struct FuseMount {
     mount_point: PathBuf,
     fusermount: &'static str,
