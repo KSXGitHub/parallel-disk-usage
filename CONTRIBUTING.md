@@ -365,11 +365,9 @@ rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy
 
 Some integration tests require external (non-Cargo) tools that are **not** managed by `Cargo.toml`. These tests are skipped or excluded when the tools are absent, but CI installs them to get full coverage.
 
-| Package | Provides | Used by |
-|---|---|---|
-| `squashfs-tools` | `mksquashfs` | Cross-device (`--one-file-system`) FUSE test |
-| `squashfuse` | `squashfuse` | Cross-device (`--one-file-system`) FUSE test |
-| `fuse3` | `fusermount3`, `/dev/fuse` | Cross-device (`--one-file-system`) FUSE test |
+- `squashfs-tools` (provides `mksquashfs`) — cross-device (`--one-file-system`) FUSE test
+- `squashfuse` (provides `squashfuse`) — cross-device (`--one-file-system`) FUSE test
+- `fuse3` (provides `fusermount3`, `/dev/fuse`) — cross-device (`--one-file-system`) FUSE test
 
 On Debian/Ubuntu:
 
