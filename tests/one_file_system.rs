@@ -246,7 +246,6 @@ fn cross_device_excludes_mount() {
         let mut data_tree: DataTree<OsStringDisplay, Bytes> = builder.into();
         data_tree.par_cull_insignificant_data(0.01);
         data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
-        *data_tree.name_mut() = OsStringDisplay::os_string_from(".");
         let visualizer = Visualizer::<OsStringDisplay, _> {
             data_tree: &data_tree,
             bytes_format: BytesFormat::PlainNumber,
