@@ -198,7 +198,10 @@ where
 
 ### Error Handling
 
-- Define custom error enums with `#[derive(Debug, Display, Error)]` from `derive_more`.
+- Use `derive_more` for error types. Only derive the traits that are actually used:
+  - `Display`: derive when the type needs to be displayed (e.g., printed to stderr, used in format strings).
+  - `Error`: derive when the type is used as a `std::error::Error` (e.g., as the error type in `Result`, or as a source of another error). Not all types with `Display` need `Error`.
+  - A type that only needs formatting (not error handling) should derive `Display` without `Error`.
 - Minimize `unwrap()` in non-test code — use proper error propagation. `unwrap()` is acceptable in tests and for provably infallible operations (with a comment explaining why). When deliberately ignoring an error, use `.ok()` with a comment explaining why.
 
 ```rust
