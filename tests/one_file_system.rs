@@ -223,8 +223,22 @@ fn cross_device_excludes_mount() {
         fusermount: fuse_tools.fusermount,
     };
 
-    // Small delay to let FUSE settle
-    thread::sleep(Duration::from_millis(100));
+    // Wait for the FUSE mount to become readable (exponential backoff)
+    let mut wait_ms = 100;
+    for attempt in 0..6 {
+        if mount_point
+            .read_dir()
+            .is_ok_and(|mut entries| entries.next().is_some())
+        {
+            break;
+        }
+        assert!(
+            attempt < 5,
+            "FUSE mount at {mount_point:?} not ready after retries"
+        );
+        thread::sleep(Duration::from_millis(wait_ms));
+        wait_ms *= 2;
+    }
 
     // Run pdu WITHOUT -x — should see both files
     let without_x = Command::new(pdu)
