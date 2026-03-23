@@ -10,10 +10,8 @@ use std::process::{Command, Output, Stdio};
 use text_block_macros::text_block;
 
 #[cfg(unix)]
-#[cfg(not(pdu_test_skip_fs_errors))]
 use maplit::btreeset;
 #[cfg(unix)]
-#[cfg(not(pdu_test_skip_fs_errors))]
 use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::DataTree,
@@ -25,7 +23,6 @@ use parallel_disk_usage::{
     visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
 };
 #[cfg(unix)]
-#[cfg(not(pdu_test_skip_fs_errors))]
 use std::{collections::BTreeSet, path::Path};
 
 fn stdio(command: Command) -> Command {
@@ -36,7 +33,6 @@ fn stdio(command: Command) -> Command {
 }
 
 #[cfg(unix)]
-#[cfg(not(pdu_test_skip_fs_errors))]
 fn fs_permission(path: impl AsRef<Path>, permission: &'static str, recursive: bool) {
     let Output { status, stderr, .. } = Command::new("chmod")
         .pipe(|cmd| if recursive { cmd.with_arg("-R") } else { cmd })
@@ -110,8 +106,8 @@ fn max_depth_0() {
 }
 
 #[cfg(unix)]
-#[cfg(not(pdu_test_skip_fs_errors))]
 #[test]
+#[cfg_attr(pdu_test_skip_fs_errors, ignore = "pdu_test_skip_fs_errors is set")]
 fn fs_errors() {
     if unsafe { libc::geteuid() } == 0 {
         panic!(

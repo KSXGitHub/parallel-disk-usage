@@ -70,6 +70,7 @@ impl Api for MockedApi {
 }
 
 #[test]
+#[cfg_attr(not(unix), ignore = "only one path separator style is tested")]
 fn remove_nothing() {
     let original = vec!["foo", "bar", "abc/def", "0/1/2"];
     let mut actual = original.clone();
@@ -79,6 +80,7 @@ fn remove_nothing() {
 }
 
 #[test]
+#[cfg_attr(not(unix), ignore = "only one path separator style is tested")]
 fn remove_duplicated_arguments() {
     let original = dbg!(vec![
         "foo",
@@ -110,6 +112,7 @@ fn remove_duplicated_arguments() {
 }
 
 #[test]
+#[cfg_attr(not(unix), ignore = "only one path separator style is tested")]
 fn remove_overlapping_sub_paths() {
     let original = vec![
         "foo/child",
@@ -127,6 +130,7 @@ fn remove_overlapping_sub_paths() {
 }
 
 #[test]
+#[cfg_attr(not(unix), ignore = "only one path separator style is tested")]
 fn remove_all_except_current_dir() {
     let original = dbg!(vec!["foo", "bar", ".", "abc/def", "0/1/2"]);
     let mut actual = original.clone();
@@ -162,6 +166,7 @@ fn remove_all_except_current_dir() {
 }
 
 #[test]
+#[cfg_attr(not(unix), ignore = "only one path separator style is tested")]
 fn remove_all_except_parent_dir() {
     let original = dbg!(vec!["foo", "bar", "..", "abc/def", ".", "0/1/2"]);
     let mut actual = original.clone();
@@ -185,6 +190,7 @@ fn remove_all_except_parent_dir() {
 }
 
 #[test]
+#[cfg_attr(not(unix), ignore = "only one path separator style is tested")]
 fn remove_overlapping_real_paths() {
     let original = dbg!(vec![
         "foo",
@@ -227,6 +233,7 @@ fn remove_overlapping_real_paths() {
 }
 
 #[test]
+#[cfg_attr(not(unix), ignore = "only one path separator style is tested")]
 fn do_not_remove_symlinks() {
     let original = dbg!(vec![
         "foo",
