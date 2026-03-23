@@ -35,7 +35,10 @@ run_if() (
   true)
     if [[ $no_fail_fast == 'true' ]]; then
       run "$@" || {
-        echo "error: Command $* failed with exit code $?" >&2
+        exit_status=$?
+        printf 'error: Command failed with exit code %d: ' "$exit_status" >&2
+        printf '%q ' "$@" >&2
+        printf '\n' >&2
         touch "$failure_marker"
       }
     else
