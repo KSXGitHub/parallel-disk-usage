@@ -151,7 +151,8 @@ impl Drop for FuseMount<'_> {
 /// Uses `squashfuse` to mount a squashfs image via FUSE — no root privileges or
 /// user namespaces required. The image is pre-built with `mksquashfs` containing the
 /// test file, so the mount is read-only (which is fine since `pdu` only reads).
-/// Skipped when FUSE infrastructure is unavailable.
+/// Panics when FUSE infrastructure is unavailable; can be excluded via
+/// `RUSTFLAGS='--cfg pdu_test_skip_cross_device'`.
 #[test]
 #[cfg_attr(not(target_os = "linux"), ignore = "this test only works on Linux")]
 #[cfg_attr(
