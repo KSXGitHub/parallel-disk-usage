@@ -91,6 +91,11 @@ maplit = "1.0.2"
 normalize-path = "0.2.1"
 pretty_assertions = "1.4.1"
 rand = "0.10.0"
+which = "8.0.2"
 
 [lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(pdu_test_skip_fs_errors)', 'cfg(pdu_test_skip_cross_device)'] }
+unexpected_cfgs.level = "warn"
+unexpected_cfgs.check-cfg = [
+  'cfg(pdu_test_skip_fs_errors)',
+  'cfg(pdu_test_skip_cross_device)',
+]

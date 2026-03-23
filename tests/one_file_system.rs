@@ -29,6 +29,7 @@ use parallel_disk_usage::{
     reporter::{ErrorOnlyReporter, ErrorReport},
     size::Bytes,
 };
+use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 
 /// When all files reside on a single filesystem, `one_file_system: true` should produce
@@ -67,7 +68,7 @@ fn same_device_on_sample_workspace() {
 #[cfg(target_os = "linux")]
 #[cfg(not(pdu_test_skip_cross_device))]
 struct FuseTools {
-    /// The fusermount command to use for unmounting (`"fusermount"` or `"fusermount3"`).
+    /// The fusermount command to use for unmounting (`"fusermount3"` or `"fusermount"`).
     fusermount: &'static str,
 }
 
@@ -77,52 +78,69 @@ struct FuseTools {
 /// 1. `mksquashfs` binary exists
 /// 2. `squashfuse` binary exists
 /// 3. `/dev/fuse` is accessible
-/// 4. `fusermount` (or `fusermount3`) binary exists
+/// 4. `fusermount3` (or `fusermount`) binary exists
 ///
 /// Returns `Ok(FuseTools)` with the discovered tool paths, or `Err` with a diagnostic message.
 #[cfg(target_os = "linux")]
 #[cfg(not(pdu_test_skip_cross_device))]
 fn fuse_probe() -> Result<FuseTools, String> {
-    use std::{path::Path, process::Command};
+    use std::path::Path;
 
-    // Check that mksquashfs is installed
-    Command::new("mksquashfs")
-        .arg("-version")
-        .output()
-        .map_err(|error| {
-            format!("`mksquashfs` not found: {error}. Install squashfs-tools for your platform.")
-        })?;
+    which::which("mksquashfs").map_err(|error| {
+        format!("`mksquashfs` not found: {error}. Install squashfs-tools for your platform.")
+    })?;
 
-    // Check that squashfuse is installed
-    Command::new("squashfuse")
-        .arg("--help")
-        .output()
-        .map_err(|error| {
-            format!("`squashfuse` not found: {error}. Install squashfuse for your platform.")
-        })?;
+    which::which("squashfuse").map_err(|error| {
+        format!("`squashfuse` not found: {error}. Install squashfuse for your platform.")
+    })?;
 
-    // Check that /dev/fuse is accessible
     if !Path::new("/dev/fuse").exists() {
-        return Err("/dev/fuse does not exist. \
-             The FUSE kernel module may not be loaded (`modprobe fuse`)."
-            .to_string());
+        return Err(
+            "/dev/fuse does not exist. The FUSE kernel module may not be loaded (`modprobe fuse`)."
+                .to_string(),
+        );
     }
 
-    // Check that fusermount is available (needed for unmounting)
-    let has_fusermount = Command::new("fusermount").arg("-V").output().is_ok();
-    let has_fusermount3 = Command::new("fusermount3").arg("-V").output().is_ok();
-    let fusermount = match (has_fusermount, has_fusermount3) {
-        (true, _) => "fusermount",
-        (_, true) => "fusermount3",
-        _ => {
-            return Err(
-                "Neither `fusermount` nor `fusermount3` found. Install FUSE for your platform."
-                    .to_string(),
-            );
-        }
+    // Prefer fusermount3 (libfuse v3, actively developed) over fusermount (libfuse v2)
+    let fusermount = if which::which("fusermount3").is_ok() {
+        "fusermount3"
+    } else if which::which("fusermount").is_ok() {
+        "fusermount"
+    } else {
+        return Err(
+            "Neither `fusermount3` nor `fusermount` found. Install FUSE for your platform."
+                .to_string(),
+        );
     };
 
     Ok(FuseTools { fusermount })
+}
+
+/// RAII guard that unmounts a FUSE mount point on drop.
+#[cfg(target_os = "linux")]
+#[cfg(not(pdu_test_skip_cross_device))]
+struct FuseMount {
+    mount_point: std::path::PathBuf,
+    fusermount: &'static str,
+}
+
+#[cfg(target_os = "linux")]
+#[cfg(not(pdu_test_skip_cross_device))]
+impl Drop for FuseMount {
+    fn drop(&mut self) {
+        use command_extra::CommandExtra;
+        let status = self
+            .fusermount
+            .pipe(std::process::Command::new)
+            .with_arg("-u")
+            .with_arg(&self.mount_point)
+            .status();
+        match status {
+            Ok(status) if status.success() => {}
+            Ok(status) => eprintln!("warning: {} exited with {status}", self.fusermount),
+            Err(error) => eprintln!("warning: failed to run {}: {error}", self.fusermount),
+        }
+    }
 }
 
 /// When a subdirectory is a mount point for a different filesystem, `-x` should exclude it.
@@ -143,16 +161,15 @@ fn cross_device_excludes_mount() {
         time::Duration,
     };
 
-    let fuse_tools = match fuse_probe() {
-        Ok(tools) => tools,
-        Err(reason) => panic!(
+    let fuse_tools = fuse_probe().unwrap_or_else(|reason| {
+        panic!(
             "error: This test requires FUSE (`mksquashfs`, `squashfuse`, `/dev/fuse`, \
              `fusermount`) but the probe failed.\n\
              reason: {reason}\n\
              hint: Install `squashfs-tools`, `squashfuse`, and FUSE for your platform, \
              or set `RUSTFLAGS='--cfg pdu_test_skip_cross_device'` to skip this test.",
-        ),
-    };
+        )
+    });
 
     let pdu = env!("CARGO_BIN_EXE_pdu");
     let temp = Temp::new_dir().expect("create temp dir for cross-device test");
@@ -187,7 +204,8 @@ fn cross_device_excludes_mount() {
         String::from_utf8_lossy(&mksquashfs_output.stderr),
     );
 
-    // Mount the squashfs image via squashfuse (read-only)
+    // Mount the squashfs image via squashfuse (read-only).
+    // The _fuse_mount guard ensures we unmount even if assertions panic.
     let mount_output = Command::new("squashfuse")
         .with_arg(&image_path)
         .with_arg(&mount_point)
@@ -200,79 +218,65 @@ fn cross_device_excludes_mount() {
         "squashfuse mount failed: {}",
         String::from_utf8_lossy(&mount_output.stderr),
     );
+    let _fuse_mount = FuseMount {
+        mount_point: mount_point.clone(),
+        fusermount: fuse_tools.fusermount,
+    };
 
     // Small delay to let FUSE settle
     thread::sleep(Duration::from_millis(100));
 
-    // Ensure we unmount even if assertions fail
-    let test_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        // Run pdu WITHOUT -x — should see both files
-        let without_x = Command::new(pdu)
-            .with_args(["--bytes-format=plain"])
-            .with_arg(&workspace)
-            .with_stdout(Stdio::piped())
-            .with_stderr(Stdio::piped())
-            .output()
-            .expect("run pdu without -x");
-        let without_x_stdout = String::from_utf8_lossy(&without_x.stdout);
-        let without_x_stderr = String::from_utf8_lossy(&without_x.stderr);
-        if !without_x_stderr.is_empty() {
-            eprintln!("pdu (no -x) STDERR:\n{without_x_stderr}");
-        }
-        eprintln!("pdu (no -x) STDOUT:\n{without_x_stdout}");
-        assert!(
-            without_x.status.success(),
-            "pdu without -x failed: {without_x_stderr}",
-        );
-        assert!(
-            without_x_stdout.contains("inside.txt"),
-            "without -x should show inside.txt:\n{without_x_stdout}",
-        );
-        assert!(
-            without_x_stdout.contains("outside.txt"),
-            "without -x should show outside.txt:\n{without_x_stdout}",
-        );
-
-        // Run pdu WITH -x — should only see outside.txt
-        let with_x = Command::new(pdu)
-            .with_args(["--bytes-format=plain", "-x"])
-            .with_arg(&workspace)
-            .with_stdout(Stdio::piped())
-            .with_stderr(Stdio::piped())
-            .output()
-            .expect("run pdu with -x");
-        let with_x_stdout = String::from_utf8_lossy(&with_x.stdout);
-        let with_x_stderr = String::from_utf8_lossy(&with_x.stderr);
-        if !with_x_stderr.is_empty() {
-            eprintln!("pdu (-x) STDERR:\n{with_x_stderr}");
-        }
-        eprintln!("pdu (-x) STDOUT:\n{with_x_stdout}");
-        assert!(
-            with_x.status.success(),
-            "pdu with -x failed: {with_x_stderr}",
-        );
-        assert!(
-            with_x_stdout.contains("outside.txt"),
-            "with -x should show outside.txt:\n{with_x_stdout}",
-        );
-        assert!(
-            !with_x_stdout.contains("inside.txt"),
-            "with -x should exclude inside.txt (on different filesystem):\n{with_x_stdout}",
-        );
-    }));
-
-    // Always unmount using the fusermount variant discovered by fuse_probe
-    let unmount_status = Command::new(fuse_tools.fusermount)
-        .with_arg("-u")
-        .with_arg(&mount_point)
-        .status();
-    match unmount_status {
-        Ok(status) if status.success() => {}
-        Ok(status) => eprintln!("warning: {} exited with {status}", fuse_tools.fusermount),
-        Err(error) => eprintln!("warning: failed to run {}: {error}", fuse_tools.fusermount),
+    // Run pdu WITHOUT -x — should see both files
+    let without_x = Command::new(pdu)
+        .with_args(["--bytes-format=plain"])
+        .with_arg(&workspace)
+        .with_stdout(Stdio::piped())
+        .with_stderr(Stdio::piped())
+        .output()
+        .expect("run pdu without -x");
+    let without_x_stdout = String::from_utf8_lossy(&without_x.stdout);
+    let without_x_stderr = String::from_utf8_lossy(&without_x.stderr);
+    if !without_x_stderr.is_empty() {
+        eprintln!("pdu (no -x) STDERR:\n{without_x_stderr}");
     }
+    eprintln!("pdu (no -x) STDOUT:\n{without_x_stdout}");
+    assert!(
+        without_x.status.success(),
+        "pdu without -x failed: {without_x_stderr}",
+    );
+    assert!(
+        without_x_stdout.contains("inside.txt"),
+        "without -x should show inside.txt:\n{without_x_stdout}",
+    );
+    assert!(
+        without_x_stdout.contains("outside.txt"),
+        "without -x should show outside.txt:\n{without_x_stdout}",
+    );
 
-    if let Err(payload) = test_result {
-        std::panic::resume_unwind(payload);
+    // Run pdu WITH -x — should only see outside.txt
+    let with_x = Command::new(pdu)
+        .with_args(["--bytes-format=plain", "-x"])
+        .with_arg(&workspace)
+        .with_stdout(Stdio::piped())
+        .with_stderr(Stdio::piped())
+        .output()
+        .expect("run pdu with -x");
+    let with_x_stdout = String::from_utf8_lossy(&with_x.stdout);
+    let with_x_stderr = String::from_utf8_lossy(&with_x.stderr);
+    if !with_x_stderr.is_empty() {
+        eprintln!("pdu (-x) STDERR:\n{with_x_stderr}");
     }
+    eprintln!("pdu (-x) STDOUT:\n{with_x_stdout}");
+    assert!(
+        with_x.status.success(),
+        "pdu with -x failed: {with_x_stderr}",
+    );
+    assert!(
+        with_x_stdout.contains("outside.txt"),
+        "with -x should show outside.txt:\n{with_x_stdout}",
+    );
+    assert!(
+        !with_x_stdout.contains("inside.txt"),
+        "with -x should exclude inside.txt (on different filesystem):\n{with_x_stdout}",
+    );
 }
