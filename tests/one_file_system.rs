@@ -5,13 +5,13 @@
 //! [`same_device_on_sample_workspace`] verifies that enabling `--one-file-system` on a
 //! single-device workspace produces the same tree as without it.
 //!
-//! ## Integration test via `unshare`
+//! ## Integration test via FUSE
 //!
-//! [`cross_device_excludes_mount`] uses `unshare --user --mount --map-root-user` to create
-//! a tmpfs mount inside a user namespace (no root required) and checks that `-x` correctly
-//! excludes entries on the mounted filesystem.
+//! [`cross_device_excludes_mount`] uses `fuse2fs` to mount an ext2 filesystem image via FUSE
+//! (no root or user namespaces required) and checks that `-x` correctly excludes entries on
+//! the mounted filesystem.
 //!
-//! The `unshare` test panics when user namespaces are unavailable.
+//! The FUSE test panics when `fuse2fs`, `/dev/fuse`, or `fusermount` are unavailable.
 //! It can be excluded via `RUSTFLAGS='--cfg pdu_test_skip_cross_device'`.
 
 #![cfg(unix)]
@@ -63,158 +63,197 @@ fn same_device_on_sample_workspace() {
     );
 }
 
-/// Checks that `unshare --user --mount --map-root-user` is available and allows
-/// mounting a tmpfs inside the created namespace.
+/// Checks that `fuse2fs` and FUSE infrastructure are available.
+///
+/// Verifies:
+/// 1. `fuse2fs` binary exists
+/// 2. `/dev/fuse` is accessible
+/// 3. `fusermount` (or `fusermount3`) binary exists
 ///
 /// Returns `Ok(())` on success, or `Err` with a diagnostic message on failure.
 #[cfg(target_os = "linux")]
 #[cfg(not(pdu_test_skip_cross_device))]
-fn unshare_available() -> Result<(), String> {
-    use command_extra::CommandExtra;
-    use std::process::Command;
-    let output = Command::new("unshare")
-        .with_args([
-            "--user",
-            "--mount",
-            "--map-root-user",
-            "sh",
-            "-c",
-            "mountpoint=$(mktemp -d) && mount -t tmpfs tmpfs \"$mountpoint\" && umount \"$mountpoint\"",
-        ])
+fn fuse_available() -> Result<(), String> {
+    use std::{path::Path, process::Command};
+
+    // Check that fuse2fs is installed
+    Command::new("fuse2fs")
+        .arg("--help")
         .output()
-        .map_err(|error| format!("failed to execute unshare: {error}"))?;
-    if output.status.success() {
-        Ok(())
-    } else {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        Err(format!(
-            "unshare probe exited with {}: {}",
-            output.status,
-            stderr.trim(),
-        ))
+        .map_err(|error| format!("`fuse2fs` not found: {error}. Install e2fsprogs or fuse2fs."))?;
+
+    // Check that /dev/fuse is accessible
+    if !Path::new("/dev/fuse").exists() {
+        return Err(
+            "/dev/fuse does not exist. The FUSE kernel module may not be loaded. \
+             Try `modprobe fuse`."
+                .to_string(),
+        );
     }
+
+    // Check that fusermount is available (needed for unmounting)
+    let has_fusermount = Command::new("fusermount").arg("-V").output().is_ok();
+    let has_fusermount3 = Command::new("fusermount3").arg("-V").output().is_ok();
+    if !has_fusermount && !has_fusermount3 {
+        return Err(
+            "Neither `fusermount` nor `fusermount3` found. Install fuse or fuse3.".to_string(),
+        );
+    }
+
+    Ok(())
 }
 
 /// When a subdirectory is a mount point for a different filesystem, `-x` should exclude it.
 ///
-/// Uses `unshare --user --mount --map-root-user` to avoid requiring root privileges.
-/// Skipped when user namespaces are unavailable.
+/// Uses `fuse2fs` to mount an ext2 filesystem image via FUSE — no root privileges or
+/// user namespaces required.
+/// Skipped when FUSE infrastructure is unavailable.
 #[test]
 #[cfg(target_os = "linux")]
 #[cfg(not(pdu_test_skip_cross_device))]
 fn cross_device_excludes_mount() {
     use command_extra::CommandExtra;
     use std::{
-        fmt::Write,
+        fs,
         process::{Command, Stdio},
+        thread,
+        time::Duration,
     };
 
-    if let Err(reason) = unshare_available() {
+    if let Err(reason) = fuse_available() {
         panic!(
-            "error: This test requires `unshare --user --mount --map-root-user` but the probe failed.\n\
+            "error: This test requires FUSE (`fuse2fs`, `/dev/fuse`, `fusermount`) but the probe failed.\n\
              reason: {reason}\n\
-             hint: Either enable user namespaces or set `RUSTFLAGS='--cfg pdu_test_skip_cross_device'` to skip this test.",
+             hint: Install e2fsprogs and fuse, or set `RUSTFLAGS='--cfg pdu_test_skip_cross_device'` to skip this test.",
         );
     }
 
     let pdu = env!("CARGO_BIN_EXE_pdu");
+    let temp = Temp::new_dir().expect("create temp dir for cross-device test");
+    let workspace = temp.join("workspace");
+    let mount_point = workspace.join("mounted");
+    let image_path = temp.join("ext2.img");
+
+    fs::create_dir_all(&mount_point).expect("create workspace and mount point");
+
+    // Write a file on the root filesystem
     let outside_content = "A".repeat(1000);
-    let inside_content = "B".repeat(2000);
+    fs::write(workspace.join("outside.txt"), &outside_content).expect("write outside.txt");
 
-    // Build a shell script that creates a tmpfs mount inside a user namespace,
-    // writes files on both filesystems, and runs pdu with and without -x.
-    let mut script = String::new();
-    writeln!(script, "TMPDIR=$(mktemp -d)").unwrap();
-    writeln!(script, "mkdir -p \"$TMPDIR/mounted\"").unwrap();
-    writeln!(script, "mount -t tmpfs tmpfs \"$TMPDIR/mounted\"").unwrap();
-    writeln!(
-        script,
-        "printf '%s' '{outside_content}' > \"$TMPDIR/outside.txt\""
-    )
-    .unwrap();
-    writeln!(
-        script,
-        "printf '%s' '{inside_content}' > \"$TMPDIR/mounted/inside.txt\""
-    )
-    .unwrap();
-    // Write each pdu invocation's output to a separate file so we don't need
-    // to parse markers from a combined stdout.
-    writeln!(script, "WITHOUT_X=$(mktemp)").unwrap();
-    writeln!(script, "WITH_X=$(mktemp)").unwrap();
-    writeln!(
-        script,
-        "\"{pdu}\" --bytes-format=plain \"$TMPDIR\" >\"$WITHOUT_X\" 2>&1"
-    )
-    .unwrap();
-    writeln!(
-        script,
-        "\"{pdu}\" --bytes-format=plain -x \"$TMPDIR\" >\"$WITH_X\" 2>&1"
-    )
-    .unwrap();
-    writeln!(script, "umount \"$TMPDIR/mounted\"").unwrap();
-    writeln!(script, "rm -rf \"$TMPDIR\"").unwrap();
-    writeln!(script, "printf 'WITHOUT_X\\0'").unwrap();
-    writeln!(script, "cat \"$WITHOUT_X\"").unwrap();
-    writeln!(script, "printf '\\0WITH_X\\0'").unwrap();
-    writeln!(script, "cat \"$WITH_X\"").unwrap();
-    writeln!(script, "printf '\\0'").unwrap();
-    writeln!(script, "rm -f \"$WITHOUT_X\" \"$WITH_X\"").unwrap();
-
-    let output = Command::new("unshare")
-        .with_args([
-            "--user",
-            "--mount",
-            "--map-root-user",
-            "bash",
-            "-c",
-            &script,
-        ])
+    // Create a small ext2 filesystem image (4 MiB)
+    let mkfs_output = Command::new("mkfs.ext2")
+        .with_args(["-F", "-q"])
+        .with_arg(&image_path)
+        .with_arg("4096") // 4096 × 1K blocks = 4 MiB
         .with_stdout(Stdio::piped())
         .with_stderr(Stdio::piped())
         .output()
-        .expect("run unshare");
+        .expect("run mkfs.ext2");
+    assert!(
+        mkfs_output.status.success(),
+        "mkfs.ext2 failed: {}",
+        String::from_utf8_lossy(&mkfs_output.stderr),
+    );
 
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    if !stderr.is_empty() {
-        eprintln!("STDERR:\n{stderr}");
+    // Mount the image via fuse2fs
+    let mount_output = Command::new("fuse2fs")
+        .with_arg(&image_path)
+        .with_arg(&mount_point)
+        .with_args(["-o", "rw"])
+        .with_stdout(Stdio::piped())
+        .with_stderr(Stdio::piped())
+        .output()
+        .expect("run fuse2fs");
+    assert!(
+        mount_output.status.success(),
+        "fuse2fs mount failed: {}",
+        String::from_utf8_lossy(&mount_output.stderr),
+    );
+
+    // Small delay to let FUSE settle
+    thread::sleep(Duration::from_millis(100));
+
+    // Write a file on the mounted (different) filesystem
+    let inside_content = "B".repeat(2000);
+    let write_result = fs::write(mount_point.join("inside.txt"), &inside_content);
+
+    // Ensure we unmount even if assertions fail
+    let test_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        write_result.expect("write inside.txt on mounted filesystem");
+
+        // Run pdu WITHOUT -x — should see both files
+        let without_x = Command::new(pdu)
+            .with_args(["--bytes-format=plain"])
+            .with_arg(&workspace)
+            .with_stdout(Stdio::piped())
+            .with_stderr(Stdio::piped())
+            .output()
+            .expect("run pdu without -x");
+        let without_x_stdout = String::from_utf8_lossy(&without_x.stdout);
+        let without_x_stderr = String::from_utf8_lossy(&without_x.stderr);
+        if !without_x_stderr.is_empty() {
+            eprintln!("pdu (no -x) STDERR:\n{without_x_stderr}");
+        }
+        eprintln!("pdu (no -x) STDOUT:\n{without_x_stdout}");
+        assert!(
+            without_x.status.success(),
+            "pdu without -x failed: {without_x_stderr}",
+        );
+        assert!(
+            without_x_stdout.contains("inside.txt"),
+            "without -x should show inside.txt:\n{without_x_stdout}",
+        );
+        assert!(
+            without_x_stdout.contains("outside.txt"),
+            "without -x should show outside.txt:\n{without_x_stdout}",
+        );
+
+        // Run pdu WITH -x — should only see outside.txt
+        let with_x = Command::new(pdu)
+            .with_args(["--bytes-format=plain", "-x"])
+            .with_arg(&workspace)
+            .with_stdout(Stdio::piped())
+            .with_stderr(Stdio::piped())
+            .output()
+            .expect("run pdu with -x");
+        let with_x_stdout = String::from_utf8_lossy(&with_x.stdout);
+        let with_x_stderr = String::from_utf8_lossy(&with_x.stderr);
+        if !with_x_stderr.is_empty() {
+            eprintln!("pdu (-x) STDERR:\n{with_x_stderr}");
+        }
+        eprintln!("pdu (-x) STDOUT:\n{with_x_stdout}");
+        assert!(
+            with_x.status.success(),
+            "pdu with -x failed: {with_x_stderr}",
+        );
+        assert!(
+            with_x_stdout.contains("outside.txt"),
+            "with -x should show outside.txt:\n{with_x_stdout}",
+        );
+        assert!(
+            !with_x_stdout.contains("inside.txt"),
+            "with -x should exclude inside.txt (on different filesystem):\n{with_x_stdout}",
+        );
+    }));
+
+    // Always unmount — try fusermount first, fall back to fusermount3
+    let unmount_status = Command::new("fusermount")
+        .with_arg("-u")
+        .with_arg(&mount_point)
+        .status()
+        .or_else(|_| {
+            Command::new("fusermount3")
+                .with_arg("-u")
+                .with_arg(&mount_point)
+                .status()
+        });
+    match unmount_status {
+        Ok(status) if status.success() => {}
+        Ok(status) => eprintln!("warning: fusermount exited with {status}"),
+        Err(error) => eprintln!("warning: failed to run fusermount: {error}"),
     }
-    assert!(output.status.success(), "unshare command failed");
 
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    eprintln!("STDOUT:\n{stdout}");
-
-    let find_section = |label: &str| -> &str {
-        let label_start = stdout
-            .find(label)
-            .unwrap_or_else(|| panic!("missing {label} section in output:\n{stdout}"));
-        let content_start = label_start + label.len() + 1; // skip label + NUL
-        let content_end = stdout[content_start..]
-            .find('\0')
-            .map(|pos| content_start + pos)
-            .unwrap_or(stdout.len());
-        stdout[content_start..content_end].trim()
-    };
-
-    let without_x = find_section("WITHOUT_X");
-    let with_x = find_section("WITH_X");
-
-    // Without -x: should contain both "inside.txt" and "outside.txt"
-    assert!(
-        without_x.contains("inside.txt"),
-        "without -x should show inside.txt:\n{without_x}",
-    );
-    assert!(
-        without_x.contains("outside.txt"),
-        "without -x should show outside.txt:\n{without_x}",
-    );
-
-    // With -x: should contain "outside.txt" but NOT "inside.txt"
-    assert!(
-        with_x.contains("outside.txt"),
-        "with -x should show outside.txt:\n{with_x}",
-    );
-    assert!(
-        !with_x.contains("inside.txt"),
-        "with -x should exclude inside.txt (on different filesystem):\n{with_x}",
-    );
+    if let Err(payload) = test_result {
+        std::panic::resume_unwind(payload);
+    }
 }
