@@ -345,3 +345,9 @@ The CI script `test.sh` runs all of these across 5 feature combinations. You can
 ```sh
 FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh
 ```
+
+> [!IMPORTANT]
+> Always run the full test suite before committing, even for seemingly trivial changes such as documentation edits, comment changes, or config updates. Any change can break formatting, linting, building, tests, or doc generation across the different feature combinations.
+
+> [!NOTE]
+> Some tests may fail with a hint about `RUSTFLAGS` and `--cfg pdu_test_skip_*` flags. Follow the hint and rerun with the suggested flags.
