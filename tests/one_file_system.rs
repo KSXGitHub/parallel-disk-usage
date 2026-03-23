@@ -120,6 +120,10 @@ fn fuse_probe() -> Result<FuseTools, String> {
     Ok(FuseTools { fusermount })
 }
 
+/// RAII guard that unmounts a FUSE mount point when dropped.
+///
+/// Its sole purpose is to ensure the FUSE filesystem is cleanly unmounted (via `fusermount -u`)
+/// even if the test panics, preventing stale mounts from accumulating.
 struct FuseMount<'a> {
     mount_point: &'a Path,
     fusermount: &'static str,
@@ -278,10 +282,26 @@ fn cross_device_excludes_mount() {
     let expected = build_expected_tree(false);
     eprintln!("WITHOUT --one-file-system:\nACTUAL:\n{actual}\n\nEXPECTED:\n{expected}\n");
     assert_eq!(actual, expected);
+    assert!(
+        actual.contains("inside.txt"),
+        "without --one-file-system should show inside.txt:\n{actual}",
+    );
+    assert!(
+        actual.contains("outside.txt"),
+        "without --one-file-system should show outside.txt:\n{actual}",
+    );
 
     // Run pdu WITH --one-file-system — should only see outside.txt
     let actual = run_pdu(true);
     let expected = build_expected_tree(true);
     eprintln!("WITH --one-file-system:\nACTUAL:\n{actual}\n\nEXPECTED:\n{expected}\n");
     assert_eq!(actual, expected);
+    assert!(
+        actual.contains("outside.txt"),
+        "with --one-file-system should show outside.txt:\n{actual}",
+    );
+    assert!(
+        !actual.contains("inside.txt"),
+        "with --one-file-system should exclude inside.txt (on different filesystem):\n{actual}",
+    );
 }
