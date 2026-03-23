@@ -16,4 +16,4 @@ Read and follow the CONTRIBUTING.md file in this repository for all code style c
 - Minimize `unwrap()` in non-test code — use proper error handling
 - Install toolchain before running tests: `rustup toolchain install "$(< rust-toolchain)" && rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy`
 - Run `FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh` to validate changes
-- If some checks fail due to environment limitations, set `PDU_NO_FAIL_FAST=true` to run all checks instead of stopping at the first failure — this lets you see which checks pass and which fail
+- Set `PDU_NO_FAIL_FAST=true` to run all checks instead of stopping at the first failure — this lets you see which checks pass and which fail
