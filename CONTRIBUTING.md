@@ -213,6 +213,36 @@ pub enum RuntimeError {
 }
 ```
 
+### Conditional Test Skipping: `#[cfg]` vs `#[cfg_attr(..., ignore)]`
+
+When a test cannot run under certain conditions (e.g., wrong platform, running as root), prefer `#[cfg_attr(..., ignore)]` over `#[cfg(...)]` to skip it. This way the test is still compiled on all configurations — catching type errors and regressions early — but simply skipped at runtime.
+
+Use `#[cfg]` on tests **only** when the code cannot compile under the condition — for example, when the test references types, functions, or trait methods that are gated behind `#[cfg]` and do not exist on other platforms or feature sets.
+
+Prefer including a reason string in the `ignore` attribute to explain why the test is skipped.
+
+```rust
+// Good — test compiles everywhere, skipped at runtime on non-unix
+#[test]
+#[cfg_attr(not(unix), ignore = "only one path separator style is tested")]
+fn unix_path_logic() { /* uses hardcoded unix paths but no unix-only types */ }
+
+// Good — test CANNOT compile on non-unix (uses unix-only types)
+#[cfg(unix)]
+#[test]
+fn block_size() { /* uses GetBlockSize which only exists on unix */ }
+
+// Good — test compiles with the flag, skipped at runtime
+#[test]
+#[cfg_attr(pdu_test_skip_some_test, ignore = "pdu_test_skip_some_test is set")]
+fn some_test() { /* ... */ }
+
+// Bad — excludes the test from compilation entirely when it could still compile
+#[cfg(not(pdu_test_skip_some_test))]
+#[test]
+fn some_test() { /* ... */ }
+```
+
 ### Using `pipe-trait`
 
 This codebase uses the [`pipe-trait`](https://docs.rs/pipe-trait) crate extensively. The `Pipe` trait enables method-chaining through unary functions, keeping code in a natural left-to-right reading order. Import it as `use pipe_trait::Pipe;`.
