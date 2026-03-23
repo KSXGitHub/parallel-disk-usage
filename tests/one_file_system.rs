@@ -29,7 +29,6 @@ use parallel_disk_usage::{
     reporter::{ErrorOnlyReporter, ErrorReport},
     size::Bytes,
 };
-#[cfg(target_os = "linux")]
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 
@@ -66,7 +65,6 @@ fn same_device_on_sample_workspace() {
 }
 
 /// Information about the available FUSE tools, discovered by [`fuse_probe`].
-#[cfg(target_os = "linux")]
 struct FuseTools {
     /// The fusermount command to use for unmounting (`"fusermount3"` or `"fusermount"`).
     fusermount: &'static str,
@@ -81,7 +79,6 @@ struct FuseTools {
 /// 4. `fusermount3` (or `fusermount`) binary exists
 ///
 /// Returns `Ok(FuseTools)` with the discovered tool paths, or `Err` with a diagnostic message.
-#[cfg(target_os = "linux")]
 fn fuse_probe() -> Result<FuseTools, String> {
     use std::path::Path;
 
@@ -116,13 +113,11 @@ fn fuse_probe() -> Result<FuseTools, String> {
 }
 
 /// RAII guard that unmounts a FUSE mount point on drop.
-#[cfg(target_os = "linux")]
 struct FuseMount {
     mount_point: std::path::PathBuf,
     fusermount: &'static str,
 }
 
-#[cfg(target_os = "linux")]
 impl Drop for FuseMount {
     fn drop(&mut self) {
         use command_extra::CommandExtra;
@@ -147,7 +142,7 @@ impl Drop for FuseMount {
 /// test file, so the mount is read-only (which is fine since `pdu` only reads).
 /// Skipped when FUSE infrastructure is unavailable.
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg_attr(not(target_os = "linux"), ignore = "this test only works on Linux")]
 #[cfg_attr(
     pdu_test_skip_cross_device,
     ignore = "pdu_test_skip_cross_device is set"
