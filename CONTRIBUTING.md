@@ -234,13 +234,13 @@ fn block_size() { /* uses GetBlockSize which only exists on unix */ }
 
 // Good — test compiles with the flag, skipped at runtime
 #[test]
-#[cfg_attr(pdu_test_skip_fs_errors, ignore = "pdu_test_skip_fs_errors is set")]
-fn fs_errors() { /* ... */ }
+#[cfg_attr(pdu_test_skip_some_test, ignore = "pdu_test_skip_some_test is set")]
+fn some_test() { /* ... */ }
 
 // Bad — excludes the test from compilation entirely when it could still compile
-#[cfg(not(pdu_test_skip_fs_errors))]
+#[cfg(not(pdu_test_skip_some_test))]
 #[test]
-fn fs_errors() { /* ... */ }
+fn some_test() { /* ... */ }
 ```
 
 ### Using `pipe-trait`
