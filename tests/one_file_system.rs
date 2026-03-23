@@ -90,10 +90,7 @@ fn fuse_probe() -> Result<FuseTools, String> {
         .arg("-version")
         .output()
         .map_err(|error| {
-            format!(
-                "`mksquashfs` not found: {error}. \
-                 Install via `apt install squashfs-tools`."
-            )
+            format!("`mksquashfs` not found: {error}. Install squashfs-tools for your platform.")
         })?;
 
     // Check that squashfuse is installed
@@ -101,19 +98,14 @@ fn fuse_probe() -> Result<FuseTools, String> {
         .arg("--help")
         .output()
         .map_err(|error| {
-            format!(
-                "`squashfuse` not found: {error}. \
-                 Install via `apt install squashfuse`."
-            )
+            format!("`squashfuse` not found: {error}. Install squashfuse for your platform.")
         })?;
 
     // Check that /dev/fuse is accessible
     if !Path::new("/dev/fuse").exists() {
-        return Err(
-            "/dev/fuse does not exist. The FUSE kernel module may not be loaded. \
-             Try `modprobe fuse`."
-                .to_string(),
-        );
+        return Err("/dev/fuse does not exist. \
+             The FUSE kernel module may not be loaded (`modprobe fuse`)."
+            .to_string());
     }
 
     // Check that fusermount is available (needed for unmounting)
@@ -123,9 +115,10 @@ fn fuse_probe() -> Result<FuseTools, String> {
         (true, _) => "fusermount",
         (_, true) => "fusermount3",
         _ => {
-            return Err("Neither `fusermount` nor `fusermount3` found. \
-                 Install via `apt install fuse3`."
-                .to_string());
+            return Err(
+                "Neither `fusermount` nor `fusermount3` found. Install FUSE for your platform."
+                    .to_string(),
+            );
         }
     };
 
@@ -156,8 +149,8 @@ fn cross_device_excludes_mount() {
             "error: This test requires FUSE (`mksquashfs`, `squashfuse`, `/dev/fuse`, \
              `fusermount`) but the probe failed.\n\
              reason: {reason}\n\
-             hint: Install via `apt install squashfs-tools squashfuse fuse3`, or set \
-             `RUSTFLAGS='--cfg pdu_test_skip_cross_device'` to skip this test.",
+             hint: Install `squashfs-tools`, `squashfuse`, and FUSE for your platform, \
+             or set `RUSTFLAGS='--cfg pdu_test_skip_cross_device'` to skip this test.",
         ),
     };
 
