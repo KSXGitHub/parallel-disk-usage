@@ -15,5 +15,6 @@ Read and follow the CONTRIBUTING.md file in this repository for all code style c
 - Custom errors: `#[derive(Debug, Display, Error)]`
 - Minimize `unwrap()` in non-test code — use proper error handling
 - Install toolchain before running tests: `rustup toolchain install "$(< rust-toolchain)" && rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy`
-- Run `FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh` to validate changes
+- Run `FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh` to validate changes. If a test fails with a hint about `RUSTFLAGS` and `--cfg pdu_test_skip_*`, follow the hint and rerun with the suggested flags.
+- **ALWAYS run the full test suite** (`FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh`) before committing, regardless of how trivial the change seems — this includes documentation-only changes, comment edits, config changes, and refactors. The test suite checks formatting, linting, building, tests, and docs across multiple feature combinations; any type of change can break any of these checks.
 - Set `PDU_NO_FAIL_FAST=true` to run all checks instead of stopping at the first failure — this lets you see which checks pass and which fail
