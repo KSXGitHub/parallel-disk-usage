@@ -215,16 +215,16 @@ pub enum RuntimeError {
 
 ### Conditional Test Skipping: `#[cfg]` vs `#[cfg_attr(..., ignore)]`
 
-When a test cannot run under certain conditions (e.g., wrong platform, running as root), prefer `#[cfg_attr(..., ignore)]` over `#[cfg(...)]` to skip it. `#[ignore]` keeps the test compiled on all configurations, catching type errors and regressions early — the test is simply skipped at runtime.
+When a test cannot run under certain conditions (e.g., wrong platform, running as root), prefer `#[cfg_attr(..., ignore)]` over `#[cfg(...)]` to skip it. This way the test is still compiled on all configurations — catching type errors and regressions early — but simply skipped at runtime.
 
 Use `#[cfg]` on tests **only** when the code cannot compile under the condition — for example, when the test references types, functions, or trait methods that are gated behind `#[cfg]` and do not exist on other platforms or feature sets.
 
-Always include a reason string in the `ignore` attribute to explain why the test is skipped.
+Prefer including a reason string in the `ignore` attribute to explain why the test is skipped.
 
 ```rust
 // Good — test compiles everywhere, skipped at runtime on non-unix
-#[cfg_attr(not(unix), ignore = "test uses hardcoded unix paths")]
 #[test]
+#[cfg_attr(not(unix), ignore = "only one path separator style is tested")]
 fn unix_path_logic() { /* uses hardcoded unix paths but no unix-only types */ }
 
 // Good — test CANNOT compile on non-unix (uses unix-only types)
@@ -233,8 +233,8 @@ fn unix_path_logic() { /* uses hardcoded unix paths but no unix-only types */ }
 fn block_size() { /* uses GetBlockSize which only exists on unix */ }
 
 // Good — test compiles with the flag, skipped at runtime
-#[cfg_attr(pdu_test_skip_fs_errors, ignore = "pdu_test_skip_fs_errors is set")]
 #[test]
+#[cfg_attr(pdu_test_skip_fs_errors, ignore = "pdu_test_skip_fs_errors is set")]
 fn fs_errors() { /* ... */ }
 
 // Bad — excludes the test from compilation entirely when it could still compile
