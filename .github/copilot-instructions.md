@@ -12,7 +12,7 @@ Read and follow the CONTRIBUTING.md file in this repository for all code style c
 - Use `pipe-trait` for chaining through unary functions (constructors, `Some`, `Ok`, free functions, etc.), avoiding nested calls, and continuing method chains — but not for simple standalone calls (prefer `foo(value)` over `value.pipe(foo)`)
 - Prefer `where` clauses for multiple trait bounds
 - Derive order: std traits → comparison traits → `Hash` → derive_more → feature-gated
-- Error types: only derive `Display` and `Error` from `derive_more` when each trait is actually used — not all displayable types need `Error`, and not all error types need `Display`
+- Error types: only derive `Display` and `Error` from `derive_more` when each is actually needed — not all displayable types are errors
 - Minimize `unwrap()` in non-test code — use proper error handling
 - Install toolchain before running tests: `rustup toolchain install "$(< rust-toolchain)" && rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy`
 - Run `FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh` to validate changes
