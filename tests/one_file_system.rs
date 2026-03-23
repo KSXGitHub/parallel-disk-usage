@@ -218,21 +218,17 @@ fn cross_device_excludes_mount() {
     };
 
     // Wait for the FUSE mount to become readable (exponential backoff)
-    let mut wait_ms = 100;
-    for attempt in 0..6 {
-        if mount_point
-            .read_dir()
-            .is_ok_and(|mut entries| entries.next().is_some())
-        {
-            break;
-        }
-        assert!(
-            attempt < 5,
-            "FUSE mount at {mount_point:?} not ready after retries"
-        );
-        thread::sleep(Duration::from_millis(wait_ms));
-        wait_ms *= 2;
-    }
+    let wait_ms_base = 100;
+    let poll_result = (0..5)
+        .map(|exponent| wait_ms_base << exponent)
+        .map(Duration::from_millis)
+        .map(thread::sleep)
+        .filter_map(|()| mount_point.read_dir().ok())
+        .find_map(|mut entry| entry.next());
+    assert!(
+        poll_result.is_some(),
+        "FUSE mount at {mount_point:?} not ready after retries"
+    );
 
     let build_expected_tree = |one_file_system: bool| -> String {
         let builder = FsTreeBuilder {
