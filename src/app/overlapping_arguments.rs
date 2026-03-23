@@ -121,6 +121,5 @@ pub fn remove_items_from_vec_by_indices<Item>(vec: &mut Vec<Item>, indices: &Has
 
 #[cfg(test)]
 mod test_remove_items_from_vec_by_indices;
-#[cfg(unix)]
 #[cfg(test)]
 mod test_remove_overlapping_paths;

@@ -69,6 +69,7 @@ impl Api for MockedApi {
     }
 }
 
+#[cfg_attr(not(unix), ignore = "test uses hardcoded unix paths")]
 #[test]
 fn remove_nothing() {
     let original = vec!["foo", "bar", "abc/def", "0/1/2"];
@@ -78,6 +79,7 @@ fn remove_nothing() {
     assert_eq!(actual, expected);
 }
 
+#[cfg_attr(not(unix), ignore = "test uses hardcoded unix paths")]
 #[test]
 fn remove_duplicated_arguments() {
     let original = dbg!(vec![
@@ -109,6 +111,7 @@ fn remove_duplicated_arguments() {
     assert_eq!(actual, expected);
 }
 
+#[cfg_attr(not(unix), ignore = "test uses hardcoded unix paths")]
 #[test]
 fn remove_overlapping_sub_paths() {
     let original = vec![
@@ -126,6 +129,7 @@ fn remove_overlapping_sub_paths() {
     assert_eq!(actual, expected);
 }
 
+#[cfg_attr(not(unix), ignore = "test uses hardcoded unix paths")]
 #[test]
 fn remove_all_except_current_dir() {
     let original = dbg!(vec!["foo", "bar", ".", "abc/def", "0/1/2"]);
@@ -161,6 +165,7 @@ fn remove_all_except_current_dir() {
     assert_eq!(actual, expected);
 }
 
+#[cfg_attr(not(unix), ignore = "test uses hardcoded unix paths")]
 #[test]
 fn remove_all_except_parent_dir() {
     let original = dbg!(vec!["foo", "bar", "..", "abc/def", ".", "0/1/2"]);
@@ -184,6 +189,7 @@ fn remove_all_except_parent_dir() {
     assert_eq!(actual, expected);
 }
 
+#[cfg_attr(not(unix), ignore = "test uses hardcoded unix paths")]
 #[test]
 fn remove_overlapping_real_paths() {
     let original = dbg!(vec![
@@ -226,6 +232,7 @@ fn remove_overlapping_real_paths() {
     assert_eq!(actual, expected);
 }
 
+#[cfg_attr(not(unix), ignore = "test uses hardcoded unix paths")]
 #[test]
 fn do_not_remove_symlinks() {
     let original = dbg!(vec![
