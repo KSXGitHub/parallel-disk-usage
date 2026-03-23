@@ -36,7 +36,7 @@ use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use std::{
     fs::{create_dir_all, write as write_file},
-    path::{Path, PathBuf},
+    path::Path,
     process::{Command, Stdio},
     thread::sleep,
     time::Duration,
@@ -120,18 +120,18 @@ fn fuse_probe() -> Result<FuseTools, String> {
     Ok(FuseTools { fusermount })
 }
 
-struct FuseMount {
-    mount_point: PathBuf,
+struct FuseMount<'a> {
+    mount_point: &'a Path,
     fusermount: &'static str,
 }
 
-impl Drop for FuseMount {
+impl Drop for FuseMount<'_> {
     fn drop(&mut self) {
         let status = self
             .fusermount
             .pipe(Command::new)
             .with_arg("-u")
-            .with_arg(&self.mount_point)
+            .with_arg(self.mount_point)
             .status();
         match status {
             Ok(status) if status.success() => {}
@@ -213,7 +213,7 @@ fn cross_device_excludes_mount() {
         String::from_utf8_lossy(&mount_output.stderr),
     );
     let _fuse_mount = FuseMount {
-        mount_point: mount_point.clone(),
+        mount_point: &mount_point,
         fusermount: fuse_tools.fusermount,
     };
 
