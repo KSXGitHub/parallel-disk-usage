@@ -20,6 +20,7 @@
 pub mod _utils;
 pub use _utils::*;
 
+use command_extra::CommandExtra;
 use parallel_disk_usage::{
     data_tree::DataTree,
     fs_tree_builder::FsTreeBuilder,
@@ -31,6 +32,14 @@ use parallel_disk_usage::{
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
+use std::{
+    fs::{create_dir_all, write as write_file},
+    path::{Path, PathBuf},
+    process::{Command, Stdio},
+    thread,
+    time::Duration,
+};
+use which::which;
 
 /// When all files reside on a single filesystem, `one_file_system: true` should produce
 /// the same tree as `one_file_system: false`.
@@ -80,13 +89,11 @@ struct FuseTools {
 ///
 /// Returns `Ok(FuseTools)` with the discovered tool paths, or `Err` with a diagnostic message.
 fn fuse_probe() -> Result<FuseTools, String> {
-    use std::path::Path;
-
-    which::which("mksquashfs").map_err(|error| {
+    which("mksquashfs").map_err(|error| {
         format!("`mksquashfs` not found: {error}. Install squashfs-tools for your platform.")
     })?;
 
-    which::which("squashfuse").map_err(|error| {
+    which("squashfuse").map_err(|error| {
         format!("`squashfuse` not found: {error}. Install squashfuse for your platform.")
     })?;
 
@@ -98,9 +105,9 @@ fn fuse_probe() -> Result<FuseTools, String> {
     }
 
     // Prefer fusermount3 (libfuse v3, actively developed) over fusermount (libfuse v2)
-    let fusermount = if which::which("fusermount3").is_ok() {
+    let fusermount = if which("fusermount3").is_ok() {
         "fusermount3"
-    } else if which::which("fusermount").is_ok() {
+    } else if which("fusermount").is_ok() {
         "fusermount"
     } else {
         return Err(
@@ -114,16 +121,15 @@ fn fuse_probe() -> Result<FuseTools, String> {
 
 /// RAII guard that unmounts a FUSE mount point on drop.
 struct FuseMount {
-    mount_point: std::path::PathBuf,
+    mount_point: PathBuf,
     fusermount: &'static str,
 }
 
 impl Drop for FuseMount {
     fn drop(&mut self) {
-        use command_extra::CommandExtra;
         let status = self
             .fusermount
-            .pipe(std::process::Command::new)
+            .pipe(Command::new)
             .with_arg("-u")
             .with_arg(&self.mount_point)
             .status();
@@ -148,14 +154,6 @@ impl Drop for FuseMount {
     ignore = "pdu_test_skip_cross_device is set"
 )]
 fn cross_device_excludes_mount() {
-    use command_extra::CommandExtra;
-    use std::{
-        fs,
-        process::{Command, Stdio},
-        thread,
-        time::Duration,
-    };
-
     let fuse_tools = fuse_probe().unwrap_or_else(|reason| {
         panic!(
             "error: This test requires FUSE (`mksquashfs`, `squashfuse`, `/dev/fuse`, \
@@ -173,16 +171,16 @@ fn cross_device_excludes_mount() {
     let image_path = temp.join("squash.img");
     let staging_dir = temp.join("staging");
 
-    fs::create_dir_all(&mount_point).expect("create workspace and mount point");
-    fs::create_dir_all(&staging_dir).expect("create staging directory");
+    create_dir_all(&mount_point).expect("create workspace and mount point");
+    create_dir_all(&staging_dir).expect("create staging directory");
 
     // Write a file on the root filesystem
     let outside_content = "A".repeat(1000);
-    fs::write(workspace.join("outside.txt"), &outside_content).expect("write outside.txt");
+    write_file(workspace.join("outside.txt"), &outside_content).expect("write outside.txt");
 
     // Create a file in the staging directory to be packed into the squashfs image
     let inside_content = "B".repeat(2000);
-    fs::write(staging_dir.join("inside.txt"), &inside_content).expect("write staging/inside.txt");
+    write_file(staging_dir.join("inside.txt"), &inside_content).expect("write staging/inside.txt");
 
     // Build a squashfs image from the staging directory
     let mksquashfs_output = Command::new("mksquashfs")
