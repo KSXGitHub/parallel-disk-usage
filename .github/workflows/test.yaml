@@ -42,6 +42,10 @@ jobs:
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > $installer
           bash $installer --default-toolchain $(cat rust-toolchain) -y
 
+      - name: Install FUSE dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y e2fsprogs fuse3
+
       - name: Test (dev)
         shell: bash
         env:
