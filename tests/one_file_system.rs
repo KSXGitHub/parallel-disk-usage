@@ -186,7 +186,8 @@ fn cross_device_excludes_mount() {
     let mksquashfs_output = Command::new("mksquashfs")
         .with_arg(&staging_dir)
         .with_arg(&image_path)
-        .with_args(["-noappend", "-quiet"])
+        .with_arg("-noappend")
+        .with_arg("-quiet")
         .with_stdout(Stdio::piped())
         .with_stderr(Stdio::piped())
         .output()
@@ -235,7 +236,7 @@ fn cross_device_excludes_mount() {
 
     // Run pdu WITHOUT -x — should see both files
     let without_x = Command::new(pdu)
-        .with_args(["--bytes-format=plain"])
+        .with_arg("--bytes-format=plain")
         .with_arg(&workspace)
         .with_stdout(Stdio::piped())
         .with_stderr(Stdio::piped())
@@ -262,7 +263,8 @@ fn cross_device_excludes_mount() {
 
     // Run pdu WITH -x — should only see outside.txt
     let with_x = Command::new(pdu)
-        .with_args(["--bytes-format=plain", "-x"])
+        .with_arg("--bytes-format=plain")
+        .with_arg("-x")
         .with_arg(&workspace)
         .with_stdout(Stdio::piped())
         .with_stderr(Stdio::piped())
