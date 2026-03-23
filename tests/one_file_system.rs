@@ -178,7 +178,7 @@ fn cross_device_excludes_mount() {
     let mount_output = Command::new("fuse2fs")
         .with_arg(&image_path)
         .with_arg(&mount_point)
-        .with_args(["-o", "rw"])
+        .with_args(["-o", "rw,fakeroot"])
         .with_stdout(Stdio::piped())
         .with_stderr(Stdio::piped())
         .output()
