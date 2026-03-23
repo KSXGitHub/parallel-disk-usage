@@ -61,16 +61,16 @@ fn same_device_on_sample_workspace() {
         .into()
     };
 
-    let tree_without = build_tree(false)
+    let without_1fs = build_tree(false)
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
         .into_reflection();
-    let tree_with = build_tree(true)
+    let with_1fs = build_tree(true)
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
         .into_reflection();
 
     assert_eq!(
-        sanitize_tree_reflection(tree_without),
-        sanitize_tree_reflection(tree_with),
+        sanitize_tree_reflection(without_1fs),
+        sanitize_tree_reflection(with_1fs),
         "one_file_system should not change the result when all files are on the same device",
     );
 }
