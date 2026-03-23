@@ -63,24 +63,37 @@ fn same_device_on_sample_workspace() {
     );
 }
 
-/// Checks that `fuse2fs` and FUSE infrastructure are available.
+/// Information about the available FUSE tools, discovered by [`fuse_probe`].
+#[cfg(target_os = "linux")]
+#[cfg(not(pdu_test_skip_cross_device))]
+struct FuseTools {
+    /// The fusermount command to use for unmounting (`"fusermount"` or `"fusermount3"`).
+    fusermount: &'static str,
+}
+
+/// Probes for `fuse2fs` and FUSE infrastructure.
 ///
 /// Verifies:
 /// 1. `fuse2fs` binary exists
 /// 2. `/dev/fuse` is accessible
 /// 3. `fusermount` (or `fusermount3`) binary exists
 ///
-/// Returns `Ok(())` on success, or `Err` with a diagnostic message on failure.
+/// Returns `Ok(FuseTools)` with the discovered tool paths, or `Err` with a diagnostic message.
 #[cfg(target_os = "linux")]
 #[cfg(not(pdu_test_skip_cross_device))]
-fn fuse_available() -> Result<(), String> {
+fn fuse_probe() -> Result<FuseTools, String> {
     use std::{path::Path, process::Command};
 
     // Check that fuse2fs is installed
     Command::new("fuse2fs")
         .arg("--help")
         .output()
-        .map_err(|error| format!("`fuse2fs` not found: {error}. Install e2fsprogs or fuse2fs."))?;
+        .map_err(|error| {
+            format!(
+                "`fuse2fs` not found: {error}. \
+                 Install the `fuse2fs` package (or `e2fsprogs` on distros that bundle it)."
+            )
+        })?;
 
     // Check that /dev/fuse is accessible
     if !Path::new("/dev/fuse").exists() {
@@ -94,13 +107,17 @@ fn fuse_available() -> Result<(), String> {
     // Check that fusermount is available (needed for unmounting)
     let has_fusermount = Command::new("fusermount").arg("-V").output().is_ok();
     let has_fusermount3 = Command::new("fusermount3").arg("-V").output().is_ok();
-    if !has_fusermount && !has_fusermount3 {
-        return Err(
-            "Neither `fusermount` nor `fusermount3` found. Install fuse or fuse3.".to_string(),
-        );
-    }
+    let fusermount = match (has_fusermount, has_fusermount3) {
+        (true, _) => "fusermount",
+        (_, true) => "fusermount3",
+        _ => {
+            return Err(
+                "Neither `fusermount` nor `fusermount3` found. Install fuse or fuse3.".to_string(),
+            );
+        }
+    };
 
-    Ok(())
+    Ok(FuseTools { fusermount })
 }
 
 /// When a subdirectory is a mount point for a different filesystem, `-x` should exclude it.
@@ -120,13 +137,15 @@ fn cross_device_excludes_mount() {
         time::Duration,
     };
 
-    if let Err(reason) = fuse_available() {
-        panic!(
+    let fuse_tools = match fuse_probe() {
+        Ok(tools) => tools,
+        Err(reason) => panic!(
             "error: This test requires FUSE (`fuse2fs`, `/dev/fuse`, `fusermount`) but the probe failed.\n\
              reason: {reason}\n\
-             hint: Install e2fsprogs and fuse, or set `RUSTFLAGS='--cfg pdu_test_skip_cross_device'` to skip this test.",
-        );
-    }
+             hint: Install `fuse2fs` and `fuse3` packages, or set \
+             `RUSTFLAGS='--cfg pdu_test_skip_cross_device'` to skip this test.",
+        ),
+    };
 
     let pdu = env!("CARGO_BIN_EXE_pdu");
     let temp = Temp::new_dir().expect("create temp dir for cross-device test");
@@ -236,21 +255,15 @@ fn cross_device_excludes_mount() {
         );
     }));
 
-    // Always unmount — try fusermount first, fall back to fusermount3
-    let unmount_status = Command::new("fusermount")
+    // Always unmount using the fusermount variant discovered by fuse_probe
+    let unmount_status = Command::new(fuse_tools.fusermount)
         .with_arg("-u")
         .with_arg(&mount_point)
-        .status()
-        .or_else(|_| {
-            Command::new("fusermount3")
-                .with_arg("-u")
-                .with_arg(&mount_point)
-                .status()
-        });
+        .status();
     match unmount_status {
         Ok(status) if status.success() => {}
-        Ok(status) => eprintln!("warning: fusermount exited with {status}"),
-        Err(error) => eprintln!("warning: failed to run fusermount: {error}"),
+        Ok(status) => eprintln!("warning: {} exited with {status}", fuse_tools.fusermount),
+        Err(error) => eprintln!("warning: failed to run {}: {error}", fuse_tools.fusermount),
     }
 
     if let Err(payload) = test_result {
