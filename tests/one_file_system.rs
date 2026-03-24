@@ -230,7 +230,7 @@ fn cross_device_excludes_mount() {
         .map(Duration::from_millis)
         .map(sleep)
         .filter_map(|()| mount_point.read_dir().ok())
-        .find_map(|mut entry| entry.next());
+        .find_map(|mut entry| entry.next()?.ok());
     assert!(
         poll_result.is_some(),
         "FUSE mount at {mount_point:?} not ready after {retries} retries"

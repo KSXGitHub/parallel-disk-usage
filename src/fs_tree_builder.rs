@@ -140,7 +140,10 @@ where
                                 path,
                                 error,
                             }));
-                            return Info::default();
+                            return Info {
+                                size,
+                                children: Vec::new(),
+                            };
                         }
                         Ok(entries) => entries,
                     }
