@@ -58,8 +58,8 @@ unit() (
   read -ra test_flags <<<"${TEST_FLAGS:-}"
   run_if "${LINT:-true}" cargo clippy "$@" -- -D warnings
   run_if "${DOC:-false}" cargo doc "$@"
-  run_if "${BUILD:-true}" cargo build "${build_flags[@]}" "$@"
-  run_if "${TEST:-true}" cargo test "${test_flags[@]}" "$@"
+  run_if "${BUILD:-true}" cargo build ${build_flags[@]+"${build_flags[@]}"} "$@"
+  run_if "${TEST:-true}" cargo test ${test_flags[@]+"${test_flags[@]}"} "$@"
 )
 
 run_if "${FMT:-true}" cargo fmt -- --check
