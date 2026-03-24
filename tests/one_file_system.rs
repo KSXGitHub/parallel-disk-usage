@@ -267,13 +267,7 @@ fn cross_device_excludes_mount() {
             .with_stdin(Stdio::null())
             .with_stdout(Stdio::piped())
             .with_stderr(Stdio::piped())
-            .pipe(|command| {
-                if one_file_system {
-                    command.with_arg("--one-file-system")
-                } else {
-                    command
-                }
-            })
+            .with_args(one_file_system.then_some("--one-file-system"))
             .with_arg(&workspace)
             .output()
             .expect("run pdu")
