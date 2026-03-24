@@ -112,7 +112,7 @@ fn fs_errors() {
         panic!(
             "{}\n{}",
             "error: This test must not be run as root because running with elevated privileges would affect its accuracy.",
-            "hint: Either run this test as a non-root user or set `TEST_SKIP='fs_errors'` to skip this test.",
+            "hint: Either run this test as a non-root user or rerun via `TEST_SKIP='fs_errors' ./test.sh` to skip this test.",
         );
     }
 
