@@ -369,17 +369,7 @@ Some integration tests require external (non-Cargo) tools that are **not** manag
 - `squashfuse` (provides `squashfuse`) — cross-device (`--one-file-system`) FUSE test
 - `fuse3` (provides `fusermount3`, `/dev/fuse`) — cross-device (`--one-file-system`) FUSE test
 
-On Debian/Ubuntu:
-
-```sh
-sudo apt install squashfs-tools squashfuse fuse3
-```
-
-Tests that need these tools will panic with a diagnostic message if they are missing. The panic message includes the specific `RUSTFLAGS='--cfg pdu_test_skip_*'` flag to skip the test. For example:
-
-```sh
-export RUSTFLAGS='--cfg pdu_test_skip_cross_device'
-```
+Tests that need these tools will panic with a diagnostic message if they are missing. The panic message includes the specific `RUSTFLAGS='--cfg pdu_test_skip_*'` flag to skip the test.
 
 ## Automated Checks
 

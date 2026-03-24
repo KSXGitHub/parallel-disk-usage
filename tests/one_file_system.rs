@@ -224,7 +224,8 @@ fn cross_device_excludes_mount() {
 
     // Wait for the FUSE mount to become readable (exponential backoff)
     let wait_ms_base = 100;
-    let poll_result = (0..5)
+    let retries = 5;
+    let poll_result = (0..retries)
         .map(|exponent| wait_ms_base << exponent)
         .map(Duration::from_millis)
         .map(sleep)
@@ -232,7 +233,7 @@ fn cross_device_excludes_mount() {
         .find_map(|mut entry| entry.next());
     assert!(
         poll_result.is_some(),
-        "FUSE mount at {mount_point:?} not ready after retries"
+        "FUSE mount at {mount_point:?} not ready after {retries} retries"
     );
 
     let build_expected_tree = |one_file_system: bool| -> String {
