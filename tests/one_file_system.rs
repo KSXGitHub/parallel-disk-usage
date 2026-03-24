@@ -260,19 +260,20 @@ fn cross_device_excludes_mount() {
     };
 
     let run_pdu = |one_file_system: bool| -> String {
-        let command = Command::new(PDU)
+        Command::new(PDU)
             .with_arg("--quantity=apparent-size")
             .with_arg("--total-width=100")
             .with_arg("--bytes-format=plain")
             .with_stdin(Stdio::null())
             .with_stdout(Stdio::piped())
-            .with_stderr(Stdio::piped());
-        let command = if one_file_system {
-            command.with_arg("--one-file-system")
-        } else {
-            command
-        };
-        command
+            .with_stderr(Stdio::piped())
+            .pipe(|command| {
+                if one_file_system {
+                    command.with_arg("--one-file-system")
+                } else {
+                    command
+                }
+            })
             .with_arg(&workspace)
             .output()
             .expect("run pdu")
