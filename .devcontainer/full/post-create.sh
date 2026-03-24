@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo "Installing external test dependencies..." >&2
+sudo apt update && sudo apt install -y squashfs-tools squashfuse fuse3
+
 echo "Installing Python dependencies..." >&2
 python3 -m pip install --user toml
 
