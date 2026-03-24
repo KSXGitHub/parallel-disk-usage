@@ -3,9 +3,6 @@ set -euo pipefail
 
 mkdir -p "$HOME/.local/bin"
 
-echo "Installing external test dependencies..." >&2
-sudo apt update && sudo apt install -y squashfs-tools squashfuse fuse3
-
 bash "$(dirname "$0")/install-rust-toolchain.sh"
 bash "$(dirname "$0")/install-hyperfine.sh"
 

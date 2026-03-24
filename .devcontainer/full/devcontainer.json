@@ -1,10 +1,9 @@
 {
   "name": "parallel-disk-usage (full)",
   "image": "mcr.microsoft.com/devcontainers/rust:1",
-  "runArgs": [
-    "--device=/dev/fuse",
-    "--cap-add=SYS_ADMIN"
-  ],
+  "remoteEnv": {
+    "RUSTFLAGS": "--cfg pdu_test_skip_cross_device --cfg pdu_test_skip_fs_errors"
+  },
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "version": "lts",
