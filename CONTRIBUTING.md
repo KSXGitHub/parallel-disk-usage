@@ -233,8 +233,6 @@ fn unix_path_logic() { /* uses hardcoded unix paths but no unix-only types */ }
 fn block_size() { /* uses GetBlockSize which only exists on unix */ }
 ```
 
-For tests that need to be skipped based on the runtime environment (e.g., running as root), use `TEST_SKIP='test_name'` instead of custom `cfg` flags. This avoids forcing a full recompilation just to skip a test.
-
 ### Using `pipe-trait`
 
 This codebase uses the [`pipe-trait`](https://docs.rs/pipe-trait) crate extensively. The `Pipe` trait enables method-chaining through unary functions, keeping code in a natural left-to-right reading order. Import it as `use pipe_trait::Pipe;`.
