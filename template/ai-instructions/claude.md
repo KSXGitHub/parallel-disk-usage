@@ -1,1 +1,2 @@
 - `gh` (GitHub CLI) is not installed — do not attempt to use it
+- After creating a pull request, use `subscribe_pr_activity` to monitor it for CI failures and review comments, then offer to address them automatically

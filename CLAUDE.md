@@ -19,3 +19,4 @@ Read and follow the CONTRIBUTING.md file in this repository for all code style c
 - Run `FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh` to validate changes. If a test fails with a hint about `TEST_SKIP`, follow the hint and rerun with the suggested variable.
 - **ALWAYS run the full test suite** (`FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh`) before committing, regardless of how trivial the change seems — this includes documentation-only changes, comment edits, config changes, and refactors. The test suite checks formatting, linting, building, tests, and docs across multiple feature combinations; any type of change can break any of these checks.
 - `gh` (GitHub CLI) is not installed — do not attempt to use it
+- After creating a pull request, use `subscribe_pr_activity` to monitor it for CI failures and review comments, then offer to address them automatically
