@@ -35,7 +35,7 @@ fn stdio(command: Command) -> Command {
 #[cfg(unix)]
 fn fs_permission(path: impl AsRef<Path>, permission: &'static str, recursive: bool) {
     let Output { status, stderr, .. } = Command::new("chmod")
-        .pipe(|cmd| if recursive { cmd.with_arg("-R") } else { cmd })
+        .with_args(recursive.then_some("-R"))
         .with_arg(permission)
         .with_arg(path.as_ref())
         .with_stdin(Stdio::null())
