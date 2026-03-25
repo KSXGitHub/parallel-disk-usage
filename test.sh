@@ -54,10 +54,21 @@ run_if() (
 )
 
 unit() (
-  eval run_if "${LINT:-true}" cargo clippy "$@" -- -D warnings
-  eval run_if "${DOC:-false}" cargo doc "$@"
-  eval run_if "${BUILD:-true}" cargo build "${BUILD_FLAGS:-}" "$@"
-  eval run_if "${TEST:-true}" cargo test "${TEST_FLAGS:-}" "$@"
+  read -ra build_flags <<<"${BUILD_FLAGS:-}"
+  read -ra test_flags <<<"${TEST_FLAGS:-}"
+  read -ra test_skip <<<"${TEST_SKIP:-}"
+  skip_args=()
+  for name in ${test_skip[@]+"${test_skip[@]}"}; do
+    skip_args+=(--skip "$name")
+  done
+  run_if "${LINT:-true}" cargo clippy "$@" -- -D warnings
+  run_if "${DOC:-false}" cargo doc "$@"
+  run_if "${BUILD:-true}" cargo build ${build_flags[@]+"${build_flags[@]}"} "$@"
+  if [[ ${#skip_args[@]} -gt 0 ]]; then
+    run_if "${TEST:-true}" cargo test ${test_flags[@]+"${test_flags[@]}"} "$@" -- "${skip_args[@]}"
+  else
+    run_if "${TEST:-true}" cargo test ${test_flags[@]+"${test_flags[@]}"} "$@"
+  fi
 )
 
 run_if "${FMT:-true}" cargo fmt -- --check

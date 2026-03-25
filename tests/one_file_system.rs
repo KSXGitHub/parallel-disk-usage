@@ -12,7 +12,7 @@
 //! excludes entries on the mounted filesystem.
 //!
 //! The FUSE test panics when `mksquashfs`, `squashfuse`, `/dev/fuse`, or `fusermount` are
-//! unavailable. It can be excluded via `RUSTFLAGS='--cfg pdu_test_skip_cross_device'`.
+//! unavailable. It can be excluded via `TEST_SKIP='cross_device_excludes_mount' ./test.sh`.
 
 #![cfg(unix)]
 #![cfg(feature = "cli")]
@@ -152,13 +152,9 @@ impl Drop for FuseMount<'_> {
 /// user namespaces required. The image is pre-built with `mksquashfs` containing the
 /// test file, so the mount is read-only (which is fine since `pdu` only reads).
 /// Panics when FUSE infrastructure is unavailable; can be excluded via
-/// `RUSTFLAGS='--cfg pdu_test_skip_cross_device'`.
+/// `TEST_SKIP='cross_device_excludes_mount' ./test.sh`.
 #[test]
 #[cfg_attr(not(target_os = "linux"), ignore = "this test only works on Linux")]
-#[cfg_attr(
-    pdu_test_skip_cross_device,
-    ignore = "pdu_test_skip_cross_device is set"
-)]
 fn cross_device_excludes_mount() {
     let fuse_tools = fuse_probe().unwrap_or_else(|reason| {
         panic!(
@@ -166,7 +162,7 @@ fn cross_device_excludes_mount() {
              `fusermount`) but the probe failed.\n\
              reason: {reason}\n\
              hint: Install `squashfs-tools`, `squashfuse`, and FUSE for your platform, \
-             or set `RUSTFLAGS='--cfg pdu_test_skip_cross_device'` to skip this test.",
+             or rerun via `TEST_SKIP='cross_device_excludes_mount' ./test.sh` to skip this test.",
         )
     });
 
