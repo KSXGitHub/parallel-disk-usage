@@ -353,13 +353,13 @@ rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy
 
 ## Optional External Dependencies
 
-Some integration tests require external (non-Cargo) tools that are **not** managed by `Cargo.toml`. These tests are skipped or excluded when the tools are absent, but CI installs them to get full coverage.
+Some integration tests require external (non-Cargo) tools that are **not** managed by `Cargo.toml`. These tests panic when the tools are absent; CI installs them to get full coverage.
 
 - `squashfs-tools` (provides `mksquashfs`) — cross-device (`--one-file-system`) FUSE test
 - `squashfuse` (provides `squashfuse`) — cross-device (`--one-file-system`) FUSE test
 - `fuse3` (provides `fusermount3`, `/dev/fuse`) — cross-device (`--one-file-system`) FUSE test
 
-Tests that need these tools will panic with a diagnostic message if they are missing. The panic message includes the specific `RUSTFLAGS='--cfg pdu_test_skip_*'` flag to skip the test.
+Tests that need these tools will panic with a diagnostic message if they are missing. The panic message includes the specific `TEST_SKIP` variable to skip the test via `./test.sh`.
 
 ## Automated Checks
 
