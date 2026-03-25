@@ -107,13 +107,12 @@ fn max_depth_0() {
 
 #[cfg(unix)]
 #[test]
-#[cfg_attr(pdu_test_skip_fs_errors, ignore = "pdu_test_skip_fs_errors is set")]
 fn fs_errors() {
     if unsafe { libc::geteuid() } == 0 {
         panic!(
             "{}\n{}",
             "error: This test must not be run as root because running with elevated privileges would affect its accuracy.",
-            "hint: Either run this test as a non-root user or set `RUSTFLAGS='--cfg pdu_test_skip_fs_errors'` to skip this test.",
+            "hint: Either run this test as a non-root user or rerun via `TEST_SKIP='fs_errors' ./test.sh` to skip this test.",
         );
     }
 

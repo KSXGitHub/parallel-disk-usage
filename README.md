@@ -93,6 +93,7 @@ Environment Variables
 | `TEST`        | `true` or `false` | `true`        | Whether to run `cargo test`                     |
 | `BUILD_FLAGS` | string            | _(empty)_     | Space-separated list of flags for `cargo build` |
 | `TEST_FLAGS`  | string            | _(empty)_     | Space-separated list of flags for `cargo test`  |
+| `TEST_SKIP`   | string            | _(empty)_     | Space-separated list of test names to skip      |
 
 </details>
 

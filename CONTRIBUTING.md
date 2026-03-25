@@ -215,7 +215,7 @@ pub enum RuntimeError {
 
 ### Conditional Test Skipping: `#[cfg]` vs `#[cfg_attr(..., ignore)]`
 
-When a test cannot run under certain conditions (e.g., wrong platform, running as root), prefer `#[cfg_attr(..., ignore)]` over `#[cfg(...)]` to skip it. This way the test is still compiled on all configurations — catching type errors and regressions early — but simply skipped at runtime.
+When a test cannot run under certain conditions (e.g., wrong platform), prefer `#[cfg_attr(..., ignore)]` over `#[cfg(...)]` to skip it. This way the test is still compiled on all configurations — catching type errors and regressions early — but simply skipped at runtime.
 
 Use `#[cfg]` on tests **only** when the code cannot compile under the condition — for example, when the test references types, functions, or trait methods that are gated behind `#[cfg]` and do not exist on other platforms or feature sets.
 
@@ -231,16 +231,6 @@ fn unix_path_logic() { /* uses hardcoded unix paths but no unix-only types */ }
 #[cfg(unix)]
 #[test]
 fn block_size() { /* uses GetBlockSize which only exists on unix */ }
-
-// Good — test compiles with the flag, skipped at runtime
-#[test]
-#[cfg_attr(pdu_test_skip_some_test, ignore = "pdu_test_skip_some_test is set")]
-fn some_test() { /* ... */ }
-
-// Bad — excludes the test from compilation entirely when it could still compile
-#[cfg(not(pdu_test_skip_some_test))]
-#[test]
-fn some_test() { /* ... */ }
 ```
 
 ### Using `pipe-trait`
@@ -380,4 +370,4 @@ FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh
 > Always run the full test suite before committing, even for seemingly trivial changes such as documentation edits, comment changes, or config updates. Any change can break formatting, linting, building, tests, or doc generation across the different feature combinations.
 
 > [!NOTE]
-> Some tests may fail with a hint about `RUSTFLAGS` and `--cfg pdu_test_skip_*` flags. Follow the hint and rerun with the suggested flags.
+> Some tests may fail with a hint about `TEST_SKIP`. Follow the hint and rerun with the suggested variable.
