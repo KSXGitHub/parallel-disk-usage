@@ -38,6 +38,8 @@ set edit:completion:arg-completer[pdu] = {|@words|
             cand --deduplicate-hardlinks 'Detect and subtract the sizes of hardlinks from their parent directory totals'
             cand --detect-links 'Detect and subtract the sizes of hardlinks from their parent directory totals'
             cand --dedupe-links 'Detect and subtract the sizes of hardlinks from their parent directory totals'
+            cand -x 'Skip directories on different filesystems'
+            cand --one-file-system 'Skip directories on different filesystems'
             cand --top-down 'Print the tree top-down instead of bottom-up'
             cand --align-right 'Set the root of the bars to the right'
             cand --no-sort 'Do not sort the branches in the tree'

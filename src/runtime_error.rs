@@ -32,6 +32,10 @@ pub enum UnsupportedFeature {
     #[cfg(not(unix))]
     #[display("Feature --deduplicate-hardlinks is not available on this platform")]
     DeduplicateHardlink,
+    /// Using `--one-file-system` on non-POSIX.
+    #[cfg(not(unix))]
+    #[display("Feature --one-file-system is not available on this platform")]
+    OneFileSystem,
 }
 
 impl From<Infallible> for RuntimeError {

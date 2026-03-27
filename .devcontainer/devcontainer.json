@@ -1,6 +1,9 @@
 {
   "name": "parallel-disk-usage (Rust only)",
   "image": "mcr.microsoft.com/devcontainers/rust:1",
+  "remoteEnv": {
+    "TEST_SKIP": "cross_device_excludes_mount"
+  },
   "customizations": {
     "vscode": {
       "extensions": [

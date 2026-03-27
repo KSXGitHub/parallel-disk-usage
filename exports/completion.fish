@@ -12,6 +12,7 @@ complete -c pdu -l threads -d 'Set the maximum number of threads to spawn. Could
 complete -c pdu -l json-input -d 'Read JSON data from stdin'
 complete -c pdu -l json-output -d 'Print JSON data instead of an ASCII chart'
 complete -c pdu -s H -l deduplicate-hardlinks -l detect-links -l dedupe-links -d 'Detect and subtract the sizes of hardlinks from their parent directory totals'
+complete -c pdu -s x -l one-file-system -d 'Skip directories on different filesystems'
 complete -c pdu -l top-down -d 'Print the tree top-down instead of bottom-up'
 complete -c pdu -l align-right -d 'Set the root of the bars to the right'
 complete -c pdu -l no-sort -d 'Do not sort the branches in the tree'

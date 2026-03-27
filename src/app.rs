@@ -5,6 +5,7 @@ pub use sub::Sub;
 use crate::{
     args::{Args, Quantity, Threads},
     bytes_format::BytesFormat,
+    device::DeviceBoundary,
     get_size::{GetApparentSize, GetSize},
     hardlink,
     json_data::{JsonData, JsonDataBody, JsonShared, JsonTree},
@@ -129,6 +130,13 @@ impl App {
         #[cfg(not(unix))]
         if self.args.deduplicate_hardlinks {
             return crate::runtime_error::UnsupportedFeature::DeduplicateHardlink
+                .pipe(RuntimeError::UnsupportedFeature)
+                .pipe(Err);
+        }
+
+        #[cfg(not(unix))]
+        if self.args.one_file_system {
+            return crate::runtime_error::UnsupportedFeature::OneFileSystem
                 .pipe(RuntimeError::UnsupportedFeature)
                 .pipe(Err);
         }
@@ -283,6 +291,7 @@ impl App {
                     progress: $progress,
                     #[cfg(unix)] deduplicate_hardlinks: $hardlinks,
                     #[cfg(not(unix))] deduplicate_hardlinks: _,
+                    one_file_system,
                     files,
                     json_output,
                     bytes_format,
@@ -299,6 +308,7 @@ impl App {
                     bar_alignment: BarAlignment::from_align_right(align_right),
                     size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
                     hardlinks_handler: <$size_getter as CreateHardlinksHandler<{ cfg!(unix) && $hardlinks }, $progress>>::create_hardlinks_handler(),
+                    device_boundary: DeviceBoundary::from_one_file_system(one_file_system),
                     reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
                     bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
                     files,

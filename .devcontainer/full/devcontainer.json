@@ -1,6 +1,9 @@
 {
   "name": "parallel-disk-usage (full)",
   "image": "mcr.microsoft.com/devcontainers/rust:1",
+  "remoteEnv": {
+    "TEST_SKIP": "cross_device_excludes_mount"
+  },
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "version": "lts",

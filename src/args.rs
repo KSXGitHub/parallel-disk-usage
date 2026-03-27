@@ -94,7 +94,7 @@ pub struct Args {
     /// Read JSON data from stdin.
     #[clap(
         long,
-        conflicts_with_all = ["quantity", "deduplicate_hardlinks"]
+        conflicts_with_all = ["quantity", "deduplicate_hardlinks", "one_file_system"]
     )]
     pub json_input: bool,
 
@@ -111,6 +111,11 @@ pub struct Args {
     #[clap(long, short = 'H', visible_aliases = ["detect-links", "dedupe-links"])]
     #[cfg_attr(not(unix), clap(hide = true))]
     pub deduplicate_hardlinks: bool,
+
+    /// Skip directories on different filesystems.
+    #[clap(long, short = 'x')]
+    #[cfg_attr(not(unix), clap(hide = true))]
+    pub one_file_system: bool,
 
     /// Print the tree top-down instead of bottom-up.
     #[clap(long)]

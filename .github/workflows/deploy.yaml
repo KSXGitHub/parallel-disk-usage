@@ -29,6 +29,12 @@ jobs:
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > $installer
           bash $installer --default-toolchain $(cat rust-toolchain) -y
 
+      - name: Install external test dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install -y squashfs-tools squashfuse fuse3
+
       - name: Test (dev)
         shell: bash
         env:

@@ -41,6 +41,8 @@ Register-ArgumentCompleter -Native -CommandName 'pdu' -ScriptBlock {
             [CompletionResult]::new('--deduplicate-hardlinks', '--deduplicate-hardlinks', [CompletionResultType]::ParameterName, 'Detect and subtract the sizes of hardlinks from their parent directory totals')
             [CompletionResult]::new('--detect-links', '--detect-links', [CompletionResultType]::ParameterName, 'Detect and subtract the sizes of hardlinks from their parent directory totals')
             [CompletionResult]::new('--dedupe-links', '--dedupe-links', [CompletionResultType]::ParameterName, 'Detect and subtract the sizes of hardlinks from their parent directory totals')
+            [CompletionResult]::new('-x', '-x', [CompletionResultType]::ParameterName, 'Skip directories on different filesystems')
+            [CompletionResult]::new('--one-file-system', '--one-file-system', [CompletionResultType]::ParameterName, 'Skip directories on different filesystems')
             [CompletionResult]::new('--top-down', '--top-down', [CompletionResultType]::ParameterName, 'Print the tree top-down instead of bottom-up')
             [CompletionResult]::new('--align-right', '--align-right', [CompletionResultType]::ParameterName, 'Set the root of the bars to the right')
             [CompletionResult]::new('--no-sort', '--no-sort', [CompletionResultType]::ParameterName, 'Do not sort the branches in the tree')

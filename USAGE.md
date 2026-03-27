@@ -39,6 +39,13 @@ How to display the numbers of bytes.
 
 Detect and subtract the sizes of hardlinks from their parent directory totals.
 
+<a id="option-x" name="option-x"></a><a id="one-file-system" name="one-file-system"></a>
+### `--one-file-system`
+
+* _Aliases:_ `-x`.
+
+Skip directories on different filesystems.
+
 <a id="top-down" name="top-down"></a>
 ### `--top-down`
 

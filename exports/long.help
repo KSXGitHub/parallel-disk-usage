@@ -31,6 +31,9 @@ Options:
 
           [aliases: --detect-links, --dedupe-links]
 
+  -x, --one-file-system
+          Skip directories on different filesystems
+
       --top-down
           Print the tree top-down instead of bottom-up
 
