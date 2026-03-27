@@ -5,6 +5,7 @@ pub use sub::Sub;
 use crate::{
     args::{Args, Quantity, Threads},
     bytes_format::BytesFormat,
+    device::DeviceBoundary,
     get_size::{GetApparentSize, GetSize},
     hardlink,
     json_data::{JsonData, JsonDataBody, JsonShared, JsonTree},
@@ -307,7 +308,7 @@ impl App {
                     bar_alignment: BarAlignment::from_align_right(align_right),
                     size_getter: <$size_getter as GetSizeUtils>::INSTANCE,
                     hardlinks_handler: <$size_getter as CreateHardlinksHandler<{ cfg!(unix) && $hardlinks }, $progress>>::create_hardlinks_handler(),
-                    one_file_system,
+                    device_boundary: DeviceBoundary::from_1fs(one_file_system),
                     reporter: <$size_getter as CreateReporter<$progress>>::create_reporter(report_error),
                     bytes_format: <$size_getter as GetSizeUtils>::formatter(bytes_format),
                     files,

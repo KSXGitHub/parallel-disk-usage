@@ -4,6 +4,7 @@ use derive_more::{AsRef, Deref};
 use into_sorted::IntoSorted;
 use parallel_disk_usage::{
     data_tree::{DataTree, DataTreeReflection},
+    device::DeviceBoundary,
     fs_tree_builder::FsTreeBuilder,
     get_size::{self, GetSize},
     hardlink::HardlinkIgnorant,
@@ -373,7 +374,7 @@ where
                 panic!("Unexpected call to report_error: {error:?}")
             }),
             root: root.join(suffix),
-            one_file_system: false,
+            device_boundary: DeviceBoundary::Cross,
             max_depth: 10,
         }
         .pipe(DataTree::<OsStringDisplay, Size>::from)

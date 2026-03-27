@@ -1,5 +1,6 @@
 use super::{
     data_tree::DataTree,
+    device::DeviceBoundary,
     get_size::GetSize,
     hardlink::{RecordHardlinks, RecordHardlinksArgument},
     os_string_display::OsStringDisplay,
@@ -22,6 +23,7 @@ use std::{
 /// # use parallel_disk_usage::fs_tree_builder::FsTreeBuilder;
 /// use parallel_disk_usage::{
 ///     data_tree::DataTree,
+///     device::DeviceBoundary,
 ///     get_size::GetApparentSize,
 ///     os_string_display::OsStringDisplay,
 ///     reporter::{ErrorOnlyReporter, ErrorReport},
@@ -33,7 +35,7 @@ use std::{
 ///     hardlinks_recorder: &HardlinkIgnorant,
 ///     size_getter: GetApparentSize,
 ///     reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-///     one_file_system: false,
+///     device_boundary: DeviceBoundary::Cross,
 ///     max_depth: 10,
 /// };
 /// let data_tree: DataTree<OsStringDisplay, Bytes> = builder.into();
@@ -54,8 +56,8 @@ where
     pub hardlinks_recorder: &'a HardlinksRecorder,
     /// Reports progress to external system.
     pub reporter: &'a Report,
-    /// Skip directories on different filesystems.
-    pub one_file_system: bool,
+    /// Whether to cross device boundary into a different filesystem.
+    pub device_boundary: DeviceBoundary,
     /// Deepest level of descendant display in the graph. The sizes beyond the max depth still count toward total.
     pub max_depth: u64,
 }
@@ -76,14 +78,15 @@ where
             size_getter,
             hardlinks_recorder,
             reporter,
-            one_file_system,
+            device_boundary,
             max_depth,
         } = builder;
 
         // `root` would be inspected multiple times, but its impact on performance is insignificant
         // before the (usually) massive fs tree `root` contains.
-        let root_dev = if one_file_system {
-            match symlink_metadata(&root) {
+        let root_dev = match device_boundary {
+            DeviceBoundary::Cross => None,
+            DeviceBoundary::Stay => match symlink_metadata(&root) {
                 Err(error) => {
                     reporter.report(Event::EncounterError(ErrorReport {
                         operation: SymlinkMetadata,
@@ -93,9 +96,7 @@ where
                     return DataTree::file(OsStringDisplay::os_string_from(&root), Size::default());
                 }
                 Ok(stats) => Some(get_device_id(&stats)),
-            }
-        } else {
-            None
+            },
         };
 
         TreeBuilder::<PathBuf, OsStringDisplay, Size, _, _> {

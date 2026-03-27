@@ -24,6 +24,7 @@ use command_extra::CommandExtra;
 use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::DataTree,
+    device::DeviceBoundary,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetApparentSize,
     hardlink::HardlinkIgnorant,
@@ -43,35 +44,35 @@ use std::{
 };
 use which::which;
 
-/// When all files reside on a single filesystem, `one_file_system: true` should produce
-/// the same tree as `one_file_system: false`.
+/// When all files reside on a single filesystem, [`DeviceBoundary::Stay`] should produce
+/// the same tree as [`DeviceBoundary::Cross`].
 #[test]
 fn same_device_on_sample_workspace() {
     let workspace = SampleWorkspace::default();
 
-    let build_tree = |one_file_system: bool| -> DataTree<OsStringDisplay, Bytes> {
+    let build_tree = |device_boundary: DeviceBoundary| -> DataTree<OsStringDisplay, Bytes> {
         FsTreeBuilder {
             root: workspace.to_path_buf(),
             size_getter: GetApparentSize,
             hardlinks_recorder: &HardlinkIgnorant,
             reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-            one_file_system,
+            device_boundary,
             max_depth: 10,
         }
         .into()
     };
 
-    let without_1fs = build_tree(false)
+    let cross = build_tree(DeviceBoundary::Cross)
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
         .into_reflection();
-    let with_1fs = build_tree(true)
+    let stay = build_tree(DeviceBoundary::Stay)
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
         .into_reflection();
 
     assert_eq!(
-        sanitize_tree_reflection(without_1fs),
-        sanitize_tree_reflection(with_1fs),
-        "one_file_system should not change the result when all files are on the same device",
+        sanitize_tree_reflection(cross),
+        sanitize_tree_reflection(stay),
+        "DeviceBoundary should not change the result when all files are on the same device",
     );
 }
 
@@ -232,13 +233,13 @@ fn cross_device_excludes_mount() {
         "FUSE mount at {mount_point:?} not ready after {retries} retries"
     );
 
-    let build_expected_tree = |one_file_system: bool| -> String {
+    let build_expected_tree = |device_boundary: DeviceBoundary| -> String {
         let builder = FsTreeBuilder {
             root: workspace.clone(),
             size_getter: GetApparentSize,
             hardlinks_recorder: &HardlinkIgnorant,
             reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-            one_file_system,
+            device_boundary,
             max_depth: 10,
         };
         let mut data_tree: DataTree<OsStringDisplay, Bytes> = builder.into();
@@ -272,7 +273,7 @@ fn cross_device_excludes_mount() {
 
     // Run pdu WITHOUT --one-file-system — should see both files
     let actual = run_pdu(false);
-    let expected = build_expected_tree(false);
+    let expected = build_expected_tree(DeviceBoundary::Cross);
     eprintln!("WITHOUT --one-file-system:\nACTUAL:\n{actual}\n\nEXPECTED:\n{expected}\n");
     assert_eq!(actual, expected);
     assert!(
@@ -286,7 +287,7 @@ fn cross_device_excludes_mount() {
 
     // Run pdu WITH --one-file-system — should only see outside.txt
     let actual = run_pdu(true);
-    let expected = build_expected_tree(true);
+    let expected = build_expected_tree(DeviceBoundary::Stay);
     eprintln!("WITH --one-file-system:\nACTUAL:\n{actual}\n\nEXPECTED:\n{expected}\n");
     assert_eq!(actual, expected);
     assert!(

@@ -1,6 +1,7 @@
 use crate::{
     args::{Depth, Fraction},
     data_tree::DataTree,
+    device::DeviceBoundary,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetSize,
     hardlink::{DeduplicateSharedSize, HardlinkIgnorant, RecordHardlinks},
@@ -43,8 +44,8 @@ where
     pub size_getter: SizeGetter,
     /// Handle to detect, record, and deduplicate hardlinks.
     pub hardlinks_handler: HardlinksHandler,
-    /// Skip directories on different filesystems.
-    pub one_file_system: bool,
+    /// Whether to cross device boundary into a different filesystem.
+    pub device_boundary: DeviceBoundary,
     /// Reports measurement progress.
     pub reporter: Report,
     /// Minimal size proportion required to appear.
@@ -73,7 +74,7 @@ where
             max_depth,
             size_getter,
             hardlinks_handler,
-            one_file_system,
+            device_boundary,
             reporter,
             min_ratio,
             no_sort,
@@ -89,7 +90,7 @@ where
                     root,
                     size_getter,
                     hardlinks_recorder: &hardlinks_handler,
-                    one_file_system,
+                    device_boundary,
                     max_depth,
                 }
                 .into()

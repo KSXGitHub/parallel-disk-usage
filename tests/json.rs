@@ -8,6 +8,7 @@ use command_extra::CommandExtra;
 use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::DataTree,
+    device::DeviceBoundary,
     fs_tree_builder::FsTreeBuilder,
     get_size::GetApparentSize,
     hardlink::HardlinkIgnorant,
@@ -85,7 +86,7 @@ fn json_output() {
         size_getter: GetApparentSize,
         hardlinks_recorder: &HardlinkIgnorant,
         reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
-        one_file_system: false,
+        device_boundary: DeviceBoundary::Cross,
         max_depth: 10,
     };
     let expected = builder
