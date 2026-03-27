@@ -37,14 +37,14 @@ where
     pub bar_alignment: BarAlignment,
     /// Distribution and number of characters/blocks can be placed in a line.
     pub column_width_distribution: ColumnWidthDistribution,
-    /// Skip directories on different filesystems.
-    pub one_file_system: bool,
     /// Maximum number of levels that should be visualized.
     pub max_depth: Depth,
     /// [Get the size](GetSize) of files/directories.
     pub size_getter: SizeGetter,
     /// Handle to detect, record, and deduplicate hardlinks.
     pub hardlinks_handler: HardlinksHandler,
+    /// Skip directories on different filesystems.
+    pub one_file_system: bool,
     /// Reports measurement progress.
     pub reporter: Report,
     /// Minimal size proportion required to appear.
@@ -70,10 +70,10 @@ where
             direction,
             bar_alignment,
             column_width_distribution,
-            one_file_system,
             max_depth,
             size_getter,
             hardlinks_handler,
+            one_file_system,
             reporter,
             min_ratio,
             no_sort,
