@@ -263,6 +263,7 @@ fn cross_device_excludes_mount() {
             .with_arg("--quantity=apparent-size")
             .with_arg("--total-width=100")
             .with_arg("--bytes-format=plain")
+            .with_arg("--min-ratio=0.01")
             .with_args(extra_arg)
             .with_arg(&workspace)
             .with_stdin(Stdio::null())
