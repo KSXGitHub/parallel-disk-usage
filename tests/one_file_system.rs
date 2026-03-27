@@ -50,16 +50,15 @@ use which::which;
 fn same_device_on_sample_workspace() {
     let workspace = SampleWorkspace::default();
 
-    let build_tree = |device_boundary: DeviceBoundary| -> DataTree<OsStringDisplay, Bytes> {
-        FsTreeBuilder {
+    let build_tree = |device_boundary: DeviceBoundary| {
+        DataTree::from(FsTreeBuilder {
             root: workspace.to_path_buf(),
             size_getter: GetApparentSize,
             hardlinks_recorder: &HardlinkIgnorant,
             reporter: &ErrorOnlyReporter::new(ErrorReport::SILENT),
             device_boundary,
             max_depth: 10,
-        }
-        .into()
+        })
     };
 
     let cross = DeviceBoundary::Cross
