@@ -61,19 +61,19 @@ fn same_device_on_sample_workspace() {
         })
     };
 
-    let cross = DeviceBoundary::Cross
+    let crossing = DeviceBoundary::Cross
         .pipe(build_tree)
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
         .into_reflection()
         .pipe(sanitize_tree_reflection);
-    let stay = DeviceBoundary::Stay
+    let staying = DeviceBoundary::Stay
         .pipe(build_tree)
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
         .into_reflection()
         .pipe(sanitize_tree_reflection);
 
     assert_eq!(
-        cross, stay,
+        crossing, staying,
         "DeviceBoundary should not change the result when all files are on the same device",
     );
 }
