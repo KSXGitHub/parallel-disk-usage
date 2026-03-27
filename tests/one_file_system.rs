@@ -62,10 +62,12 @@ fn same_device_on_sample_workspace() {
         .into()
     };
 
-    let cross = build_tree(DeviceBoundary::Cross)
+    let cross = DeviceBoundary::Cross
+        .pipe(build_tree)
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
         .into_reflection();
-    let stay = build_tree(DeviceBoundary::Stay)
+    let stay = DeviceBoundary::Stay
+        .pipe(build_tree)
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
         .into_reflection();
 
