@@ -94,7 +94,7 @@ pub struct Args {
     /// Read JSON data from stdin.
     #[clap(
         long,
-        conflicts_with_all = ["quantity", "deduplicate_hardlinks"]
+        conflicts_with_all = ["quantity", "deduplicate_hardlinks", "one_file_system"]
     )]
     pub json_input: bool,
 
