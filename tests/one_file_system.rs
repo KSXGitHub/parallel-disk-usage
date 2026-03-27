@@ -66,6 +66,7 @@ fn same_device_on_sample_workspace() {
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
         .into_reflection()
         .pipe(sanitize_tree_reflection);
+
     let staying = DeviceBoundary::Stay
         .pipe(build_tree)
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
