@@ -1,0 +1,136 @@
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH pdu 1  "pdu 0.21.1" 
+.SH NAME
+pdu \- Summarize disk usage of the set of files, recursively for directories.
+.SH SYNOPSIS
+\fBpdu\fR [\fB\-\-json\-input\fR] [\fB\-\-json\-output\fR] [\fB\-b\fR|\fB\-\-bytes\-format\fR] [\fB\-H\fR|\fB\-\-deduplicate\-hardlinks\fR] [\fB\-x\fR|\fB\-\-one\-file\-system\fR] [\fB\-\-top\-down\fR] [\fB\-\-align\-right\fR] [\fB\-q\fR|\fB\-\-quantity\fR] [\fB\-d\fR|\fB\-\-max\-depth\fR] [\fB\-w\fR|\fB\-\-total\-width\fR] [\fB\-\-column\-width\fR] [\fB\-m\fR|\fB\-\-min\-ratio\fR] [\fB\-\-no\-sort\fR] [\fB\-s\fR|\fB\-\-silent\-errors\fR] [\fB\-p\fR|\fB\-\-progress\fR] [\fB\-\-threads\fR] [\fB\-\-omit\-json\-shared\-details\fR] [\fB\-\-omit\-json\-shared\-summary\fR] [\fB\-h\fR|\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] [\fIFILES\fR] 
+.SH DESCRIPTION
+Summarize disk usage of the set of files, recursively for directories.
+.PP
+Copyright: Apache\-2.0 © 2021 Hoàng Văn Khải <https://github.com/KSXGitHub/>
+Sponsor: https://github.com/sponsors/KSXGitHub
+.SH OPTIONS
+.TP
+\fB\-\-json\-input\fR
+Read JSON data from stdin
+.TP
+\fB\-\-json\-output\fR
+Print JSON data instead of an ASCII chart
+.TP
+\fB\-b\fR, \fB\-\-bytes\-format\fR \fI<BYTES_FORMAT>\fR [default: metric]
+How to display the numbers of bytes
+.br
+
+.br
+\fIPossible values:\fR
+.RS 14
+.IP \(bu 2
+plain: Display plain number of bytes without units
+.IP \(bu 2
+metric: Use metric scale, i.e. 1K = 1000B, 1M = 1000K, and so on
+.IP \(bu 2
+binary: Use binary scale, i.e. 1K = 1024B, 1M = 1024K, and so on
+.RE
+.TP
+\fB\-H\fR, \fB\-\-deduplicate\-hardlinks\fR
+Detect and subtract the sizes of hardlinks from their parent directory totals
+.TP
+\fB\-x\fR, \fB\-\-one\-file\-system\fR
+Skip directories on different filesystems
+.TP
+\fB\-\-top\-down\fR
+Print the tree top\-down instead of bottom\-up
+.TP
+\fB\-\-align\-right\fR
+Set the root of the bars to the right
+.TP
+\fB\-q\fR, \fB\-\-quantity\fR \fI<QUANTITY>\fR [default: block\-size]
+Aspect of the files/directories to be measured
+.br
+
+.br
+\fIPossible values:\fR
+.RS 14
+.IP \(bu 2
+apparent\-size: Measure apparent sizes
+.IP \(bu 2
+block\-size: Measure block sizes (block\-count * 512B)
+.IP \(bu 2
+block\-count: Count numbers of blocks
+.RE
+.TP
+\fB\-d\fR, \fB\-\-max\-depth\fR \fI<MAX_DEPTH>\fR [default: 10]
+Maximum depth to display the data. Could be either "inf" or a positive integer
+.TP
+\fB\-w\fR, \fB\-\-total\-width\fR \fI<TOTAL_WIDTH>\fR
+Width of the visualization
+.TP
+\fB\-\-column\-width\fR \fI<TREE_WIDTH>\fR\fI \fR\fI<BAR_WIDTH>\fR
+Maximum widths of the tree column and width of the bar column
+.TP
+\fB\-m\fR, \fB\-\-min\-ratio\fR \fI<MIN_RATIO>\fR [default: 0.01]
+Minimal size proportion required to appear
+.TP
+\fB\-\-no\-sort\fR
+Do not sort the branches in the tree
+.TP
+\fB\-s\fR, \fB\-\-silent\-errors\fR
+Prevent filesystem error messages from appearing in stderr
+.TP
+\fB\-p\fR, \fB\-\-progress\fR
+Report progress being made at the expense of performance
+.TP
+\fB\-\-threads\fR \fI<THREADS>\fR [default: auto]
+Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer
+.TP
+\fB\-\-omit\-json\-shared\-details\fR
+Do not output `.shared.details` in the JSON output
+.TP
+\fB\-\-omit\-json\-shared\-summary\fR
+Do not output `.shared.summary` in the JSON output
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help (see a summary with \*(Aq\-h\*(Aq)
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Print version
+.TP
+[\fIFILES\fR]
+List of files and/or directories
+.SH EXTRA
+Examples:
+    Show disk usage chart of current working directory
+    $ pdu
+
+    Show disk usage chart of a single file or directory
+    $ pdu path/to/file/or/directory
+
+    Compare disk usages of multiple files and/or directories
+    $ pdu file.txt dir/
+
+    Show chart in apparent sizes instead of block sizes
+    $ pdu \-\-quantity=apparent\-size
+
+    Detect and subtract the sizes of hardlinks from their parent nodes
+    $ pdu \-\-deduplicate\-hardlinks
+
+    Show sizes in plain numbers instead of metric units
+    $ pdu \-\-bytes\-format=plain
+
+    Show sizes in base 2¹⁰ units (binary) instead of base 10³ units (metric)
+    $ pdu \-\-bytes\-format=binary
+
+    Show disk usage chart of all entries regardless of size
+    $ pdu \-\-min\-ratio=0
+
+    Only show disk usage chart of entries whose size is at least 5% of total
+    $ pdu \-\-min\-ratio=0.05
+
+    Show disk usage data as JSON instead of chart
+    $ pdu \-\-min\-ratio=0 \-\-max\-depth=inf \-\-json\-output | jq
+
+    Visualize existing JSON representation of disk usage data
+    $ pdu \-\-json\-input < disk\-usage.json
+.SH VERSION
+v0.21.1

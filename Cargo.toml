@@ -45,6 +45,11 @@ path = "cli/completions.rs"
 required-features = ["cli-completions"]
 
 [[bin]]
+name = "pdu-man-page"
+path = "cli/man_page.rs"
+required-features = ["cli-man"]
+
+[[bin]]
 name = "pdu-usage-md"
 path = "cli/usage_md.rs"
 required-features = ["cli"]
@@ -59,12 +64,14 @@ default = ["cli"]
 json = ["serde/derive", "serde_json"]
 cli = ["clap/derive", "clap_complete", "clap-utilities", "json"]
 cli-completions = ["cli"]
+cli-man = ["cli", "clap_mangen"]
 ai-instructions = ["clap/derive"]
 
 [dependencies]
 assert-cmp = "0.3.0"
 clap = { version = "4.5.60", optional = true }
 clap_complete = { version = "4.5.66", optional = true }
+clap_mangen = { version = "0.2.27", optional = true }
 clap-utilities = { version = "0.3.0", optional = true }
 dashmap = "6.1.0"
 derive_more = { version = "2.1.1", features = ["full"] }
@@ -85,6 +92,7 @@ zero-copy-pads = "0.2.0"
 
 [dev-dependencies]
 build-fs-tree = "0.8.1"
+clap_mangen = "0.2.27"
 command-extra = "1.0.0"
 libc = "0.2.182"
 maplit = "1.0.2"
