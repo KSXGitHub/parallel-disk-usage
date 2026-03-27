@@ -37,7 +37,7 @@ block-count\:"Count numbers of blocks"))' \
 '-m+[Minimal size proportion required to appear]:MIN_RATIO:_default' \
 '--min-ratio=[Minimal size proportion required to appear]:MIN_RATIO:_default' \
 '--threads=[Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer]:THREADS:_default' \
-'(-q --quantity -H --deduplicate-hardlinks)--json-input[Read JSON data from stdin]' \
+'(-q --quantity -H --deduplicate-hardlinks -x --one-file-system)--json-input[Read JSON data from stdin]' \
 '--json-output[Print JSON data instead of an ASCII chart]' \
 '-H[Detect and subtract the sizes of hardlinks from their parent directory totals]' \
 '--deduplicate-hardlinks[Detect and subtract the sizes of hardlinks from their parent directory totals]' \
