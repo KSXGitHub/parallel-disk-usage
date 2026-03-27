@@ -83,16 +83,17 @@ See [USAGE.md](./USAGE.md) for the full help text.
 Environment Variables
 </summary>
 
-| name          | type              | default value | description                                     |
-|---------------|-------------------|---------------|-------------------------------------------------|
-| `FMT`         | `true` or `false` | `true`        | Whether to run `cargo fmt`                      |
-| `LINT`        | `true` or `false` | `true`        | Whether to run `cargo clippy`                   |
-| `DOC`         | `true` or `false` | `false`       | Whether to run `cargo doc`                      |
-| `BUILD`       | `true` or `false` | `true`        | Whether to run `cargo build`                    |
-| `TEST`        | `true` or `false` | `true`        | Whether to run `cargo test`                     |
-| `BUILD_FLAGS` | string            | _(empty)_     | Space-separated list of flags for `cargo build` |
-| `TEST_FLAGS`  | string            | _(empty)_     | Space-separated list of flags for `cargo test`  |
-| `TEST_SKIP`   | string            | _(empty)_     | Space-separated list of test names to skip      |
+| name               | type              | default value | description                                     |
+|--------------------|-------------------|---------------|-------------------------------------------------|
+| `FMT`              | `true` or `false` | `true`        | Whether to run `cargo fmt`                      |
+| `LINT`             | `true` or `false` | `true`        | Whether to run `cargo clippy`                   |
+| `DOC`              | `true` or `false` | `false`       | Whether to run `cargo doc`                      |
+| `BUILD`            | `true` or `false` | `true`        | Whether to run `cargo build`                    |
+| `TEST`             | `true` or `false` | `true`        | Whether to run `cargo test`                     |
+| `BUILD_FLAGS`      | string            | _(empty)_     | Space-separated list of flags for `cargo build` |
+| `TEST_FLAGS`       | string            | _(empty)_     | Space-separated list of flags for `cargo test`  |
+| `TEST_SKIP`        | string            | _(empty)_     | Space-separated list of test names to skip      |
+| `PDU_NO_FAIL_FAST` | `true` or `false` | `false`       | Whether to continue running after a failure     |
 
 </details>
 
