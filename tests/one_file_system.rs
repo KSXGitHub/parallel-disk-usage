@@ -64,15 +64,16 @@ fn same_device_on_sample_workspace() {
     let cross = DeviceBoundary::Cross
         .pipe(build_tree)
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
-        .into_reflection();
+        .into_reflection()
+        .pipe(sanitize_tree_reflection);
     let stay = DeviceBoundary::Stay
         .pipe(build_tree)
         .into_par_sorted(|left, right| left.name().cmp(right.name()))
-        .into_reflection();
+        .into_reflection()
+        .pipe(sanitize_tree_reflection);
 
     assert_eq!(
-        sanitize_tree_reflection(cross),
-        sanitize_tree_reflection(stay),
+        cross, stay,
         "DeviceBoundary should not change the result when all files are on the same device",
     );
 }
