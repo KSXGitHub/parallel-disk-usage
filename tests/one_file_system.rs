@@ -256,12 +256,12 @@ fn cross_device_excludes_mount() {
         expected.trim_end().to_string()
     };
 
-    let run_pdu = |one_file_system: bool| -> String {
+    let run_pdu = |extra_arg: Option<&'static str>| -> String {
         Command::new(PDU)
             .with_arg("--quantity=apparent-size")
             .with_arg("--total-width=100")
             .with_arg("--bytes-format=plain")
-            .with_args(one_file_system.then_some("--one-file-system"))
+            .with_args(extra_arg)
             .with_arg(&workspace)
             .with_stdin(Stdio::null())
             .with_stdout(Stdio::piped())
@@ -272,7 +272,7 @@ fn cross_device_excludes_mount() {
     };
 
     // Run pdu WITHOUT --one-file-system — should see both files
-    let actual = run_pdu(false);
+    let actual = run_pdu(None);
     let expected = build_expected_tree(DeviceBoundary::Cross);
     eprintln!("WITHOUT --one-file-system:\nACTUAL:\n{actual}\n\nEXPECTED:\n{expected}\n");
     assert_eq!(actual, expected);
@@ -286,7 +286,7 @@ fn cross_device_excludes_mount() {
     );
 
     // Run pdu WITH --one-file-system — should only see outside.txt
-    let actual = run_pdu(true);
+    let actual = run_pdu(Some("--one-file-system"));
     let expected = build_expected_tree(DeviceBoundary::Stay);
     eprintln!("WITH --one-file-system:\nACTUAL:\n{actual}\n\nEXPECTED:\n{expected}\n");
     assert_eq!(actual, expected);
