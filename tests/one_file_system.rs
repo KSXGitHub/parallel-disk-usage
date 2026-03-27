@@ -72,10 +72,7 @@ fn same_device_on_sample_workspace() {
         .into_reflection()
         .pipe(sanitize_tree_reflection);
 
-    assert_eq!(
-        crossing, staying,
-        "DeviceBoundary should not change the result when all files are on the same device",
-    );
+    assert_eq!(crossing, staying);
 }
 
 /// Information about the available FUSE tools, discovered by [`fuse_probe`].
