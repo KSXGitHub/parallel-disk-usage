@@ -16,6 +16,7 @@ Read and follow the CONTRIBUTING.md file in this repository for all code style c
 - Minimize `unwrap()` in non-test code — use proper error handling
 - Prefer `#[cfg_attr(..., ignore = "reason")]` over `#[cfg(...)]` to skip tests — use `#[cfg]` on tests only when the code cannot compile under the condition (e.g., references types/functions that don't exist on other platforms)
 - Install toolchain before running tests: `rustup toolchain install "$(< rust-toolchain)" && rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy`
-- Run `FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh` to validate changes. If a test fails with a hint about `TEST_SKIP`, follow the hint and rerun with the suggested variable.
+- If you change CLI arguments, help text, or anything that affects command-line output, run `./generate-completions.sh` to regenerate the shell completion files, help text files, and `USAGE.md`. **Do not attempt to regenerate these files manually** — always use the script.
+- Run `FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh` to validate changes. If a test fails with a hint about `TEST_SKIP`, follow the hint and rerun with the suggested variable. If a sync test fails, read its error message carefully and run the exact command it tells you to run.
 - **ALWAYS run the full test suite** (`FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh`) before committing, regardless of how trivial the change seems — this includes documentation-only changes, comment edits, config changes, and refactors. The test suite checks formatting, linting, building, tests, and docs across multiple feature combinations; any type of change can break any of these checks.
 - `gh` (GitHub CLI) is not installed — do not attempt to use it
