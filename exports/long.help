@@ -31,6 +31,9 @@ Options:
 
           [aliases: --detect-links, --dedupe-links]
 
+  -x, --one-file-system
+          Skip directories on different filesystems
+
       --top-down
           Print the tree top-down instead of bottom-up
 
@@ -73,9 +76,6 @@ Options:
           Prevent filesystem error messages from appearing in stderr
 
           [aliases: --no-errors]
-
-  -x, --one-file-system
-          Skip directories on different filesystems
 
   -p, --progress
           Report progress being made at the expense of performance

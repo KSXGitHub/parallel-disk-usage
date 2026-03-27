@@ -39,6 +39,13 @@ How to display the numbers of bytes.
 
 Detect and subtract the sizes of hardlinks from their parent directory totals.
 
+<a id="option-x" name="option-x"></a><a id="one-file-system" name="one-file-system"></a>
+### `--one-file-system`
+
+* _Aliases:_ `-x`.
+
+Skip directories on different filesystems.
+
 <a id="top-down" name="top-down"></a>
 ### `--top-down`
 
@@ -100,13 +107,6 @@ Do not sort the branches in the tree.
 * _Aliases:_ `-s`, `--no-errors`.
 
 Prevent filesystem error messages from appearing in stderr.
-
-<a id="option-x" name="option-x"></a><a id="one-file-system" name="one-file-system"></a>
-### `--one-file-system`
-
-* _Aliases:_ `-x`.
-
-Skip directories on different filesystems.
 
 <a id="option-p" name="option-p"></a><a id="progress" name="progress"></a>
 ### `--progress`

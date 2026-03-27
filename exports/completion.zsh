@@ -43,14 +43,14 @@ block-count\:"Count numbers of blocks"))' \
 '--deduplicate-hardlinks[Detect and subtract the sizes of hardlinks from their parent directory totals]' \
 '--detect-links[Detect and subtract the sizes of hardlinks from their parent directory totals]' \
 '--dedupe-links[Detect and subtract the sizes of hardlinks from their parent directory totals]' \
+'-x[Skip directories on different filesystems]' \
+'--one-file-system[Skip directories on different filesystems]' \
 '--top-down[Print the tree top-down instead of bottom-up]' \
 '--align-right[Set the root of the bars to the right]' \
 '--no-sort[Do not sort the branches in the tree]' \
 '-s[Prevent filesystem error messages from appearing in stderr]' \
 '--silent-errors[Prevent filesystem error messages from appearing in stderr]' \
 '--no-errors[Prevent filesystem error messages from appearing in stderr]' \
-'-x[Skip directories on different filesystems]' \
-'--one-file-system[Skip directories on different filesystems]' \
 '-p[Report progress being made at the expense of performance]' \
 '--progress[Report progress being made at the expense of performance]' \
 '--omit-json-shared-details[Do not output \`.shared.details\` in the JSON output]' \

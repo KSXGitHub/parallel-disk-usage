@@ -291,6 +291,7 @@ impl App {
                     progress: $progress,
                     #[cfg(unix)] deduplicate_hardlinks: $hardlinks,
                     #[cfg(not(unix))] deduplicate_hardlinks: _,
+                    one_file_system,
                     files,
                     json_output,
                     bytes_format,
@@ -299,7 +300,6 @@ impl App {
                     max_depth,
                     min_ratio,
                     no_sort,
-                    one_file_system,
                     omit_json_shared_details,
                     omit_json_shared_summary,
                     ..

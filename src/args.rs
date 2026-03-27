@@ -112,6 +112,11 @@ pub struct Args {
     #[cfg_attr(not(unix), clap(hide = true))]
     pub deduplicate_hardlinks: bool,
 
+    /// Skip directories on different filesystems.
+    #[clap(long, short = 'x')]
+    #[cfg_attr(not(unix), clap(hide = true))]
+    pub one_file_system: bool,
+
     /// Print the tree top-down instead of bottom-up.
     #[clap(long)]
     pub top_down: bool,
@@ -154,11 +159,6 @@ pub struct Args {
     /// Prevent filesystem error messages from appearing in stderr.
     #[clap(long, short, visible_alias = "no-errors")]
     pub silent_errors: bool,
-
-    /// Skip directories on different filesystems.
-    #[clap(long, short = 'x')]
-    #[cfg_attr(not(unix), clap(hide = true))]
-    pub one_file_system: bool,
 
     /// Report progress being made at the expense of performance.
     #[clap(long, short)]

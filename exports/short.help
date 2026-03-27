@@ -14,6 +14,8 @@ Options:
           How to display the numbers of bytes [default: metric] [possible values: plain, metric, binary]
   -H, --deduplicate-hardlinks
           Detect and subtract the sizes of hardlinks from their parent directory totals [aliases: --detect-links, --dedupe-links]
+  -x, --one-file-system
+          Skip directories on different filesystems
       --top-down
           Print the tree top-down instead of bottom-up
       --align-right
@@ -32,8 +34,6 @@ Options:
           Do not sort the branches in the tree
   -s, --silent-errors
           Prevent filesystem error messages from appearing in stderr [aliases: --no-errors]
-  -x, --one-file-system
-          Skip directories on different filesystems
   -p, --progress
           Report progress being made at the expense of performance
       --threads <THREADS>
