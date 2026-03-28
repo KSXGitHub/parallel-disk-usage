@@ -40,7 +40,14 @@ fn roff() {
 }
 
 #[test]
-#[ignore = "requires man(1); run with --include-ignored to check"]
 fn man() {
+    if which::which("man").is_err() {
+        panic!(
+            "{}\n{}",
+            "error: This test requires `man` but it was not found.",
+            "hint: Install `man-db` for your platform, \
+             or rerun via `TEST_SKIP='man' ./test.sh` to skip this test.",
+        );
+    }
     check("man", "1");
 }
