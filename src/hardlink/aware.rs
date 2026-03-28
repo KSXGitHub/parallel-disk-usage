@@ -82,8 +82,9 @@ where
         }));
 
         let ino = InodeNumber::get(stats);
+        let dev = stats.dev();
         self.record
-            .add(ino, size, links, path)
+            .add(ino, dev, size, links, path)
             .map_err(ReportHardlinksError::AddToRecord)
     }
 }
