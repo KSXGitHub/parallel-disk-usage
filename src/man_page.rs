@@ -303,7 +303,7 @@ fn render_conflicts(out: &mut String, command: &Command, arg: &Arg, conflict_map
     }
     writeln!(
         out,
-        ".PP\nCannot be used with {}.",
+        ".RS\n.PP\nCannot be used with {}.\n.RE",
         conflict_names.join(", ")
     )
     .unwrap();
