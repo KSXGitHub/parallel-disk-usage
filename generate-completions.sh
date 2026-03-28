@@ -18,3 +18,4 @@ gen elvish completion.elv
 ./run.sh pdu -h | sed 's/[[:space:]]*$//' > exports/short.help
 ./run.sh pdu-usage-md > USAGE.md
 ./run.sh pdu-man-page > exports/pdu.1
+MANWIDTH=120 man ./exports/pdu.1 | sed 's/[[:space:]]*$//' > exports/pdu.1.man
