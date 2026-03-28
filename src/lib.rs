@@ -15,6 +15,8 @@ pub mod app;
 #[cfg(feature = "cli")]
 pub mod args;
 #[cfg(feature = "cli")]
+pub mod man_page;
+#[cfg(feature = "cli")]
 pub mod runtime_error;
 #[cfg(feature = "cli")]
 pub mod usage_md;

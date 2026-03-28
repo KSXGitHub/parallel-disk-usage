@@ -271,6 +271,16 @@ jobs:
           asset_name: completion.elv
           asset_content_type: text/plain
 
+      - name: Upload Man Page
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./exports/pdu.1
+          asset_name: pdu.1
+          asset_content_type: text/plain
+
   upload_release_assets:
     name: Upload Release Assets
 

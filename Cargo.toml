@@ -45,6 +45,11 @@ path = "cli/completions.rs"
 required-features = ["cli-completions"]
 
 [[bin]]
+name = "pdu-man-page"
+path = "cli/man_page.rs"
+required-features = ["cli"]
+
+[[bin]]
 name = "pdu-usage-md"
 path = "cli/usage_md.rs"
 required-features = ["cli"]
