@@ -59,7 +59,7 @@ fn roff_escape(text: &str) -> String {
 fn render_title(out: &mut String, command: &Command) {
     let name = command.get_name();
     let version = command.get_version().unwrap_or_default();
-    writeln!(out, ".TH {name} 1 \"\" \"{name} {version}\"").unwrap();
+    writeln!(out, ".TH {name} 1 \"{name} {version}\"").unwrap();
 }
 
 fn render_name_section(out: &mut String, command: &Command) {
