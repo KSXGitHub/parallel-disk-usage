@@ -23,11 +23,20 @@ pub fn render_man_page() -> String {
 }
 
 /// Builds a bidirectional conflict map from clap's one-directional conflict declarations.
+///
+/// Hidden args are excluded so the man page doesn't reference options
+/// that are not listed on the current platform.
 fn build_conflict_map(command: &Command) -> ConflictMap {
     let mut map = ConflictMap::new();
     for arg in command.get_arguments() {
+        if arg.is_hide_set() {
+            continue;
+        }
         let arg_id = arg.get_id().to_string();
         for conflict in command.get_arg_conflicts_with(arg) {
+            if conflict.is_hide_set() {
+                continue;
+            }
             let conflict_id = conflict.get_id().to_string();
             map.entry(arg_id.clone())
                 .or_default()
