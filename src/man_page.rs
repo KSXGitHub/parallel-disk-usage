@@ -271,8 +271,8 @@ fn render_examples_section(out: &mut String, command: &Command) {
         if line.is_empty() {
             continue;
         }
-        if let Some(command) = line.strip_prefix("$ ") {
-            writeln!(out, ".nf\n\\fB$ {}\\fR\n.fi", roff_escape(command)).unwrap();
+        if let Some(example_command) = line.strip_prefix("$ ") {
+            writeln!(out, ".nf\n\\fB$ {}\\fR\n.fi", roff_escape(example_command)).unwrap();
         } else {
             writeln!(out, ".TP\n{}", roff_escape(line)).unwrap();
         }

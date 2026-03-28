@@ -78,7 +78,7 @@ fn render_man_output(page_num: u8) -> Result<String, String> {
 
 fn check_file(path: &str, expected: &str) -> ExitCode {
     match std::fs::read_to_string(path) {
-        Ok(actual) if actual == *expected => ExitCode::SUCCESS,
+        Ok(actual) if actual == expected => ExitCode::SUCCESS,
         Ok(_) => {
             eprintln!("{path} is outdated, run ./generate-completions.sh to update it");
             ExitCode::FAILURE
