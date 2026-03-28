@@ -62,7 +62,17 @@ fn man_path(page_num: u8) -> String {
 fn render_man_output(page_num: u8) -> Result<String, String> {
     let roff_file = roff_path(page_num);
     let output = Command::new("groff")
-        .args(["-man", "-T", "utf8", "-r", &format!("LL={LINE_LENGTH}n")])
+        .args([
+            "-man",
+            "-T",
+            "utf8",
+            "-K",
+            "utf8",
+            "-P",
+            "-c",
+            "-r",
+            &format!("LL={LINE_LENGTH}n"),
+        ])
         .arg(format!("./{roff_file}"))
         .output()
         .map_err(|error| format!("failed to run groff: {error}"))?;
