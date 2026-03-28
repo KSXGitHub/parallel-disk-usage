@@ -115,16 +115,23 @@ fn render_synopsis_option(out: &mut String, arg: &Arg) {
     out.push(']');
 }
 
+fn is_multiple(arg: &Arg) -> bool {
+    arg.get_num_args()
+        .map(|range| range.max_values() > 1)
+        .unwrap_or(false)
+}
+
 fn render_synopsis_positional(out: &mut String, arg: &Arg) {
     let name = arg
         .get_value_names()
         .and_then(|names| names.first())
         .map(|name| name.as_str())
         .unwrap_or_else(|| arg.get_id().as_str());
+    let ellipsis = if is_multiple(arg) { "..." } else { "" };
     if arg.is_required_set() {
-        write!(out, "\\fI{}\\fR", roff_escape(name)).unwrap();
+        write!(out, "\\fI{}\\fR{ellipsis}", roff_escape(name)).unwrap();
     } else {
-        write!(out, "[\\fI{}\\fR]", roff_escape(name)).unwrap();
+        write!(out, "[\\fI{}\\fR]{ellipsis}", roff_escape(name)).unwrap();
     }
 }
 
@@ -194,10 +201,11 @@ fn render_option_header_positional(out: &mut String, arg: &Arg) {
         .and_then(|names| names.first())
         .map(|name| name.as_str())
         .unwrap_or_else(|| arg.get_id().as_str());
+    let ellipsis = if is_multiple(arg) { "..." } else { "" };
     if arg.is_required_set() {
-        writeln!(out, "\\fI{name}\\fR").unwrap();
+        writeln!(out, "\\fI{name}\\fR{ellipsis}").unwrap();
     } else {
-        writeln!(out, "[\\fI{name}\\fR]").unwrap();
+        writeln!(out, "[\\fI{name}\\fR]{ellipsis}").unwrap();
     }
 }
 
