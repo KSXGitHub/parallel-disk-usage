@@ -99,38 +99,37 @@ Print version
 [\fIFILES\fR]
 List of files and/or directories
 .SH EXAMPLES
-Examples:
-    Show disk usage chart of current working directory
-    $ pdu
+Show disk usage chart of current working directory
+$ pdu
 
-    Show disk usage chart of a single file or directory
-    $ pdu path/to/file/or/directory
+Show disk usage chart of a single file or directory
+$ pdu path/to/file/or/directory
 
-    Compare disk usages of multiple files and/or directories
-    $ pdu file.txt dir/
+Compare disk usages of multiple files and/or directories
+$ pdu file.txt dir/
 
-    Show chart in apparent sizes instead of block sizes
-    $ pdu \-\-quantity=apparent\-size
+Show chart in apparent sizes instead of block sizes
+$ pdu \-\-quantity=apparent\-size
 
-    Detect and subtract the sizes of hardlinks from their parent nodes
-    $ pdu \-\-deduplicate\-hardlinks
+Detect and subtract the sizes of hardlinks from their parent nodes
+$ pdu \-\-deduplicate\-hardlinks
 
-    Show sizes in plain numbers instead of metric units
-    $ pdu \-\-bytes\-format=plain
+Show sizes in plain numbers instead of metric units
+$ pdu \-\-bytes\-format=plain
 
-    Show sizes in base 2¹⁰ units (binary) instead of base 10³ units (metric)
-    $ pdu \-\-bytes\-format=binary
+Show sizes in base 2¹⁰ units (binary) instead of base 10³ units (metric)
+$ pdu \-\-bytes\-format=binary
 
-    Show disk usage chart of all entries regardless of size
-    $ pdu \-\-min\-ratio=0
+Show disk usage chart of all entries regardless of size
+$ pdu \-\-min\-ratio=0
 
-    Only show disk usage chart of entries whose size is at least 5% of total
-    $ pdu \-\-min\-ratio=0.05
+Only show disk usage chart of entries whose size is at least 5% of total
+$ pdu \-\-min\-ratio=0.05
 
-    Show disk usage data as JSON instead of chart
-    $ pdu \-\-min\-ratio=0 \-\-max\-depth=inf \-\-json\-output | jq
+Show disk usage data as JSON instead of chart
+$ pdu \-\-min\-ratio=0 \-\-max\-depth=inf \-\-json\-output | jq
 
-    Visualize existing JSON representation of disk usage data
-    $ pdu \-\-json\-input < disk\-usage.json
+Visualize existing JSON representation of disk usage data
+$ pdu \-\-json\-input < disk\-usage.json
 .SH VERSION
 v0.21.1
