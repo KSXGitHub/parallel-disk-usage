@@ -202,13 +202,13 @@ fn render_value_hint(arg: &Arg) -> String {
         .map(|value| value.to_string_lossy())
         .map(Cow::into_owned)
         .collect();
-    if !defaults.is_empty()
-        && !arg.is_hide_default_value_set()
-        && !matches!(arg.get_action(), ArgAction::SetTrue)
+    if defaults.is_empty()
+        || arg.is_hide_default_value_set()
+        || matches!(arg.get_action(), ArgAction::SetTrue)
     {
-        format!("{value_part} [default: {}]", defaults.join(", "))
-    } else {
         value_part
+    } else {
+        format!("{value_part} [default: {}]", defaults.join(", "))
     }
 }
 
