@@ -46,7 +46,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install -y squashfs-tools squashfuse fuse3 groff-base
+          sudo apt install -y squashfs-tools squashfuse fuse3
 
       - name: Test (dev)
         shell: bash
