@@ -230,7 +230,7 @@ fn render_value_hint(arg: &Arg) -> String {
     } else {
         parts.push(format!("\\fI<{}>\\fR", roff_escape(arg.get_id().as_str())));
     }
-    let value_part = parts.join("\\fI \\fR");
+    let value_part = parts.join(" ");
     let defaults: Vec<_> = arg
         .get_default_values()
         .iter()
