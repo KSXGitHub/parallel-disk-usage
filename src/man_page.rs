@@ -223,7 +223,7 @@ fn render_option_header_flag(out: &mut String, arg: &Arg) {
         .into_iter()
         .flatten()
         .map(roff_escape)
-        .map(|arg| format!("\\fB\\-\\-{arg}\\fR"));
+        .map(|alias| format!("\\fB\\-\\-{alias}\\fR"));
     let header = short.into_iter().chain(long).chain(aliases).join(", ");
     if arg.get_action().takes_values() {
         let value_str = render_value_hint(arg);
