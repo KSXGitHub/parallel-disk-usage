@@ -40,6 +40,10 @@ fn roff() {
 }
 
 #[test]
+#[cfg_attr(
+    not(target_os = "linux"),
+    ignore = "groff is only installed on Linux CI"
+)]
 fn man() {
     if which::which("groff").is_err() {
         panic!(
