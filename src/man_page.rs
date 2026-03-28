@@ -31,7 +31,7 @@ fn render_name_section(out: &mut String, command: &Command) {
     let name = command.get_name();
     let about = command
         .get_about()
-        .map(|text| text.to_string())
+        .map(ToString::to_string)
         .unwrap_or_default();
     writeln!(out, ".SH NAME").unwrap();
     writeln!(out, "{name} \\- {}", roff_escape(&about)).unwrap();
@@ -99,7 +99,7 @@ fn render_description_section(out: &mut String, command: &Command) {
     let text = command
         .get_long_about()
         .or_else(|| command.get_about())
-        .map(|text| text.to_string())
+        .map(ToString::to_string)
         .unwrap_or_default();
     render_paragraph_text(out, &text);
 }
@@ -147,7 +147,7 @@ fn render_option_entry(out: &mut String, arg: &Arg) {
     let help = arg
         .get_long_help()
         .or_else(|| arg.get_help())
-        .map(|text| text.to_string())
+        .map(ToString::to_string)
         .unwrap_or_default();
     writeln!(out, "{}", roff_escape(&help)).unwrap();
     render_possible_values(out, arg);
