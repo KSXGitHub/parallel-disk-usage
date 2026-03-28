@@ -62,17 +62,8 @@ fn man_path(page_num: u8) -> String {
 fn render_man_output(page_num: u8) -> Result<String, String> {
     let roff_file = roff_path(page_num);
     let output = Command::new("groff")
-        .args([
-            "-man",
-            "-T",
-            "utf8",
-            "-K",
-            "utf8",
-            "-P",
-            "-c",
-            "-r",
-            &format!("LL={LINE_LENGTH}n"),
-        ])
+        .args(["-man", "-T", "utf8", "-K", "utf8"])
+        .arg(format!("-rLL={LINE_LENGTH}n"))
         .arg(format!("./{roff_file}"))
         .output()
         .map_err(|error| format!("failed to run groff: {error}"))?;
@@ -82,7 +73,26 @@ fn render_man_output(page_num: u8) -> Result<String, String> {
     }
     let content = String::from_utf8(output.stdout)
         .map_err(|error| format!("groff output is not UTF-8: {error}"))?;
-    Ok(normalize_text(&content))
+    Ok(normalize_text(&strip_overstrikes(&content)))
+}
+
+/// Strips backspace-based overstriking sequences produced by grotty.
+///
+/// Grotty uses `X\x08X` for bold and `_\x08X` for underline. This function
+/// removes the overstrike prefix (char + `\x08`) leaving only the visible character.
+fn strip_overstrikes(text: &str) -> String {
+    let chars: Vec<char> = text.chars().collect();
+    let mut result = String::with_capacity(text.len());
+    let mut index = 0;
+    while index < chars.len() {
+        if index + 1 < chars.len() && chars[index + 1] == '\x08' {
+            index += 2;
+        } else {
+            result.push(chars[index]);
+            index += 1;
+        }
+    }
+    result
 }
 
 /// Strips trailing whitespace per line, trims trailing blank lines,
