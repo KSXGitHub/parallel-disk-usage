@@ -168,10 +168,10 @@ fn render_paragraph_text(out: &mut String, text: &str) {
         }
         if need_paragraph && !first {
             out.push_str(".PP\n");
-            need_paragraph = false;
         } else if !first {
             out.push_str(".br\n");
         }
+        need_paragraph = false;
         first = false;
         writeln!(out, "{}", roff_escape(line)).unwrap();
     }
