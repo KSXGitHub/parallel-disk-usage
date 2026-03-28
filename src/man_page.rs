@@ -1,20 +1,54 @@
 use crate::args::Args;
 use clap::{Arg, ArgAction, Command, CommandFactory};
-use std::{borrow::Cow, fmt::Write};
+use std::{borrow::Cow, collections::BTreeMap, fmt::Write};
+
+/// A map from argument ID to the set of argument IDs it conflicts with (bidirectional).
+type ConflictMap = BTreeMap<String, Vec<String>>;
 
 /// Renders the man page for `pdu` as a string in roff format.
 pub fn render_man_page() -> String {
     let mut command = Args::command();
     command.build();
+    let conflict_map = build_conflict_map(&command);
     let mut out = String::new();
     render_title(&mut out, &command);
     render_name_section(&mut out, &command);
     render_synopsis_section(&mut out, &command);
     render_description_section(&mut out, &command);
-    render_options_section(&mut out, &command);
+    render_options_section(&mut out, &command, &conflict_map);
     render_examples_section(&mut out, &command);
     render_version_section(&mut out, &command);
     out
+}
+
+/// Builds a bidirectional conflict map from clap's one-directional conflict declarations.
+fn build_conflict_map(command: &Command) -> ConflictMap {
+    let mut map = ConflictMap::new();
+    for arg in command.get_arguments() {
+        let arg_id = arg.get_id().to_string();
+        for conflict in command.get_arg_conflicts_with(arg) {
+            let conflict_id = conflict.get_id().to_string();
+            map.entry(arg_id.clone())
+                .or_default()
+                .push(conflict_id.clone());
+            map.entry(conflict_id).or_default().push(arg_id.clone());
+        }
+    }
+    // Deduplicate each entry
+    for conflicts in map.values_mut() {
+        conflicts.sort();
+        conflicts.dedup();
+    }
+    map
+}
+
+/// Resolves an argument ID to its `--long` flag name for display.
+fn resolve_flag_name(command: &Command, arg_id: &str) -> Option<String> {
+    command
+        .get_arguments()
+        .find(|arg| arg.get_id().as_str() == arg_id)
+        .and_then(|arg| arg.get_long())
+        .map(|long| format!("\\fB\\-\\-{}\\fR", roff_escape(long)))
 }
 
 /// Escapes a string for roff by replacing hyphens with `\-`.
@@ -128,17 +162,17 @@ fn render_paragraph_text(out: &mut String, text: &str) {
     }
 }
 
-fn render_options_section(out: &mut String, command: &Command) {
+fn render_options_section(out: &mut String, command: &Command, conflict_map: &ConflictMap) {
     out.push_str(".SH OPTIONS\n");
     for arg in command.get_arguments() {
         if arg.is_hide_set() {
             continue;
         }
-        render_option_entry(out, command, arg);
+        render_option_entry(out, command, arg, conflict_map);
     }
 }
 
-fn render_option_entry(out: &mut String, command: &Command, arg: &Arg) {
+fn render_option_entry(out: &mut String, command: &Command, arg: &Arg, conflict_map: &ConflictMap) {
     out.push_str(".TP\n");
     if arg.is_positional() {
         render_option_header_positional(out, arg);
@@ -152,7 +186,7 @@ fn render_option_entry(out: &mut String, command: &Command, arg: &Arg) {
         .unwrap_or_default();
     writeln!(out, "{}", roff_escape(&help)).unwrap();
     render_possible_values(out, arg);
-    render_conflicts(out, command, arg);
+    render_conflicts(out, command, arg, conflict_map);
 }
 
 fn render_option_header_positional(out: &mut String, arg: &Arg) {
@@ -254,23 +288,25 @@ fn render_possible_values(out: &mut String, arg: &Arg) {
     out.push_str(".RE\n");
 }
 
-fn render_conflicts(out: &mut String, command: &Command, arg: &Arg) {
-    let conflicts = command.get_arg_conflicts_with(arg);
-    if conflicts.is_empty() {
-        return;
-    }
-    let conflict_names: Vec<_> = conflicts
+fn render_conflicts(out: &mut String, command: &Command, arg: &Arg, conflict_map: &ConflictMap) {
+    let arg_id = arg.get_id().as_str();
+    let conflict_ids = match conflict_map.get(arg_id) {
+        Some(ids) if !ids.is_empty() => ids,
+        _ => return,
+    };
+    let conflict_names: Vec<_> = conflict_ids
         .iter()
-        .filter_map(|conflict_arg| {
-            conflict_arg
-                .get_long()
-                .map(|long| format!("\\fB\\-\\-{}\\fR", roff_escape(long)))
-        })
+        .filter_map(|conflict_id| resolve_flag_name(command, conflict_id))
         .collect();
     if conflict_names.is_empty() {
         return;
     }
-    writeln!(out, ".br\nConflicts with {}.", conflict_names.join(", ")).unwrap();
+    writeln!(
+        out,
+        ".PP\nCannot be used with {}.",
+        conflict_names.join(", ")
+    )
+    .unwrap();
 }
 
 fn render_examples_section(out: &mut String, command: &Command) {

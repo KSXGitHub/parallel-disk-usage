@@ -16,8 +16,8 @@ List of files and/or directories
 .TP
 \fB\-\-json\-input\fR
 Read JSON data from stdin
-.br
-Conflicts with \fB\-\-quantity\fR, \fB\-\-deduplicate\-hardlinks\fR, \fB\-\-one\-file\-system\fR.
+.PP
+Cannot be used with \fB\-\-deduplicate\-hardlinks\fR, \fB\-\-one\-file\-system\fR, \fB\-\-quantity\fR.
 .TP
 \fB\-\-json\-output\fR
 Print JSON data instead of an ASCII chart
@@ -38,9 +38,13 @@ Use binary scale, i.e. 1K = 1024B, 1M = 1024K, and so on
 .TP
 \fB\-H\fR, \fB\-\-deduplicate\-hardlinks\fR, \fB\-\-detect\-links\fR, \fB\-\-dedupe\-links\fR
 Detect and subtract the sizes of hardlinks from their parent directory totals
+.PP
+Cannot be used with \fB\-\-json\-input\fR.
 .TP
 \fB\-x\fR, \fB\-\-one\-file\-system\fR
 Skip directories on different filesystems
+.PP
+Cannot be used with \fB\-\-json\-input\fR.
 .TP
 \fB\-\-top\-down\fR
 Print the tree top\-down instead of bottom\-up
@@ -61,17 +65,21 @@ Measure block sizes (block\-count * 512B)
 \fB\-\-quantity block\-count\fR
 Count numbers of blocks
 .RE
+.PP
+Cannot be used with \fB\-\-json\-input\fR.
 .TP
 \fB\-d\fR, \fB\-\-max\-depth\fR, \fB\-\-depth\fR \fI<MAX_DEPTH>\fR [default: 10]
 Maximum depth to display the data. Could be either "inf" or a positive integer
 .TP
 \fB\-w\fR, \fB\-\-total\-width\fR, \fB\-\-width\fR \fI<TOTAL_WIDTH>\fR
 Width of the visualization
-.br
-Conflicts with \fB\-\-column\-width\fR.
+.PP
+Cannot be used with \fB\-\-column\-width\fR.
 .TP
 \fB\-\-column\-width\fR \fI<TREE_WIDTH>\fR\fI \fR\fI<BAR_WIDTH>\fR
 Maximum widths of the tree column and width of the bar column
+.PP
+Cannot be used with \fB\-\-total\-width\fR.
 .TP
 \fB\-m\fR, \fB\-\-min\-ratio\fR \fI<MIN_RATIO>\fR [default: 0.01]
 Minimal size proportion required to appear
