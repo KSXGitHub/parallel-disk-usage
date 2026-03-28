@@ -230,7 +230,7 @@ fn render_value_hint(arg: &Arg) -> String {
         .get_value_names()
         .map(<[_]>::iter)
         .map(|names| names.map(|name| name.as_str()))
-        .map(|names| names.collect::<Vec<_>>())
+        .map(Vec::from_iter)
         .unwrap_or_else(|| vec![arg.get_id().as_str()])
         .into_iter()
         .map(roff_escape)
