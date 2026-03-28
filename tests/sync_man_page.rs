@@ -40,10 +40,7 @@ fn roff() {
 }
 
 #[test]
-#[cfg_attr(
-    not(feature = "man-test"),
-    ignore = "requires man(1); enable with --features man-test"
-)]
+#[ignore = "requires man(1); run with --include-ignored to check"]
 fn man() {
     check("man", "1");
 }
