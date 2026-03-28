@@ -25,12 +25,12 @@ pub fn get_device_id(_stats: &std::fs::Metadata) -> DeviceId {
 }
 
 #[cfg(test)]
-#[cfg(unix)]
 mod tests {
     use super::get_device_id;
     use std::fs::symlink_metadata;
 
     #[test]
+    #[cfg_attr(not(unix), ignore = "device ID is meaningful only on unix")]
     fn same_filesystem_returns_equal_ids() {
         let root_stats = symlink_metadata("/").expect("stat /");
         let root_stats2 = symlink_metadata("/").expect("stat / again");
@@ -43,8 +43,11 @@ mod tests {
 
     /// `/proc` is a virtual filesystem mounted separately from `/` on Linux.
     #[test]
-    #[cfg(target_os = "linux")]
-    fn different_filesystem_returns_different_ids() {
+    #[cfg_attr(
+        not(target_os = "linux"),
+        ignore = "/proc is a separate filesystem only on Linux"
+    )]
+    fn different_filesystem_returns_different_ids_linux() {
         let root_stats = symlink_metadata("/").expect("stat /");
         let proc_stats = symlink_metadata("/proc").expect("stat /proc");
         assert_ne!(
@@ -56,8 +59,11 @@ mod tests {
 
     /// `/dev` is a separate filesystem (`devfs`) from `/` on macOS.
     #[test]
-    #[cfg(target_os = "macos")]
-    fn different_filesystem_returns_different_ids() {
+    #[cfg_attr(
+        not(target_os = "macos"),
+        ignore = "/dev is a separate filesystem only on macOS"
+    )]
+    fn different_filesystem_returns_different_ids_macos() {
         let root_stats = symlink_metadata("/").expect("stat /");
         let dev_stats = symlink_metadata("/dev").expect("stat /dev");
         assert_ne!(
