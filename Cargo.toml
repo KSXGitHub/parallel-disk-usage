@@ -47,7 +47,7 @@ required-features = ["cli-completions"]
 [[bin]]
 name = "pdu-man-page"
 path = "cli/man_page.rs"
-required-features = ["cli-man"]
+required-features = ["cli"]
 
 [[bin]]
 name = "pdu-usage-md"
@@ -64,7 +64,6 @@ default = ["cli"]
 json = ["serde/derive", "serde_json"]
 cli = ["clap/derive", "clap_complete", "clap-utilities", "json"]
 cli-completions = ["cli"]
-cli-man = ["cli"]
 ai-instructions = ["clap/derive"]
 
 [dependencies]

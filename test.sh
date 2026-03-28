@@ -77,7 +77,6 @@ unit --no-default-features "$@"
 unit --all-features "$@"
 unit --features cli "$@"
 unit --features cli-completions "$@"
-unit --features cli-man "$@"
 unit --features ai-instructions "$@"
 
 if [[ -f "$failure_marker" ]]; then

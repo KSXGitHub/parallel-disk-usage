@@ -14,7 +14,7 @@ pub use serde_json;
 pub mod app;
 #[cfg(feature = "cli")]
 pub mod args;
-#[cfg(feature = "cli-man")]
+#[cfg(feature = "cli")]
 pub mod man_page;
 #[cfg(feature = "cli")]
 pub mod runtime_error;

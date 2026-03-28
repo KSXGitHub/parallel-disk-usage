@@ -5,7 +5,7 @@
 // Since the CLI in Windows looks a little different, and I am way too lazy to make two versions
 // of man page files, the following test would only run in UNIX-like environment.
 #![cfg(unix)]
-#![cfg(feature = "cli-man")]
+#![cfg(feature = "cli")]
 
 use parallel_disk_usage::man_page::render_man_page;
 
