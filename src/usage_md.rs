@@ -166,17 +166,22 @@ fn write_option_anchors(out: &mut String, arg: &Arg, primary_long: &str) {
 }
 
 fn collect_option_display_aliases(arg: &Arg) -> Vec<String> {
-    let mut aliases = Vec::<String>::new();
-    if let Some(short) = arg.get_short() {
-        aliases.push(format!("-{short}"));
-    }
-    for alias in arg.get_visible_aliases().unwrap_or_default() {
-        aliases.push(format!("--{alias}"));
-    }
-    for alias in arg.get_visible_short_aliases().unwrap_or_default() {
-        aliases.push(format!("-{alias}"));
-    }
-    aliases
+    let short = arg.get_short().map(|short| format!("-{short}"));
+    let long_aliases = arg
+        .get_visible_aliases()
+        .into_iter()
+        .flatten()
+        .map(|alias| format!("--{alias}"));
+    let short_aliases = arg
+        .get_visible_short_aliases()
+        .into_iter()
+        .flatten()
+        .map(|alias| format!("-{alias}"));
+    short
+        .into_iter()
+        .chain(long_aliases)
+        .chain(short_aliases)
+        .collect()
 }
 
 fn collect_option_default_values(arg: &Arg) -> Vec<Cow<'_, str>> {
