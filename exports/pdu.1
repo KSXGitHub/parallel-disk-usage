@@ -2,7 +2,7 @@
 .SH NAME
 pdu \- Summarize disk usage of the set of files, recursively for directories.
 .SH SYNOPSIS
-\fBpdu\fR [\fB\-\-json\-input\fR] [\fB\-\-json\-output\fR] [\fB\-b\fR|\fB\-\-bytes\-format\fR \fIBYTES_FORMAT\fR] [\fB\-H\fR|\fB\-\-deduplicate\-hardlinks\fR] [\fB\-x\fR|\fB\-\-one\-file\-system\fR] [\fB\-\-top\-down\fR] [\fB\-\-align\-right\fR] [\fB\-q\fR|\fB\-\-quantity\fR \fIQUANTITY\fR] [\fB\-d\fR|\fB\-\-max\-depth\fR \fIMAX_DEPTH\fR] [\fB\-w\fR|\fB\-\-total\-width\fR \fITOTAL_WIDTH\fR] [\fB\-\-column\-width\fR \fITREE_WIDTH\fR \fIBAR_WIDTH\fR] [\fB\-m\fR|\fB\-\-min\-ratio\fR \fIMIN_RATIO\fR] [\fB\-\-no\-sort\fR] [\fB\-s\fR|\fB\-\-silent\-errors\fR] [\fB\-p\fR|\fB\-\-progress\fR] [\fB\-\-threads\fR \fITHREADS\fR] [\fB\-\-omit\-json\-shared\-details\fR] [\fB\-\-omit\-json\-shared\-summary\fR] [\fIFILES\fR]
+\fBpdu\fR [\fB\-\-json\-input\fR] [\fB\-\-json\-output\fR] [\fB\-b\fR|\fB\-\-bytes\-format\fR \fIBYTES_FORMAT\fR] [\fB\-H\fR|\fB\-\-deduplicate\-hardlinks\fR] [\fB\-x\fR|\fB\-\-one\-file\-system\fR] [\fB\-\-top\-down\fR] [\fB\-\-align\-right\fR] [\fB\-q\fR|\fB\-\-quantity\fR \fIQUANTITY\fR] [\fB\-d\fR|\fB\-\-max\-depth\fR \fIMAX_DEPTH\fR] [\fB\-w\fR|\fB\-\-total\-width\fR \fITOTAL_WIDTH\fR] [\fB\-\-column\-width\fR \fITREE_WIDTH\fR \fIBAR_WIDTH\fR] [\fB\-m\fR|\fB\-\-min\-ratio\fR \fIMIN_RATIO\fR] [\fB\-\-no\-sort\fR] [\fB\-s\fR|\fB\-\-silent\-errors\fR] [\fB\-p\fR|\fB\-\-progress\fR] [\fB\-\-threads\fR \fITHREADS\fR] [\fB\-\-omit\-json\-shared\-details\fR] [\fB\-\-omit\-json\-shared\-summary\fR] [\fB\-h\fR|\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] [\fIFILES\fR]
 .SH DESCRIPTION
 Summarize disk usage of the set of files, recursively for directories.
 .PP
@@ -16,23 +16,24 @@ List of files and/or directories
 .TP
 \fB\-\-json\-input\fR
 Read JSON data from stdin
+.br
+Conflicts with \fB\-\-quantity\fR, \fB\-\-deduplicate\-hardlinks\fR, \fB\-\-one\-file\-system\fR.
 .TP
 \fB\-\-json\-output\fR
 Print JSON data instead of an ASCII chart
 .TP
 \fB\-b\fR, \fB\-\-bytes\-format\fR \fI<BYTES_FORMAT>\fR [default: metric]
 How to display the numbers of bytes
-.br
-
-.br
-\fIPossible values:\fR
-.RS 14
-.IP \(bu 2
-plain: Display plain number of bytes without units
-.IP \(bu 2
-metric: Use metric scale, i.e. 1K = 1000B, 1M = 1000K, and so on
-.IP \(bu 2
-binary: Use binary scale, i.e. 1K = 1024B, 1M = 1024K, and so on
+.RS
+.TP
+\fB\-\-bytes\-format plain\fR
+Display plain number of bytes without units
+.TP
+\fB\-\-bytes\-format metric\fR
+Use metric scale, i.e. 1K = 1000B, 1M = 1000K, and so on
+.TP
+\fB\-\-bytes\-format binary\fR
+Use binary scale, i.e. 1K = 1024B, 1M = 1024K, and so on
 .RE
 .TP
 \fB\-H\fR, \fB\-\-deduplicate\-hardlinks\fR, \fB\-\-detect\-links\fR, \fB\-\-dedupe\-links\fR
@@ -49,17 +50,16 @@ Set the root of the bars to the right
 .TP
 \fB\-q\fR, \fB\-\-quantity\fR \fI<QUANTITY>\fR [default: block-size]
 Aspect of the files/directories to be measured
-.br
-
-.br
-\fIPossible values:\fR
-.RS 14
-.IP \(bu 2
-apparent\-size: Measure apparent sizes
-.IP \(bu 2
-block\-size: Measure block sizes (block\-count * 512B)
-.IP \(bu 2
-block\-count: Count numbers of blocks
+.RS
+.TP
+\fB\-\-quantity apparent\-size\fR
+Measure apparent sizes
+.TP
+\fB\-\-quantity block\-size\fR
+Measure block sizes (block\-count * 512B)
+.TP
+\fB\-\-quantity block\-count\fR
+Count numbers of blocks
 .RE
 .TP
 \fB\-d\fR, \fB\-\-max\-depth\fR, \fB\-\-depth\fR \fI<MAX_DEPTH>\fR [default: 10]
@@ -67,6 +67,8 @@ Maximum depth to display the data. Could be either "inf" or a positive integer
 .TP
 \fB\-w\fR, \fB\-\-total\-width\fR, \fB\-\-width\fR \fI<TOTAL_WIDTH>\fR
 Width of the visualization
+.br
+Conflicts with \fB\-\-column\-width\fR.
 .TP
 \fB\-\-column\-width\fR \fI<TREE_WIDTH>\fR\fI \fR\fI<BAR_WIDTH>\fR
 Maximum widths of the tree column and width of the bar column
@@ -91,6 +93,12 @@ Do not output `.shared.details` in the JSON output
 .TP
 \fB\-\-omit\-json\-shared\-summary\fR
 Do not output `.shared.summary` in the JSON output
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help (see a summary with '\-h')
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Print version
 .SH EXAMPLES
 .TP
 Show disk usage chart of current working directory

@@ -4,7 +4,8 @@ use std::{borrow::Cow, fmt::Write};
 
 /// Renders the man page for `pdu` as a string in roff format.
 pub fn render_man_page() -> String {
-    let command = Args::command();
+    let mut command = Args::command();
+    command.build();
     let mut out = String::new();
     render_title(&mut out, &command);
     render_name_section(&mut out, &command);
@@ -133,11 +134,11 @@ fn render_options_section(out: &mut String, command: &Command) {
         if arg.is_hide_set() {
             continue;
         }
-        render_option_entry(out, arg);
+        render_option_entry(out, command, arg);
     }
 }
 
-fn render_option_entry(out: &mut String, arg: &Arg) {
+fn render_option_entry(out: &mut String, command: &Command, arg: &Arg) {
     out.push_str(".TP\n");
     if arg.is_positional() {
         render_option_header_positional(out, arg);
@@ -151,6 +152,7 @@ fn render_option_entry(out: &mut String, arg: &Arg) {
         .unwrap_or_default();
     writeln!(out, "{}", roff_escape(&help)).unwrap();
     render_possible_values(out, arg);
+    render_conflicts(out, command, arg);
 }
 
 fn render_option_header_positional(out: &mut String, arg: &Arg) {
@@ -230,24 +232,45 @@ fn render_possible_values(out: &mut String, arg: &Arg) {
     if possible_values.is_empty() {
         return;
     }
-    out.push_str(".br\n\n.br\n");
-    out.push_str("\\fIPossible values:\\fR\n");
-    out.push_str(".RS 14\n");
+    let flag = arg
+        .get_long()
+        .map(|long| format!("\\-\\-{}", roff_escape(long)))
+        .unwrap_or_default();
+    out.push_str(".RS\n");
     for value in &possible_values {
         let name = value.get_name();
         if let Some(help) = value.get_help() {
             writeln!(
                 out,
-                ".IP \\(bu 2\n{}: {}",
+                ".TP\n\\fB{flag} {}\\fR\n{}",
                 roff_escape(name),
-                roff_escape(&help.to_string())
+                roff_escape(&help.to_string()),
             )
             .unwrap();
         } else {
-            writeln!(out, ".IP \\(bu 2\n{}", roff_escape(name)).unwrap();
+            writeln!(out, ".TP\n\\fB{flag} {}\\fR", roff_escape(name)).unwrap();
         }
     }
     out.push_str(".RE\n");
+}
+
+fn render_conflicts(out: &mut String, command: &Command, arg: &Arg) {
+    let conflicts = command.get_arg_conflicts_with(arg);
+    if conflicts.is_empty() {
+        return;
+    }
+    let conflict_names: Vec<_> = conflicts
+        .iter()
+        .filter_map(|conflict_arg| {
+            conflict_arg
+                .get_long()
+                .map(|long| format!("\\fB\\-\\-{}\\fR", roff_escape(long)))
+        })
+        .collect();
+    if conflict_names.is_empty() {
+        return;
+    }
+    writeln!(out, ".br\nConflicts with {}.", conflict_names.join(", ")).unwrap();
 }
 
 fn render_examples_section(out: &mut String, command: &Command) {
