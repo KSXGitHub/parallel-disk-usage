@@ -1,13 +1,12 @@
-use clap::CommandFactory;
-use clap_mangen::Man;
-use parallel_disk_usage::args::Args;
-use std::{io::stdout, process::ExitCode};
+use parallel_disk_usage::man_page::render_man_page;
+use std::process::ExitCode;
 
 fn main() -> ExitCode {
-    let command = Args::command();
-    let man = Man::new(command);
-    match man.render(&mut stdout()) {
-        Ok(()) => ExitCode::SUCCESS,
+    match render_man_page() {
+        Ok(content) => {
+            print!("{content}");
+            ExitCode::SUCCESS
+        }
         Err(error) => {
             eprintln!("error: {error}");
             ExitCode::FAILURE

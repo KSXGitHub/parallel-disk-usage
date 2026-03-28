@@ -5,19 +5,13 @@
 // Since the CLI in Windows looks a little different, and I am way too lazy to make two versions
 // of man page files, the following test would only run in UNIX-like environment.
 #![cfg(unix)]
-#![cfg(feature = "cli")]
+#![cfg(feature = "cli-man")]
 
-use clap::CommandFactory;
-use clap_mangen::Man;
-use parallel_disk_usage::args::Args;
+use parallel_disk_usage::man_page::render_man_page;
 
 #[test]
 fn man_page() {
-    let command = Args::command();
-    let man = Man::new(command);
-    let mut buffer = Vec::new();
-    man.render(&mut buffer).expect("render man page to buffer");
-    let received = String::from_utf8(buffer).expect("man page should be valid UTF-8");
+    let received = render_man_page().expect("render man page");
     let expected = include_str!("../exports/pdu.1");
     assert!(
         received == expected,
