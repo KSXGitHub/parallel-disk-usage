@@ -50,7 +50,8 @@ with open('./pkgbuild/parallel-disk-usage-bin/PKGBUILD', 'w') as pkgbuild:
     f'completion.{release_tag}.{ext}::{source_url_prefix}/completion.{ext}'
     for ext in supported_completions
   )
-  content += f'source=(pdu-{checksum}::{source_url} {completion_source} {readme_url} {license_url})\n'
+  man_page_source = f'pdu.{release_tag}.1::{source_url_prefix}/pdu.1'
+  content += f'source=(pdu-{checksum}::{source_url} {completion_source} {man_page_source} {readme_url} {license_url})\n'
   content += f'_checksum={checksum}\n'
   completion_checksums = ' '.join('SKIP' for _ in supported_completions)
   content += f'_completion_checksums=({completion_checksums})\n'

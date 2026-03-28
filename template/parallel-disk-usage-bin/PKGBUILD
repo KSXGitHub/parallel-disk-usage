@@ -10,6 +10,7 @@ conflicts=(parallel-disk-usage)
 sha1sums=(
   "$_checksum"                  # for the pdu binary
   "${_completion_checksums[@]}" # for the completion files
+  SKIP                          # for the man page
   SKIP                          # for the readme file
   SKIP                          # for the license file
 )
