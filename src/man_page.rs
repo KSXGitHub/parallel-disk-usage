@@ -272,22 +272,17 @@ fn render_possible_values(out: &mut String, arg: &Arg) {
     }
     let flag = arg
         .get_long()
-        .map(|long| format!("\\-\\-{}", roff_escape(long)))
+        .map(roff_escape)
+        .map(|long| format!("\\-\\-{long}"))
         .unwrap_or_default();
     out.push_str(".RS\n");
     for value in &possible_values {
-        let name = value.get_name();
-        if let Some(help) = value.get_help() {
-            writeln!(
-                out,
-                ".TP\n\\fB{flag} {}\\fR\n{}",
-                roff_escape(name),
-                roff_escape(&help.to_string()),
-            )
-            .unwrap();
-        } else {
-            writeln!(out, ".TP\n\\fB{flag} {}\\fR", roff_escape(name)).unwrap();
-        }
+        let name = roff_escape(value.get_name());
+        let help = value
+            .get_help()
+            .map(|help| format!("\n{}", roff_escape(&help.to_string())))
+            .unwrap_or_default();
+        writeln!(out, ".TP\n\\fB{flag} {name}\\fR{help}").unwrap();
     }
     out.push_str(".RE\n");
 }
