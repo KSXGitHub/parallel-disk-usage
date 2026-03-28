@@ -41,11 +41,11 @@ fn roff() {
 
 #[test]
 fn man() {
-    if which::which("man").is_err() {
+    if which::which("groff").is_err() {
         panic!(
             "{}\n{}",
-            "error: This test requires `man` but it was not found.",
-            "hint: Install `man-db` for your platform, \
+            "error: This test requires `groff` but it was not found.",
+            "hint: Install `groff` (or `groff-base`) for your platform, \
              or rerun via `TEST_SKIP='man' ./test.sh` to skip this test.",
         );
     }

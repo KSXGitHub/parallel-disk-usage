@@ -2,7 +2,7 @@ use clap::{Parser, ValueEnum};
 use parallel_disk_usage::man_page::render_man_page;
 use std::process::{Command, ExitCode};
 
-const MANWIDTH: &str = "120";
+const LINE_LENGTH: &str = "120";
 
 /// Manage generated man pages.
 #[derive(Debug, Parser)]
@@ -58,22 +58,32 @@ fn man_path(page_num: u8) -> String {
 
 fn render_man_output(page_num: u8) -> Result<String, String> {
     let roff_file = roff_path(page_num);
-    let output = Command::new("man")
-        .env("MANWIDTH", MANWIDTH)
+    let output = Command::new("groff")
+        .args(["-man", "-T", "utf8", "-r", &format!("LL={LINE_LENGTH}n")])
         .arg(format!("./{roff_file}"))
         .output()
-        .map_err(|error| format!("failed to run man: {error}"))?;
+        .map_err(|error| format!("failed to run groff: {error}"))?;
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("man failed: {stderr}"));
+        return Err(format!("groff failed: {stderr}"));
     }
     let content = String::from_utf8(output.stdout)
-        .map_err(|error| format!("man output is not UTF-8: {error}"))?;
-    Ok(content
+        .map_err(|error| format!("groff output is not UTF-8: {error}"))?;
+    Ok(normalize_text(&content))
+}
+
+/// Strips trailing whitespace per line, trims trailing blank lines,
+/// and ensures the output ends with exactly one newline.
+fn normalize_text(text: &str) -> String {
+    let mut result: String = text
         .lines()
         .map(str::trim_end)
         .collect::<Vec<_>>()
-        .join("\n"))
+        .join("\n");
+    let trimmed_len = result.trim_end().len();
+    result.truncate(trimmed_len);
+    result.push('\n');
+    result
 }
 
 fn check_file(path: &str, expected: &str) -> ExitCode {
