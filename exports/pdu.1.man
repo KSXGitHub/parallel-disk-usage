@@ -1,35 +1,35 @@
-_p_d_u(1)                                           General Commands Manual                                          _p_d_u(1)
+[4mpdu[24m(1)                                           General Commands Manual                                          [4mpdu[24m(1)
 
-NNAAMMEE
+[1mNAME[0m
        pdu - Summarize disk usage of the set of files, recursively for directories.
 
-SSYYNNOOPPSSIISS
-       ppdduu     [----jjssoonn--iinnppuutt]     [----jjssoonn--oouuttppuutt]    [--bb|----bbyytteess--ffoorrmmaatt    _B_Y_T_E_S___F_O_R_M_A_T]    [--HH|----ddeedduupplliiccaattee--hhaarrddlliinnkkss]
-       [--xx|----oonnee--ffiillee--ssyysstteemm] [----ttoopp--ddoowwnn] [----aalliiggnn--rriigghhtt] [--qq|----qquuaannttiittyy _Q_U_A_N_T_I_T_Y] [--dd|----mmaaxx--ddeepptthh _M_A_X___D_E_P_T_H] [--ww|----ttoo‐‐
-       ttaall--wwiiddtthh   _T_O_T_A_L___W_I_D_T_H]   [----ccoolluummnn--wwiiddtthh   _T_R_E_E___W_I_D_T_H   _B_A_R___W_I_D_T_H]   [--mm|----mmiinn--rraattiioo   _M_I_N___R_A_T_I_O]   [----nnoo--ssoorrtt]
-       [--ss|----ssiilleenntt--eerrrroorrss]  [--pp|----pprrooggrreessss]  [----tthhrreeaaddss  _T_H_R_E_A_D_S] [----oommiitt--jjssoonn--sshhaarreedd--ddeettaaiillss] [----oommiitt--jjssoonn--sshhaarreedd--ssuumm‐‐
-       mmaarryy] [_F_I_L_E_S]
+[1mSYNOPSIS[0m
+       [1mpdu     [22m[[1m--json-input[22m]     [[1m--json-output[22m]    [[1m-b[22m|[1m--bytes-format    [4m[22mBYTES_FORMAT[24m]    [[1m-H[22m|[1m--deduplicate-hardlinks[22m]
+       [[1m-x[22m|[1m--one-file-system[22m] [[1m--top-down[22m] [[1m--align-right[22m] [[1m-q[22m|[1m--quantity [4m[22mQUANTITY[24m] [[1m-d[22m|[1m--max-depth [4m[22mMAX_DEPTH[24m] [[1m-w[22m|[1m--to‐[0m
+       [1mtal-width   [4m[22mTOTAL_WIDTH[24m]   [[1m--column-width   [4m[22mTREE_WIDTH[24m   [4mBAR_WIDTH[24m]   [[1m-m[22m|[1m--min-ratio   [4m[22mMIN_RATIO[24m]   [[1m--no-sort[22m]
+       [[1m-s[22m|[1m--silent-errors[22m]  [[1m-p[22m|[1m--progress[22m]  [[1m--threads  [4m[22mTHREADS[24m] [[1m--omit-json-shared-details[22m] [[1m--omit-json-shared-sum‐[0m
+       [1mmary[22m] [[4mFILES[24m]
 
-DDEESSCCRRIIPPTTIIOONN
+[1mDESCRIPTION[0m
        Summarize disk usage of the set of files, recursively for directories.
 
        Copyright: Apache-2.0 © 2021 Hoàng Văn Khải <https://github.com/KSXGitHub/>
        Sponsor: https://github.com/sponsors/KSXGitHub
 
-OOPPTTIIOONNSS
-       [_F_I_L_E_S]
+[1mOPTIONS[0m
+       [[4mFILES[24m]
               List of files and/or directories
 
-       ----jjssoonn--iinnppuutt
+       [1m--json-input[0m
               Read JSON data from stdin
 
-       ----jjssoonn--oouuttppuutt
+       [1m--json-output[0m
               Print JSON data instead of an ASCII chart
 
-       --bb, ----bbyytteess--ffoorrmmaatt _<_B_Y_T_E_S___F_O_R_M_A_T_> [default: metric]
+       [1m-b[22m, [1m--bytes-format [4m[22m<BYTES_FORMAT>[24m [default: metric]
               How to display the numbers of bytes
 
-              _P_o_s_s_i_b_l_e _v_a_l_u_e_s_:
+              [4mPossible[24m [4mvalues:[0m
 
                      • plain: Display plain number of bytes without units
 
@@ -37,22 +37,22 @@ OOPPTTIIOONNSS
 
                      • binary: Use binary scale, i.e. 1K = 1024B, 1M = 1024K, and so on
 
-       --HH, ----ddeedduupplliiccaattee--hhaarrddlliinnkkss, ----ddeetteecctt--lliinnkkss, ----ddeedduuppee--lliinnkkss
+       [1m-H[22m, [1m--deduplicate-hardlinks[22m, [1m--detect-links[22m, [1m--dedupe-links[0m
               Detect and subtract the sizes of hardlinks from their parent directory totals
 
-       --xx, ----oonnee--ffiillee--ssyysstteemm
+       [1m-x[22m, [1m--one-file-system[0m
               Skip directories on different filesystems
 
-       ----ttoopp--ddoowwnn
+       [1m--top-down[0m
               Print the tree top-down instead of bottom-up
 
-       ----aalliiggnn--rriigghhtt
+       [1m--align-right[0m
               Set the root of the bars to the right
 
-       --qq, ----qquuaannttiittyy _<_Q_U_A_N_T_I_T_Y_> [default: block-size]
+       [1m-q[22m, [1m--quantity [4m[22m<QUANTITY>[24m [default: block-size]
               Aspect of the files/directories to be measured
 
-              _P_o_s_s_i_b_l_e _v_a_l_u_e_s_:
+              [4mPossible[24m [4mvalues:[0m
 
                      • apparent-size: Measure apparent sizes
 
@@ -60,71 +60,71 @@ OOPPTTIIOONNSS
 
                      • block-count: Count numbers of blocks
 
-       --dd, ----mmaaxx--ddeepptthh, ----ddeepptthh _<_M_A_X___D_E_P_T_H_> [default: 10]
+       [1m-d[22m, [1m--max-depth[22m, [1m--depth [4m[22m<MAX_DEPTH>[24m [default: 10]
               Maximum depth to display the data. Could be either "inf" or a positive integer
 
-       --ww, ----ttoottaall--wwiiddtthh, ----wwiiddtthh _<_T_O_T_A_L___W_I_D_T_H_>
+       [1m-w[22m, [1m--total-width[22m, [1m--width [4m[22m<TOTAL_WIDTH>[0m
               Width of the visualization
 
-       ----ccoolluummnn--wwiiddtthh _<_T_R_E_E___W_I_D_T_H_> _<_B_A_R___W_I_D_T_H_>
+       [1m--column-width [4m[22m<TREE_WIDTH>[24m [4m<BAR_WIDTH>[0m
               Maximum widths of the tree column and width of the bar column
 
-       --mm, ----mmiinn--rraattiioo _<_M_I_N___R_A_T_I_O_> [default: 0.01]
+       [1m-m[22m, [1m--min-ratio [4m[22m<MIN_RATIO>[24m [default: 0.01]
               Minimal size proportion required to appear
 
-       ----nnoo--ssoorrtt
+       [1m--no-sort[0m
               Do not sort the branches in the tree
 
-       --ss, ----ssiilleenntt--eerrrroorrss, ----nnoo--eerrrroorrss
+       [1m-s[22m, [1m--silent-errors[22m, [1m--no-errors[0m
               Prevent filesystem error messages from appearing in stderr
 
-       --pp, ----pprrooggrreessss
+       [1m-p[22m, [1m--progress[0m
               Report progress being made at the expense of performance
 
-       ----tthhrreeaaddss _<_T_H_R_E_A_D_S_> [default: auto]
+       [1m--threads [4m[22m<THREADS>[24m [default: auto]
               Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer
 
-       ----oommiitt--jjssoonn--sshhaarreedd--ddeettaaiillss
+       [1m--omit-json-shared-details[0m
               Do not output ‘.shared.details‘ in the JSON output
 
-       ----oommiitt--jjssoonn--sshhaarreedd--ssuummmmaarryy
+       [1m--omit-json-shared-summary[0m
               Do not output ‘.shared.summary‘ in the JSON output
 
-EEXXAAMMPPLLEESS
+[1mEXAMPLES[0m
        Show disk usage chart of current working directory
-              $$ ppdduu
+              [1m$ pdu[0m
 
        Show disk usage chart of a single file or directory
-              $$ ppdduu ppaatthh//ttoo//ffiillee//oorr//ddiirreeccttoorryy
+              [1m$ pdu path/to/file/or/directory[0m
 
        Compare disk usages of multiple files and/or directories
-              $$ ppdduu ffiillee..ttxxtt ddiirr//
+              [1m$ pdu file.txt dir/[0m
 
        Show chart in apparent sizes instead of block sizes
-              $$ ppdduu ----qquuaannttiittyy==aappppaarreenntt--ssiizzee
+              [1m$ pdu --quantity=apparent-size[0m
 
        Detect and subtract the sizes of hardlinks from their parent nodes
-              $$ ppdduu ----ddeedduupplliiccaattee--hhaarrddlliinnkkss
+              [1m$ pdu --deduplicate-hardlinks[0m
 
        Show sizes in plain numbers instead of metric units
-              $$ ppdduu ----bbyytteess--ffoorrmmaatt==ppllaaiinn
+              [1m$ pdu --bytes-format=plain[0m
 
        Show sizes in base 2¹⁰ units (binary) instead of base 10³ units (metric)
-              $$ ppdduu ----bbyytteess--ffoorrmmaatt==bbiinnaarryy
+              [1m$ pdu --bytes-format=binary[0m
 
        Show disk usage chart of all entries regardless of size
-              $$ ppdduu ----mmiinn--rraattiioo==00
+              [1m$ pdu --min-ratio=0[0m
 
        Only show disk usage chart of entries whose size is at least 5% of total
-              $$ ppdduu ----mmiinn--rraattiioo==00..0055
+              [1m$ pdu --min-ratio=0.05[0m
 
        Show disk usage data as JSON instead of chart
-              $$ ppdduu ----mmiinn--rraattiioo==00 ----mmaaxx--ddeepptthh==iinnff ----jjssoonn--oouuttppuutt || jjqq
+              [1m$ pdu --min-ratio=0 --max-depth=inf --json-output | jq[0m
 
        Visualize existing JSON representation of disk usage data
-              $$ ppdduu ----jjssoonn--iinnppuutt << ddiisskk--uussaaggee..jjssoonn
+              [1m$ pdu --json-input < disk-usage.json[0m
 
-VVEERRSSIIOONN
+[1mVERSION[0m
        v0.21.1
 
-                                                       pdu 0.21.1                                                 _p_d_u(1)
+                                                       pdu 0.21.1                                                 [4mpdu[24m(1)
