@@ -34,7 +34,6 @@ fn build_conflict_map(command: &Command) -> ConflictMap {
             map.entry(conflict_id).or_default().push(arg_id.clone());
         }
     }
-    // Deduplicate each entry
     for conflicts in map.values_mut() {
         conflicts.sort();
         conflicts.dedup();
