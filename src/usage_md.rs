@@ -166,7 +166,6 @@ fn write_option_anchors(out: &mut String, arg: &Arg, primary_long: &str) {
 }
 
 fn collect_option_display_aliases(arg: &Arg) -> Vec<String> {
-    let short = arg.get_short().map(|short| format!("-{short}"));
     let long_aliases = arg
         .get_visible_aliases()
         .into_iter()
@@ -177,7 +176,8 @@ fn collect_option_display_aliases(arg: &Arg) -> Vec<String> {
         .into_iter()
         .flatten()
         .map(|alias| format!("-{alias}"));
-    short
+    arg.get_short()
+        .map(|short| format!("-{short}"))
         .into_iter()
         .chain(long_aliases)
         .chain(short_aliases)
