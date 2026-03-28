@@ -1,6 +1,6 @@
 use crate::args::Args;
 use clap::{Arg, ArgAction, Command, CommandFactory};
-use std::fmt::Write;
+use std::{borrow::Cow, fmt::Write};
 
 /// Renders the man page for `pdu` as a string in roff format.
 pub fn render_man_page() -> String {
@@ -199,7 +199,8 @@ fn render_value_hint(arg: &Arg) -> String {
     let defaults: Vec<_> = arg
         .get_default_values()
         .iter()
-        .map(|value| value.to_string_lossy().into_owned())
+        .map(|value| value.to_string_lossy())
+        .map(Cow::into_owned)
         .collect();
     if !defaults.is_empty()
         && !arg.is_hide_default_value_set()
