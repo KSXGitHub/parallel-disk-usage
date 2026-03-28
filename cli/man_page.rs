@@ -1,6 +1,9 @@
 use clap::{Parser, ValueEnum};
 use parallel_disk_usage::man_page::render_man_page;
-use std::process::{Command, ExitCode};
+use std::{
+    fs,
+    process::{Command, ExitCode},
+};
 
 const LINE_LENGTH: &str = "120";
 
@@ -86,8 +89,18 @@ fn normalize_text(text: &str) -> String {
     result
 }
 
+fn write_file(path: &str, content: &str) -> ExitCode {
+    match fs::write(path, content) {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(error) => {
+            eprintln!("error writing {path}: {error}");
+            ExitCode::FAILURE
+        }
+    }
+}
+
 fn check_file(path: &str, expected: &str) -> ExitCode {
-    match std::fs::read_to_string(path) {
+    match fs::read_to_string(path) {
         Ok(actual) if actual == expected => ExitCode::SUCCESS,
         Ok(_) => {
             eprintln!("{path} is outdated, run ./generate-completions.sh to update it");
@@ -104,15 +117,9 @@ fn main() -> ExitCode {
     let args = Args::parse();
     let page_num = args.page.number();
     match (args.action, args.kind) {
-        (Action::Generate, Kind::Roff) => {
-            print!("{}", render_man_page());
-            ExitCode::SUCCESS
-        }
+        (Action::Generate, Kind::Roff) => write_file(&roff_path(page_num), &render_man_page()),
         (Action::Generate, Kind::Man) => match render_man_output(page_num) {
-            Ok(content) => {
-                print!("{content}");
-                ExitCode::SUCCESS
-            }
+            Ok(content) => write_file(&man_path(page_num), &content),
             Err(error) => {
                 eprintln!("error: {error}");
                 ExitCode::FAILURE
