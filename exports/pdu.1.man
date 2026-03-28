@@ -1,35 +1,35 @@
-[4mpdu[24m(1)                                           General Commands Manual                                          [4mpdu[24m(1)
+pdu(1)                                           General Commands Manual                                          pdu(1)
 
-[1mNAME[0m
+NAME
        pdu - Summarize disk usage of the set of files, recursively for directories.
 
-[1mSYNOPSIS[0m
-       [1mpdu     [22m[[1m--json-input[22m]     [[1m--json-output[22m]    [[1m-b[22m|[1m--bytes-format    [4m[22mBYTES_FORMAT[24m]    [[1m-H[22m|[1m--deduplicate-hardlinks[22m]
-       [[1m-x[22m|[1m--one-file-system[22m] [[1m--top-down[22m] [[1m--align-right[22m] [[1m-q[22m|[1m--quantity [4m[22mQUANTITY[24m] [[1m-d[22m|[1m--max-depth [4m[22mMAX_DEPTH[24m] [[1m-w[22m|[1m--to‐[0m
-       [1mtal-width   [4m[22mTOTAL_WIDTH[24m]   [[1m--column-width   [4m[22mTREE_WIDTH[24m   [4mBAR_WIDTH[24m]   [[1m-m[22m|[1m--min-ratio   [4m[22mMIN_RATIO[24m]   [[1m--no-sort[22m]
-       [[1m-s[22m|[1m--silent-errors[22m]  [[1m-p[22m|[1m--progress[22m]  [[1m--threads  [4m[22mTHREADS[24m] [[1m--omit-json-shared-details[22m] [[1m--omit-json-shared-sum‐[0m
-       [1mmary[22m] [[4mFILES[24m]
+SYNOPSIS
+       pdu     [--json-input]     [--json-output]    [-b|--bytes-format    BYTES_FORMAT]    [-H|--deduplicate-hardlinks]
+       [-x|--one-file-system] [--top-down] [--align-right] [-q|--quantity QUANTITY] [-d|--max-depth MAX_DEPTH] [-w|--to‐
+       tal-width   TOTAL_WIDTH]   [--column-width   TREE_WIDTH   BAR_WIDTH]   [-m|--min-ratio   MIN_RATIO]   [--no-sort]
+       [-s|--silent-errors]  [-p|--progress]  [--threads  THREADS] [--omit-json-shared-details] [--omit-json-shared-sum‐
+       mary] [FILES]
 
-[1mDESCRIPTION[0m
+DESCRIPTION
        Summarize disk usage of the set of files, recursively for directories.
 
        Copyright: Apache-2.0 © 2021 Hoàng Văn Khải <https://github.com/KSXGitHub/>
        Sponsor: https://github.com/sponsors/KSXGitHub
 
-[1mOPTIONS[0m
-       [[4mFILES[24m]
+OPTIONS
+       [FILES]
               List of files and/or directories
 
-       [1m--json-input[0m
+       --json-input
               Read JSON data from stdin
 
-       [1m--json-output[0m
+       --json-output
               Print JSON data instead of an ASCII chart
 
-       [1m-b[22m, [1m--bytes-format [4m[22m<BYTES_FORMAT>[24m [default: metric]
+       -b, --bytes-format <BYTES_FORMAT> [default: metric]
               How to display the numbers of bytes
 
-              [4mPossible[24m [4mvalues:[0m
+              Possible values:
 
                      • plain: Display plain number of bytes without units
 
@@ -37,22 +37,22 @@
 
                      • binary: Use binary scale, i.e. 1K = 1024B, 1M = 1024K, and so on
 
-       [1m-H[22m, [1m--deduplicate-hardlinks[22m, [1m--detect-links[22m, [1m--dedupe-links[0m
+       -H, --deduplicate-hardlinks, --detect-links, --dedupe-links
               Detect and subtract the sizes of hardlinks from their parent directory totals
 
-       [1m-x[22m, [1m--one-file-system[0m
+       -x, --one-file-system
               Skip directories on different filesystems
 
-       [1m--top-down[0m
+       --top-down
               Print the tree top-down instead of bottom-up
 
-       [1m--align-right[0m
+       --align-right
               Set the root of the bars to the right
 
-       [1m-q[22m, [1m--quantity [4m[22m<QUANTITY>[24m [default: block-size]
+       -q, --quantity <QUANTITY> [default: block-size]
               Aspect of the files/directories to be measured
 
-              [4mPossible[24m [4mvalues:[0m
+              Possible values:
 
                      • apparent-size: Measure apparent sizes
 
@@ -60,71 +60,71 @@
 
                      • block-count: Count numbers of blocks
 
-       [1m-d[22m, [1m--max-depth[22m, [1m--depth [4m[22m<MAX_DEPTH>[24m [default: 10]
+       -d, --max-depth, --depth <MAX_DEPTH> [default: 10]
               Maximum depth to display the data. Could be either "inf" or a positive integer
 
-       [1m-w[22m, [1m--total-width[22m, [1m--width [4m[22m<TOTAL_WIDTH>[0m
+       -w, --total-width, --width <TOTAL_WIDTH>
               Width of the visualization
 
-       [1m--column-width [4m[22m<TREE_WIDTH>[24m [4m<BAR_WIDTH>[0m
+       --column-width <TREE_WIDTH> <BAR_WIDTH>
               Maximum widths of the tree column and width of the bar column
 
-       [1m-m[22m, [1m--min-ratio [4m[22m<MIN_RATIO>[24m [default: 0.01]
+       -m, --min-ratio <MIN_RATIO> [default: 0.01]
               Minimal size proportion required to appear
 
-       [1m--no-sort[0m
+       --no-sort
               Do not sort the branches in the tree
 
-       [1m-s[22m, [1m--silent-errors[22m, [1m--no-errors[0m
+       -s, --silent-errors, --no-errors
               Prevent filesystem error messages from appearing in stderr
 
-       [1m-p[22m, [1m--progress[0m
+       -p, --progress
               Report progress being made at the expense of performance
 
-       [1m--threads [4m[22m<THREADS>[24m [default: auto]
+       --threads <THREADS> [default: auto]
               Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer
 
-       [1m--omit-json-shared-details[0m
+       --omit-json-shared-details
               Do not output ‘.shared.details‘ in the JSON output
 
-       [1m--omit-json-shared-summary[0m
+       --omit-json-shared-summary
               Do not output ‘.shared.summary‘ in the JSON output
 
-[1mEXAMPLES[0m
+EXAMPLES
        Show disk usage chart of current working directory
-              [1m$ pdu[0m
+              $ pdu
 
        Show disk usage chart of a single file or directory
-              [1m$ pdu path/to/file/or/directory[0m
+              $ pdu path/to/file/or/directory
 
        Compare disk usages of multiple files and/or directories
-              [1m$ pdu file.txt dir/[0m
+              $ pdu file.txt dir/
 
        Show chart in apparent sizes instead of block sizes
-              [1m$ pdu --quantity=apparent-size[0m
+              $ pdu --quantity=apparent-size
 
        Detect and subtract the sizes of hardlinks from their parent nodes
-              [1m$ pdu --deduplicate-hardlinks[0m
+              $ pdu --deduplicate-hardlinks
 
        Show sizes in plain numbers instead of metric units
-              [1m$ pdu --bytes-format=plain[0m
+              $ pdu --bytes-format=plain
 
        Show sizes in base 2¹⁰ units (binary) instead of base 10³ units (metric)
-              [1m$ pdu --bytes-format=binary[0m
+              $ pdu --bytes-format=binary
 
        Show disk usage chart of all entries regardless of size
-              [1m$ pdu --min-ratio=0[0m
+              $ pdu --min-ratio=0
 
        Only show disk usage chart of entries whose size is at least 5% of total
-              [1m$ pdu --min-ratio=0.05[0m
+              $ pdu --min-ratio=0.05
 
        Show disk usage data as JSON instead of chart
-              [1m$ pdu --min-ratio=0 --max-depth=inf --json-output | jq[0m
+              $ pdu --min-ratio=0 --max-depth=inf --json-output | jq
 
        Visualize existing JSON representation of disk usage data
-              [1m$ pdu --json-input < disk-usage.json[0m
+              $ pdu --json-input < disk-usage.json
 
-[1mVERSION[0m
+VERSION
        v0.21.1
 
-                                                       pdu 0.21.1                                                 [4mpdu[24m(1)
+                                                       pdu 0.21.1                                                 pdu(1)
