@@ -1,20 +1,49 @@
-//! The following test checks whether the man page file is outdated.
+//! The following tests check whether the man page files are outdated.
 //!
-//! If the test fails, run `./generate-completions.sh` on the root of the repo to update the man page.
+//! If the tests fail, run `./generate-completions.sh` on the root of the repo to update the man page.
 
 // Since the CLI in Windows looks a little different, and I am way too lazy to make two versions
-// of man page files, the following test would only run in UNIX-like environment.
+// of man page files, the following tests would only run in UNIX-like environment.
 #![cfg(unix)]
 #![cfg(feature = "cli")]
 
-use parallel_disk_usage::man_page::render_man_page;
+use command_extra::CommandExtra;
+use std::process::Command;
 
-#[test]
-fn man_page() {
-    let received = render_man_page();
-    let expected = include_str!("../exports/pdu.1");
+const PDU_MAN_PAGE: &str = env!("CARGO_BIN_EXE_pdu-man-page");
+
+fn check(kind: &str, page: &str) {
+    let output = Command::new(PDU_MAN_PAGE)
+        .with_args(["check", kind, page])
+        .with_current_dir(env!("CARGO_MANIFEST_DIR"))
+        .output()
+        .expect("spawn pdu-man-page");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stdout = stdout.trim();
+    if !stdout.is_empty() {
+        eprintln!("STDOUT:\n{stdout}\n");
+    }
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    let stderr = stderr.trim();
+    if !stderr.is_empty() {
+        eprintln!("STDERR:\n{stderr}\n");
+    }
     assert!(
-        received == expected,
+        output.status.success(),
         "man page is outdated, run ./generate-completions.sh to update it",
     );
+}
+
+#[test]
+fn roff() {
+    check("roff", "1");
+}
+
+#[test]
+#[cfg_attr(
+    not(feature = "man-test"),
+    ignore = "requires man(1); enable with --features man-test"
+)]
+fn man() {
+    check("man", "1");
 }

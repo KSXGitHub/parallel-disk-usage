@@ -64,6 +64,7 @@ default = ["cli"]
 json = ["serde/derive", "serde_json"]
 cli = ["clap/derive", "clap_complete", "clap-utilities", "json"]
 cli-completions = ["cli"]
+man-test = []
 ai-instructions = ["clap/derive"]
 
 [dependencies]
