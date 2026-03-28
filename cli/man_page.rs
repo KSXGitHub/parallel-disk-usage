@@ -62,7 +62,10 @@ fn man_path(page_num: u8) -> String {
 fn render_man_output(page_num: u8) -> Result<String, String> {
     let roff_file = roff_path(page_num);
     let output = Command::new("groff")
-        .args(["-man", "-T", "utf8", "-K", "utf8"])
+        .args([
+            "-man", "-T", "utf8", "-K", "utf8", "-P", "-c", "-P", "-b", "-P", "-u",
+        ])
+        .env("GROFF_NO_SGR", "1")
         .arg(format!("-rLL={LINE_LENGTH}n"))
         .arg(format!("./{roff_file}"))
         .output()
@@ -73,19 +76,30 @@ fn render_man_output(page_num: u8) -> Result<String, String> {
     }
     let content = String::from_utf8(output.stdout)
         .map_err(|error| format!("groff output is not UTF-8: {error}"))?;
-    Ok(normalize_text(&strip_overstrikes(&content)))
+    Ok(normalize_text(&strip_formatting(&content)))
 }
 
-/// Strips backspace-based overstriking sequences produced by grotty.
+/// Strips terminal formatting from grotty output.
 ///
-/// Grotty uses `X\x08X` for bold and `_\x08X` for underline. This function
-/// removes the overstrike prefix (char + `\x08`) leaving only the visible character.
-fn strip_overstrikes(text: &str) -> String {
+/// Handles two styles grotty may use:
+/// - **SGR mode** (default): ANSI escape sequences like `\x1b[1m` (bold), `\x1b[0m` (reset).
+/// - **Legacy mode** (`-c`): Backspace overstrikes like `X\x08X` (bold), `_\x08X` (underline).
+fn strip_formatting(text: &str) -> String {
     let chars: Vec<char> = text.chars().collect();
     let mut result = String::with_capacity(text.len());
     let mut index = 0;
     while index < chars.len() {
-        if index + 1 < chars.len() && chars[index + 1] == '\x08' {
+        if chars[index] == '\x1b' && index + 1 < chars.len() && chars[index + 1] == '[' {
+            // Skip ANSI escape: ESC [ ... m
+            index += 2;
+            while index < chars.len() && chars[index] != 'm' {
+                index += 1;
+            }
+            if index < chars.len() {
+                index += 1; // skip the 'm'
+            }
+        } else if index + 1 < chars.len() && chars[index + 1] == '\x08' {
+            // Skip backspace overstrike: char + BS
             index += 2;
         } else {
             result.push(chars[index]);
