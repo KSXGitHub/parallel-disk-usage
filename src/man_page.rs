@@ -1,7 +1,7 @@
 use crate::args::Args;
 use clap::{Arg, ArgAction, Command, CommandFactory};
 use itertools::Itertools;
-use std::{borrow::Cow, collections::BTreeMap, fmt::Write};
+use std::{collections::BTreeMap, fmt::Write};
 
 /// A map from argument ID to the set of argument IDs it conflicts with (bidirectional).
 type ConflictMap = BTreeMap<String, Vec<String>>;
@@ -59,7 +59,7 @@ fn roff_escape(text: &str) -> String {
 fn render_title(out: &mut String, command: &Command) {
     let name = command.get_name();
     let version = command.get_version().unwrap_or_default();
-    writeln!(out, ".TH {name} 1 \"{name} {version}\"").unwrap();
+    writeln!(out, ".TH {name} 1 \"\" \"{name} {version}\"").unwrap();
 }
 
 fn render_name_section(out: &mut String, command: &Command) {
@@ -236,19 +236,19 @@ fn render_value_hint(arg: &Arg) -> String {
         .map(roff_escape)
         .map(|name| format!("\\fI<{name}>\\fR"))
         .join(" ");
-    let defaults: Vec<_> = arg
+    let defaults = arg
         .get_default_values()
         .iter()
         .map(|value| value.to_string_lossy())
-        .map(Cow::into_owned)
-        .collect();
+        .map(|value| roff_escape(&value))
+        .join(", ");
     let hide_defaults = defaults.is_empty()
         || arg.is_hide_default_value_set()
         || matches!(arg.get_action(), ArgAction::SetTrue);
     if hide_defaults {
         value_part
     } else {
-        format!("{value_part} [default: {}]", defaults.join(", "))
+        format!("{value_part} [default: {defaults}]")
     }
 }
 
