@@ -64,14 +64,13 @@ default = ["cli"]
 json = ["serde/derive", "serde_json"]
 cli = ["clap/derive", "clap_complete", "clap-utilities", "json"]
 cli-completions = ["cli"]
-cli-man = ["cli", "clap_mangen"]
+cli-man = ["cli"]
 ai-instructions = ["clap/derive"]
 
 [dependencies]
 assert-cmp = "0.3.0"
 clap = { version = "4.5.60", optional = true }
 clap_complete = { version = "4.5.66", optional = true }
-clap_mangen = { version = "0.2.27", optional = true }
 clap-utilities = { version = "0.3.0", optional = true }
 dashmap = "6.1.0"
 derive_more = { version = "2.1.1", features = ["full"] }

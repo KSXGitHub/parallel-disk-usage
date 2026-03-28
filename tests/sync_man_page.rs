@@ -11,7 +11,7 @@ use parallel_disk_usage::man_page::render_man_page;
 
 #[test]
 fn man_page() {
-    let received = render_man_page().expect("render man page");
+    let received = render_man_page();
     let expected = include_str!("../exports/pdu.1");
     assert!(
         received == expected,

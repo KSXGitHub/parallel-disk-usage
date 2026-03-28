@@ -1,16 +1,18 @@
-.ie \n(.g .ds Aq \(aq
-.el .ds Aq '
-.TH pdu 1  "pdu 0.21.1" 
+.TH pdu 1 "pdu 0.21.1"
 .SH NAME
 pdu \- Summarize disk usage of the set of files, recursively for directories.
 .SH SYNOPSIS
-\fBpdu\fR [\fB\-\-json\-input\fR] [\fB\-\-json\-output\fR] [\fB\-b\fR|\fB\-\-bytes\-format\fR] [\fB\-H\fR|\fB\-\-deduplicate\-hardlinks\fR] [\fB\-x\fR|\fB\-\-one\-file\-system\fR] [\fB\-\-top\-down\fR] [\fB\-\-align\-right\fR] [\fB\-q\fR|\fB\-\-quantity\fR] [\fB\-d\fR|\fB\-\-max\-depth\fR] [\fB\-w\fR|\fB\-\-total\-width\fR] [\fB\-\-column\-width\fR] [\fB\-m\fR|\fB\-\-min\-ratio\fR] [\fB\-\-no\-sort\fR] [\fB\-s\fR|\fB\-\-silent\-errors\fR] [\fB\-p\fR|\fB\-\-progress\fR] [\fB\-\-threads\fR] [\fB\-\-omit\-json\-shared\-details\fR] [\fB\-\-omit\-json\-shared\-summary\fR] [\fB\-h\fR|\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] [\fIFILES\fR] 
+\fBpdu\fR [\fB\-\-json\-input\fR] [\fB\-\-json\-output\fR] [\fB\-b\fR|\fB\-\-bytes\-format\fR \fIBYTES_FORMAT\fR] [\fB\-H\fR|\fB\-\-deduplicate\-hardlinks\fR] [\fB\-x\fR|\fB\-\-one\-file\-system\fR] [\fB\-\-top\-down\fR] [\fB\-\-align\-right\fR] [\fB\-q\fR|\fB\-\-quantity\fR \fIQUANTITY\fR] [\fB\-d\fR|\fB\-\-max\-depth\fR \fIMAX_DEPTH\fR] [\fB\-w\fR|\fB\-\-total\-width\fR \fITOTAL_WIDTH\fR] [\fB\-\-column\-width\fR \fITREE_WIDTH\fR \fIBAR_WIDTH\fR] [\fB\-m\fR|\fB\-\-min\-ratio\fR \fIMIN_RATIO\fR] [\fB\-\-no\-sort\fR] [\fB\-s\fR|\fB\-\-silent\-errors\fR] [\fB\-p\fR|\fB\-\-progress\fR] [\fB\-\-threads\fR \fITHREADS\fR] [\fB\-\-omit\-json\-shared\-details\fR] [\fB\-\-omit\-json\-shared\-summary\fR] [\fIFILES\fR]
 .SH DESCRIPTION
 Summarize disk usage of the set of files, recursively for directories.
 .PP
 Copyright: Apache\-2.0 © 2021 Hoàng Văn Khải <https://github.com/KSXGitHub/>
+.br
 Sponsor: https://github.com/sponsors/KSXGitHub
 .SH OPTIONS
+.TP
+[\fIFILES\fR]
+List of files and/or directories
 .TP
 \fB\-\-json\-input\fR
 Read JSON data from stdin
@@ -33,7 +35,7 @@ metric: Use metric scale, i.e. 1K = 1000B, 1M = 1000K, and so on
 binary: Use binary scale, i.e. 1K = 1024B, 1M = 1024K, and so on
 .RE
 .TP
-\fB\-H\fR, \fB\-\-deduplicate\-hardlinks\fR
+\fB\-H\fR, \fB\-\-deduplicate\-hardlinks\fR, \fB\-\-detect\-links\fR, \fB\-\-dedupe\-links\fR
 Detect and subtract the sizes of hardlinks from their parent directory totals
 .TP
 \fB\-x\fR, \fB\-\-one\-file\-system\fR
@@ -45,7 +47,7 @@ Print the tree top\-down instead of bottom\-up
 \fB\-\-align\-right\fR
 Set the root of the bars to the right
 .TP
-\fB\-q\fR, \fB\-\-quantity\fR \fI<QUANTITY>\fR [default: block\-size]
+\fB\-q\fR, \fB\-\-quantity\fR \fI<QUANTITY>\fR [default: block-size]
 Aspect of the files/directories to be measured
 .br
 
@@ -60,10 +62,10 @@ block\-size: Measure block sizes (block\-count * 512B)
 block\-count: Count numbers of blocks
 .RE
 .TP
-\fB\-d\fR, \fB\-\-max\-depth\fR \fI<MAX_DEPTH>\fR [default: 10]
+\fB\-d\fR, \fB\-\-max\-depth\fR, \fB\-\-depth\fR \fI<MAX_DEPTH>\fR [default: 10]
 Maximum depth to display the data. Could be either "inf" or a positive integer
 .TP
-\fB\-w\fR, \fB\-\-total\-width\fR \fI<TOTAL_WIDTH>\fR
+\fB\-w\fR, \fB\-\-total\-width\fR, \fB\-\-width\fR \fI<TOTAL_WIDTH>\fR
 Width of the visualization
 .TP
 \fB\-\-column\-width\fR \fI<TREE_WIDTH>\fR\fI \fR\fI<BAR_WIDTH>\fR
@@ -75,7 +77,7 @@ Minimal size proportion required to appear
 \fB\-\-no\-sort\fR
 Do not sort the branches in the tree
 .TP
-\fB\-s\fR, \fB\-\-silent\-errors\fR
+\fB\-s\fR, \fB\-\-silent\-errors\fR, \fB\-\-no\-errors\fR
 Prevent filesystem error messages from appearing in stderr
 .TP
 \fB\-p\fR, \fB\-\-progress\fR
@@ -89,47 +91,61 @@ Do not output `.shared.details` in the JSON output
 .TP
 \fB\-\-omit\-json\-shared\-summary\fR
 Do not output `.shared.summary` in the JSON output
-.TP
-\fB\-h\fR, \fB\-\-help\fR
-Print help (see a summary with \*(Aq\-h\*(Aq)
-.TP
-\fB\-V\fR, \fB\-\-version\fR
-Print version
-.TP
-[\fIFILES\fR]
-List of files and/or directories
 .SH EXAMPLES
+.TP
 Show disk usage chart of current working directory
-$ pdu
-
+.nf
+\fB$ pdu\fR
+.fi
+.TP
 Show disk usage chart of a single file or directory
-$ pdu path/to/file/or/directory
-
+.nf
+\fB$ pdu path/to/file/or/directory\fR
+.fi
+.TP
 Compare disk usages of multiple files and/or directories
-$ pdu file.txt dir/
-
+.nf
+\fB$ pdu file.txt dir/\fR
+.fi
+.TP
 Show chart in apparent sizes instead of block sizes
-$ pdu \-\-quantity=apparent\-size
-
+.nf
+\fB$ pdu \-\-quantity=apparent\-size\fR
+.fi
+.TP
 Detect and subtract the sizes of hardlinks from their parent nodes
-$ pdu \-\-deduplicate\-hardlinks
-
+.nf
+\fB$ pdu \-\-deduplicate\-hardlinks\fR
+.fi
+.TP
 Show sizes in plain numbers instead of metric units
-$ pdu \-\-bytes\-format=plain
-
+.nf
+\fB$ pdu \-\-bytes\-format=plain\fR
+.fi
+.TP
 Show sizes in base 2¹⁰ units (binary) instead of base 10³ units (metric)
-$ pdu \-\-bytes\-format=binary
-
+.nf
+\fB$ pdu \-\-bytes\-format=binary\fR
+.fi
+.TP
 Show disk usage chart of all entries regardless of size
-$ pdu \-\-min\-ratio=0
-
+.nf
+\fB$ pdu \-\-min\-ratio=0\fR
+.fi
+.TP
 Only show disk usage chart of entries whose size is at least 5% of total
-$ pdu \-\-min\-ratio=0.05
-
+.nf
+\fB$ pdu \-\-min\-ratio=0.05\fR
+.fi
+.TP
 Show disk usage data as JSON instead of chart
-$ pdu \-\-min\-ratio=0 \-\-max\-depth=inf \-\-json\-output | jq
-
+.nf
+\fB$ pdu \-\-min\-ratio=0 \-\-max\-depth=inf \-\-json\-output | jq\fR
+.fi
+.TP
 Visualize existing JSON representation of disk usage data
-$ pdu \-\-json\-input < disk\-usage.json
+.nf
+\fB$ pdu \-\-json\-input < disk\-usage.json\fR
+.fi
 .SH VERSION
 v0.21.1
