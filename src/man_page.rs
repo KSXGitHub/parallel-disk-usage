@@ -1,5 +1,6 @@
 use crate::args::Args;
 use clap::{Arg, ArgAction, Command, CommandFactory};
+use itertools::Itertools;
 use std::{borrow::Cow, collections::BTreeMap, fmt::Write};
 
 /// A map from argument ID to the set of argument IDs it conflicts with (bidirectional).
@@ -73,21 +74,20 @@ fn render_name_section(out: &mut String, command: &Command) {
 
 fn render_synopsis_section(out: &mut String, command: &Command) {
     out.push_str(".SH SYNOPSIS\n");
-    out.push_str(&format!("\\fB{}\\fR", command.get_name()));
-    for arg in command.get_arguments() {
-        if arg.is_positional() {
-            continue;
-        }
-        if arg.is_hide_set() {
-            continue;
-        }
+    write!(out, "\\fB{}\\fR", command.get_name()).unwrap();
+    let options = command
+        .get_arguments()
+        .filter(|arg| !arg.is_positional())
+        .filter(|arg| !arg.is_hide_set());
+    for arg in options {
         out.push(' ');
         render_synopsis_option(out, arg);
     }
-    for arg in command.get_arguments() {
-        if !arg.is_positional() || arg.is_hide_set() {
-            continue;
-        }
+    let positionals = command
+        .get_arguments()
+        .filter(|arg| arg.is_positional())
+        .filter(|arg| !arg.is_hide_set());
+    for arg in positionals {
         out.push(' ');
         render_synopsis_positional(out, arg);
     }
@@ -202,17 +202,21 @@ fn render_option_header_positional(out: &mut String, arg: &Arg) {
 }
 
 fn render_option_header_flag(out: &mut String, arg: &Arg) {
-    let mut parts = Vec::new();
-    if let Some(short) = arg.get_short() {
-        parts.push(format!("\\fB\\-{}\\fR", roff_escape(&short.to_string())));
-    }
-    if let Some(long) = arg.get_long() {
-        parts.push(format!("\\fB\\-\\-{}\\fR", roff_escape(long)));
-    }
-    for alias in arg.get_visible_aliases().unwrap_or_default() {
-        parts.push(format!("\\fB\\-\\-{}\\fR", roff_escape(alias)));
-    }
-    let header = parts.join(", ");
+    let short = arg
+        .get_short()
+        .map(|short| roff_escape(&short.to_string()))
+        .map(|short| format!("\\fB\\-{short}\\fR"));
+    let long = arg
+        .get_long()
+        .map(roff_escape)
+        .map(|long| format!("\\fB\\-\\-{long}\\fR"));
+    let aliases = arg
+        .get_visible_aliases()
+        .into_iter()
+        .flatten()
+        .map(roff_escape)
+        .map(|arg| format!("\\fB\\-\\-{arg}\\fR"));
+    let header = short.into_iter().chain(long).chain(aliases).join(", ");
     if arg.get_action().takes_values() {
         let value_str = render_value_hint(arg);
         writeln!(out, "{header} {value_str}").unwrap();
@@ -222,25 +226,26 @@ fn render_option_header_flag(out: &mut String, arg: &Arg) {
 }
 
 fn render_value_hint(arg: &Arg) -> String {
-    let mut parts = Vec::new();
-    if let Some(value_names) = arg.get_value_names() {
-        for name in value_names {
-            parts.push(format!("\\fI<{}>\\fR", roff_escape(name)));
-        }
-    } else {
-        parts.push(format!("\\fI<{}>\\fR", roff_escape(arg.get_id().as_str())));
-    }
-    let value_part = parts.join(" ");
+    let value_part = arg
+        .get_value_names()
+        .map(<[_]>::iter)
+        .map(|names| names.map(|name| name.as_str()))
+        .map(|names| names.collect::<Vec<_>>())
+        .unwrap_or_else(|| vec![arg.get_id().as_str()])
+        .into_iter()
+        .map(roff_escape)
+        .map(|name| format!("\\fI<{name}>\\fR"))
+        .join(" ");
     let defaults: Vec<_> = arg
         .get_default_values()
         .iter()
         .map(|value| value.to_string_lossy())
         .map(Cow::into_owned)
         .collect();
-    if defaults.is_empty()
+    let hide_defaults = defaults.is_empty()
         || arg.is_hide_default_value_set()
-        || matches!(arg.get_action(), ArgAction::SetTrue)
-    {
+        || matches!(arg.get_action(), ArgAction::SetTrue);
+    if hide_defaults {
         value_part
     } else {
         format!("{value_part} [default: {}]", defaults.join(", "))
@@ -289,23 +294,15 @@ fn render_possible_values(out: &mut String, arg: &Arg) {
 
 fn render_conflicts(out: &mut String, command: &Command, arg: &Arg, conflict_map: &ConflictMap) {
     let arg_id = arg.get_id().as_str();
-    let conflict_ids = match conflict_map.get(arg_id) {
-        Some(ids) if !ids.is_empty() => ids,
-        _ => return,
-    };
-    let conflict_names: Vec<_> = conflict_ids
-        .iter()
-        .filter_map(|conflict_id| resolve_flag_name(command, conflict_id))
-        .collect();
-    if conflict_names.is_empty() {
-        return;
+    let conflicts = conflict_map
+        .get(arg_id)
+        .into_iter()
+        .flatten()
+        .filter_map(|id| resolve_flag_name(command, id))
+        .join(", ");
+    if !conflicts.is_empty() {
+        writeln!(out, ".RS\n.PP\nCannot be used with {conflicts}.\n.RE").unwrap();
     }
-    writeln!(
-        out,
-        ".RS\n.PP\nCannot be used with {}.\n.RE",
-        conflict_names.join(", ")
-    )
-    .unwrap();
 }
 
 fn render_examples_section(out: &mut String, command: &Command) {
