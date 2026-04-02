@@ -174,12 +174,14 @@ fn same_ino_on_different_devices_are_treated_separately() {
     assert_eq!(list.len(), 2, "expected one entry per (dev, ino) pair");
 
     let reflection = list.into_reflection();
-    // Both entries expose ino=100 in the reflection (device is not part of the
-    // public JSON format), so there are still 2 entries in the vector.
     assert_eq!(reflection.len(), 2);
 
-    // Paths are grouped per (dev, ino): each group has exactly 2 paths.
-    for entry in reflection.iter() {
-        assert_eq!(entry.paths.len(), 2);
-    }
+    // Sorted by (ino, dev), so dev=1 comes first.
+    let entries: Vec<_> = reflection.iter().collect();
+    assert_eq!(entries[0].dev, 1);
+    assert_eq!(entries[0].ino, 100.into());
+    assert_eq!(entries[0].paths.len(), 2);
+    assert_eq!(entries[1].dev, 2);
+    assert_eq!(entries[1].ino, 100.into());
+    assert_eq!(entries[1].paths.len(), 2);
 }

@@ -27,7 +27,7 @@ use std::path::Path;
 /// the same inode number. Both du-dust and dua-cli track `(device, inode)` pairs
 /// for the same reason.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-struct InodeKey {
+pub(crate) struct InodeKey {
     /// Device number of the filesystem the inode belongs to.
     dev: u64,
     /// Inode number within the device.

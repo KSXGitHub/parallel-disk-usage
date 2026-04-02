@@ -85,6 +85,8 @@ fn simple_tree_with_some_hardlinks() {
             .pipe(InodeNumber::from)
     };
 
+    let dev = read_device_number(&workspace);
+
     let shared_paths = |suffices: &[&str]| {
         suffices
             .iter()
@@ -190,6 +192,7 @@ fn simple_tree_with_some_hardlinks() {
         .collect();
     let expected_shared_details = [
         ReflectionEntry {
+            dev,
             ino: file_inode("one-internal-hardlink.txt"),
             size: file_size("one-internal-hardlink.txt"),
             links: 1 + 1,
@@ -199,6 +202,7 @@ fn simple_tree_with_some_hardlinks() {
             ]),
         },
         ReflectionEntry {
+            dev,
             ino: file_inode("two-internal-hardlinks.txt"),
             size: file_size("two-internal-hardlinks.txt"),
             links: 1 + 2,
@@ -209,12 +213,14 @@ fn simple_tree_with_some_hardlinks() {
             ]),
         },
         ReflectionEntry {
+            dev,
             ino: file_inode("one-external-hardlink.txt"),
             size: file_size("one-external-hardlink.txt"),
             links: 1 + 1,
             paths: shared_paths(&["sources/one-external-hardlink.txt"]),
         },
         ReflectionEntry {
+            dev,
             ino: file_inode("one-internal-one-external-hardlinks.txt"),
             size: file_size("one-internal-one-external-hardlinks.txt"),
             links: 1 + 1 + 1,
@@ -338,6 +344,8 @@ fn multiple_hardlinks_to_a_single_file() {
         .pipe_as_ref(read_inode_number)
         .pipe(InodeNumber::from);
 
+    let dev = read_device_number(&workspace);
+
     let actual_size = tree.size;
     let expected_size = workspace
         .pipe_as_ref(read_apparent_size)
@@ -374,6 +382,7 @@ fn multiple_hardlinks_to_a_single_file() {
         .cloned()
         .collect();
     let expected_shared_details = [ReflectionEntry {
+        dev,
         ino: file_inode,
         size: file_size,
         links: 1 + links,
@@ -470,6 +479,8 @@ fn complex_tree_with_shared_and_unique_files() {
             .pipe(Bytes::new)
     };
 
+    let dev = read_device_number(&workspace);
+
     let actual_size = tree.size;
 
     // The following formula treat the first file as "real" and
@@ -562,6 +573,7 @@ fn complex_tree_with_shared_and_unique_files() {
             .find(|item| starts_with_path(item, "some-hardlinks/file-0.txt"))
             .cloned();
         let expected = Some(ReflectionEntry {
+            dev,
             ino: workspace
                 .join("some-hardlinks/file-0.txt")
                 .pipe_as_ref(read_inode_number)
@@ -591,6 +603,7 @@ fn complex_tree_with_shared_and_unique_files() {
             .find(|item| starts_with_path(item, &format!("some-hardlinks/file-{file_index}.txt")))
             .cloned();
         let expected = Some(ReflectionEntry {
+            dev,
             ino: workspace
                 .join(format!("some-hardlinks/file-{file_index}.txt"))
                 .pipe_as_ref(read_inode_number)
@@ -695,6 +708,8 @@ fn hardlinks_and_non_hardlinks() {
             .pipe(InodeNumber::from)
     };
 
+    let dev = read_device_number(&workspace);
+
     let shared_paths = |file_names: &[&str]| {
         file_names
             .iter()
@@ -717,12 +732,14 @@ fn hardlinks_and_non_hardlinks() {
         .collect();
     let expected_shared_details = [
         ReflectionEntry {
+            dev,
             ino: file_inode("file-0.txt"),
             size: file_size,
             links: 3,
             paths: shared_paths(&["file-0.txt", "link0-file0.txt", "link1-file0.txt"]),
         },
         ReflectionEntry {
+            dev,
             ino: file_inode("file-1.txt"),
             size: file_size,
             links: 2,
@@ -730,24 +747,28 @@ fn hardlinks_and_non_hardlinks() {
         },
         // ... file-2.txt and file-3.txt don't have hardlinks so they shouldn't appear here ...
         ReflectionEntry {
+            dev,
             ino: file_inode("file-4.txt"),
             size: file_size,
             links: 2,
             paths: shared_paths(&["file-4.txt"]),
         },
         ReflectionEntry {
+            dev,
             ino: file_inode("file-5.txt"),
             size: file_size,
             links: 2,
             paths: shared_paths(&["file-5.txt"]),
         },
         ReflectionEntry {
+            dev,
             ino: file_inode("file-6.txt"),
             size: file_size,
             links: 2,
             paths: shared_paths(&["file-6.txt"]),
         },
         ReflectionEntry {
+            dev,
             ino: file_inode("file-7.txt"),
             size: file_size,
             links: 2,
@@ -898,6 +919,8 @@ fn exclusive_hardlinks_only() {
             .pipe(InodeNumber::from)
     };
 
+    let dev = read_device_number(&workspace);
+
     let shared_paths = |file_names: &[&str]| {
         file_names
             .iter()
@@ -921,6 +944,7 @@ fn exclusive_hardlinks_only() {
     let expected_shared_details = (0..files_per_branch)
         .par_bridge()
         .map(|index| ReflectionEntry {
+            dev,
             ino: file_inode(&format!("file-{index}.txt")),
             size: file_size,
             links: 2,
@@ -1024,6 +1048,8 @@ fn exclusive_only_and_external_only_hardlinks() {
             .pipe(InodeNumber::from)
     };
 
+    let dev = read_device_number(&workspace);
+
     let shared_paths = |file_names: &[&str]| {
         file_names
             .iter()
@@ -1050,6 +1076,7 @@ fn exclusive_only_and_external_only_hardlinks() {
             (0..(files_per_branch / 2))
                 .par_bridge()
                 .map(|index| ReflectionEntry {
+                    dev,
                     ino: file_inode(&format!("link0-{index}.txt")),
                     size: file_size,
                     links: 2,
@@ -1060,6 +1087,7 @@ fn exclusive_only_and_external_only_hardlinks() {
             ((files_per_branch / 2)..files_per_branch)
                 .par_bridge()
                 .map(|index| ReflectionEntry {
+                    dev,
                     ino: file_inode(&format!("link0-{index}.txt")),
                     size: file_size,
                     links: 2,
@@ -1187,6 +1215,8 @@ fn external_hardlinks_only() {
             .pipe(InodeNumber::from)
     };
 
+    let dev = read_device_number(&workspace);
+
     let shared_paths = |file_names: &[&str]| {
         file_names
             .iter()
@@ -1210,6 +1240,7 @@ fn external_hardlinks_only() {
     let expected_shared_details = (0..files_per_branch)
         .par_bridge()
         .map(|index| ReflectionEntry {
+            dev,
             ino: file_inode(&format!("linkX-{index}.txt")),
             size: file_size,
             links: 2,

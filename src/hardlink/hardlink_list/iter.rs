@@ -30,6 +30,12 @@ impl<'a, Size> Iterator for Iter<'a, Size> {
 }
 
 impl<'a, Size> Item<'a, Size> {
+    /// The device number of the filesystem the inode belongs to.
+    #[inline]
+    pub fn dev(&self) -> u64 {
+        self.0.key().dev
+    }
+
     /// The inode number of the file.
     #[inline]
     pub fn ino(&self) -> InodeNumber {

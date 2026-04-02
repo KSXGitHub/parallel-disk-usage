@@ -12,14 +12,8 @@ use serde::{Deserialize, Serialize};
 /// internal content.
 ///
 /// **Guarantees:**
-/// * Every `(device, inode)` pair is unique within the scope of a single scan, but inode
-///   numbers alone are **not** guaranteed to be unique: when scanning multiple filesystems,
-///   two unrelated files on different devices can share the same inode number and will each
-///   produce a separate entry. The reflection stores only the inode number (the JSON format
-///   does not carry device information), so round-tripping a multi-filesystem scan through
-///   JSON is an unsupported edge case.
-/// * The internal list is always sorted by inode numbers (and by device number as a
-///   tie-breaker when two entries share the same inode number).
+/// * Every `(device, inode)` pair is unique.
+/// * The internal list is always sorted by inode numbers (with device number as tie-breaker).
 ///
 /// **Equality:** `Reflection` implements `PartialEq` and `Eq` traits.
 ///
@@ -54,6 +48,8 @@ impl<Size> Reflection<Size> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 pub struct ReflectionEntry<Size> {
+    /// Device number of the filesystem the inode belongs to.
+    pub dev: u64,
     /// The inode number of the file.
     pub ino: InodeNumber,
     /// Size of the file.
@@ -67,9 +63,10 @@ pub struct ReflectionEntry<Size> {
 impl<Size> ReflectionEntry<Size> {
     /// Create a new entry.
     #[inline]
-    fn new(ino: InodeNumber, Value { size, links, paths }: Value<Size>) -> Self {
+    fn new(InodeKey { dev, ino }: InodeKey, Value { size, links, paths }: Value<Size>) -> Self {
         let paths = paths.into();
         ReflectionEntry {
+            dev,
             ino,
             size,
             links,
@@ -77,41 +74,35 @@ impl<Size> ReflectionEntry<Size> {
         }
     }
 
-    /// Dissolve [`ReflectionEntry`] into a pair of [`InodeNumber`] and [`Value`].
+    /// Dissolve [`ReflectionEntry`] into a pair of [`InodeKey`] and [`Value`].
     #[inline]
-    fn dissolve(self) -> (InodeNumber, Value<Size>) {
+    fn dissolve(self) -> (InodeKey, Value<Size>) {
         let ReflectionEntry {
+            dev,
             ino,
             size,
             links,
             paths,
         } = self;
         let paths = paths.into();
-        (ino, Value { size, links, paths })
+        (InodeKey { dev, ino }, Value { size, links, paths })
     }
 }
 
 impl<Size> From<Vec<ReflectionEntry<Size>>> for Reflection<Size> {
-    /// Sort the list by inode numbers, then create the reflection.
+    /// Sort the list by `(inode, device)`, then create the reflection.
     fn from(list: Vec<ReflectionEntry<Size>>) -> Self {
-        list.into_sorted_unstable_by_key(|entry| u64::from(entry.ino))
+        list.into_sorted_unstable_by_key(|entry| (u64::from(entry.ino), entry.dev))
             .pipe(Reflection)
     }
 }
 
 impl<Size> From<HardlinkList<Size>> for Reflection<Size> {
     fn from(HardlinkList(list): HardlinkList<Size>) -> Self {
-        // Collect to a vec, sort by (ino, dev) for a stable, deterministic order, then
-        // strip dev before wrapping.  Sorting here (with dev still available) avoids the
-        // nondeterminism that would arise from an unstable sort on ino alone when two
-        // entries from different filesystems share the same inode number.
-        let mut pairs: Vec<(InodeKey, Value<Size>)> = list.into_iter().collect();
-        pairs.sort_unstable_by_key(|(key, _)| (u64::from(key.ino), key.dev));
-        pairs
-            .into_iter()
-            .map(|(key, value)| ReflectionEntry::new(key.ino, value))
+        list.into_iter()
+            .map(|(key, value)| ReflectionEntry::new(key, value))
             .collect::<Vec<_>>()
-            .pipe(Reflection)
+            .pipe(Reflection::from)
     }
 }
 
@@ -131,17 +122,9 @@ impl<Size> TryFrom<Reflection<Size>> for HardlinkList<Size> {
         let map = DashMap::with_capacity(entries.len());
 
         for entry in entries {
-            let (ino, value) = entry.dissolve();
-            // Device number is unknown when loading from a reflection (e.g. JSON input);
-            // use dev=0 as a placeholder. This means that when reloading JSON output that
-            // was produced by scanning multiple filesystems, files from different devices
-            // sharing the same inode number cannot be distinguished and therefore cannot
-            // all be represented. Such duplicates cause a ConversionError::DuplicatedInode
-            // and are treated as an unsupported edge case, since the JSON format does not
-            // carry device information.
-            let key = InodeKey { dev: 0, ino };
+            let (key, value) = entry.dissolve();
             if map.insert(key, value).is_some() {
-                return ino.pipe(ConversionError::DuplicatedInode).pipe(Err);
+                return key.ino.pipe(ConversionError::DuplicatedInode).pipe(Err);
             }
         }
 
