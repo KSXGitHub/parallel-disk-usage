@@ -4,6 +4,7 @@ use super::{
 };
 use crate::{
     data_tree::DataTree,
+    device::DeviceNumber,
     inode::InodeNumber,
     os_string_display::OsStringDisplay,
     reporter::{event::HardlinkDetection, Event, Reporter},
@@ -20,7 +21,7 @@ use std::{convert::Infallible, fmt::Debug, os::unix::fs::MetadataExt, path::Path
 /// accurately reflect the real size of their containers.
 #[derive(Debug, SmartDefault, Clone, AsRef, AsMut, From, Into)]
 pub struct Aware<Size> {
-    /// Map an inode number to its size and detected paths.
+    /// Map each file (identified by inode number and device number) to its size and detected paths.
     record: HardlinkList<Size>,
 }
 
@@ -82,8 +83,9 @@ where
         }));
 
         let ino = InodeNumber::get(stats);
+        let dev = DeviceNumber::get(stats);
         self.record
-            .add(ino, size, links, path)
+            .add(ino, dev, size, links, path)
             .map_err(ReportHardlinksError::AddToRecord)
     }
 }

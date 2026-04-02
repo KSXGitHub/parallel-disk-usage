@@ -9,7 +9,7 @@ pub use summary::Summary;
 pub use Reflection as HardlinkListReflection;
 pub use Summary as SharedLinkSummary;
 
-use crate::{hardlink::LinkPathList, inode::InodeNumber, size};
+use crate::{device::DeviceNumber, hardlink::LinkPathList, inode::InodeNumber, size};
 use dashmap::DashMap;
 use derive_more::{Display, Error};
 use smart_default::SmartDefault;
@@ -19,6 +19,15 @@ use std::fmt::Debug;
 use pipe_trait::Pipe;
 #[cfg(any(unix, test))]
 use std::path::Path;
+
+/// Internal key used to uniquely identify an inode across all filesystems.
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+struct InodeKey {
+    /// Inode number within the device.
+    ino: InodeNumber,
+    /// Device number of the filesystem the inode belongs to.
+    dev: DeviceNumber,
+}
 
 /// Map value in [`HardlinkList`].
 #[derive(Debug, Clone)]
@@ -38,8 +47,8 @@ struct Value<Size> {
 /// [`Reflection`] which implement these traits.
 #[derive(Debug, SmartDefault, Clone)]
 pub struct HardlinkList<Size>(
-    /// Map an inode number to its size, number of links, and detected paths.
-    DashMap<InodeNumber, Value<Size>>,
+    /// Map an inode key (device + inode number) to its size, number of links, and detected paths.
+    DashMap<InodeKey, Value<Size>>,
 );
 
 impl<Size> HardlinkList<Size> {
@@ -64,31 +73,39 @@ impl<Size> HardlinkList<Size> {
     }
 }
 
-/// Error that occurs when a different size was detected for the same [`ino`][ino].
+/// Error that occurs when a different size was detected for the same [`ino`][ino] and [`dev`][dev].
 ///
 /// <!-- Should have been `std::os::unix::fs::MetadataExt::ino` but it would error on Windows -->
 /// [ino]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
+/// <!-- Should have been `std::os::unix::fs::MetadataExt::dev` but it would error on Windows -->
+/// [dev]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.dev
 #[derive(Debug, Display, Error)]
 #[cfg_attr(test, derive(PartialEq, Eq))]
 #[display(bound(Size: Debug))]
-#[display("Size for inode {ino} changed from {recorded:?} to {detected:?}")]
+#[display("Size for inode {ino} on device {dev} changed from {recorded:?} to {detected:?}")]
 pub struct SizeConflictError<Size> {
     pub ino: InodeNumber,
+    pub dev: DeviceNumber,
     pub recorded: Size,
     pub detected: Size,
 }
 
-/// Error that occurs when a different [`nlink`][nlink] was detected for the same [`ino`][ino].
+/// Error that occurs when a different [`nlink`][nlink] was detected for the same [`ino`][ino] and [`dev`][dev].
 ///
 /// <!-- Should have been `std::os::unix::fs::MetadataExt::nlink` but it would error on Windows -->
 /// [nlink]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.nlink
 /// <!-- Should have been `std::os::unix::fs::MetadataExt::ino` but it would error on Windows -->
 /// [ino]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
+/// <!-- Should have been `std::os::unix::fs::MetadataExt::dev` but it would error on Windows -->
+/// [dev]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.dev
 #[derive(Debug, Display, Error)]
 #[cfg_attr(test, derive(PartialEq, Eq))]
-#[display("Number of links of inode {ino} changed from {recorded:?} to {detected:?}")]
+#[display(
+    "Number of links of inode {ino} on device {dev} changed from {recorded:?} to {detected:?}"
+)]
 pub struct NumberOfLinksConflictError {
     pub ino: InodeNumber,
+    pub dev: DeviceNumber,
     pub recorded: u64,
     pub detected: u64,
 }
@@ -112,17 +129,20 @@ where
     pub(crate) fn add(
         &self,
         ino: InodeNumber,
+        dev: DeviceNumber,
         size: Size,
         links: u64,
         path: &Path,
     ) -> Result<(), AddError<Size>> {
+        let key = InodeKey { ino, dev };
         let mut assertions = Ok(());
         self.0
-            .entry(ino)
+            .entry(key)
             .and_modify(|recorded| {
                 if size != recorded.size {
                     assertions = Err(AddError::SizeConflict(SizeConflictError {
                         ino,
+                        dev,
                         recorded: recorded.size,
                         detected: size,
                     }));
@@ -133,6 +153,7 @@ where
                     assertions = Err(AddError::NumberOfLinksConflict(
                         NumberOfLinksConflictError {
                             ino,
+                            dev,
                             recorded: recorded.links,
                             detected: links,
                         },

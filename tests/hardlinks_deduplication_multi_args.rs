@@ -82,6 +82,8 @@ fn simple_tree_with_some_hardlinks() {
             .pipe(InodeNumber::from)
     };
 
+    let dev = read_device_number(&workspace);
+
     let shared_paths = |suffices: &[&str]| {
         suffices
             .iter()
@@ -144,6 +146,7 @@ fn simple_tree_with_some_hardlinks() {
         .collect();
     let expected_shared_details = [
         ReflectionEntry {
+            dev,
             ino: file_inode("one-internal-hardlink.txt"),
             size: file_size("one-internal-hardlink.txt"),
             links: 1 + 1,
@@ -153,6 +156,7 @@ fn simple_tree_with_some_hardlinks() {
             ]),
         },
         ReflectionEntry {
+            dev,
             ino: file_inode("two-internal-hardlinks.txt"),
             size: file_size("two-internal-hardlinks.txt"),
             links: 1 + 2,
@@ -163,12 +167,14 @@ fn simple_tree_with_some_hardlinks() {
             ]),
         },
         ReflectionEntry {
+            dev,
             ino: file_inode("one-external-hardlink.txt"),
             size: file_size("one-external-hardlink.txt"),
             links: 1 + 1,
             paths: shared_paths(&["sources/one-external-hardlink.txt"]),
         },
         ReflectionEntry {
+            dev,
             ino: file_inode("one-internal-one-external-hardlinks.txt"),
             size: file_size("one-internal-one-external-hardlinks.txt"),
             links: 1 + 1 + 1,
@@ -295,6 +301,8 @@ fn multiple_hardlinks_to_a_single_file() {
         .pipe_as_ref(read_inode_number)
         .pipe(InodeNumber::from);
 
+    let dev = read_device_number(&workspace);
+
     let actual_size = tree.size;
     let expected_size = file_size;
     assert_eq!(actual_size, expected_size);
@@ -319,6 +327,7 @@ fn multiple_hardlinks_to_a_single_file() {
         .cloned()
         .collect();
     let expected_shared_details = [ReflectionEntry {
+        dev,
         ino: file_inode,
         size: file_size,
         links: 1 + links,
@@ -437,6 +446,8 @@ fn multiple_duplicated_arguments() {
             .pipe(InodeNumber::from)
     };
 
+    let dev = read_device_number(&workspace);
+
     let shared_paths = |suffices: &[&str]| {
         suffices
             .iter()
@@ -501,6 +512,7 @@ fn multiple_duplicated_arguments() {
         .collect();
     let expected_shared_details = [
         ReflectionEntry {
+            dev,
             ino: file_inode("one-internal-hardlink.txt"),
             size: file_size("one-internal-hardlink.txt"),
             links: 1 + 1,
@@ -510,6 +522,7 @@ fn multiple_duplicated_arguments() {
             ]),
         },
         ReflectionEntry {
+            dev,
             ino: file_inode("two-internal-hardlinks.txt"),
             size: file_size("two-internal-hardlinks.txt"),
             links: 1 + 2,
@@ -520,12 +533,14 @@ fn multiple_duplicated_arguments() {
             ]),
         },
         ReflectionEntry {
+            dev,
             ino: file_inode("one-external-hardlink.txt"),
             size: file_size("one-external-hardlink.txt"),
             links: 1 + 1,
             paths: shared_paths(&["main/sources/one-external-hardlink.txt"]),
         },
         ReflectionEntry {
+            dev,
             ino: file_inode("one-internal-one-external-hardlinks.txt"),
             size: file_size("one-internal-one-external-hardlinks.txt"),
             links: 1 + 1 + 1,

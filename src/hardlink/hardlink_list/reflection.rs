@@ -1,5 +1,5 @@
-use super::{HardlinkList, Value};
-use crate::{hardlink::LinkPathListReflection, inode::InodeNumber};
+use super::{HardlinkList, InodeKey, Value};
+use crate::{device::DeviceNumber, hardlink::LinkPathListReflection, inode::InodeNumber};
 use dashmap::DashMap;
 use derive_more::{Display, Error, Into, IntoIterator};
 use into_sorted::IntoSortedUnstable;
@@ -12,8 +12,8 @@ use serde::{Deserialize, Serialize};
 /// internal content.
 ///
 /// **Guarantees:**
-/// * Every inode number is unique.
-/// * The internal list is always sorted by inode numbers.
+/// * Every pair of an inode number and a device number is unique.
+/// * The internal list is always sorted by pairs of an inode number and a device number.
 ///
 /// **Equality:** `Reflection` implements `PartialEq` and `Eq` traits.
 ///
@@ -50,6 +50,8 @@ impl<Size> Reflection<Size> {
 pub struct ReflectionEntry<Size> {
     /// The inode number of the file.
     pub ino: InodeNumber,
+    /// Device number of the filesystem the inode belongs to.
+    pub dev: DeviceNumber,
     /// Size of the file.
     pub size: Size,
     /// Total number of links of the file, both listed (in [`Self::paths`]) and unlisted.
@@ -61,34 +63,47 @@ pub struct ReflectionEntry<Size> {
 impl<Size> ReflectionEntry<Size> {
     /// Create a new entry.
     #[inline]
-    fn new(ino: InodeNumber, Value { size, links, paths }: Value<Size>) -> Self {
+    fn new(InodeKey { ino, dev }: InodeKey, Value { size, links, paths }: Value<Size>) -> Self {
         let paths = paths.into();
         ReflectionEntry {
             ino,
+            dev,
             size,
             links,
             paths,
         }
     }
 
-    /// Dissolve [`ReflectionEntry`] into a pair of [`InodeNumber`] and [`Value`].
+    /// Dissolve [`ReflectionEntry`] into a pair of [`InodeKey`] and [`Value`].
     #[inline]
-    fn dissolve(self) -> (InodeNumber, Value<Size>) {
+    fn dissolve(self) -> (InodeKey, Value<Size>) {
         let ReflectionEntry {
             ino,
+            dev,
             size,
             links,
             paths,
         } = self;
         let paths = paths.into();
-        (ino, Value { size, links, paths })
+        (InodeKey { ino, dev }, Value { size, links, paths })
+    }
+
+    /// Sorting key to be used in the "sort by key" family of functions.
+    ///
+    /// Sort by the inode number first, then by the device number.
+    ///
+    /// This function returns a pair of 2 `u64`s instead of a pair of 2 wrapper
+    /// types because we prefer them not to have to implement `Ord`.
+    #[inline]
+    fn sorting_key(&self) -> (u64, u64) {
+        (u64::from(self.ino), u64::from(self.dev))
     }
 }
 
 impl<Size> From<Vec<ReflectionEntry<Size>>> for Reflection<Size> {
-    /// Sort the list by inode numbers, then create the reflection.
+    /// Sort the list by inode numbers and device numbers, then create the reflection.
     fn from(list: Vec<ReflectionEntry<Size>>) -> Self {
-        list.into_sorted_unstable_by_key(|entry| u64::from(entry.ino))
+        list.into_sorted_unstable_by_key(ReflectionEntry::sorting_key)
             .pipe(Reflection)
     }
 }
@@ -96,7 +111,7 @@ impl<Size> From<Vec<ReflectionEntry<Size>>> for Reflection<Size> {
 impl<Size> From<HardlinkList<Size>> for Reflection<Size> {
     fn from(HardlinkList(list): HardlinkList<Size>) -> Self {
         list.into_iter()
-            .map(|(ino, value)| ReflectionEntry::new(ino, value))
+            .map(|(key, value)| ReflectionEntry::new(key, value))
             .collect::<Vec<_>>()
             .pipe(Reflection::from)
     }
@@ -107,9 +122,19 @@ impl<Size> From<HardlinkList<Size>> for Reflection<Size> {
 #[derive(Debug, Display, Error, Clone, Copy, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum ConversionError {
-    /// When the source has duplicated inode numbers.
-    #[display("Inode number {_0} is duplicated")]
-    DuplicatedInode(#[error(not(source))] InodeNumber),
+    /// When the source has a duplicated `(inode, device)` pair.
+    #[display("Inode {_0} on device {_1} is duplicated")]
+    DuplicatedInode(InodeNumber, DeviceNumber),
+}
+
+impl ConversionError {
+    /// Convenient function to convert an [`InodeKey`] into a [`ConversionError::DuplicatedInode`].
+    ///
+    /// We don't embed [`InodeKey`] directly into [`ConversionError::DuplicatedInode`] because of
+    /// their difference in visibility: One is private, the other public.
+    fn duplicated_inode(InodeKey { ino, dev }: InodeKey) -> Self {
+        ConversionError::DuplicatedInode(ino, dev)
+    }
 }
 
 impl<Size> TryFrom<Reflection<Size>> for HardlinkList<Size> {
@@ -118,9 +143,9 @@ impl<Size> TryFrom<Reflection<Size>> for HardlinkList<Size> {
         let map = DashMap::with_capacity(entries.len());
 
         for entry in entries {
-            let (ino, value) = entry.dissolve();
-            if map.insert(ino, value).is_some() {
-                return ino.pipe(ConversionError::DuplicatedInode).pipe(Err);
+            let (key, value) = entry.dissolve();
+            if map.insert(key, value).is_some() {
+                return key.pipe(ConversionError::duplicated_inode).pipe(Err);
             }
         }
 
