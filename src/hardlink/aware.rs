@@ -21,7 +21,7 @@ use std::{convert::Infallible, fmt::Debug, os::unix::fs::MetadataExt, path::Path
 /// accurately reflect the real size of their containers.
 #[derive(Debug, SmartDefault, Clone, AsRef, AsMut, From, Into)]
 pub struct Aware<Size> {
-    /// Map a pair of an inode number and a device number to its size and detected paths.
+    /// Map each file (identified by inode number and device number) to its size and detected paths.
     record: HardlinkList<Size>,
 }
 
