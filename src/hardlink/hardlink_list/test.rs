@@ -149,11 +149,6 @@ fn detect_number_of_links_change() {
     assert_eq!(actual, expected);
 }
 
-/// Files on different devices may share the same inode number, but they are
-/// unrelated — hardlinks cannot span filesystem boundaries.  Verify that two
-/// files with the same inode number but different device numbers produce
-/// separate entries in the list (i.e. the device number is actually used in
-/// the deduplication key).
 #[test]
 fn same_ino_on_different_devices_are_treated_separately() {
     let list = HardlinkList::<Bytes>::new();
