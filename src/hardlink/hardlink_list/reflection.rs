@@ -128,6 +128,10 @@ pub enum ConversionError {
 }
 
 impl ConversionError {
+    /// Convenient function to convert an [`InodeKey`] into a [`ConversionError::DuplicatedInode`].
+    ///
+    /// We don't embed [`InodeKey`] directly into [`ConversionError::DuplicatedInode`] because of
+    /// their difference in visibility: One is private, the other public.
     fn duplicated_inode(InodeKey { ino, dev }: InodeKey) -> Self {
         ConversionError::DuplicatedInode(ino, dev)
     }
