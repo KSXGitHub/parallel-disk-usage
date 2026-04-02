@@ -75,8 +75,9 @@ impl<Size> HardlinkList<Size> {
 
 /// Error that occurs when a different size was detected for the same [`ino`] and [`dev`].
 ///
-/// <!-- Should have been `std::os::unix::fs::MetadataExt::{ino,dev}` but it would error on Windows -->
+/// <!-- Should have been `std::os::unix::fs::MetadataExt::ino` but it would error on Windows -->
 /// [`ino`]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
+/// <!-- Should have been `std::os::unix::fs::MetadataExt::dev` but it would error on Windows -->
 /// [`dev`]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.dev
 #[derive(Debug, Display, Error)]
 #[cfg_attr(test, derive(PartialEq, Eq))]
@@ -91,9 +92,11 @@ pub struct SizeConflictError<Size> {
 
 /// Error that occurs when a different [`nlink`] was detected for the same [`ino`] and [`dev`].
 ///
-/// <!-- Should have been `std::os::unix::fs::MetadataExt::{nlink,ino,dev}` but it would error on Windows -->
+/// <!-- Should have been `std::os::unix::fs::MetadataExt::nlink` but it would error on Windows -->
 /// [`nlink`]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.nlink
+/// <!-- Should have been `std::os::unix::fs::MetadataExt::ino` but it would error on Windows -->
 /// [`ino`]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
+/// <!-- Should have been `std::os::unix::fs::MetadataExt::dev` but it would error on Windows -->
 /// [`dev`]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.dev
 #[derive(Debug, Display, Error)]
 #[cfg_attr(test, derive(PartialEq, Eq))]
