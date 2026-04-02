@@ -9,7 +9,7 @@ pub use summary::Summary;
 pub use Reflection as HardlinkListReflection;
 pub use Summary as SharedLinkSummary;
 
-use crate::{hardlink::LinkPathList, inode::InodeNumber, size};
+use crate::{device_number::DeviceNumber, hardlink::LinkPathList, inode::InodeNumber, size};
 use dashmap::DashMap;
 use derive_more::{Display, Error};
 use smart_default::SmartDefault;
@@ -28,10 +28,10 @@ use std::path::Path;
 /// for the same reason.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 struct InodeKey {
-    /// Device number of the filesystem the inode belongs to.
-    dev: u64,
     /// Inode number within the device.
     ino: InodeNumber,
+    /// Device number of the filesystem the inode belongs to.
+    dev: DeviceNumber,
 }
 
 /// Map value in [`HardlinkList`].
@@ -126,12 +126,12 @@ where
     pub(crate) fn add(
         &self,
         ino: InodeNumber,
-        dev: u64,
+        dev: DeviceNumber,
         size: Size,
         links: u64,
         path: &Path,
     ) -> Result<(), AddError<Size>> {
-        let key = InodeKey { dev, ino };
+        let key = InodeKey { ino, dev };
         let mut assertions = Ok(());
         self.0
             .entry(key)

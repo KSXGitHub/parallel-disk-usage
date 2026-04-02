@@ -586,9 +586,10 @@ pub fn read_inode_number(path: &Path) -> u64 {
 
 /// Read [dev](std::os::unix::fs::MetadataExt::dev) of a path.
 #[cfg(unix)]
-pub fn read_device_number(path: &Path) -> u64 {
+pub fn read_device_number(path: &Path) -> parallel_disk_usage::device_number::DeviceNumber {
     use std::os::unix::fs::MetadataExt;
     path.pipe(symlink_metadata)
         .unwrap_or_else(|error| panic!("Can't read metadata at {path:?}: {error}"))
         .dev()
+        .into()
 }

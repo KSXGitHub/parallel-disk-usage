@@ -4,21 +4,21 @@ use pipe_trait::Pipe;
 use pretty_assertions::{assert_eq, assert_ne};
 
 const TABLE: &[(u64, u64, u64, u64, &str)] = &[
-    // dev, ino, size, links, path
-    (0, 241, 3652, 1, "a"),
-    (0, 569, 2210, 1, "b"),
-    (0, 110, 2350, 3, "c"),
-    (0, 110, 2350, 3, "c1"),
-    (0, 778, 1110, 1, "d"),
-    (0, 274, 6060, 2, "e"),
-    (0, 274, 6060, 2, "e1"),
-    (0, 883, 4530, 1, "f"),
+    // ino, dev, size, links, path
+    (241, 0, 3652, 1, "a"),
+    (569, 0, 2210, 1, "b"),
+    (110, 0, 2350, 3, "c"),
+    (110, 0, 2350, 3, "c1"),
+    (778, 0, 1110, 1, "d"),
+    (274, 0, 6060, 2, "e"),
+    (274, 0, 6060, 2, "e1"),
+    (883, 0, 4530, 1, "f"),
 ];
 
 fn add<const ROW: usize>(list: HardlinkList<Bytes>) -> HardlinkList<Bytes> {
     let values = TABLE[ROW];
-    let (dev, ino, size, links, path) = values;
-    if let Err(error) = list.add(ino.into(), dev, size.into(), links, path.as_ref()) {
+    let (ino, dev, size, links, path) = values;
+    if let Err(error) = list.add(ino.into(), dev.into(), size.into(), links, path.as_ref()) {
         panic!("Failed to add {values:?} (index: {ROW}) to the list: {error}");
     }
     list
@@ -120,10 +120,10 @@ fn insertion_difference_cause_inequality() {
 #[test]
 fn detect_size_change() {
     let list = HardlinkList::<Bytes>::new();
-    list.add(123.into(), 0, 100.into(), 1, "a".as_ref())
+    list.add(123.into(), 0.into(), 100.into(), 1, "a".as_ref())
         .expect("add the first path");
     let actual = list
-        .add(123.into(), 0, 110.into(), 1, "b".as_ref())
+        .add(123.into(), 0.into(), 110.into(), 1, "b".as_ref())
         .expect_err("add the second path");
     let expected = AddError::SizeConflict(SizeConflictError {
         ino: 123.into(),
@@ -136,10 +136,10 @@ fn detect_size_change() {
 #[test]
 fn detect_number_of_links_change() {
     let list = HardlinkList::<Bytes>::new();
-    list.add(123.into(), 0, 100.into(), 1, "a".as_ref())
+    list.add(123.into(), 0.into(), 100.into(), 1, "a".as_ref())
         .expect("add the first path");
     let actual = list
-        .add(123.into(), 0, 100.into(), 2, "b".as_ref())
+        .add(123.into(), 0.into(), 100.into(), 2, "b".as_ref())
         .expect_err("add the second path");
     let expected = AddError::NumberOfLinksConflict(NumberOfLinksConflictError {
         ino: 123.into(),
@@ -159,29 +159,29 @@ fn same_ino_on_different_devices_are_treated_separately() {
     let list = HardlinkList::<Bytes>::new();
 
     // dev=1, ino=100 — first filesystem
-    list.add(100.into(), 1, 50.into(), 2, "dev1/file_a".as_ref())
+    list.add(100.into(), 1.into(), 50.into(), 2, "dev1/file_a".as_ref())
         .expect("add dev1/file_a");
-    list.add(100.into(), 1, 50.into(), 2, "dev1/file_b".as_ref())
+    list.add(100.into(), 1.into(), 50.into(), 2, "dev1/file_b".as_ref())
         .expect("add dev1/file_b (same dev+ino → same inode group)");
 
     // dev=2, ino=100 — second filesystem, coincidentally same inode number
-    list.add(100.into(), 2, 80.into(), 2, "dev2/file_c".as_ref())
+    list.add(100.into(), 2.into(), 80.into(), 2, "dev2/file_c".as_ref())
         .expect("add dev2/file_c (different dev → separate inode group)");
-    list.add(100.into(), 2, 80.into(), 2, "dev2/file_d".as_ref())
+    list.add(100.into(), 2.into(), 80.into(), 2, "dev2/file_d".as_ref())
         .expect("add dev2/file_d (same dev+ino → same inode group as file_c)");
 
     // Each device should produce its own entry, so the list should have 2 entries.
-    assert_eq!(list.len(), 2, "expected one entry per (dev, ino) pair");
+    assert_eq!(list.len(), 2, "expected one entry per (ino, dev) pair");
 
     let reflection = list.into_reflection();
     assert_eq!(reflection.len(), 2);
 
     // Sorted by (ino, dev), so dev=1 comes first.
     let entries: Vec<_> = reflection.iter().collect();
-    assert_eq!(entries[0].dev, 1);
+    assert_eq!(entries[0].dev, 1.into());
     assert_eq!(entries[0].ino, 100.into());
     assert_eq!(entries[0].paths.len(), 2);
-    assert_eq!(entries[1].dev, 2);
+    assert_eq!(entries[1].dev, 2.into());
     assert_eq!(entries[1].ino, 100.into());
     assert_eq!(entries[1].paths.len(), 2);
 }

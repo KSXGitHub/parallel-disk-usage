@@ -1,5 +1,5 @@
 use super::{HardlinkList, InodeKey, Value};
-use crate::{hardlink::LinkPathList, inode::InodeNumber};
+use crate::{device_number::DeviceNumber, hardlink::LinkPathList, inode::InodeNumber};
 use dashmap::{iter::Iter as DashIter, mapref::multiple::RefMulti};
 use pipe_trait::Pipe;
 
@@ -30,16 +30,16 @@ impl<'a, Size> Iterator for Iter<'a, Size> {
 }
 
 impl<'a, Size> Item<'a, Size> {
-    /// The device number of the filesystem the inode belongs to.
-    #[inline]
-    pub fn dev(&self) -> u64 {
-        self.0.key().dev
-    }
-
     /// The inode number of the file.
     #[inline]
     pub fn ino(&self) -> InodeNumber {
         self.0.key().ino
+    }
+
+    /// The device number of the filesystem the inode belongs to.
+    #[inline]
+    pub fn dev(&self) -> DeviceNumber {
+        self.0.key().dev
     }
 
     /// Size of the file.

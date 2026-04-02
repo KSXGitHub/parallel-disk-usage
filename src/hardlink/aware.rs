@@ -4,6 +4,7 @@ use super::{
 };
 use crate::{
     data_tree::DataTree,
+    device_number::DeviceNumber,
     inode::InodeNumber,
     os_string_display::OsStringDisplay,
     reporter::{event::HardlinkDetection, Event, Reporter},
@@ -82,7 +83,7 @@ where
         }));
 
         let ino = InodeNumber::get(stats);
-        let dev = stats.dev();
+        let dev = DeviceNumber::get(stats);
         self.record
             .add(ino, dev, size, links, path)
             .map_err(ReportHardlinksError::AddToRecord)
