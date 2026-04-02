@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// **Guarantees:**
 /// * Every pair of an inode number and a device number is unique.
-/// * The internal list is always sorted by inode numbers (with device number as tie-breaker).
+/// * The internal list is always sorted by pairs of an inode number and a device number.
 ///
 /// **Equality:** `Reflection` implements `PartialEq` and `Eq` traits.
 ///
