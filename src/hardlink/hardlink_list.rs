@@ -73,12 +73,12 @@ impl<Size> HardlinkList<Size> {
     }
 }
 
-/// Error that occurs when a different size was detected for the same [`ino`] and [`dev`].
+/// Error that occurs when a different size was detected for the same [`ino`][ino] and [`dev`][dev].
 ///
 /// <!-- Should have been `std::os::unix::fs::MetadataExt::ino` but it would error on Windows -->
-/// [`ino`]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
+/// [ino]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
 /// <!-- Should have been `std::os::unix::fs::MetadataExt::dev` but it would error on Windows -->
-/// [`dev`]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.dev
+/// [dev]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.dev
 #[derive(Debug, Display, Error)]
 #[cfg_attr(test, derive(PartialEq, Eq))]
 #[display(bound(Size: Debug))]
@@ -90,14 +90,14 @@ pub struct SizeConflictError<Size> {
     pub detected: Size,
 }
 
-/// Error that occurs when a different [`nlink`] was detected for the same [`ino`] and [`dev`].
+/// Error that occurs when a different [`nlink`][nlink] was detected for the same [`ino`][ino] and [`dev`][dev].
 ///
 /// <!-- Should have been `std::os::unix::fs::MetadataExt::nlink` but it would error on Windows -->
-/// [`nlink`]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.nlink
+/// [nlink]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.nlink
 /// <!-- Should have been `std::os::unix::fs::MetadataExt::ino` but it would error on Windows -->
-/// [`ino`]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
+/// [ino]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
 /// <!-- Should have been `std::os::unix::fs::MetadataExt::dev` but it would error on Windows -->
-/// [`dev`]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.dev
+/// [dev]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.dev
 #[derive(Debug, Display, Error)]
 #[cfg_attr(test, derive(PartialEq, Eq))]
 #[display(
