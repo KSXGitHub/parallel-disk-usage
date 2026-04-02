@@ -112,18 +112,16 @@ impl<Size> From<HardlinkList<Size>> for Reflection<Size> {
 #[non_exhaustive]
 pub enum ConversionError {
     /// When the source has a duplicated `(inode, device)` pair.
-    #[display("Inode {ino} on device {dev} is duplicated")]
-    DuplicatedInode {
-        #[error(not(source))]
-        ino: InodeNumber,
-        #[error(not(source))]
-        dev: DeviceNumber,
-    },
+    #[display("Inode {_0} on device {_1} is duplicated")]
+    DuplicatedInode(
+        #[error(not(source))] InodeNumber,
+        #[error(not(source))] DeviceNumber,
+    ),
 }
 
 impl ConversionError {
     fn duplicated_inode(InodeKey { ino, dev }: InodeKey) -> Self {
-        ConversionError::DuplicatedInode { ino, dev }
+        ConversionError::DuplicatedInode(ino, dev)
     }
 }
 
