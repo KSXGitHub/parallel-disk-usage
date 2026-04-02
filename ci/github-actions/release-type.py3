@@ -20,8 +20,8 @@ def dict_path(data, head: str, *tail: str):
   return dict_path(value, *tail)
 
 def set_output(name: str, value: str):
-  with open(environ['GITHUB_OUTPUT'], 'a') as fh:
-    print(f'{name}={value}', file=fh)
+  with open(environ['GITHUB_OUTPUT'], 'a') as output_file:
+    print(f'{name}={value}', file=output_file)
 
 with open('Cargo.toml') as cargo_toml:
   data = toml.load(cargo_toml)
