@@ -90,7 +90,7 @@ impl<Size> ReflectionEntry<Size> {
 }
 
 impl<Size> From<Vec<ReflectionEntry<Size>>> for Reflection<Size> {
-    /// Sort the list by `(inode, device)`, then create the reflection.
+    /// Sort the list by inode numbers and device numbers, then create the reflection.
     fn from(list: Vec<ReflectionEntry<Size>>) -> Self {
         list.into_sorted_unstable_by_key(|entry| (u64::from(entry.ino), u64::from(entry.dev)))
             .pipe(Reflection)
