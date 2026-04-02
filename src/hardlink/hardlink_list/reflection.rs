@@ -87,12 +87,23 @@ impl<Size> ReflectionEntry<Size> {
         let paths = paths.into();
         (InodeKey { ino, dev }, Value { size, links, paths })
     }
+
+    /// Sorting key to be used in the "sort by key" family of functions.
+    ///
+    /// Sort by the inode number first, then by the device number.
+    ///
+    /// This function returns a pair of 2 `u64`s instead a pair of 2 wrapper
+    /// types because we prefer them not to have to implement `Ord`.
+    #[inline]
+    fn sorting_key(&self) -> (u64, u64) {
+        (u64::from(self.ino), u64::from(self.dev))
+    }
 }
 
 impl<Size> From<Vec<ReflectionEntry<Size>>> for Reflection<Size> {
     /// Sort the list by inode numbers and device numbers, then create the reflection.
     fn from(list: Vec<ReflectionEntry<Size>>) -> Self {
-        list.into_sorted_unstable_by_key(|entry| (u64::from(entry.ino), u64::from(entry.dev)))
+        list.into_sorted_unstable_by_key(ReflectionEntry::sorting_key)
             .pipe(Reflection)
     }
 }
