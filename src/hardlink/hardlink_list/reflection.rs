@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 /// internal content.
 ///
 /// **Guarantees:**
-/// * Every `(device, inode)` pair is unique.
+/// * Every pair of an inode number and a device number is unique.
 /// * The internal list is always sorted by inode numbers (with device number as tie-breaker).
 ///
 /// **Equality:** `Reflection` implements `PartialEq` and `Eq` traits.
@@ -113,10 +113,7 @@ impl<Size> From<HardlinkList<Size>> for Reflection<Size> {
 pub enum ConversionError {
     /// When the source has a duplicated `(inode, device)` pair.
     #[display("Inode {_0} on device {_1} is duplicated")]
-    DuplicatedInode(
-        #[error(not(source))] InodeNumber,
-        #[error(not(source))] DeviceNumber,
-    ),
+    DuplicatedInode(InodeNumber, DeviceNumber),
 }
 
 impl ConversionError {

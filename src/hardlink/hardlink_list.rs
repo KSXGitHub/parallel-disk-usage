@@ -21,11 +21,6 @@ use pipe_trait::Pipe;
 use std::path::Path;
 
 /// Internal key used to uniquely identify an inode across all filesystems.
-///
-/// Hardlinks cannot span filesystems, so including the device number prevents
-/// false deduplication of files from different filesystems that happen to share
-/// the same inode number. Both du-dust and dua-cli track `(device, inode)` pairs
-/// for the same reason.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 struct InodeKey {
     /// Inode number within the device.
@@ -78,7 +73,10 @@ impl<Size> HardlinkList<Size> {
     }
 }
 
-/// Error that occurs when a different size was detected for the same inode.
+/// Error that occurs when a different size was detected for the same [`ino`] and [`dev`].
+///
+/// [`ino`]: std::os::unix::fs::MetadataExt::ino
+/// [`dev`]: std::os::unix::fs::MetadataExt::dev
 #[derive(Debug, Display, Error)]
 #[cfg_attr(test, derive(PartialEq, Eq))]
 #[display(bound(Size: Debug))]
@@ -90,7 +88,11 @@ pub struct SizeConflictError<Size> {
     pub detected: Size,
 }
 
-/// Error that occurs when a different number of links was detected for the same inode.
+/// Error that occurs when a different [`nlink`] was detected for the same [`ino`] and [`dev`].
+///
+/// [`nlink`]: std::os::unix::fs::MetadataExt::nlink
+/// [`ino`]: std::os::unix::fs::MetadataExt::ino
+/// [`dev`]: std::os::unix::fs::MetadataExt::dev
 #[derive(Debug, Display, Error)]
 #[cfg_attr(test, derive(PartialEq, Eq))]
 #[display(
