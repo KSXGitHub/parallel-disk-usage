@@ -19,8 +19,14 @@ def dict_path(data, head: str, *tail: str):
   if not tail: return value
   return dict_path(value, *tail)
 
+github_output = environ.get('GITHUB_OUTPUT', None)
+
+if not github_output:
+  print('::error ::Environment variable GITHUB_OUTPUT is required but missing')
+  exit(1)
+
 def set_output(name: str, value: str):
-  with open(environ['GITHUB_OUTPUT'], 'a') as output_file:
+  with open(github_output, 'a') as output_file:
     print(f'{name}={value}', file=output_file)
 
 with open('Cargo.toml') as cargo_toml:
