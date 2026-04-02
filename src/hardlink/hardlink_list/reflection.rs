@@ -92,7 +92,7 @@ impl<Size> ReflectionEntry<Size> {
     ///
     /// Sort by the inode number first, then by the device number.
     ///
-    /// This function returns a pair of 2 `u64`s instead a pair of 2 wrapper
+    /// This function returns a pair of 2 `u64`s instead of a pair of 2 wrapper
     /// types because we prefer them not to have to implement `Ord`.
     #[inline]
     fn sorting_key(&self) -> (u64, u64) {
