@@ -4,7 +4,7 @@ use super::{
 };
 use crate::{
     data_tree::DataTree,
-    device_number::DeviceNumber,
+    device::DeviceNumber,
     inode::InodeNumber,
     os_string_display::OsStringDisplay,
     reporter::{event::HardlinkDetection, Event, Reporter},

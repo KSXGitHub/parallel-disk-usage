@@ -1,5 +1,5 @@
 use super::{HardlinkList, InodeKey, Value};
-use crate::{device_number::DeviceNumber, hardlink::LinkPathListReflection, inode::InodeNumber};
+use crate::{device::DeviceNumber, hardlink::LinkPathListReflection, inode::InodeNumber};
 use dashmap::DashMap;
 use derive_more::{Display, Error, Into, IntoIterator};
 use into_sorted::IntoSortedUnstable;

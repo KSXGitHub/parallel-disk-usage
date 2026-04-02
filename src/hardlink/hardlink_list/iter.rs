@@ -1,5 +1,5 @@
 use super::{HardlinkList, InodeKey, Value};
-use crate::{device_number::DeviceNumber, hardlink::LinkPathList, inode::InodeNumber};
+use crate::{device::DeviceNumber, hardlink::LinkPathList, inode::InodeNumber};
 use dashmap::{iter::Iter as DashIter, mapref::multiple::RefMulti};
 use pipe_trait::Pipe;
 

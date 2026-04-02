@@ -9,7 +9,7 @@ pub use summary::Summary;
 pub use Reflection as HardlinkListReflection;
 pub use Summary as SharedLinkSummary;
 
-use crate::{device_number::DeviceNumber, hardlink::LinkPathList, inode::InodeNumber, size};
+use crate::{device::DeviceNumber, hardlink::LinkPathList, inode::InodeNumber, size};
 use dashmap::DashMap;
 use derive_more::{Display, Error};
 use smart_default::SmartDefault;
@@ -78,31 +78,27 @@ impl<Size> HardlinkList<Size> {
     }
 }
 
-/// Error that occurs when a different size was detected for the same [`ino`][ino].
-///
-/// <!-- Should have been `std::os::unix::fs::MetadataExt::ino` but it would error on Windows -->
-/// [ino]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
+/// Error that occurs when a different size was detected for the same inode.
 #[derive(Debug, Display, Error)]
 #[cfg_attr(test, derive(PartialEq, Eq))]
 #[display(bound(Size: Debug))]
-#[display("Size for inode {ino} changed from {recorded:?} to {detected:?}")]
+#[display("Size for inode {ino} on device {dev} changed from {recorded:?} to {detected:?}")]
 pub struct SizeConflictError<Size> {
     pub ino: InodeNumber,
+    pub dev: DeviceNumber,
     pub recorded: Size,
     pub detected: Size,
 }
 
-/// Error that occurs when a different [`nlink`][nlink] was detected for the same [`ino`][ino].
-///
-/// <!-- Should have been `std::os::unix::fs::MetadataExt::nlink` but it would error on Windows -->
-/// [nlink]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.nlink
-/// <!-- Should have been `std::os::unix::fs::MetadataExt::ino` but it would error on Windows -->
-/// [ino]: https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html#tymethod.ino
+/// Error that occurs when a different number of links was detected for the same inode.
 #[derive(Debug, Display, Error)]
 #[cfg_attr(test, derive(PartialEq, Eq))]
-#[display("Number of links of inode {ino} changed from {recorded:?} to {detected:?}")]
+#[display(
+    "Number of links of inode {ino} on device {dev} changed from {recorded:?} to {detected:?}"
+)]
 pub struct NumberOfLinksConflictError {
     pub ino: InodeNumber,
+    pub dev: DeviceNumber,
     pub recorded: u64,
     pub detected: u64,
 }
@@ -139,6 +135,7 @@ where
                 if size != recorded.size {
                     assertions = Err(AddError::SizeConflict(SizeConflictError {
                         ino,
+                        dev,
                         recorded: recorded.size,
                         detected: size,
                     }));
@@ -149,6 +146,7 @@ where
                     assertions = Err(AddError::NumberOfLinksConflict(
                         NumberOfLinksConflictError {
                             ino,
+                            dev,
                             recorded: recorded.links,
                             detected: links,
                         },

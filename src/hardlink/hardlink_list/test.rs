@@ -127,6 +127,7 @@ fn detect_size_change() {
         .expect_err("add the second path");
     let expected = AddError::SizeConflict(SizeConflictError {
         ino: 123.into(),
+        dev: 0.into(),
         recorded: 100.into(),
         detected: 110.into(),
     });
@@ -143,6 +144,7 @@ fn detect_number_of_links_change() {
         .expect_err("add the second path");
     let expected = AddError::NumberOfLinksConflict(NumberOfLinksConflictError {
         ino: 123.into(),
+        dev: 0.into(),
         recorded: 1,
         detected: 2,
     });

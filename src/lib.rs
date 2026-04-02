@@ -41,7 +41,6 @@ pub use clap_utilities;
 pub mod bytes_format;
 pub mod data_tree;
 pub mod device;
-pub mod device_number;
 pub mod fs_tree_builder;
 pub mod get_size;
 pub mod hardlink;
