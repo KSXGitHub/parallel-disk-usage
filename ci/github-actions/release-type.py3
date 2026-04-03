@@ -19,34 +19,44 @@ def dict_path(data, head: str, *tail: str):
   if not tail: return value
   return dict_path(value, *tail)
 
+github_output = environ.get('GITHUB_OUTPUT', None)
+
+if not github_output:
+  print('::error ::Environment variable GITHUB_OUTPUT is required but missing')
+  exit(1)
+
+def set_output(name: str, value: str):
+  with open(github_output, 'a') as output_file:
+    print(f'{name}={value}', file=output_file)
+
 with open('Cargo.toml') as cargo_toml:
   data = toml.load(cargo_toml)
   version = dict_path(data, 'package', 'version')
 
   if version != release_tag:
     print(f'::warning ::RELEASE_TAG ({release_tag}) does not match Cargo.toml#package.version ({version})')
-    print('::set-output name=release_type::none')
-    print('::set-output name=is_release::false')
-    print('::set-output name=is_prerelease::false')
-    print(f'::set-output name=release_tag::{release_tag}')
+    set_output('release_type', 'none')
+    set_output('is_release', 'false')
+    set_output('is_prerelease', 'false')
+    set_output('release_tag', release_tag)
     exit(0)
 
 if re.match(r'^[0-9]+\.[0-9]+\.[0-9]+-.+$', release_tag):
-  print('::set-output name=release_type::prerelease')
-  print('::set-output name=is_release::true')
-  print('::set-output name=is_prerelease::true')
-  print(f'::set-output name=release_tag::{release_tag}')
+  set_output('release_type', 'prerelease')
+  set_output('is_release', 'true')
+  set_output('is_prerelease', 'true')
+  set_output('release_tag', release_tag)
   exit(0)
 
 if re.match(r'^[0-9]+\.[0-9]+\.[0-9]+$', release_tag):
-  print('::set-output name=release_type::official')
-  print('::set-output name=is_release::true')
-  print('::set-output name=is_prerelease::false')
-  print(f'::set-output name=release_tag::{release_tag}')
+  set_output('release_type', 'official')
+  set_output('is_release', 'true')
+  set_output('is_prerelease', 'false')
+  set_output('release_tag', release_tag)
   exit(0)
 
-print('::set-output name=release_type::none')
-print('::set-output name=is_release::false')
-print('::set-output name=is_prerelease::false')
-print(f'::set-output name=release_tag::{release_tag}')
+set_output('release_type', 'none')
+set_output('is_release', 'false')
+set_output('is_prerelease', 'false')
+set_output('release_tag', release_tag)
 exit(0)
