@@ -616,3 +616,7 @@ jobs:
           asset_path: ./tmp.benchmark-reports.tar.gz
           asset_name: benchmark-reports.tar.gz
           asset_content_type: application/x-compressed-tar
+
+      - name: Clean workspace artifacts before cache
+        shell: bash
+        run: cargo clean --workspace

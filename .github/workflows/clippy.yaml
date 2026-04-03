@@ -58,3 +58,8 @@ jobs:
           BUILD: 'false'
           TEST: 'false'
         run: ./test.sh
+
+      - name: Clean workspace artifacts before cache
+        if: matrix.os != 'macos-latest'
+        shell: bash
+        run: cargo clean --workspace

@@ -73,3 +73,8 @@ jobs:
           BUILD_FLAGS: '--locked'
           TEST_FLAGS: '--no-fail-fast'
         run: ./test.sh --release
+
+      - name: Clean workspace artifacts before cache
+        if: matrix.os != 'macos-latest'
+        shell: bash
+        run: cargo clean --workspace
