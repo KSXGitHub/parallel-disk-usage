@@ -117,6 +117,7 @@ jobs:
         run: node ci/github-actions/check-for-performance-regressions.js
 
       - name: Clean workspace artifacts before cache
+        if: always()
         continue-on-error: true
         shell: bash
         run: cargo clean --workspace
