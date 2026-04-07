@@ -1,7 +1,6 @@
-import { summary } from '@actions/core'
 import { getOctokit, context } from '@actions/github'
 import console from 'console'
-import { readFileSync } from 'fs'
+import { appendFileSync, readFileSync } from 'fs'
 import process from 'process'
 import { Item as RegressionItem, collectRegressions } from './benchmark/collect-regressions'
 import { SelfBenchmarkCategory, parseSelfBenchmarkCategory } from './benchmark/matrix'
@@ -70,10 +69,13 @@ async function main() {
     reportBody,
   ].join('\n')
 
-  try {
-    await summary.addRaw(overallReport, true).write()
-  } catch (error) {
-    console.error('Failed to write GitHub step summary:', error)
+  const stepSummaryPath = env.load('GITHUB_STEP_SUMMARY', '')
+  if (stepSummaryPath) {
+    try {
+      appendFileSync(stepSummaryPath, overallReport + '\n')
+    } catch (error) {
+      console.error(`Failed to write GitHub step summary to ${stepSummaryPath}:`, error)
+    }
   }
 
   const auth = env.load('GITHUB_TOKEN')
