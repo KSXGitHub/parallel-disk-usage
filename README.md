@@ -192,11 +192,10 @@ Starting with version 0.22.1, every executable published to [GitHub Releases](ht
 To verify a downloaded binary, install the [GitHub CLI](https://cli.github.com/) and run:
 
 ```sh
-gh attestation verify pdu-x86_64-unknown-linux-gnu \
-  --repo KSXGitHub/parallel-disk-usage
+gh attestation verify downloaded-pdu --repo KSXGitHub/parallel-disk-usage
 ```
 
-(Replace `pdu-x86_64-unknown-linux-gnu` with the filename you downloaded.) A successful run prints the signer workflow and confirms that the file's SHA-256 matches the attested digest. All attestations for this repository can also be browsed at the [Attestations page](https://github.com/KSXGitHub/parallel-disk-usage/attestations).
+(Replace `downloaded-pdu` with the filename you downloaded.) A successful run prints the signer workflow and confirms that the file's SHA-256 matches the attested digest. All attestations for this repository can also be browsed at the [Attestations page](https://github.com/KSXGitHub/parallel-disk-usage/attestations).
 
 Binaries from releases older than 0.22.1 are not attested.
 
