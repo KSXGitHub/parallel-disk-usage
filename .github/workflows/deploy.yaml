@@ -248,8 +248,24 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+
     steps:
       - uses: actions/checkout@v6
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            ./exports/completion.bash
+            ./exports/completion.fish
+            ./exports/completion.zsh
+            ./exports/completion.ps1
+            ./exports/completion.elv
+            ./exports/pdu.1
 
       - name: Upload Tab-Completion file for Bash
         uses: actions/upload-release-asset@v1.0.2
@@ -379,6 +395,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+
     steps:
       - uses: actions/checkout@v6
 
@@ -392,6 +413,14 @@ jobs:
 
       - name: Create checksums
         run: ./ci/github-actions/create-checksums.sh
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            ./sha1sum.txt
+            ./sha256sum.txt
+            ./sha512sum.txt
 
       - name: Upload as artifacts
         uses: actions/upload-artifact@v7
