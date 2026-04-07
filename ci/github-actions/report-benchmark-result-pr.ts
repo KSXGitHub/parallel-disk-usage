@@ -74,7 +74,7 @@ async function main() {
     try {
       appendFileSync(stepSummaryPath, overallReport + '\n')
     } catch (error) {
-      console.error(`Failed to write GitHub step summary to ${stepSummaryPath}:`, error)
+      console.error(`error: Failed to write GitHub step summary to ${stepSummaryPath}:`, error)
     }
   }
 
