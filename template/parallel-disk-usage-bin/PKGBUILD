@@ -16,15 +16,6 @@ sha1sums=(
   SKIP                          # for the license file
 )
 
-# Optionally verify the build provenance attestations published alongside the
-# release artifacts. This requires:
-#   * the GitHub CLI (the `github-cli` package), and
-#   * an authenticated `gh` session (run `gh auth login`) or a `GH_TOKEN`
-#     environment variable — `gh attestation verify` currently calls the
-#     GitHub API to fetch the attestation bundle even for public repos
-#     (see https://github.com/cli/cli/issues/12030).
-# When either prerequisite is missing, the verification step is skipped with
-# a warning so installing the package remains possible without it.
 prepare() {
   if ! command -v gh > /dev/null 2>&1; then
     warning 'GitHub CLI (gh) not found, skipping provenance verification.'
