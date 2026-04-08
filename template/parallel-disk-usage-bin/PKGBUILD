@@ -35,7 +35,6 @@ prepare() {
   gh attestation verify --repo "$_repo" "completion.$pkgver.bash"
   gh attestation verify --repo "$_repo" "completion.$pkgver.fish"
   gh attestation verify --repo "$_repo" "completion.$pkgver.zsh"
-  gh attestation verify --repo "$_repo" "pdu.$pkgver.1"
 }
 
 package() {
