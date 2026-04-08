@@ -66,10 +66,7 @@ jobs:
 
     permissions:
       contents: read
-      # Needed by actions/attest-build-provenance to request a Sigstore OIDC token.
-      # Kept at job level rather than split into a dedicated attest job — the
-      # narrower-blast-radius refactor was judged disproportionate here; see PR #387.
-      id-token: write
+      id-token: write # needed for actions/attest-build-provenance
       attestations: write
 
     strategy:
@@ -116,10 +113,7 @@ jobs:
 
     permissions:
       contents: read
-      # Needed by actions/attest-build-provenance to request a Sigstore OIDC token.
-      # Kept at job level rather than split into a dedicated attest job — the
-      # narrower-blast-radius refactor was judged disproportionate here; see PR #387.
-      id-token: write
+      id-token: write # needed for actions/attest-build-provenance
       attestations: write
 
     strategy:
@@ -165,10 +159,7 @@ jobs:
 
     permissions:
       contents: read
-      # Needed by actions/attest-build-provenance to request a Sigstore OIDC token.
-      # Kept at job level rather than split into a dedicated attest job — the
-      # narrower-blast-radius refactor was judged disproportionate here; see PR #387.
-      id-token: write
+      id-token: write # needed for actions/attest-build-provenance
       attestations: write
 
     strategy:
@@ -259,8 +250,7 @@ jobs:
 
     permissions:
       contents: write
-      # Needed by actions/attest-build-provenance to request a Sigstore OIDC token.
-      id-token: write
+      id-token: write # needed for actions/attest-build-provenance
       attestations: write
 
     steps:
@@ -407,8 +397,7 @@ jobs:
 
     permissions:
       contents: write
-      # Needed by actions/attest-build-provenance to request a Sigstore OIDC token.
-      id-token: write
+      id-token: write # needed for actions/attest-build-provenance
       attestations: write
 
     steps:
