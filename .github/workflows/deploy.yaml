@@ -504,6 +504,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      id-token: write # needed for actions/attest-build-provenance
+      attestations: write
+
     steps:
       - uses: actions/checkout@v6
 
@@ -665,6 +670,11 @@ jobs:
 
       - name: Create archive of benchmark reports
         run: tar czf tmp.benchmark-reports.tar.gz tmp.benchmark-report.*
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ./tmp.benchmark-reports.tar.gz
 
       - name: Upload benchmark reports
         uses: actions/upload-release-asset@v1.0.2
