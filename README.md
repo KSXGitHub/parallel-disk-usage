@@ -146,6 +146,9 @@ Beware that the structure of the JSON tree differs depending on the number of fi
 
 Go to the [GitHub Release Page](https://github.com/KSXGitHub/parallel-disk-usage/releases) and download a binary.
 
+> [!NOTE]
+> Starting with version 0.22.1, every executable published to GitHub Releases ships with a build provenance attestation, so you can cryptographically verify that the binary was produced by this repository's deployment workflow rather than uploaded by hand. See [_How can I trust the release binaries?_](#how-can-i-trust-the-release-binaries) for the verification command.
+
 #### From [crates.io](https://crates.io)
 
 **Prerequisites:**
@@ -182,6 +185,21 @@ sudo pacman -S parallel-disk-usage
 No. "Vibe coding" means letting AI do everything without human involvement. This project uses AI-assisted workflows with active human direction and reviews.
 
 Using AI also does not mean poor quality. On the contrary, AI reviews have helped detect previously undetected bugs.
+
+### How can I trust the release binaries?
+
+Starting with version 0.22.1, every executable published to [GitHub Releases](https://github.com/KSXGitHub/parallel-disk-usage/releases) is accompanied by a [build provenance attestation](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations). The attestation is cryptographically signed by [Sigstore](https://www.sigstore.dev/) — a public-good signing service operated by the Linux Foundation — and records that the binary was built by this repository's GitHub Actions deployment workflow from a specific commit. Because the signing happens inside GitHub's infrastructure via OIDC and the signatures are logged to Sigstore's public transparency log, the guarantee does not depend on trusting the maintainer's personal word: any tampered or manually uploaded binary would fail verification.
+
+To verify a downloaded binary, install the [GitHub CLI](https://cli.github.com/) and run:
+
+```sh
+gh attestation verify downloaded-pdu --repo KSXGitHub/parallel-disk-usage
+# note: replace `downloaded-pdu` with the filename you downloaded.
+```
+
+A successful run prints the signer workflow and confirms that the file's SHA-256 matches the attested digest. All attestations for this repository can also be browsed at the [Attestations page](https://github.com/KSXGitHub/parallel-disk-usage/attestations).
+
+Binaries from releases older than 0.22.1 are not attested.
 
 ## Similar programs
 
