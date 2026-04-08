@@ -40,7 +40,7 @@ prepare() {
   for _file in "pdu-$_checksum" "completion.$pkgver.bash" "completion.$pkgver.fish" "completion.$pkgver.zsh"; do
     if ! gh attestation verify --repo "$_repo" "$_file"; then
       error 'Build provenance verification failed.'
-      plain 'hint: set PDU_SKIP_PROVENANCE_VERIFY=1 to skip verification (e.g., for offline builds).'
+      plain 'hint: set PDU_SKIP_PROVENANCE_VERIFY=1 to skip verification for failures unrelated to artifact trust (e.g. transient network errors).'
       return 1
     fi
   done
