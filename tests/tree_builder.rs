@@ -1,4 +1,4 @@
-use build_fs_tree::{dir, file, FileSystemTree};
+use build_fs_tree::{FileSystemTree, dir, file};
 use derive_more::From;
 use parallel_disk_usage::{
     data_tree::{DataTree, DataTreeReflection},

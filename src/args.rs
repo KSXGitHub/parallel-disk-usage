@@ -13,7 +13,7 @@ use clap::{ColorChoice, Parser};
 use derive_setters::Setters;
 use smart_default::SmartDefault;
 use std::path::PathBuf;
-use terminal_size::{terminal_size, Width};
+use terminal_size::{Width, terminal_size};
 use text_block_macros::text_block;
 
 /// The CLI arguments.

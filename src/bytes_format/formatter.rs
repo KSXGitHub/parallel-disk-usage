@@ -1,4 +1,4 @@
-use super::{scale_base, ParsedValue};
+use super::{ParsedValue, scale_base};
 use std::fmt::Debug;
 
 /// Format a quantity of bytes.

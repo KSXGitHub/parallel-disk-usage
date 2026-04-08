@@ -1,4 +1,4 @@
-use super::{extract_block_device_name, is_virtual_block_device, RealFs};
+use super::{RealFs, extract_block_device_name, is_virtual_block_device};
 
 /// On hosts with a `/sys/block/vda` device, exercises the detection
 /// pipeline without panicking. Silently skips if `vda` does not exist.

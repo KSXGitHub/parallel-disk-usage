@@ -51,8 +51,8 @@ pub enum BytesFormat {
 impl BytesFormat {
     /// Format a quantity of bytes according to the settings.
     pub fn format(self, bytes: u64) -> Output {
-        use formatter::{BINARY, METRIC};
         use BytesFormat::*;
+        use formatter::{BINARY, METRIC};
         match self {
             PlainNumber => Output::PlainNumber(bytes),
             MetricUnits => METRIC.parse_value(bytes).pipe(Output::Units),

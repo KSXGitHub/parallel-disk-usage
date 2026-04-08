@@ -1,5 +1,5 @@
 use parallel_disk_usage::{
-    data_tree::{reflection::ConversionError, DataTree, Reflection},
+    data_tree::{DataTree, Reflection, reflection::ConversionError},
     size::Bytes,
 };
 use pretty_assertions::assert_eq;

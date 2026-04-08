@@ -1,4 +1,4 @@
-use super::{remove_overlapping_paths, Api};
+use super::{Api, remove_overlapping_paths};
 use normalize_path::NormalizePath;
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;

@@ -1,4 +1,4 @@
-use super::{iter::Item as IterItem, reflection::ReflectionEntry, HardlinkList, Reflection};
+use super::{HardlinkList, Reflection, iter::Item as IterItem, reflection::ReflectionEntry};
 use crate::size;
 use derive_more::{Add, AddAssign, Sum};
 use derive_setters::Setters;
@@ -89,7 +89,9 @@ where
                     summary.exclusive_shared_size += size;
                 }
                 Ordering::Less => {
-                    panic!("Impossible! Total of nlink ({links}) is less than detected paths ({paths}). Something must have gone wrong!");
+                    panic!(
+                        "Impossible! Total of nlink ({links}) is less than detected paths ({paths}). Something must have gone wrong!"
+                    );
                 }
             }
         }
@@ -172,7 +174,9 @@ impl<Size: size::Size> Display for SummaryDisplay<'_, Size> {
         } else {
             ln!("Some files have links outside this tree")?;
             ln!("* Number of shared inodes: {inodes} total, {exclusive_inodes} exclusive")?;
-            ln!("* Total number of links: {all_links} total, {detected_links} detected, {exclusive_links} exclusive")?;
+            ln!(
+                "* Total number of links: {all_links} total, {detected_links} detected, {exclusive_links} exclusive"
+            )?;
             ln!("* Total shared size: {shared_size} total, {exclusive_shared_size} exclusive")?;
         }
 

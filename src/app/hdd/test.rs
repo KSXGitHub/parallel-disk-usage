@@ -1,4 +1,4 @@
-use super::{any_path_is_in_hdd, path_is_in_hdd, DiskApi, FsApi};
+use super::{DiskApi, FsApi, any_path_is_in_hdd, path_is_in_hdd};
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use std::{

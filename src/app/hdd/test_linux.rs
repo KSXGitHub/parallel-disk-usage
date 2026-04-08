@@ -1,4 +1,4 @@
-use super::{parse_block_device_name, reclassify_virtual_hdd, FsApi, VIRTUAL_DISK_KIND};
+use super::{FsApi, VIRTUAL_DISK_KIND, parse_block_device_name, reclassify_virtual_hdd};
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use std::{

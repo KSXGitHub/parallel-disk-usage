@@ -1,4 +1,4 @@
-use build_fs_tree::{dir, file, Build, MergeableFileSystemTree};
+use build_fs_tree::{Build, MergeableFileSystemTree, dir, file};
 use command_extra::CommandExtra;
 use derive_more::{AsRef, Deref};
 use into_sorted::IntoSorted;
@@ -14,7 +14,7 @@ use parallel_disk_usage::{
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use rand::{distr::Alphanumeric, rng, RngExt};
+use rand::{RngExt, distr::Alphanumeric, rng};
 use rayon::prelude::*;
 use std::{
     cmp::Ordering,

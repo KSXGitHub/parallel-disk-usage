@@ -167,7 +167,7 @@ impl App {
             // Hardlinks deduplication doesn't work properly if there are more than 1 paths pointing to
             // the same tree or if a path points to a subtree of another path. Therefore, we must find
             // and remove such overlapping paths before they cause problems.
-            use overlapping_arguments::{remove_overlapping_paths, RealApi};
+            use overlapping_arguments::{RealApi, remove_overlapping_paths};
             remove_overlapping_paths::<RealApi>(&mut self.args.files);
         }
 

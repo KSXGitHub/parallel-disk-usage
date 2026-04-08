@@ -1,13 +1,13 @@
 use super::{
-    hardlink_list, DeduplicateSharedSize, HardlinkList, LinkPathList, RecordHardlinks,
-    RecordHardlinksArgument,
+    DeduplicateSharedSize, HardlinkList, LinkPathList, RecordHardlinks, RecordHardlinksArgument,
+    hardlink_list,
 };
 use crate::{
     data_tree::DataTree,
     device::DeviceNumber,
     inode::InodeNumber,
     os_string_display::OsStringDisplay,
-    reporter::{event::HardlinkDetection, Event, Reporter},
+    reporter::{Event, Reporter, event::HardlinkDetection},
     size,
 };
 use derive_more::{AsMut, AsRef, Display, Error, From, Into};

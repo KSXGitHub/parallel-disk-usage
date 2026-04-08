@@ -1,4 +1,4 @@
-use super::{NodeInfo, Table, BORDER_COLUMNS, PERCENTAGE_COLUMN_MAX_WIDTH};
+use super::{BORDER_COLUMNS, NodeInfo, PERCENTAGE_COLUMN_MAX_WIDTH, Table};
 use crate::{data_tree::DataTree, size, visualizer::Visualizer};
 use assert_cmp::debug_assert_op;
 use derive_more::{Deref, DerefMut};

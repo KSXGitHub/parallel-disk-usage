@@ -4,7 +4,7 @@ use super::{
     get_size::GetSize,
     hardlink::{RecordHardlinks, RecordHardlinksArgument},
     os_string_display::OsStringDisplay,
-    reporter::{error_report::Operation::*, ErrorReport, Event, Reporter},
+    reporter::{ErrorReport, Event, Reporter, error_report::Operation::*},
     size,
     tree_builder::{Info, TreeBuilder},
 };

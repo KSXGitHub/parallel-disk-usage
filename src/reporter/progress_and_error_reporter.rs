@@ -5,8 +5,8 @@ use std::{
     any::Any,
     marker::PhantomData,
     ops::ControlFlow,
-    sync::{atomic::Ordering::Relaxed, Arc},
-    thread::{sleep, spawn, JoinHandle},
+    sync::{Arc, atomic::Ordering::Relaxed},
+    thread::{JoinHandle, sleep, spawn},
     time::Duration,
 };
 
@@ -48,12 +48,14 @@ where
     {
         let progress = Arc::new(ProgressReportState::default());
         let progress_thread = progress.clone();
-        let progress_reporter_handle = spawn(move || loop {
-            sleep(progress_report_interval);
-            match progress_thread.to_progress_report() {
-                ControlFlow::Continue(progress) => report_progress(progress),
-                ControlFlow::Break(()) => break,
-            };
+        let progress_reporter_handle = spawn(move || {
+            loop {
+                sleep(progress_report_interval);
+                match progress_thread.to_progress_report() {
+                    ControlFlow::Continue(progress) => report_progress(progress),
+                    ControlFlow::Break(()) => break,
+                };
+            }
         });
         ProgressAndErrorReporter {
             progress,

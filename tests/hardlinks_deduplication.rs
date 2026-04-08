@@ -12,8 +12,8 @@ use parallel_disk_usage::{
     bytes_format::BytesFormat,
     data_tree::Reflection,
     hardlink::{
-        hardlink_list::{reflection::ReflectionEntry, Summary},
         LinkPathListReflection,
+        hardlink_list::{Summary, reflection::ReflectionEntry},
     },
     inode::InodeNumber,
     json_data::{JsonData, JsonTree},
