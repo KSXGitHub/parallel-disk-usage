@@ -19,13 +19,13 @@ sha1sums=(
 prepare() {
   if ! command -v gh > /dev/null 2>&1; then
     warning 'GitHub CLI (gh) not found, skipping provenance verification.'
-    warning 'hint: install the github-cli package to enable cryptographic verification of release artifacts.'
+    plain 'hint: install the github-cli package to enable cryptographic verification of release artifacts.'
     return 0
   fi
 
   if ! gh auth status > /dev/null 2>&1; then
     warning 'gh is not authenticated, skipping provenance verification.'
-    warning 'hint: run `gh auth login` (or set GH_TOKEN) to enable cryptographic verification of release artifacts.'
+    plain 'hint: run `gh auth login` (or set GH_TOKEN) to enable cryptographic verification of release artifacts.'
     return 0
   fi
 
