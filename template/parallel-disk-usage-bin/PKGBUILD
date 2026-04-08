@@ -17,6 +17,11 @@ sha1sums=(
 )
 
 prepare() {
+  if [[ -n $PDU_SKIP_PROVENANCE_VERIFY ]]; then
+    warning 'PDU_SKIP_PROVENANCE_VERIFY is set, skipping provenance verification.'
+    return 0
+  fi
+
   if ! command -v gh > /dev/null 2>&1; then
     warning 'GitHub CLI (gh) not found, skipping provenance verification.'
     plain 'hint: install the github-cli package to enable cryptographic verification of release artifacts.'
@@ -31,10 +36,14 @@ prepare() {
 
   msg2 'Verifying build provenance with gh attestation...'
   local _repo='KSXGitHub/parallel-disk-usage'
-  gh attestation verify --repo "$_repo" "pdu-$_checksum"
-  gh attestation verify --repo "$_repo" "completion.$pkgver.bash"
-  gh attestation verify --repo "$_repo" "completion.$pkgver.fish"
-  gh attestation verify --repo "$_repo" "completion.$pkgver.zsh"
+  local _file
+  for _file in "pdu-$_checksum" "completion.$pkgver.bash" "completion.$pkgver.fish" "completion.$pkgver.zsh"; do
+    if ! gh attestation verify --repo "$_repo" "$_file"; then
+      error 'Build provenance verification failed.'
+      plain 'hint: set PDU_SKIP_PROVENANCE_VERIFY=1 to skip verification (e.g., for offline builds).'
+      return 1
+    fi
+  done
 }
 
 package() {
