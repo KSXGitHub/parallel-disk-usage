@@ -114,11 +114,11 @@ fn render_synopsis_option(out: &mut String, arg: &Arg) {
     if let Some(long) = arg.get_long() {
         write!(out, "\\fB\\-\\-{}\\fR", roff_escape(long)).unwrap();
     }
-    if arg.get_action().takes_values() {
-        if let Some(value_names) = arg.get_value_names() {
-            for name in value_names {
-                write!(out, " \\fI{}\\fR", roff_escape(name)).unwrap();
-            }
+    if arg.get_action().takes_values()
+        && let Some(value_names) = arg.get_value_names()
+    {
+        for name in value_names {
+            write!(out, " \\fI{}\\fR", roff_escape(name)).unwrap();
         }
     }
     out.push(']');

@@ -89,10 +89,10 @@ fn reclassify_virtual_hdd<Fs: FsApi>(kind: DiskKind, disk_name: &str) -> DiskKin
     if kind != DiskKind::HDD {
         return kind;
     }
-    if let Some(block_dev) = extract_block_device_name::<Fs>(disk_name) {
-        if is_virtual_block_device::<Fs>(&block_dev) {
-            return VIRTUAL_DISK_KIND;
-        }
+    if let Some(block_dev) = extract_block_device_name::<Fs>(disk_name)
+        && is_virtual_block_device::<Fs>(&block_dev)
+    {
+        return VIRTUAL_DISK_KIND;
     }
     DiskKind::HDD
 }
