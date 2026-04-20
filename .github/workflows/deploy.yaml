@@ -652,7 +652,7 @@ jobs:
             pnpm-
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v5.0.0
+        uses: pnpm/action-setup@v6.0.1
         with:
           version: '7.9.0'
           run_install: 'true'
