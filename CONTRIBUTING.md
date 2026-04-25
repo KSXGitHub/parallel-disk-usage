@@ -13,7 +13,7 @@ type(scope): lowercase description
 ### Rules
 
 - **Types:** `feat`, `fix`, `refactor`, `perf`, `docs`, `style`, `chore`, `ci`, `test`, `lint`.
-- **Scopes** (optional): `cli`, `api`, `deps`, `readme`, `benchmark`, `toolchain`, `test`, or other relevant areas.
+- **Scopes** (optional): `cli`, `api`, `deps`, `readme`, `benchmark`, `toolchain`, `test`, or another relevant area.
 - **Description:** always lowercase after the colon, no trailing period, brief (3-7 words preferred).
 - **Breaking changes:** append `!` before the colon. For example: `feat(cli)!: remove deprecated flag`.
 - **Code identifiers** in descriptions should be wrapped in backticks. For example: `` chore(deps): update `rand` ``.
