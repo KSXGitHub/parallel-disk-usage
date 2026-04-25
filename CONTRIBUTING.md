@@ -118,7 +118,7 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   // OK: short closure
   left_indices.zip(right_indices).map(|(i, j)| matrix[i][j])
 
-  // OK: index-based loop (rare in Rust)
+  // OK: index-based loop
   for i in 0..len { /* ... */ }
 
   // Bad: use a descriptive name instead
