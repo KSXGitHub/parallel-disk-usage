@@ -13,7 +13,7 @@ type(scope): lowercase description
 ### Rules
 
 - **Types:** `feat`, `fix`, `refactor`, `perf`, `docs`, `style`, `chore`, `ci`, `test`, `lint`.
-- **Scopes** (optional): `cli`, `api`, `deps`, `readme`, `benchmark`, `toolchain`, `test`, or another relevant area.
+- **Scopes** (optional): `cli`, `api`, `deps`, `readme`, `benchmark`, `toolchain`, `test`, or other relevant areas.
 - **Description:** always lowercase after the colon, no trailing period, brief (3-7 words preferred).
 - **Breaking changes:** append `!` before the colon. For example: `feat(cli)!: remove deprecated flag`.
 - **Code identifiers** in descriptions should be wrapped in backticks. For example: `` chore(deps): update `rand` ``.
@@ -137,7 +137,7 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   .fold(PathBuf::new(), |acc, x| acc.join(x))
   ```
 
-- **Test fixtures:** `let a`, `let b`, `let c` for interchangeable specimens with identical roles in equality or comparison tests, such as tests of commutativity. Do not use single letters when the variables have distinct roles; use `actual`/`expected` or similar descriptive names instead.
+- **Test fixtures:** `let a`, `let b`, `let c` for interchangeable specimens with identical roles in equality or comparison tests. Do not use single letters when the variables have distinct roles; use `actual`/`expected` or similar descriptive names instead.
 
   ```rust
   let a = vec![3, 1, 2].into_iter().collect::<BTreeSet<_>>();
