@@ -36,7 +36,7 @@ Automated tools enforce formatting (`cargo fmt`) and linting (`cargo clippy`). T
 
 ### Import Organization
 
-Prefer **merged imports**. Combine multiple items from the same crate or module into a single `use` statement with braces rather than separate `use` lines. Import ordering is enforced by `cargo fmt`. Platform-specific imports such as `#[cfg(unix)]` go in a separate block after the main imports.
+Prefer **merged imports**. Combine multiple items from the same crate or module into a single `use` statement with braces rather than separate `use` lines. Import ordering is enforced by `cargo fmt`. Imports gated by a platform attribute such as `#[cfg(unix)]` go in a separate block after the main imports.
 
 ```rust
 use crate::{
