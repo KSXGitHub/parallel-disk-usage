@@ -374,7 +374,7 @@ Before submitting, ensure:
 - `cargo test` passes.
 - The project builds with no default features, with default features, and with all features.
 
-The CI script `test.sh` runs all of these across 5 feature combinations. You can run it locally with:
+The CI script `test.sh` runs all of these across every supported feature combination. You can run it locally with:
 
 ```sh
 FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh
