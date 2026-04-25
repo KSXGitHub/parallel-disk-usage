@@ -12,19 +12,23 @@ type(scope): lowercase description
 
 ### Rules
 
-- **Types:** `feat`, `fix`, `refactor`, `perf`, `docs`, `style`, `chore`, `ci`, `test`, `lint`
-- **Scopes** (optional): `cli`, `api`, `deps`, `readme`, `benchmark`, `toolchain`, `test`, or other relevant area
-- **Description:** always lowercase after the colon, no trailing period, brief (3-7 words preferred)
-- **Breaking changes:** append `!` before the colon (e.g. `feat(cli)!: remove deprecated flag`)
-- **Code identifiers** in descriptions should be wrapped in backticks (e.g. `` chore(deps): update `rand` ``)
+- **Types:** `feat`, `fix`, `refactor`, `perf`, `docs`, `style`, `chore`, `ci`, `test`, `lint`.
+- **Scopes** (optional): `cli`, `api`, `deps`, `readme`, `benchmark`, `toolchain`, `test`, or another relevant area.
+- **Description:** always lowercase after the colon, no trailing period, brief (3-7 words preferred).
+- **Breaking changes:** append `!` before the colon. For example: `feat(cli)!: remove deprecated flag`.
+- **Code identifiers** in descriptions should be wrapped in backticks. For example: `` chore(deps): update `rand` ``.
 
 ### Exception: Version Releases
 
-Version release commits use **only** the version number as the message — no type prefix:
+Version release commits use **only** the version number as the message, with no type prefix:
 
 ```
 0.21.1
 ```
+
+## Writing Style
+
+Write documentation, comments, and other prose for ease of understanding first. Prefer a formal tone when it does not hurt clarity, and use complete sentences. Avoid mid-sentence breaks introduced by em dashes or long parenthetical clauses. Em dashes are a reliable symptom of loose phrasing; when one appears, restructure the surrounding sentence so each clause stands on its own rather than swapping the em dash for another punctuation mark.
 
 ## Code Style
 
@@ -32,7 +36,7 @@ Automated tools enforce formatting (`cargo fmt`) and linting (`cargo clippy`). T
 
 ### Import Organization
 
-Prefer **merged imports** — combine multiple items from the same crate or module into a single `use` statement with braces rather than separate `use` lines. Import ordering is enforced by `cargo fmt`. Platform-specific imports (`#[cfg(unix)]`) go in a separate block after the main imports.
+Prefer **merged imports**. Combine multiple items from the same crate or module into a single `use` statement with braces rather than separate `use` lines. Import ordering is enforced by `cargo fmt`. Imports gated by a platform attribute such as `#[cfg(unix)]` go in a separate block after the main imports.
 
 ```rust
 use crate::{
@@ -95,29 +99,29 @@ Use **descriptive names** for variables and closure parameters by default. Singl
 
 #### When single-letter names are allowed
 
-- **Comparison closures:** `|a, b|` in `sort_by`, `cmp`, or similar two-argument comparison callbacks — this is idiomatic Rust.
+- **Comparison closures:** `|a, b|` in `sort_by`, `cmp`, or similar two-argument comparison callbacks. This is idiomatic Rust.
 
   ```rust
   sort_reflection_by(&mut tree, |a, b| a.name.cmp(&b.name));
   ```
 
-- **Conventional single-letter names:** `n` for a natural number (unsigned integer / count), `f` for a `fmt::Formatter`, and similar well-established conventions from math or the Rust standard library. Note: for indices, use `index`, `idx`, or `*_index` (e.g., `row_index`) — not `n`. (For `i`/`j`/`k`, see the dedicated rule below.)
+- **Conventional single-letter names:** `n` for a natural number such as an unsigned integer or count, `f` for a `fmt::Formatter`, and similar well-established conventions from math or the Rust standard library. Note: for indices, use `index`, `idx`, or `*_index` such as `row_index`, not `n`. For `i`/`j`/`k`, see the dedicated rule below.
 
   ```rust
   fn with_capacity(n: usize) -> Self { todo!() }
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { todo!() }
   ```
 
-- **Index variables (`i`, `j`, `k`):** These may only be used in two contexts: (1) short closures, and (2) index-based loops/iterations (rare in Rust). In all other cases, use `index`, `idx`, or `*_index`.
+- **Index variables (`i`, `j`, `k`):** These may only be used in two contexts: short closures, and index-based loops or iterations. The latter is rare in Rust. In all other cases, use `index`, `idx`, or `*_index`.
 
   ```rust
-  // OK — short closure
+  // OK: short closure
   left_indices.zip(right_indices).map(|(i, j)| matrix[i][j])
 
-  // OK — index-based loop (rare in Rust)
+  // OK: index-based loop
   for i in 0..len { /* ... */ }
 
-  // Bad — use a descriptive name instead
+  // Bad: use a descriptive name instead
   let i = items.iter().position(|item| item.is_active()).unwrap();
   ```
 
@@ -133,7 +137,7 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   .fold(PathBuf::new(), |acc, x| acc.join(x))
   ```
 
-- **Test fixtures:** `let a`, `let b`, `let c` for interchangeable specimens with identical roles in equality or comparison tests (e.g., testing commutativity). Do not use single letters when the variables have distinct roles — use `actual`/`expected` or similar descriptive names instead.
+- **Test fixtures:** `let a`, `let b`, `let c` for interchangeable specimens with identical roles in equality or comparison tests. Do not use single letters when the variables have distinct roles; use `actual`/`expected` or similar descriptive names instead.
 
   ```rust
   let a = vec![3, 1, 2].into_iter().collect::<BTreeSet<_>>();
@@ -143,7 +147,7 @@ Use **descriptive names** for variables and closure parameters by default. Singl
 
 #### When single-letter names are NOT allowed
 
-- **Multi-line functions and closures:** If a function or closure body spans multiple lines (e.g., contains a `let` binding followed by another expression, or multiple chained operations), use a descriptive name.
+- **Multi-line functions and closures:** Use a descriptive name when a function or closure body spans multiple lines. Examples include a body that contains a `let` binding followed by another expression, or a body with multiple chained operations.
 
   ```rust
   // Good
@@ -168,16 +172,16 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   let m = entry.metadata()?;
   ```
 
-- **Function and method parameters:** Always use descriptive names, except for conventional single-letter names listed above (`n`, `f`, etc.).
+- **Function and method parameters:** Always use descriptive names, except for the conventional single-letter names listed above, such as `n` and `f`.
 
-- **Closures with non-obvious context:** If the type or purpose is not immediately clear from the surrounding method chain, use a descriptive name.
+- **Closures with non-obvious context:** When the type or purpose is not immediately clear from the surrounding method chain, use a descriptive name.
 
   ```rust
-  // Good — not obvious what the closure receives
+  // Good: not obvious what the closure receives
   .filter_map(|entry| match entry { _ => todo!() })
   .for_each(|child| child.par_sort_by(compare))
 
-  // Bad — reader must look up what .filter receives
+  // Bad: reader must look up what .filter receives
   .filter(|x| x.get_mount_point() == mount_point)
   ```
 
@@ -199,10 +203,10 @@ where
 ### Error Handling
 
 - Use `derive_more` for error types. Only derive the traits that are actually used:
-  - `Display`: derive when the type needs to be displayed (e.g., printed to stderr, used in format strings).
-  - `Error`: derive when the type is used as a `std::error::Error` (e.g., as the error type in `Result`, or as a source of another error). Not all types with `Display` need `Error`.
-  - A type that only needs formatting (not error handling) should derive `Display` without `Error`.
-- Minimize `unwrap()` in non-test code — use proper error propagation. `unwrap()` is acceptable in tests and for provably infallible operations (with a comment explaining why). When deliberately ignoring an error, use `.ok()` with a comment explaining why.
+  - `Display`: derive when the type needs to be displayed, such as when it is printed to stderr or used in format strings.
+  - `Error`: derive when the type is used as a `std::error::Error`, such as the error type in `Result` or the source of another error. Not all types with `Display` need `Error`.
+  - A type that only needs formatting and not error handling should derive `Display` without `Error`.
+- Minimize `unwrap()` in non-test code; use proper error propagation. `unwrap()` is acceptable in tests, and is also acceptable for provably infallible operations when accompanied by a comment explaining the invariant. When deliberately ignoring an error, use `.ok()` and document the rationale.
 
 ```rust
 #[derive(Debug, Display, Error)]
@@ -215,19 +219,19 @@ pub enum RuntimeError {
 
 ### Conditional Test Skipping: `#[cfg]` vs `#[cfg_attr(..., ignore)]`
 
-When a test cannot run under certain conditions (e.g., wrong platform), prefer `#[cfg_attr(..., ignore)]` over `#[cfg(...)]` to skip it. This way the test is still compiled on all configurations — catching type errors and regressions early — but simply skipped at runtime.
+When a test cannot run under certain conditions, such as on the wrong platform, prefer `#[cfg_attr(..., ignore)]` over `#[cfg(...)]` to skip it. The test still compiles on every configuration and is only skipped at runtime. This approach catches type errors and regressions that a `#[cfg]` skip would hide.
 
-Use `#[cfg]` on tests **only** when the code cannot compile under the condition — for example, when the test references types, functions, or trait methods that are gated behind `#[cfg]` and do not exist on other platforms or feature sets.
+Use `#[cfg]` on tests **only** when the code cannot compile under the condition. An example is a test that references types, functions, or trait methods gated behind `#[cfg]` that do not exist on other platforms or feature sets.
 
 Prefer including a reason string in the `ignore` attribute to explain why the test is skipped.
 
 ```rust
-// Good — test compiles everywhere, skipped at runtime on non-unix
+// Good: test compiles everywhere, skipped at runtime on non-unix
 #[test]
 #[cfg_attr(not(unix), ignore = "only one path separator style is tested")]
 fn unix_path_logic() { /* uses hardcoded unix paths but no unix-only types */ }
 
-// Good — test CANNOT compile on non-unix (uses unix-only types)
+// Good: test CANNOT compile on non-unix (uses unix-only types)
 #[cfg(unix)]
 #[test]
 fn block_size() { /* uses GetBlockSize which only exists on unix */ }
@@ -237,14 +241,14 @@ fn block_size() { /* uses GetBlockSize which only exists on unix */ }
 
 This codebase uses the [`pipe-trait`](https://docs.rs/pipe-trait) crate extensively. The `Pipe` trait enables method-chaining through unary functions, keeping code in a natural left-to-right reading order. Import it as `use pipe_trait::Pipe;`.
 
-Any callable that takes a single argument works with `.pipe()` — free functions, closures, newtype constructors, enum variant constructors, `Some`, `Ok`, `Err`, trait methods like `From::from`, etc. The guidance below applies equally to all of them.
+Any callable that takes a single argument works with `.pipe()`. This includes free functions, closures, newtype constructors, enum variant constructors, `Some`, `Ok`, `Err`, and trait methods such as `From::from`. The guidance below applies equally to all of them.
 
 #### When to use pipe
 
 **Chaining through a unary function at the end of an expression chain:**
 
 ```rust
-// Good — pipe keeps the chain flowing left-to-right
+// Good: pipe keeps the chain flowing left-to-right
 stats.ino().pipe(InodeNumber)
 list.into_sorted_unstable_by_key(|entry| u64::from(entry.ino))
     .pipe(Reflection)
@@ -267,7 +271,7 @@ let name = entry.file_name().pipe(OsStringDisplay::from).pipe(Some);
 **Chaining through multiple unary functions:**
 
 ```rust
-// Good — clear wrapping pipeline
+// Good: clear wrapping pipeline
 ino.pipe(ConversionError::DuplicatedInode).pipe(Err)
 map.pipe(HardlinkList).pipe(Ok)
 
@@ -279,7 +283,7 @@ UnsupportedFeature::DeduplicateHardlink
 **Continuing a method chain through a free function and back to methods:**
 
 ```rust
-// Good — pipe bridges from methods to a free function and back
+// Good: pipe bridges from methods to a free function and back
 block_dev
     .pipe(validate_block_device::<Fs>)
     .map(Cow::Borrowed)
@@ -291,10 +295,10 @@ block_dev
     .then_some(block_dev)
 ```
 
-**Using `.pipe_as_ref()` to pass a reference mid-chain** — avoids introducing a temporary variable when a free function takes `&T`:
+**Using `.pipe_as_ref()` to pass a reference mid-chain.** This avoids introducing a temporary variable when a free function takes `&T`:
 
 ```rust
-// Good — pipe_as_ref calls .as_ref() then passes to the function
+// Good: pipe_as_ref calls .as_ref() then passes to the function
 path_buf.pipe_as_ref(Fs::path_exists)
 
 // Without pipe, you'd need a temporary or nested call
@@ -303,30 +307,30 @@ Fs::path_exists(path_buf.as_ref())
 
 #### When NOT to use pipe
 
-**Simple standalone function calls** — pipe adds noise with no readability benefit:
+**Simple standalone function calls.** Pipe adds noise with no readability benefit:
 
 ```rust
-// Bad — unnecessary pipe
+// Bad: unnecessary pipe
 let result = value.pipe(foo);
 
-// Good — just call the function directly
+// Good: just call the function directly
 let result = foo(value);
 ```
 
-This applies to any unary callable — `Some`, `Ok`, constructors, etc. — when there is no preceding chain to continue:
+This applies to any unary callable, such as `Some`, `Ok`, or constructors, when there is no preceding chain to continue:
 
 ```rust
-// Bad — pipe adds nothing here
+// Bad: pipe adds nothing here
 let result = value.pipe(Some);
 
-// Good — direct call is clearer
+// Good: direct call is clearer
 let result = Some(value);
 ```
 
 However, piping through any unary function **is** preferred when it continues an existing chain:
 
 ```rust
-// Good — continues a chain
+// Good: continues a chain
 report.summarize().pipe(Some)
 entry.file_name().pipe(OsStringDisplay::from).pipe(Some)
 ```
@@ -353,11 +357,11 @@ rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy
 
 ## Optional External Dependencies
 
-Some integration tests require external (non-Cargo) tools that are **not** managed by `Cargo.toml`. These tests panic when the tools are absent; CI installs them to get full coverage.
+Some integration tests require external tools that are not managed by `Cargo.toml`. These tests panic when the tools are absent. CI installs them to get full coverage.
 
-- `squashfs-tools` (provides `mksquashfs`) — cross-device (`--one-file-system`) FUSE test
-- `squashfuse` (provides `squashfuse`) — cross-device (`--one-file-system`) FUSE test
-- `fuse3` (provides `fusermount3`, `/dev/fuse`) — cross-device (`--one-file-system`) FUSE test
+- `squashfs-tools` (provides `mksquashfs`): cross-device (`--one-file-system`) FUSE test.
+- `squashfuse` (provides `squashfuse`): cross-device (`--one-file-system`) FUSE test.
+- `fuse3` (provides `fusermount3` and `/dev/fuse`): cross-device (`--one-file-system`) FUSE test.
 
 Tests that need these tools will panic with a diagnostic message if they are missing. The panic message includes the specific `TEST_SKIP` variable to skip the test via `./test.sh`.
 
@@ -365,19 +369,19 @@ Tests that need these tools will panic with a diagnostic message if they are mis
 
 Before submitting, ensure:
 
-- `cargo fmt -- --check` passes
-- `cargo clippy` passes (on all feature combinations)
-- `cargo test` passes
-- The project builds with no default features, default features, and all features
+- `cargo fmt -- --check` passes.
+- `cargo clippy` passes on all feature combinations.
+- `cargo test` passes.
+- The project builds with no default features, with default features, and with all features.
 
-The CI script `test.sh` runs all of these across 5 feature combinations. You can run it locally with:
+The CI script `test.sh` runs all of these across every supported feature combination. You can run it locally with:
 
 ```sh
 FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh
 ```
 
 > [!IMPORTANT]
-> Always run the full test suite before committing, even for seemingly trivial changes such as documentation edits, comment changes, or config updates. Any change can break formatting, linting, building, tests, or doc generation across the different feature combinations.
+> Always run the full test suite before every commit. This rule applies to all changes, including documentation edits, comment changes, and config updates. Any change can break formatting, linting, building, tests, or doc generation across the different feature combinations.
 
 > [!NOTE]
 > Some tests may fail with a hint about `TEST_SKIP`. Follow the hint and rerun with the suggested variable.
