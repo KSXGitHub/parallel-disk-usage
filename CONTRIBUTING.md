@@ -342,6 +342,30 @@ ExitCode::from(match self {
 })
 ```
 
+## Unit Tests
+
+A unit-test module may either sit inline as `mod tests { ... }` in its parent or live in a dedicated external `tests` submodule. The inline form is appropriate for short test modules; once the block grows long enough to noticeably extend the length of the parent and get in the way of reading the rest of the module, move the tests into an external file.
+
+### When the inline form is acceptable
+
+There is nothing wrong with `mod tests { ... }` by itself. Reserve the inline form for modules whose entire test suite fits in a small number of lines, so that the block does not noticeably extend the length of the parent. The problem that this convention addresses is a long inline block that extends the length of the main module and makes it harder to traverse. Use the number of lines as the deciding factor: once the inline tests grow long enough to get in the way of reading the rest of the module, move them into an external file.
+
+### Where the external file sits
+
+When the tests live externally, the parent declares them at the end of the file with the standard declaration:
+
+```rust
+#[cfg(test)]
+mod tests;
+```
+
+The external file itself sits in a directory named after the parent, using the same path regardless of whether the parent has any other submodules. Concretely:
+
+- For `src/foo.rs`, the tests file is `src/foo/tests.rs`.
+- For `src/foo/bar.rs`, the tests file is `src/foo/bar/tests.rs`.
+
+Do not flatten the tests into a sibling file such as `src/foo_tests.rs`, and do not skip the intermediate directory when the parent currently has no other submodules. This mirrors the flat file pattern (`module.rs` rather than `module/mod.rs`) described under [Module Organization](#module-organization).
+
 ## Setup
 
 Install the required Rust toolchain and components before running any checks:
