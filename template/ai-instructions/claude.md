@@ -1,1 +1,1 @@
-- `gh` (GitHub CLI) is not installed — do not attempt to use it
+- The `gh` (GitHub CLI) is not installed. Do not attempt to use it.
