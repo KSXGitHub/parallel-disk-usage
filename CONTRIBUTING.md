@@ -206,7 +206,7 @@ where
   - `Display`: derive when the type needs to be displayed, such as when it is printed to stderr or used in format strings.
   - `Error`: derive when the type is used as a `std::error::Error`, such as the error type in `Result` or the source of another error. Not all types with `Display` need `Error`.
   - A type that only needs formatting and not error handling should derive `Display` without `Error`.
-- Minimize `unwrap()` in non-test code; use proper error propagation. `unwrap()` is acceptable in tests, and is also acceptable for provably infallible operations when accompanied by a comment explaining why. When deliberately ignoring an error, use `.ok()` with a comment explaining why.
+- Minimize `unwrap()` in non-test code; use proper error propagation. `unwrap()` is acceptable in tests, and is also acceptable for provably infallible operations when accompanied by a comment explaining the invariant. When deliberately ignoring an error, use `.ok()` and document the rationale.
 
 ```rust
 #[derive(Debug, Display, Error)]
