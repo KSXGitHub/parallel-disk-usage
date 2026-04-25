@@ -105,14 +105,14 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   sort_reflection_by(&mut tree, |a, b| a.name.cmp(&b.name));
   ```
 
-- **Conventional single-letter names:** `n` for a natural number (unsigned integer or count); `f` for a `fmt::Formatter`; and similar well-established conventions from math or the Rust standard library. Note: for indices, use `index`, `idx`, or `*_index` such as `row_index`, not `n`. For `i`/`j`/`k`, see the dedicated rule below.
+- **Conventional single-letter names:** `n` for a natural number such as an unsigned integer or count, `f` for a `fmt::Formatter`, and similar well-established conventions from math or the Rust standard library. Note: for indices, use `index`, `idx`, or `*_index` such as `row_index`, not `n`. For `i`/`j`/`k`, see the dedicated rule below.
 
   ```rust
   fn with_capacity(n: usize) -> Self { todo!() }
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { todo!() }
   ```
 
-- **Index variables (`i`, `j`, `k`):** These may only be used in two contexts: short closures and index-based loops or iterations (rare in Rust). In all other cases, use `index`, `idx`, or `*_index`.
+- **Index variables (`i`, `j`, `k`):** These may only be used in two contexts: short closures, and index-based loops or iterations. The latter is rare in Rust. In all other cases, use `index`, `idx`, or `*_index`.
 
   ```rust
   // OK: short closure
@@ -147,7 +147,7 @@ Use **descriptive names** for variables and closure parameters by default. Singl
 
 #### When single-letter names are NOT allowed
 
-- **Multi-line functions and closures:** When a function or closure body spans multiple lines, such as a body that contains a `let` binding followed by another expression, or multiple chained operations, use a descriptive name.
+- **Multi-line functions and closures:** Use a descriptive name when a function or closure body spans multiple lines. Examples include a body that contains a `let` binding followed by another expression, or a body with multiple chained operations.
 
   ```rust
   // Good
@@ -172,7 +172,7 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   let m = entry.metadata()?;
   ```
 
-- **Function and method parameters:** Always use descriptive names, except for conventional single-letter names listed above (`n`, `f`, etc.).
+- **Function and method parameters:** Always use descriptive names, except for the conventional single-letter names listed above, such as `n` and `f`.
 
 - **Closures with non-obvious context:** When the type or purpose is not immediately clear from the surrounding method chain, use a descriptive name.
 
@@ -206,7 +206,7 @@ where
   - `Display`: derive when the type needs to be displayed, such as when it is printed to stderr or used in format strings.
   - `Error`: derive when the type is used as a `std::error::Error`, such as the error type in `Result` or the source of another error. Not all types with `Display` need `Error`.
   - A type that only needs formatting and not error handling should derive `Display` without `Error`.
-- Minimize `unwrap()` in non-test code; use proper error propagation. `unwrap()` is acceptable in tests and for provably infallible operations, with a comment explaining why. When deliberately ignoring an error, use `.ok()` with a comment explaining why.
+- Minimize `unwrap()` in non-test code; use proper error propagation. `unwrap()` is acceptable in tests, and is also acceptable for provably infallible operations when accompanied by a comment explaining why. When deliberately ignoring an error, use `.ok()` with a comment explaining why.
 
 ```rust
 #[derive(Debug, Display, Error)]
@@ -381,7 +381,7 @@ FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh
 ```
 
 > [!IMPORTANT]
-> Always run the full test suite before committing, even for seemingly trivial changes such as documentation edits, comment changes, or config updates. Any change can break formatting, linting, building, tests, or doc generation across the different feature combinations.
+> Always run the full test suite before every commit. This rule applies to all changes, including documentation edits, comment changes, and config updates. Any change can break formatting, linting, building, tests, or doc generation across the different feature combinations.
 
 > [!NOTE]
 > Some tests may fail with a hint about `TEST_SKIP`. Follow the hint and rerun with the suggested variable.
