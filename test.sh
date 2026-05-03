@@ -62,9 +62,6 @@ unit() (
     skip_args+=(--skip "$name")
   done
   run_if "${LINT:-true}" cargo clippy "$@" -- -D warnings
-  # `--document-private-items` lets rustdoc validate intra-doc links inside
-  # private items; the `rustdoc::private_intra_doc_links` lint, promoted to an
-  # error by `-D warnings`, still rejects public-to-private links.
   run_if "${DOC:-false}" env RUSTDOCFLAGS="-D warnings ${RUSTDOCFLAGS:-}" \
     cargo doc --document-private-items "$@"
   run_if "${BUILD:-true}" cargo build ${build_flags[@]+"${build_flags[@]}"} "$@"
