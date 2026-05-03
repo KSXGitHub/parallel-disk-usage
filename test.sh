@@ -63,7 +63,7 @@ unit() (
   done
   run_if "${LINT:-true}" cargo clippy "$@" -- -D warnings
   run_if "${DOC:-false}" env RUSTDOCFLAGS="-D warnings ${RUSTDOCFLAGS:-}" \
-    cargo doc --document-private-items "$@"
+    cargo doc --document-private-items --no-deps "$@"
   run_if "${BUILD:-true}" cargo build ${build_flags[@]+"${build_flags[@]}"} "$@"
   if [[ ${#skip_args[@]} -gt 0 ]]; then
     run_if "${TEST:-true}" cargo test ${test_flags[@]+"${test_flags[@]}"} "$@" -- "${skip_args[@]}"
