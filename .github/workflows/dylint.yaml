@@ -37,7 +37,7 @@ jobs:
 
       - name: Install dylint tooling
         shell: bash
-        run: cargo install cargo-dylint dylint-link
+        run: cargo install --locked cargo-dylint dylint-link
 
       - name: Run dylint
         shell: bash
