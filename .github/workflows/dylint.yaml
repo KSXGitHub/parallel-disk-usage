@@ -1,0 +1,57 @@
+name: Dylint
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  dylint_check:
+    name: Dylint
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Cache
+        uses: actions/cache@v5
+        timeout-minutes: 2
+        continue-on-error: true
+        with:
+          path: |
+            ~/.cargo
+            ~/.dylint_drivers
+            target
+          key: ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('dylint.toml') }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('dylint.toml') }}-${{ hashFiles('**/Cargo.lock') }}
+            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('dylint.toml') }}-
+            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-
+
+      - name: Install Rust
+        shell: bash
+        run: |
+          installer=$(mktemp -d)/install-rustup
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > $installer
+          bash $installer --default-toolchain $(cat rust-toolchain) -y
+
+      - name: Install dylint tooling
+        shell: bash
+        run: cargo install cargo-dylint dylint-link
+
+      - name: Run dylint
+        shell: bash
+        env:
+          FMT: 'false'
+          LINT: 'false'
+          DOC: 'false'
+          BUILD: 'false'
+          TEST: 'false'
+          DYLINT: 'true'
+        run: ./test.sh
+
+      - name: Clean workspace artifacts before cache
+        if: always()
+        continue-on-error: true
+        shell: bash
+        run: cargo clean --workspace

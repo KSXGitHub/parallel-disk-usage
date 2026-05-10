@@ -73,6 +73,9 @@ unit() (
 )
 
 run_if "${FMT:-true}" cargo fmt -- --check
+# Dylint inspects the source under all feature gates in a single pass, so it is
+# run once with `--all-features` rather than across every feature combination.
+run_if "${DYLINT:-false}" cargo dylint --all -- --all-features --all-targets
 unit "$@"
 unit --no-default-features "$@"
 unit --all-features "$@"

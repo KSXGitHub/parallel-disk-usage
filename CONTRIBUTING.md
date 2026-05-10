@@ -379,6 +379,14 @@ rustup toolchain install "$(< rust-toolchain)"
 rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy
 ```
 
+To run the dylint checks locally, also install `cargo-dylint` and `dylint-link`:
+
+```sh
+cargo install cargo-dylint dylint-link
+```
+
+These are only required when running with `DYLINT=true`. The dylint libraries declared in `dylint.toml` are built against their own pinned nightly toolchain, which `cargo-dylint` fetches automatically on first run.
+
 ## Optional External Dependencies
 
 Some integration tests require external tools that are not managed by `Cargo.toml`. These tests panic when the tools are absent. CI installs them to get full coverage.
@@ -397,12 +405,15 @@ Before submitting, ensure:
 - `cargo clippy` passes on all feature combinations.
 - `cargo test` passes.
 - The project builds with no default features, with default features, and with all features.
+- `cargo dylint --all` passes (requires `cargo-dylint` and `dylint-link`).
 
 The CI script `test.sh` runs all of these across every supported feature combination. You can run it locally with:
 
 ```sh
-FMT=true LINT=true BUILD=true TEST=true DOC=true ./test.sh
+FMT=true LINT=true BUILD=true TEST=true DOC=true DYLINT=true ./test.sh
 ```
+
+`DYLINT` defaults to `false` because it requires extra tooling and a separate nightly toolchain. Enable it once `cargo-dylint` and `dylint-link` are installed.
 
 > [!IMPORTANT]
 > Always run the full test suite before every commit. This rule applies to all changes, including documentation edits, comment changes, and config updates. Any change can break formatting, linting, building, tests, or doc generation across the different feature combinations.
