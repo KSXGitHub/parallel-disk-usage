@@ -1,3 +1,24 @@
+#![cfg_attr(dylint_lib = "perfectionist", feature(register_tool))]
+#![cfg_attr(dylint_lib = "perfectionist", register_tool(perfectionist))]
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::macro_trailing_comma,
+        reason = "rustfmt collapses single-element multi-line vec! and removes the trailing comma; see https://github.com/KSXGitHub/perfectionist/issues"
+    )
+)]
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    allow(
+        unfulfilled_lint_expectations,
+        reason = "perfectionist's macro_trailing_comma short-circuits when its lint is allowed/expected at crate scope, so #[expect] cannot be fulfilled even though violations exist"
+    )
+)]
+#![allow(
+    unexpected_cfgs,
+    reason = "`dylint_lib` is set by dylint's compiler wrapper and is not in --check-cfg"
+)]
+
 use parallel_disk_usage::{
     bytes_format::BytesFormat::*,
     data_tree::DataTree,
