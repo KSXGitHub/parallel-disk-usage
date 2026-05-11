@@ -168,8 +168,8 @@ fn fs_errors() {
         .map(|line| line.trim_start_matches('\r'))
         .collect();
     let expected_stderr_lines = btreeset! {
-        "[error] read_dir \"./nested/0\": Permission denied (os error 13)",
-        "[error] read_dir \"./empty-dir\": Permission denied (os error 13)",
+        r#"[error] read_dir "./nested/0": Permission denied (os error 13)"#,
+        r#"[error] read_dir "./empty-dir": Permission denied (os error 13)"#,
     };
     assert_eq!(actual_stderr_lines, expected_stderr_lines);
 

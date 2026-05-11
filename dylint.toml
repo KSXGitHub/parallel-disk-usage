@@ -1,6 +1,6 @@
 [workspace.metadata.dylint]
 libraries = [
-    { git = "https://github.com/KSXGitHub/perfectionist", rev = "3acd734c12fbd56d2c760f3c7bc9a19e45e62541" },
+    { git = "https://github.com/KSXGitHub/perfectionist", rev = "a21a146eff0ff5b61571160d287fec100879046d" },
 ]
 
 ["perfectionist::single_letter_names"]

@@ -42,6 +42,6 @@ fn test() {
         ),
     };
     let actual = TextReport(report).to_string();
-    let expected = "[error] read_dir \"path/to/a/directory\": Something goes wrong (os error 420)";
+    let expected = r#"[error] read_dir "path/to/a/directory": Something goes wrong (os error 420)"#;
     assert_eq!(actual, expected);
 }

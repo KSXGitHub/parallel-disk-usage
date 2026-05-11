@@ -47,7 +47,7 @@ where
         ReportProgress: Fn(ProgressReport<Size>) + Send + Sync + 'static,
     {
         let progress = Arc::new(ProgressReportState::default());
-        let progress_thread = progress.clone();
+        let progress_thread = Arc::clone(&progress);
         let progress_reporter_handle = spawn(move || {
             loop {
                 sleep(progress_report_interval);
