@@ -90,7 +90,7 @@ where
                 }
                 Ordering::Less => {
                     panic!(
-                        "Impossible! Total of nlink ({links}) is less than detected paths ({paths}). Something must have gone wrong!"
+                        "Impossible! Total of nlink ({links}) is less than detected paths ({paths}). Something must have gone wrong!",
                     );
                 }
             }

@@ -237,8 +237,8 @@ fn is_virtual_block_device<Fs: FsApi>(block_dev: &str) -> bool {
                 | "xen-blkfront"
                 | "vbd"
                 | "vmw_pvscsi"
-                | "hv_storvsc"
-        )
+                | "hv_storvsc",
+        ),
     )
 }
 

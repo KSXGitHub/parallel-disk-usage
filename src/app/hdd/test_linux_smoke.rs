@@ -14,7 +14,7 @@ fn real_sysfs_vda_does_not_panic() {
 fn nonexistent_device_is_not_virtual() {
     assert!(
         !is_virtual_block_device::<RealFs>("nonexistent_device_xyz"),
-        "non-existent device should not be detected as virtual"
+        "non-existent device should not be detected as virtual",
     );
 }
 

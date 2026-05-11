@@ -54,7 +54,8 @@ use crate::get_size::{GetBlockCount, GetBlockSize};
 
 ### Module Organization
 
-- Use the flat file pattern (`module.rs`) rather than `module/mod.rs` for submodules.
+The flat file pattern (`module.rs` rather than `module/mod.rs`) is enforced by the `perfectionist::flat_module_pattern` dylint check. In addition to that requirement, follow these conventions:
+
 - List `pub mod` declarations first, then `pub use` re-exports, then private imports and items.
 - Use `pub use` to re-export key types at the module level for convenience.
 

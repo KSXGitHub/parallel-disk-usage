@@ -275,7 +275,7 @@ fn render_possible_values(out: &mut String, arg: &Arg) {
     }
     if matches!(
         arg.get_action(),
-        ArgAction::SetTrue | ArgAction::SetFalse | ArgAction::Count
+        ArgAction::SetTrue | ArgAction::SetFalse | ArgAction::Count,
     ) {
         return;
     }

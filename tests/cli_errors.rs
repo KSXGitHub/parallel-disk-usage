@@ -72,7 +72,7 @@ fn min_ratio_1() {
             "error: invalid value '1' for '--min-ratio <MIN_RATIO>': greater than or equal to 1"
             ""
             "For more information, try '--help'."
-        }
+        },
     );
     assert_eq!(&stdout, &[] as &[u8]);
 }
@@ -101,7 +101,7 @@ fn max_depth_0() {
             r#"error: invalid value '0' for '--max-depth <MAX_DEPTH>': Value is neither "inf" nor a positive integer: number would be zero for non-zero type"#
             ""
             "For more information, try '--help'."
-        }
+        },
     );
     assert_eq!(&stdout, &[] as &[u8]);
 }

@@ -230,7 +230,7 @@ fn cross_device_excludes_mount() {
         .find_map(|mut entry| entry.next()?.ok());
     assert!(
         poll_result.is_some(),
-        "FUSE mount at {mount_point:?} not ready after {retries} retries"
+        "FUSE mount at {mount_point:?} not ready after {retries} retries",
     );
 
     let build_expected_tree = |device_boundary: DeviceBoundary| -> String {
