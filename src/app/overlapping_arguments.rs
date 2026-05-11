@@ -14,7 +14,7 @@ pub trait Api {
     type RealPathError;
     fn canonicalize(path: &Self::Argument) -> Result<Self::RealPath, Self::RealPathError>;
     fn is_real_dir(path: &Self::Argument) -> bool;
-    fn starts_with(a: &Self::RealPath, b: &Self::RealPath) -> bool;
+    fn starts_with(path: &Self::RealPath, prefix: &Self::RealPath) -> bool;
 }
 
 /// Implementation of [`Api`] that interacts with the real system.
@@ -36,8 +36,8 @@ impl Api for RealApi {
     }
 
     #[inline]
-    fn starts_with(a: &Self::RealPath, b: &Self::RealPath) -> bool {
-        a.starts_with(b)
+    fn starts_with(path: &Self::RealPath, prefix: &Self::RealPath) -> bool {
+        path.starts_with(prefix)
     }
 }
 

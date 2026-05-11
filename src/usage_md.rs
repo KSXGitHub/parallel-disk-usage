@@ -85,7 +85,7 @@ fn render_argument(out: &mut String, arg: &Arg) {
         .unwrap_or_else(|| arg.get_id().as_str());
     let is_multiple = arg
         .get_num_args()
-        .map(|r| r.max_values() > 1)
+        .map(|range| range.max_values() > 1)
         .unwrap_or(false);
     let display_name = if arg.is_required_set() {
         if is_multiple {

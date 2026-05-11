@@ -64,8 +64,8 @@ impl Api for MockedApi {
             .all(|(link, _)| PathBuf::from(link).normalize() != path)
     }
 
-    fn starts_with(a: &Self::RealPath, b: &Self::RealPath) -> bool {
-        a.starts_with(b)
+    fn starts_with(path: &Self::RealPath, prefix: &Self::RealPath) -> bool {
+        path.starts_with(prefix)
     }
 }
 

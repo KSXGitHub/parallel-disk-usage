@@ -1,3 +1,11 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    allow(
+        perfectionist::single_letter_let_binding,
+        reason = "the `let s` bindings flagged by this lint originate in `clap_derive` macro expansion of `default_value_t` and are outside our control",
+    )
+)]
+
 pub mod depth;
 pub mod fraction;
 pub mod quantity;

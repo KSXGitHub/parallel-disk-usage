@@ -88,6 +88,9 @@ terminal_size = "0.4.4"
 text-block-macros = "0.2.0"
 zero-copy-pads = "0.2.0"
 
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(dylint_lib, values("perfectionist"))'] }
+
 [dev-dependencies]
 build-fs-tree = "0.8.1"
 command-extra = "1.0.0"

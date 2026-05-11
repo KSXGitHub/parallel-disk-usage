@@ -11,6 +11,7 @@ pub struct Fraction(f32);
 
 /// Error that occurs when calling [`Fraction::new`].
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Error)]
+#[non_exhaustive]
 pub enum ConversionError {
     /// Provided value is greater than or equal to 1.
     #[display("greater than or equal to 1")]
@@ -43,6 +44,7 @@ impl TryFrom<f32> for Fraction {
 
 /// Error that occurs when parsing a string as [`Fraction`].
 #[derive(Debug, Display, Clone, PartialEq, Eq, Error)]
+#[non_exhaustive]
 pub enum FromStrError {
     ParseFloatError(ParseFloatError),
     Conversion(ConversionError),

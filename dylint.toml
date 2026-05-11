@@ -1,4 +1,31 @@
 [workspace.metadata.dylint]
 libraries = [
-    { git = "https://github.com/KSXGitHub/perfectionist", tag = "0.0.0-rc.7" },
+    { git = "https://github.com/KSXGitHub/perfectionist", rev = "3acd734c12fbd56d2c760f3c7bc9a19e45e62541" },
+]
+
+["perfectionist::single_letter_names"]
+# Treat project-specific and third-party comparison-style helpers as if
+# they were standard `sort_by`-shaped methods, so the idiomatic
+# `|a, b| a.field.cmp(&b.field)` closure does not trip the rule. The
+# defaults are included explicitly because setting this list replaces
+# the built-in allowlist rather than extending it.
+comparison_methods = [
+    "sort_by",
+    "sort_unstable_by",
+    "sort_by_key",
+    "sort_unstable_by_key",
+    "min_by",
+    "max_by",
+    "min_by_key",
+    "max_by_key",
+    "binary_search_by",
+    "binary_search_by_key",
+    "cmp_by",
+    "partial_cmp_by",
+    "eq_by",
+    "fold",
+    # Project-specific helper used in integration tests.
+    "sort_reflection_by",
+    # `into-sorted` crate's consuming sort.
+    "into_sorted_by",
 ]
