@@ -90,7 +90,7 @@ fn remove_duplicated_arguments() {
         "0/1/2",
         "./bar",
         "./abc/./def",
-    ],);
+    ]);
     let mut actual = original.clone();
     remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["foo", "bar", "abc/def", "0/1/2"];
@@ -104,7 +104,7 @@ fn remove_duplicated_arguments() {
         "abc/def",
         "foo",
         "0/1/2",
-    ],);
+    ]);
     let mut actual = original.clone();
     remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["foo", "./bar", "./abc/./def", "0/1/2"];
@@ -145,7 +145,7 @@ fn remove_all_except_current_dir() {
         "abc/def",
         "0/1/2",
         MOCKED_CURRENT_DIR,
-    ],);
+    ]);
     let mut actual = original.clone();
     remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["."];
@@ -158,7 +158,7 @@ fn remove_all_except_current_dir() {
         ".",
         "abc/def",
         "0/1/2",
-    ],);
+    ]);
     let mut actual = original.clone();
     remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec![MOCKED_CURRENT_DIR];
@@ -182,7 +182,7 @@ fn remove_all_except_parent_dir() {
         "abc/def",
         ".",
         "0/1/2",
-    ],);
+    ]);
     let mut actual = original.clone();
     remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["/home/user"];
@@ -199,7 +199,7 @@ fn remove_overlapping_real_paths() {
         "link-to-foo/child",
         "link-to-bar/a/b/c",
         "0/1/2",
-    ],);
+    ]);
     let mut actual = original.clone();
     remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["foo", "bar", "abc/def", "0/1/2"];
@@ -212,7 +212,7 @@ fn remove_overlapping_real_paths() {
         "bar",
         "abc/def",
         "0/1/2",
-    ],);
+    ]);
     let mut actual = original.clone();
     remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["foo", "bar", "abc/def", "0/1/2"];
@@ -225,7 +225,7 @@ fn remove_overlapping_real_paths() {
         "abc/def",
         "link-to-current-dir/bar",
         "0/1/2",
-    ],);
+    ]);
     let mut actual = original.clone();
     remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = vec!["link-to-current-dir/foo", "bar", "abc/def", "0/1/2"];
@@ -242,7 +242,7 @@ fn do_not_remove_symlinks() {
         "link-to-foo",
         "link-to-bar",
         "0/1/2",
-    ],);
+    ]);
     let mut actual = original.clone();
     remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = original;
@@ -255,7 +255,7 @@ fn do_not_remove_symlinks() {
         "link-to-foo",
         "link-to-bar",
         "0/1/2",
-    ],);
+    ]);
     let mut actual = original.clone();
     remove_overlapping_paths::<MockedApi>(&mut actual);
     let expected = original;
