@@ -39,6 +39,17 @@ jobs:
         shell: bash
         run: cargo install --locked cargo-dylint dylint-link
 
+      # The third entry in `restore-keys` above falls back to any cache for the
+      # same `rust-toolchain`, including caches built against an older
+      # `dylint.toml`. `cargo dylint` does not always detect a changed `git`
+      # `rev`/`tag` and may reuse the cached `libperfectionist.so` from the
+      # prior `dylint.toml`. Removing the dylint cache directory forces a
+      # fresh library build for the current `dylint.toml`. The `~/.cargo`
+      # registry cache is preserved, so dependency downloads stay fast.
+      - name: Invalidate stale dylint build artifacts
+        shell: bash
+        run: rm -rf target/dylint
+
       - name: Run dylint
         shell: bash
         env:
