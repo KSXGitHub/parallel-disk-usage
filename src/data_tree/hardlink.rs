@@ -12,6 +12,13 @@ where
 {
     /// Reduce the size of the directories that have hardlinks.
     #[cfg_attr(not(unix), expect(unused))]
+    #[cfg_attr(
+        dylint_lib = "perfectionist",
+        expect(
+            perfectionist::macro_argument_binding,
+            reason = "binding a `debug_assert_op!` argument to a `let` forces it to run in release builds, which defeats the entire point of `debug_assert_*`; see #415",
+        )
+    )]
     pub(crate) fn par_deduplicate_hardlinks(&mut self, hardlink_info: &[(Size, Vec<&Path>)]) {
         if hardlink_info.is_empty() {
             return;

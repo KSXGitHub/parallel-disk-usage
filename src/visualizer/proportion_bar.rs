@@ -7,17 +7,11 @@ use std::fmt::{Display, Error, Formatter};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, AsRef, Deref, Display, Into)]
 pub struct ProportionBarBlock(char);
 
-macro_rules! make_const {
-    ($name:ident = $content:literal) => {
-        pub const $name: ProportionBarBlock = ProportionBarBlock($content);
-    };
-}
-
-make_const!(LEVEL0_BLOCK = '█');
-make_const!(LEVEL1_BLOCK = '▓');
-make_const!(LEVEL2_BLOCK = '▒');
-make_const!(LEVEL3_BLOCK = '░');
-make_const!(LEVEL4_BLOCK = ' ');
+pub const LEVEL0_BLOCK: ProportionBarBlock = ProportionBarBlock('█');
+pub const LEVEL1_BLOCK: ProportionBarBlock = ProportionBarBlock('▓');
+pub const LEVEL2_BLOCK: ProportionBarBlock = ProportionBarBlock('▒');
+pub const LEVEL3_BLOCK: ProportionBarBlock = ProportionBarBlock('░');
+pub const LEVEL4_BLOCK: ProportionBarBlock = ProportionBarBlock(' ');
 
 /// Proportion bar.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, From, Into)]

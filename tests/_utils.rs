@@ -125,22 +125,36 @@ impl SampleWorkspace {
         .build(&temp)
         .expect("build the filesystem tree for the sample workspace");
 
-        macro_rules! link {
-            ($original:literal -> $link:literal) => {{
-                let original = $original;
-                let link = $link;
-                if let Err(error) = hard_link(temp.join(original), temp.join(link)) {
-                    panic!("Failed to link {original} to {link}: {error}");
-                }
-            }};
-        }
+        let link = |original: &str, link: &str| {
+            if let Err(error) = hard_link(temp.join(original), temp.join(link)) {
+                panic!("Failed to link {original} to {link}: {error}");
+            }
+        };
 
-        link!("main/sources/one-internal-hardlink.txt" -> "main/internal-hardlinks/link-0.txt");
-        link!("main/sources/two-internal-hardlinks.txt" -> "main/internal-hardlinks/link-1a.txt");
-        link!("main/sources/two-internal-hardlinks.txt" -> "main/internal-hardlinks/link-1b.txt");
-        link!("main/sources/one-external-hardlink.txt" -> "external-hardlinks/link-2.txt");
-        link!("main/sources/one-internal-one-external-hardlinks.txt" -> "main/internal-hardlinks/link-3a.txt");
-        link!("main/sources/one-internal-one-external-hardlinks.txt" -> "external-hardlinks/link-3b.txt");
+        link(
+            "main/sources/one-internal-hardlink.txt",
+            "main/internal-hardlinks/link-0.txt",
+        );
+        link(
+            "main/sources/two-internal-hardlinks.txt",
+            "main/internal-hardlinks/link-1a.txt",
+        );
+        link(
+            "main/sources/two-internal-hardlinks.txt",
+            "main/internal-hardlinks/link-1b.txt",
+        );
+        link(
+            "main/sources/one-external-hardlink.txt",
+            "external-hardlinks/link-2.txt",
+        );
+        link(
+            "main/sources/one-internal-one-external-hardlinks.txt",
+            "main/internal-hardlinks/link-3a.txt",
+        );
+        link(
+            "main/sources/one-internal-one-external-hardlinks.txt",
+            "external-hardlinks/link-3b.txt",
+        );
 
         SampleWorkspace(temp)
     }
@@ -149,21 +163,17 @@ impl SampleWorkspace {
         use std::os::unix::fs::symlink;
         let workspace = SampleWorkspace::simple_tree_with_some_hardlinks(sizes);
 
-        macro_rules! symlink {
-            ($link_name:literal -> $target:literal) => {
-                let link_name = $link_name;
-                let target = $target;
-                if let Err(error) = symlink(target, workspace.join(link_name)) {
-                    panic!("Failed create symbolic link {link_name} pointing to {target}: {error}");
-                }
-            };
-        }
+        let link = |link_name: &str, target: &str| {
+            if let Err(error) = symlink(target, workspace.join(link_name)) {
+                panic!("Failed create symbolic link {link_name} pointing to {target}: {error}");
+            }
+        };
 
-        symlink!("workspace-itself" -> ".");
-        symlink!("main/main-itself" -> ".");
-        symlink!("main/parent-of-main" -> "..");
-        symlink!("main-mirror" -> "./main");
-        symlink!("sources-mirror" -> "./main/sources");
+        link("workspace-itself", ".");
+        link("main/main-itself", ".");
+        link("main/parent-of-main", "..");
+        link("main-mirror", "./main");
+        link("sources-mirror", "./main/sources");
 
         workspace
     }

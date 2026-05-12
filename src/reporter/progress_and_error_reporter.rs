@@ -79,6 +79,13 @@ where
     ReportError: Fn(ErrorReport) + Sync,
     u64: Into<Size>,
 {
+    #[cfg_attr(
+        dylint_lib = "perfectionist",
+        expect(
+            perfectionist::macro_argument_binding,
+            reason = "the `bump!` macro's `($field:ident += $delta:expr)` matcher uses structural assignment syntax rather than a single expression, so binding the argument to a `let` is not even syntactically possible; see #416",
+        )
+    )]
     fn report(&self, event: Event<Size>) {
         use Event::*;
         let ProgressAndErrorReporter {

@@ -41,6 +41,13 @@ impl TreeColumnWidth {
 
 pub(super) type TreeTable<Name, NodeData> = Table<TreeRow<Name, NodeData>, TreeColumnWidth>;
 
+#[cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::macro_argument_binding,
+        reason = "the flagged sites are `debug_assert_op!` / `debug_assert_op_expr!` calls; binding to a `let` would defeat the debug-only contract (see #415), and the rule miscategorises bare operator tokens like `==` and `>` as expressions (see #418)",
+    )
+)]
 pub(super) fn render_tree<'a, Name, Size>(
     visualizer: Visualizer<'a, Name, Size>,
     initial_table: InitialTable<&'a Name, Size>,

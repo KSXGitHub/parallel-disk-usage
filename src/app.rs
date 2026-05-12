@@ -39,6 +39,13 @@ impl App {
     }
 
     /// Run the application.
+    #[cfg_attr(
+        dylint_lib = "perfectionist",
+        expect(
+            perfectionist::macro_argument_binding,
+            reason = "the unit literal `()` is the canonical trivial value, but the rule's trivial-expression grammar does not yet accept parenthesised forms; see #417",
+        )
+    )]
     pub fn run(mut self) -> Result<(), RuntimeError> {
         // DYNAMIC DISPATCH POLICY:
         //
