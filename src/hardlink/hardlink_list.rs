@@ -21,7 +21,7 @@ use pipe_trait::Pipe;
 use std::path::Path;
 
 /// Internal key used to uniquely identify an inode across all filesystems.
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct InodeKey {
     /// Inode number within the device.
     ino: InodeNumber,
@@ -45,7 +45,7 @@ struct Value<Size> {
 /// **Reflection:** `HardlinkList` does not implement `PartialEq`, `Eq`,
 /// `Deserialize`, and `Serialize` directly. Instead, it can be converted into a
 /// [`Reflection`] which implement these traits.
-#[derive(Debug, SmartDefault, Clone)]
+#[derive(Debug, Clone, SmartDefault)]
 pub struct HardlinkList<Size>(
     /// Map an inode key (device + inode number) to its size, number of links, and detected paths.
     DashMap<InodeKey, Value<Size>>,

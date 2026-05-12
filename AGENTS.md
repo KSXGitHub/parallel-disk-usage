@@ -12,7 +12,6 @@ Read and follow the CONTRIBUTING.md file in this repository for all code style c
 - Use descriptive names for variables and closure parameters. Single letters are permitted only in these cases: (1) conventional names like `n` for count or `f` for formatter; (2) comparison closures like `|a, b|`; (3) trivial single-expression closures; (4) fold accumulators; (5) index variables `i`/`j`/`k` in short closures or index-based loops; and (6) test fixtures with identical roles. Single letters are never permitted in multi-line functions or closures.
 - Use `pipe-trait` to chain through unary functions such as constructors, `Some`, `Ok`, and free functions. Use it to flatten nested calls and to continue method chains. Do not use it for simple standalone calls; prefer `foo(value)` over `value.pipe(foo)`.
 - Prefer `where` clauses when a type has multiple trait bounds.
-- Derive order: standard traits, then comparison traits, then `Hash`, then `derive_more`, then feature-gated derives.
 - For error types, only derive `Display` and `Error` from `derive_more` when each is actually needed. Not all displayable types are errors.
 - Minimize `unwrap()` in non-test code. Use proper error handling instead.
 - Prefer `#[cfg_attr(..., ignore = "reason")]` over `#[cfg(...)]` when skipping tests. Use `#[cfg]` on tests only when the code cannot compile under the condition, such as when it references types or functions that do not exist on other platforms.

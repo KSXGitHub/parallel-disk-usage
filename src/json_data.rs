@@ -16,7 +16,7 @@ use smart_default::SmartDefault;
 use serde::{Deserialize, Serialize};
 
 /// The `"shared"` field of [`JsonData`].
-#[derive(Debug, SmartDefault, Clone)]
+#[derive(Debug, Clone, SmartDefault)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]
 pub struct JsonShared<Size: size::Size> {

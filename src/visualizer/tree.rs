@@ -18,7 +18,7 @@ pub struct TreeSkeletalComponent {
 }
 
 /// String made by calling [`TreeSkeletalComponent::visualize`](TreeSkeletalComponent).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, AsRef, Deref, Display, Into)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Display, Into, AsRef, Deref)]
 pub struct TreeSkeletalComponentVisualization(&'static str);
 
 impl TreeSkeletalComponent {

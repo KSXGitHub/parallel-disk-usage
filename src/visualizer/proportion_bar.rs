@@ -4,7 +4,7 @@ use fmt_iter::repeat;
 use std::fmt::{Display, Error, Formatter};
 
 /// Block of proportion bar.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, AsRef, Deref, Display, Into)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Display, Into, AsRef, Deref)]
 pub struct ProportionBarBlock(char);
 
 pub const LEVEL0_BLOCK: ProportionBarBlock = ProportionBarBlock('█');

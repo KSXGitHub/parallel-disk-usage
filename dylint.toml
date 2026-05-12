@@ -3,6 +3,41 @@ libraries = [
     { git = "https://github.com/KSXGitHub/perfectionist", tag = "0.0.0-rc.9" },
 ]
 
+["perfectionist::derive_ordering"]
+# Match the convention documented in `CONTRIBUTING.md`. The `prefix`
+# extends the rule's default with the derive-more-style families this
+# project uses, in the project-preferred logical order: formatting
+# (`Display`, `Error`), conversions (`From`, `Into`, …), reference
+# wrappers (`AsRef`, `AsMut`, `Deref`, `DerefMut`), iteration
+# (`IntoIterator`), arithmetic operator pairs (`Add` / `AddAssign`,
+# `Sub` / `SubAssign`, …), and integer-format derives (`LowerHex`,
+# `UpperHex`, `Octal`). Anything not listed here (project-specific
+# `Setters`, `SmartDefault`, `Parser`, etc.) falls alphabetically
+# after the prefix, which matches the existing convention.
+style = "prefix_then_alphabetical"
+prefix = [
+    # Standard traits.
+    "Debug", "Default", "Clone", "Copy",
+    # Comparison traits.
+    "PartialEq", "Eq", "PartialOrd", "Ord",
+    # Hash.
+    "Hash",
+    # Formatting / error.
+    "Display", "Error",
+    # Conversions.
+    "From", "Into", "TryFrom", "TryInto", "FromStr",
+    # Reference wrappers.
+    "AsRef", "AsMut", "Deref", "DerefMut",
+    # Iteration.
+    "IntoIterator",
+    # Arithmetic operator pairs.
+    "Add", "AddAssign", "Sub", "SubAssign", "Mul", "MulAssign", "Div", "DivAssign",
+    # Folds.
+    "Sum", "Product",
+    # Integer-format derives.
+    "LowerHex", "UpperHex", "Octal",
+]
+
 ["perfectionist::single_letter_names"]
 # Treat project-specific and third-party comparison-style helpers as if
 # they were standard `sort_by`-shaped methods, so the idiomatic

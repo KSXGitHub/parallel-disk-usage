@@ -71,13 +71,9 @@ pub use event::Event;
 
 ### Derive Macro Ordering
 
-When deriving multiple traits, use this order and split across multiple `#[derive(...)]` lines for readability:
+The order of trait names within each `#[derive(...)]` attribute is enforced automatically by the `perfectionist::derive_ordering` rule, configured for the `prefix_then_alphabetical` style. The configured `prefix` in `dylint.toml` lists the trait families in their project-preferred order: standard traits, then comparison traits, then `Hash`, then formatting / error derives, then conversions, then reference wrappers, then iteration, then arithmetic operator pairs and folds, then integer-format derives. Any trait that is not in the `prefix` (project-specific derives such as `Setters`, `SmartDefault`, and `Parser`) falls in ASCII-case-insensitive alphabetical order after the prefix entries.
 
-1. **Standard traits:** `Debug`, `Default`, `Clone`, `Copy`
-2. **Comparison traits:** `PartialEq`, `Eq`, `PartialOrd`, `Ord`
-3. **Hash**
-4. **`derive_more` traits:** `Display`, `From`, `Into`, `Add`, `AddAssign`, etc.
-5. **Feature-gated derives** on a separate `#[cfg_attr(...)]` line
+The remaining conventions are not enforced by the rule and must be applied by hand. When a type derives many traits, split them across multiple `#[derive(...)]` lines for readability, and place feature-gated derives on a separate `#[cfg_attr(...)]` line.
 
 ```rust
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]

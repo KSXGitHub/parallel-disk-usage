@@ -25,7 +25,7 @@ impl Depth {
 }
 
 /// Error that occurs when parsing a string as [`Depth`].
-#[derive(Debug, Display, Clone, PartialEq, Eq, Error)]
+#[derive(Debug, Clone, PartialEq, Eq, Display, Error)]
 #[non_exhaustive]
 pub enum FromStrError {
     #[display("Value is neither {INFINITE:?} nor a positive integer: {_0}")]

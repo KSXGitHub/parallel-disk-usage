@@ -19,7 +19,7 @@ use std::{convert::Infallible, fmt::Debug, os::unix::fs::MetadataExt, path::Path
 /// Detect files with more than 1 links and record them.
 /// Deduplicate them (remove duplicated size) from total size to
 /// accurately reflect the real size of their containers.
-#[derive(Debug, SmartDefault, Clone, AsRef, AsMut, From, Into)]
+#[derive(Debug, Clone, From, Into, AsRef, AsMut, SmartDefault)]
 pub struct Aware<Size> {
     /// Map each file (identified by inode number and device number) to its size and detected paths.
     record: HardlinkList<Size>,

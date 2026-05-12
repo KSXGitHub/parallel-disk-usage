@@ -20,12 +20,12 @@ use serde::{Deserialize, Serialize};
     Eq,
     PartialOrd,
     Ord,
-    AsMut,
-    AsRef,
-    Deref,
-    DerefMut,
     From,
     FromStr,
+    AsRef,
+    AsMut,
+    Deref,
+    DerefMut,
 )]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 pub struct OsStringDisplay<Inner = OsString>(pub Inner)

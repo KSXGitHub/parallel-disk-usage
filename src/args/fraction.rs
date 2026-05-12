@@ -6,11 +6,11 @@ use std::{
 };
 
 /// Floating-point value that is greater than or equal to 0 and less than 1.
-#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd, AsRef, Deref, Display, Into)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd, Display, Into, AsRef, Deref)]
 pub struct Fraction(f32);
 
 /// Error that occurs when calling [`Fraction::new`].
-#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Error)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Display, Error)]
 #[non_exhaustive]
 pub enum ConversionError {
     /// Provided value is greater than or equal to 1.
@@ -43,7 +43,7 @@ impl TryFrom<f32> for Fraction {
 }
 
 /// Error that occurs when parsing a string as [`Fraction`].
-#[derive(Debug, Display, Clone, PartialEq, Eq, Error)]
+#[derive(Debug, Clone, PartialEq, Eq, Display, Error)]
 #[non_exhaustive]
 pub enum FromStrError {
     ParseFloatError(ParseFloatError),

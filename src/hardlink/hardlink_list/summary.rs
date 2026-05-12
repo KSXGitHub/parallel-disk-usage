@@ -11,7 +11,7 @@ use std::{
 use serde::{Deserialize, Serialize};
 
 /// Summary from [`HardlinkList`] or [`Reflection`].
-#[derive(Debug, Default, Setters, Clone, Copy, PartialEq, Eq, Add, AddAssign, Sum)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Add, AddAssign, Sum, Setters)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 #[setters(prefix = "with_")]
 #[non_exhaustive]

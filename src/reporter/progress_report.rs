@@ -3,7 +3,7 @@ use derive_setters::Setters;
 use std::fmt::Write;
 
 /// Scan progress.
-#[derive(Debug, Default, Setters, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Setters)]
 #[setters(prefix = "with_")]
 pub struct ProgressReport<Size: size::Size> {
     /// Number of scanned items.
