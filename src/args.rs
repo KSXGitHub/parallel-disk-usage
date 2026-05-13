@@ -1,11 +1,3 @@
-#![cfg_attr(
-    dylint_lib = "perfectionist",
-    allow(
-        perfectionist::single_letter_let_binding,
-        reason = "the `let s` bindings flagged by this lint originate in `clap_derive` macro expansion of `default_value_t` and are outside our control. KSXGitHub/perfectionist#62 added an `in_external_macro` check on the `LetStmt` span, but `clap_derive` attaches user-source spans to both the identifier and the surrounding statement, so the check does not catch this case",
-    )
-)]
-
 pub mod depth;
 pub mod fraction;
 pub mod quantity;
