@@ -466,7 +466,7 @@ impl<'a> Default for CommandList<'a> {
     /// Initialize a list with one `pdu` command.
     fn default() -> Self {
         CommandRepresentation::default()
-            .pipe(|command| vec![command])
+            .pipe(|x| vec![x])
             .pipe(CommandList)
     }
 }
