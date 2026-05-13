@@ -11,13 +11,6 @@ pub struct Fraction(f32);
 
 /// Error that occurs when calling [`Fraction::new`].
 #[derive(Debug, Display, Error, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(
-    dylint_lib = "perfectionist",
-    expect(
-        perfectionist::non_exhaustive_error,
-        reason = "this error type is explicitly exhaustive: `Fraction::new` can only fail in the two ways enumerated below, and any future failure mode would be a `Fraction::new` API change worth a SemVer-major bump",
-    )
-)]
 pub enum ConversionError {
     /// Provided value is greater than or equal to 1.
     #[display("greater than or equal to 1")]
@@ -50,13 +43,6 @@ impl TryFrom<f32> for Fraction {
 
 /// Error that occurs when parsing a string as [`Fraction`].
 #[derive(Debug, Display, Error, Clone, PartialEq, Eq)]
-#[cfg_attr(
-    dylint_lib = "perfectionist",
-    expect(
-        perfectionist::non_exhaustive_error,
-        reason = "this error type is explicitly exhaustive: `Fraction::from_str` can only fail in the two ways enumerated below, and any future failure mode would be a `Fraction::from_str` API change worth a SemVer-major bump",
-    )
-)]
 pub enum FromStrError {
     ParseFloatError(ParseFloatError),
     Conversion(ConversionError),
