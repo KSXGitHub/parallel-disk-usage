@@ -45,7 +45,7 @@ pub(super) type TreeTable<Name, NodeData> = Table<TreeRow<Name, NodeData>, TreeC
     dylint_lib = "perfectionist",
     expect(
         perfectionist::macro_argument_binding,
-        reason = "the flagged sites are `debug_assert_op!` / `debug_assert_op_expr!` calls; binding to a `let` would defeat the debug-only contract (see #415), and the rule miscategorises bare operator tokens like `==` and `>` as expressions (see #418)",
+        reason = "`Vec::len` is a pure `O(1)` read; the `debug_assert_op_expr!` invocation below intentionally keeps the call inside the assertion so it runs only in debug builds, and binding it to a `let` would lift the call into release builds for no benefit",
     )
 )]
 pub(super) fn render_tree<'a, Name, Size>(

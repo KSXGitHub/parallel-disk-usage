@@ -12,13 +12,6 @@ pub(super) struct BarRow<Name, NodeData> {
     pub(super) proportion_bar: ProportionBar,
 }
 
-#[cfg_attr(
-    dylint_lib = "perfectionist",
-    expect(
-        perfectionist::macro_argument_binding,
-        reason = "the flagged sites are all `debug_assert_op!` / `debug_assert_op_expr!` calls on side-effect-free locals; binding to a `let` would defeat the debug-only contract (see #415), and the rule also miscategorises bare operator tokens like `==` as expressions (see #418)",
-    )
-)]
 pub(super) fn render_bars<'a, Name, Size>(
     tree_table: TreeTable<&'a Name, Size>,
     total: u64,

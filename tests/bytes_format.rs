@@ -4,7 +4,7 @@
     dylint_lib = "perfectionist",
     expect(
         perfectionist::macro_argument_binding,
-        reason = "the `test_case!` macro uses a `name -> value in system == expected` DSL whose separators (`->`, `in`, `==`) are matcher tokens, not expression operators; binding the argument to a `let` is not even syntactically applicable. See #416. The crate-root scope is forced by an upstream late-pass anchoring quirk: violations in module-level item-position macro expansions resolve to the crate root, where finer-scoped `#[expect]` cannot reach them.",
+        reason = "the `test_case!` macro uses a `name -> value in system == expected` DSL whose `->` and `in` separators are not yet recognised by the rule's non-expression marker list (PR #52 added `=`, `+=`, and bare operators but not these). See #416. The crate-root scope is forced by an upstream late-pass anchoring quirk: violations in module-level item-position macro expansions resolve to the crate root, where finer-scoped `#[expect]` cannot reach them (#419).",
     )
 )]
 

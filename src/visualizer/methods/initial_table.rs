@@ -37,13 +37,6 @@ impl InitialColumnWidth {
 pub(super) type InitialTable<Name, NodeData> =
     Table<InitialRow<Name, NodeData>, InitialColumnWidth>;
 
-#[cfg_attr(
-    dylint_lib = "perfectionist",
-    expect(
-        perfectionist::macro_argument_binding,
-        reason = "the flagged sites are `debug_assert_op!` calls on side-effect-free locals; binding to a `let` would defeat the debug-only contract. See #415",
-    )
-)]
 pub(super) fn render_initial<Name, Size>(
     visualizer: Visualizer<'_, Name, Size>,
 ) -> InitialTable<&'_ Name, Size>
