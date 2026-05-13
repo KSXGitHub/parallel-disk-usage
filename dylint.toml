@@ -1,6 +1,6 @@
 [workspace.metadata.dylint]
 libraries = [
-    { git = "https://github.com/KSXGitHub/perfectionist", rev = "3ca7f01eb5b1359f6656b383be56d3b3697b106b" },
+    { git = "https://github.com/KSXGitHub/perfectionist", tag = "0.0.0-rc.12" },
 ]
 
 ["perfectionist::derive_ordering"]
@@ -21,7 +21,6 @@ prefix = [
 
 ["perfectionist::macro_argument_binding"]
 deny_extra = ["debug_assert_op", "debug_assert_op_expr"]
-allow_extra = ["bump", "link", "make_const", "symlink", "test_case", "visualize"]
 
 ["perfectionist::single_letter_closure_param"]
 extra_trivial_callback_methods = ["sort_reflection_by"]
