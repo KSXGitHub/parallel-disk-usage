@@ -41,13 +41,6 @@ impl TreeColumnWidth {
 
 pub(super) type TreeTable<Name, NodeData> = Table<TreeRow<Name, NodeData>, TreeColumnWidth>;
 
-#[cfg_attr(
-    dylint_lib = "perfectionist",
-    expect(
-        perfectionist::macro_argument_binding,
-        reason = "`Vec::len` is a pure `O(1)` read; the `debug_assert_op_expr!` invocation below intentionally keeps the call inside the assertion so it runs only in debug builds, and binding it to a `let` would lift the call into release builds for no benefit",
-    )
-)]
 pub(super) fn render_tree<'a, Name, Size>(
     visualizer: Visualizer<'a, Name, Size>,
     initial_table: InitialTable<&'a Name, Size>,

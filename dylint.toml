@@ -1,6 +1,6 @@
 [workspace.metadata.dylint]
 libraries = [
-    { git = "https://github.com/KSXGitHub/perfectionist", rev = "93cb529c15ae9e0ac8ef093efee58219b8d68cb7" },
+    { git = "https://github.com/KSXGitHub/perfectionist", rev = "892533129e44ef48f7be468a9804ff36325f70fa" },
 ]
 
 ["perfectionist::derive_ordering"]
@@ -36,6 +36,27 @@ prefix = [
     "Sum", "Product",
     # Integer-format derives.
     "LowerHex", "UpperHex", "Octal",
+]
+
+["perfectionist::macro_argument_binding"]
+# `assert_cmp::debug_assert_op!` and `debug_assert_op_expr!` expand
+# conditionally on `cfg(debug_assertions)`, so they share the
+# argument-evaluation hazard the built-in deny list catches for
+# `debug_assert*`. Catalogue them so the rule still flags genuinely
+# side-effecting arguments while accepting the pure-getter calls
+# (`vec.len()`) that the trivial-method classifier already recognises.
+deny_extra = ["debug_assert_op", "debug_assert_op_expr"]
+# Project-defined and third-party macros that expand each top-level
+# argument exactly once. Adding them to the allow list silences the
+# blanket "unknown macro" flag the default `AllowAndDeny` mode
+# applies to uncatalogued invocations.
+allow_extra = [
+    # `src/reporter/progress_and_error_reporter.rs::report`.
+    "bump",
+    # `src/app.rs::App::run`.
+    "visualize",
+    # `tests/bytes_format.rs`.
+    "test_case",
 ]
 
 ["perfectionist::single_letter_closure_param"]

@@ -1,13 +1,3 @@
-#![cfg_attr(dylint_lib = "perfectionist", feature(register_tool))]
-#![cfg_attr(dylint_lib = "perfectionist", register_tool(perfectionist))]
-#![cfg_attr(
-    dylint_lib = "perfectionist",
-    expect(
-        perfectionist::macro_argument_binding,
-        reason = "the `test_case!` macro uses a `name -> value in system == expected` DSL whose `->` and `in` separators are not yet recognised by the rule's non-expression marker list (PR #52 added `=`, `+=`, and bare operators but not these). See #416. The crate-root scope is forced by an upstream late-pass anchoring quirk: violations in module-level item-position macro expansions resolve to the crate root, where finer-scoped `#[expect]` cannot reach them (#419).",
-    )
-)]
-
 use parallel_disk_usage::bytes_format::BytesFormat;
 use pretty_assertions::assert_eq;
 
