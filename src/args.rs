@@ -25,7 +25,7 @@ use terminal_size::{Width, terminal_size};
 use text_block_macros::text_block;
 
 /// The CLI arguments.
-#[derive(Debug, Clone, Parser, Setters, SmartDefault)]
+#[derive(Debug, SmartDefault, Clone, Parser, Setters)]
 #[clap(
     name = "pdu",
 

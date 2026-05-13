@@ -7,7 +7,7 @@ use std::{
 const INFINITE: &str = "inf";
 
 /// Maximum depth of the tree.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Display)]
+#[derive(Debug, Display, Clone, Copy, PartialEq, Eq)]
 pub enum Depth {
     #[display("{INFINITE}")]
     Infinite,
@@ -25,7 +25,7 @@ impl Depth {
 }
 
 /// Error that occurs when parsing a string as [`Depth`].
-#[derive(Debug, Clone, PartialEq, Eq, Display, Error)]
+#[derive(Debug, Display, Error, Clone, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum FromStrError {
     #[display("Value is neither {INFINITE:?} nor a positive integer: {_0}")]

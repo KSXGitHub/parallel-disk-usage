@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 /// The inode number of a file or directory.
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, Hash, Display, From, Into, LowerHex, UpperHex, Octal,
+    Debug, Display, Clone, Copy, PartialEq, Eq, Hash, From, Into, LowerHex, UpperHex, Octal,
 )]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 pub struct InodeNumber(u64);

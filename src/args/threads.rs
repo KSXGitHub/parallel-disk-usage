@@ -8,7 +8,7 @@ const AUTO: &str = "auto";
 const MAX: &str = "max";
 
 /// Number of rayon threads.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Display)]
+#[derive(Debug, Display, Default, Clone, Copy, PartialEq, Eq)]
 pub enum Threads {
     #[default]
     #[display("{AUTO}")]
@@ -19,7 +19,7 @@ pub enum Threads {
 }
 
 /// Error that occurs when parsing a string as [`Threads`].
-#[derive(Debug, Clone, PartialEq, Eq, Display, Error)]
+#[derive(Debug, Display, Error, Clone, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum FromStrError {
     #[display("Value is neither {AUTO:?}, {MAX:?}, nor a number: {_0}")]

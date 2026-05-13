@@ -119,7 +119,7 @@ impl<Size> From<HardlinkList<Size>> for Reflection<Size> {
 
 /// Error that occurs when an attempt to convert a [`Reflection`] into a
 /// [`HardlinkList`] fails.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Display, Error)]
+#[derive(Debug, Display, Error, Clone, Copy, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum ConversionError {
     /// When the source has a duplicated `(inode, device)` pair.

@@ -4,84 +4,24 @@ libraries = [
 ]
 
 ["perfectionist::derive_ordering"]
-# Match the convention documented in `CONTRIBUTING.md`. The `prefix`
-# extends the rule's default with the derive-more-style families this
-# project uses, in the project-preferred logical order: formatting
-# (`Display`, `Error`), conversions (`From`, `Into`, …), reference
-# wrappers (`AsRef`, `AsMut`, `Deref`, `DerefMut`), iteration
-# (`IntoIterator`), arithmetic operator pairs (`Add` / `AddAssign`,
-# `Sub` / `SubAssign`, …), and integer-format derives (`LowerHex`,
-# `UpperHex`, `Octal`). Anything not listed here (project-specific
-# `Setters`, `SmartDefault`, `Parser`, etc.) falls alphabetically
-# after the prefix, which matches the existing convention.
 style = "prefix_then_alphabetical"
 prefix = [
-    # Standard traits.
-    "Debug", "Default", "Clone", "Copy",
-    # Comparison traits.
+    "Debug", "Display", "Error",
+    "Default", "SmartDefault",
+    "Clone", "Copy",
     "PartialEq", "Eq", "PartialOrd", "Ord",
-    # Hash.
     "Hash",
-    # Formatting / error.
-    "Display", "Error",
-    # Conversions.
-    "From", "Into", "TryFrom", "TryInto", "FromStr",
-    # Reference wrappers.
     "AsRef", "AsMut", "Deref", "DerefMut",
-    # Iteration.
+    "From", "Into", "TryFrom", "TryInto", "FromStr",
     "IntoIterator",
-    # Arithmetic operator pairs.
     "Add", "AddAssign", "Sub", "SubAssign", "Mul", "MulAssign", "Div", "DivAssign",
-    # Folds.
     "Sum", "Product",
-    # Integer-format derives.
     "LowerHex", "UpperHex", "Octal",
 ]
 
 ["perfectionist::macro_argument_binding"]
-# `assert_cmp::debug_assert_op!` and `debug_assert_op_expr!` expand
-# conditionally on `cfg(debug_assertions)`, so they share the
-# argument-evaluation hazard the built-in deny list catches for
-# `debug_assert*`. Catalogue them so the rule still flags genuinely
-# side-effecting arguments while accepting the pure-getter calls
-# (`vec.len()`) that the trivial-method classifier already recognises.
 deny_extra = ["debug_assert_op", "debug_assert_op_expr"]
-# Project-defined and third-party macros that expand each top-level
-# argument exactly once. Adding them to the allow list silences the
-# blanket "unknown macro" flag the default `AllowAndDeny` mode
-# applies to uncatalogued invocations.
-allow_extra = [
-    # `src/reporter/progress_and_error_reporter.rs::report`.
-    "bump",
-    # `src/app.rs::App::run`.
-    "visualize",
-    # `tests/bytes_format.rs`.
-    "test_case",
-]
+allow_extra = ["bump", "link", "symlink", "test_case", "visualize"]
 
 ["perfectionist::single_letter_closure_param"]
-# Treat project-specific and third-party comparison-style helpers as if
-# they were standard `sort_by`-shaped methods, so the idiomatic
-# `|a, b| a.field.cmp(&b.field)` closure does not trip the rule. The
-# defaults are included explicitly because setting this list replaces
-# the built-in allowlist rather than extending it.
-comparison_methods = [
-    "sort_by",
-    "sort_unstable_by",
-    "sort_by_key",
-    "sort_unstable_by_key",
-    "min_by",
-    "max_by",
-    "min_by_key",
-    "max_by_key",
-    "binary_search_by",
-    "binary_search_by_key",
-    "cmp_by",
-    "partial_cmp_by",
-    "eq_by",
-    "fold",
-    # Project-specific helper used in integration tests.
-    "sort_reflection_by",
-    # `into-sorted` crate's consuming sort.
-    "into_sorted_by",
-]
+comparison_methods = ["sort_by", "sort_unstable_by", "sort_by_key", "sort_unstable_by_key", "min_by", "max_by", "min_by_key", "max_by_key", "binary_search_by", "binary_search_by_key", "cmp_by", "partial_cmp_by", "eq_by", "fold", "sort_reflection_by", "into_sorted_by"]

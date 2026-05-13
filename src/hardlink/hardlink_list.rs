@@ -45,7 +45,7 @@ struct Value<Size> {
 /// **Reflection:** `HardlinkList` does not implement `PartialEq`, `Eq`,
 /// `Deserialize`, and `Serialize` directly. Instead, it can be converted into a
 /// [`Reflection`] which implement these traits.
-#[derive(Debug, Clone, SmartDefault)]
+#[derive(Debug, SmartDefault, Clone)]
 pub struct HardlinkList<Size>(
     /// Map an inode key (device + inode number) to its size, number of links, and detected paths.
     DashMap<InodeKey, Value<Size>>,

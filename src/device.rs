@@ -23,7 +23,7 @@ impl DeviceBoundary {
 
 /// The device number of a filesystem.
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, Hash, Display, From, Into, LowerHex, UpperHex, Octal,
+    Debug, Display, Clone, Copy, PartialEq, Eq, Hash, From, Into, LowerHex, UpperHex, Octal,
 )]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 pub struct DeviceNumber(u64);

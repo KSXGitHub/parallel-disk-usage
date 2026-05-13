@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Version of the `pdu` program that created the input JSON.
-#[derive(Debug, Clone, PartialEq, Eq, From, Into, FromStr, AsRef, AsMut)]
+#[derive(Debug, Clone, PartialEq, Eq, AsRef, AsMut, From, Into, FromStr)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 pub struct BinaryVersion(String);
 

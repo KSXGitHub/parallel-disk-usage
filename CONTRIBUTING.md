@@ -71,12 +71,12 @@ pub use event::Event;
 
 ### Derive Macro Ordering
 
-The order of trait names within each `#[derive(...)]` attribute is enforced automatically by the `perfectionist::derive_ordering` rule, configured for the `prefix_then_alphabetical` style. The configured `prefix` in `dylint.toml` lists the trait families in their project-preferred order: standard traits, then comparison traits, then `Hash`, then formatting / error derives, then conversions, then reference wrappers, then iteration, then arithmetic operator pairs and folds, then integer-format derives. Any trait that is not in the `prefix` (project-specific derives such as `Setters`, `SmartDefault`, and `Parser`) falls in ASCII-case-insensitive alphabetical order after the prefix entries.
+The order of trait names within each `#[derive(...)]` attribute is enforced automatically by the `perfectionist::derive_ordering` rule, configured for the `prefix_then_alphabetical` style. The configured `prefix` in `dylint.toml` lists the trait families in their project-preferred order: `Debug`, formatting / error derives (`Display`, `Error`), defaults (`Default`, `SmartDefault`), `Clone` / `Copy`, comparison and `Hash`, reference wrappers (`AsRef`, `AsMut`, `Deref`, `DerefMut`), conversions (`From`, `Into`, `TryFrom`, `TryInto`, `FromStr`), iteration, arithmetic operator pairs and folds, and integer-format derives. Any trait that is not in the `prefix` (project-specific derives such as `Setters` and `Parser`) falls in ASCII-case-insensitive alphabetical order after the prefix entries.
 
 The remaining conventions are not enforced by the rule and must be applied by hand. When a type derives many traits, split them across multiple `#[derive(...)]` lines for readability, and place feature-gated derives on a separate `#[cfg_attr(...)]` line.
 
 ```rust
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Display, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[derive(From, Into, Add, AddAssign, Sub, SubAssign, Sum)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 pub struct Bytes(u64);

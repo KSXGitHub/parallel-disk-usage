@@ -2,7 +2,7 @@ use derive_more::{Deref, DerefMut};
 use smart_default::SmartDefault;
 use std::collections::LinkedList;
 
-#[derive(Deref, DerefMut, SmartDefault)]
+#[derive(SmartDefault, Deref, DerefMut)]
 pub struct Table<Row, ColumnWidth: Default> {
     #[deref]
     #[deref_mut]
