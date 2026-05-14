@@ -88,11 +88,11 @@ Use **descriptive names** for type parameters, not single letters:
 
 - `Size`, `Name`, `SizeGetter`, `HardlinksRecorder`, `Report`
 
-Single-letter generics are acceptable only in very short, self-contained trait impls.
+Single-letter generics are acceptable only in very short, self-contained trait impls. Enforced by `perfectionist::single_letter_generic`; the threshold for "very short" is the rule's `short_impl_max_lines` knob in `dylint.toml`.
 
 ### Variable and Closure Parameter Naming
 
-Use **descriptive names** for variables and closure parameters by default. Single-letter names are permitted only in the specific cases listed below.
+Use **descriptive names** for variables and closure parameters by default. Single-letter names are permitted only in the specific cases listed below. Enforced by `perfectionist::single_letter_let_binding`, `perfectionist::single_letter_function_param`, and `perfectionist::single_letter_closure_param`; the per-rule `allowed_idents` and `extra_trivial_callback_methods` knobs in `dylint.toml` reflect the exceptions documented here.
 
 #### When single-letter names are allowed
 
