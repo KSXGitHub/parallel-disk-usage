@@ -91,6 +91,11 @@ zero-copy-pads = "0.2.0"
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(dylint_lib, values("perfectionist"))'] }
 
+[lints.clippy]
+clone_on_ref_ptr = "warn"
+if_then_some_else_none = "warn"
+unnecessary_lazy_evaluations = "warn"
+
 [dev-dependencies]
 build-fs-tree = "0.8.1"
 command-extra = "1.0.0"

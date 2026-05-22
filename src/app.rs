@@ -144,13 +144,11 @@ impl App {
         let threads = match self.args.threads {
             Threads::Auto => {
                 let disks = Disks::new_with_refreshed_list();
-                if any_path_is_in_hdd::<Disk, hdd::RealFs>(&self.args.files, &disks) {
+                any_path_is_in_hdd::<Disk, hdd::RealFs>(&self.args.files, &disks).then(|| {
                     eprintln!("warning: HDD detected, the thread limit will be set to 1");
                     eprintln!("hint: You can pass --threads=max disable this behavior");
-                    Some(1)
-                } else {
-                    None
-                }
+                    1
+                })
             }
             Threads::Max => None,
             Threads::Fixed(threads) => Some(threads.get()),
