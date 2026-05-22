@@ -5,7 +5,7 @@ libraries = [
 
 [perfectionist]
 disable = [
-    { name = "arc_rc_clone", reason = "`arc_rc_clone` is enforced by `clippy::clone_on_ref_ptr` instead" },
+    { name = "arc_rc_clone", reason = "already use clippy::clone_on_ref_ptr" },
 ]
 
 ["perfectionist::derive_ordering"]
