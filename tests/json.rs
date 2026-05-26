@@ -239,6 +239,12 @@ fn json_input_max_depth() {
     // The truncation must actually drop the deeper levels of the tree.
     let untruncated = visualize(&apply_pipeline(sample_tree(), u64::MAX, 0.0, false));
     assert_ne!(expected, untruncated);
+
+    // Implementation-independent oracle: with two levels, the root's direct
+    // children appear while their descendants do not. This pins the depth
+    // boundary without reusing the pipeline that produces `expected`.
+    assert!(actual.contains("foo"));
+    assert!(!actual.contains("subdirectory with a really long name"));
 }
 
 #[test]
