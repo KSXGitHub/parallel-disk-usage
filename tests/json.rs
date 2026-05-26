@@ -58,6 +58,84 @@ fn sample_tree() -> SampleTree {
     .into_par_sorted(|left, right| left.size().cmp(&right.size()).reverse())
 }
 
+/// Sample tree whose entries are deliberately stored in ascending order of size,
+/// which is the opposite of the descending order produced by the default sorting.
+fn ascending_sample_tree() -> SampleTree {
+    let file =
+        |name: &'static str, size: u64| SampleTree::file(name.to_string(), Bytes::from(size));
+    SampleTree::dir(
+        "root".to_string(),
+        1024.into(),
+        vec![file("a", 50), file("b", 500), file("c", 5000)],
+    )
+}
+
+/// Apply the same post-deserialization pipeline that `--json-input` performs,
+/// so that the expected visualization can be derived directly from a tree.
+fn apply_pipeline(tree: SampleTree, max_depth: u64, min_ratio: f32, no_sort: bool) -> SampleTree {
+    let mut tree = tree.into_par_retained(|_, depth| depth + 1 < max_depth);
+    if min_ratio > 0.0 {
+        tree.par_cull_insignificant_data(min_ratio);
+    }
+    if !no_sort {
+        tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
+    }
+    tree
+}
+
+/// Render a tree the same way the `--json-input` code path does.
+fn visualize(tree: &SampleTree) -> String {
+    let visualizer = Visualizer {
+        data_tree: tree,
+        bytes_format: BytesFormat::MetricUnits,
+        direction: Direction::BottomUp,
+        bar_alignment: BarAlignment::Left,
+        column_width_distribution: ColumnWidthDistribution::total(100),
+    };
+    format!("{visualizer}").trim_end().to_string()
+}
+
+/// Feed a tree to `pdu --json-input` and return its trimmed stdout.
+fn run_json_input(tree: SampleTree, extra_args: &[&str]) -> String {
+    let json_tree = JsonTree {
+        tree: tree.into_reflection(),
+        shared: Default::default(),
+    };
+    let json_data = JsonData {
+        schema_version: SchemaVersion,
+        binary_version: None,
+        body: json_tree.into(),
+    };
+    let json = serde_json::to_string_pretty(&json_data).expect("convert sample tree to JSON");
+    let workspace = Temp::new_dir().expect("create temporary directory");
+    let mut command = Command::new(PDU)
+        .with_current_dir(&workspace)
+        .with_arg("--json-input")
+        .with_arg("--bytes-format=metric")
+        .with_arg("--total-width=100");
+    for arg in extra_args {
+        command = command.with_arg(*arg);
+    }
+    let mut child = command
+        .with_stdin(Stdio::piped())
+        .with_stdout(Stdio::piped())
+        .with_stderr(Stdio::piped())
+        .spawn()
+        .expect("spawn command");
+    child
+        .stdin
+        .as_mut()
+        .expect("get stdin of child process")
+        .write_all(json.as_bytes())
+        .expect("write JSON string to child process's stdin");
+    child
+        .wait_with_output()
+        .expect("wait for output of child process")
+        .pipe(stdout_text)
+        .trim_end()
+        .to_string()
+}
+
 #[test]
 fn json_output() {
     let workspace = SampleWorkspace::default();
@@ -119,6 +197,7 @@ fn json_input() {
         .with_arg("--bytes-format=metric")
         .with_arg("--total-width=100")
         .with_arg("--max-depth=10")
+        .with_arg("--min-ratio=0")
         .with_stdin(Stdio::piped())
         .with_stdout(Stdio::piped())
         .with_stderr(Stdio::piped())
@@ -149,6 +228,39 @@ fn json_input() {
     eprintln!("EXPECTED:\n{expected}\n");
 
     assert_eq!(actual, expected);
+}
+
+#[test]
+fn json_input_max_depth() {
+    let actual = run_json_input(sample_tree(), &["--max-depth=2", "--min-ratio=0"]);
+    let expected = visualize(&apply_pipeline(sample_tree(), 2, 0.0, false));
+    assert_eq!(actual, expected);
+
+    // The truncation must actually drop the deeper levels of the tree.
+    let untruncated = visualize(&apply_pipeline(sample_tree(), u64::MAX, 0.0, false));
+    assert_ne!(expected, untruncated);
+}
+
+#[test]
+fn json_input_min_ratio() {
+    let actual = run_json_input(sample_tree(), &["--max-depth=10", "--min-ratio=0.1"]);
+    let expected = visualize(&apply_pipeline(sample_tree(), 10, 0.1, false));
+    assert_eq!(actual, expected);
+
+    // The culling must actually drop the insignificant entries.
+    let unculled = visualize(&apply_pipeline(sample_tree(), 10, 0.0, false));
+    assert_ne!(expected, unculled);
+}
+
+#[test]
+fn json_input_no_sort() {
+    let actual = run_json_input(ascending_sample_tree(), &["--no-sort", "--min-ratio=0"]);
+    let expected = visualize(&apply_pipeline(ascending_sample_tree(), 10, 0.0, true));
+    assert_eq!(actual, expected);
+
+    // Without `--no-sort` the entries are reordered, proving the flag is honored.
+    let sorted = run_json_input(ascending_sample_tree(), &["--min-ratio=0"]);
+    assert_ne!(actual, sorted);
 }
 
 #[test]

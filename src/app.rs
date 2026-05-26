@@ -30,6 +30,17 @@ pub struct App {
     args: Args,
 }
 
+/// Tree-shaping options applied to a deserialized `--json-input` tree before visualization.
+#[derive(Clone, Copy)]
+struct JsonInputShaping {
+    /// Maximum number of levels to display.
+    max_depth: u64,
+    /// Minimal size proportion required to appear.
+    min_ratio: f32,
+    /// Whether to preserve the input order of the entries.
+    no_sort: bool,
+}
+
 impl App {
     /// Initialize the application from the environment.
     pub fn from_env() -> Self {
@@ -58,10 +69,18 @@ impl App {
                 bytes_format,
                 top_down,
                 align_right,
+                max_depth,
+                min_ratio,
+                no_sort,
                 ..
             } = self.args;
             let direction = Direction::from_top_down(top_down);
             let bar_alignment = BarAlignment::from_align_right(align_right);
+            let shaping = JsonInputShaping {
+                max_depth: max_depth.get(),
+                min_ratio: min_ratio.into(),
+                no_sort,
+            };
 
             let body = stdin()
                 .pipe(serde_json::from_reader::<_, JsonData>)
@@ -75,12 +94,27 @@ impl App {
                     column_width_distribution: ColumnWidthDistribution,
                     direction: Direction,
                     bar_alignment: BarAlignment,
+                    shaping: JsonInputShaping,
                 ) -> Result<String, RuntimeError> {
                     let JsonTree { tree, shared } = tree;
+                    let JsonInputShaping {
+                        max_depth,
+                        min_ratio,
+                        no_sort,
+                    } = shaping;
 
-                    let data_tree = tree
+                    let mut data_tree = tree
                         .par_try_into_tree()
-                        .map_err(|error| RuntimeError::InvalidInputReflection(error.to_string()))?;
+                        .map_err(|error| RuntimeError::InvalidInputReflection(error.to_string()))?
+                        .into_par_retained(|_, depth| depth + 1 < max_depth);
+                    if min_ratio > 0.0 {
+                        data_tree.par_cull_insignificant_data(min_ratio);
+                    }
+                    if !no_sort {
+                        data_tree
+                            .par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
+                    }
+
                     let visualizer = Visualizer {
                         data_tree: &data_tree,
                         bytes_format,
@@ -114,6 +148,7 @@ impl App {
                         column_width_distribution,
                         direction,
                         bar_alignment,
+                        shaping,
                     )
                 };
             }
