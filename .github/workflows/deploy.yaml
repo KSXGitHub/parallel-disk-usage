@@ -472,6 +472,7 @@ jobs:
     environment: release
 
     permissions:
+      contents: read
       id-token: write # needed for crates.io Trusted Publishing
 
     steps:
