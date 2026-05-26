@@ -469,6 +469,8 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    environment: release
+
     permissions:
       id-token: write # needed for crates.io Trusted Publishing
 
