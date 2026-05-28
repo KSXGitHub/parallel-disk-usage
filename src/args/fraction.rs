@@ -18,12 +18,18 @@ pub enum ConversionError {
     /// Provided value is less than 0.
     #[display("less than 0")]
     LowerBound,
+    /// Provided value is `NaN`.
+    #[display("not a number")]
+    NotANumber,
 }
 
 impl Fraction {
     /// Create a [`Fraction`].
     pub fn new(value: f32) -> Result<Self, ConversionError> {
         use ConversionError::*;
+        if value.is_nan() {
+            return Err(NotANumber);
+        }
         if value >= 1.0 {
             return Err(UpperBound);
         }
