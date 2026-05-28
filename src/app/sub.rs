@@ -129,9 +129,7 @@ where
         let min_ratio: f32 = min_ratio.into();
         let (data_tree, deduplication_record) = {
             let mut data_tree = data_tree;
-            if min_ratio > 0.0 {
-                data_tree.par_cull_insignificant_data(min_ratio);
-            }
+            data_tree.par_cull_insignificant_data(min_ratio);
             if !no_sort {
                 data_tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
             }
