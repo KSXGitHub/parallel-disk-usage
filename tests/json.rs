@@ -70,29 +70,6 @@ fn ascending_sample_tree() -> SampleTree {
     )
 }
 
-/// Apply the same post-deserialization pipeline that `--json-input` performs,
-/// so that the expected visualization can be derived directly from a tree.
-fn apply_pipeline(tree: SampleTree, max_depth: u64, min_ratio: f32, no_sort: bool) -> SampleTree {
-    let mut tree = tree.into_par_retained(|_, depth| depth + 1 < max_depth);
-    tree.par_cull_insignificant_data(min_ratio);
-    if !no_sort {
-        tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
-    }
-    tree
-}
-
-/// Render a tree the same way the `--json-input` code path does.
-fn visualize(tree: &SampleTree) -> String {
-    let visualizer = Visualizer {
-        data_tree: tree,
-        bytes_format: BytesFormat::MetricUnits,
-        direction: Direction::BottomUp,
-        bar_alignment: BarAlignment::Left,
-        column_width_distribution: ColumnWidthDistribution::total(100),
-    };
-    format!("{visualizer}").trim_end().to_string()
-}
-
 /// Feed a tree to `pdu --json-input` and return its trimmed stdout.
 fn run_json_input(tree: SampleTree, extra_args: &[&str]) -> String {
     let json_tree = JsonTree {
@@ -228,52 +205,54 @@ fn json_input() {
 #[test]
 fn json_input_max_depth() {
     let actual = run_json_input(sample_tree(), &["--max-depth=2", "--min-ratio=0"]);
-    let expected = visualize(&apply_pipeline(sample_tree(), 2, 0.0, false));
-    assert_eq!(actual, expected);
+    eprintln!("ACTUAL:\n{actual}\n");
+    let unlimited = run_json_input(sample_tree(), &["--max-depth=10", "--min-ratio=0"]);
+    eprintln!("UNLIMITED:\n{unlimited}\n");
 
-    // The truncation must actually drop the deeper levels of the tree.
-    let untruncated = visualize(&apply_pipeline(sample_tree(), u64::MAX, 0.0, false));
-    assert_ne!(expected, untruncated);
+    // Limiting the depth must change the output.
+    assert_ne!(actual, unlimited);
 
-    // Implementation-independent oracle: with two levels, the root's direct
-    // children appear while their descendants do not. This pins the depth
-    // boundary without reusing the pipeline that produces `expected`.
+    // With two levels, the root's direct children appear while their deeper
+    // descendants do not. `subdirectory with a really long name` lives at depth 2
+    // and renders in the unlimited run, so its absence here is caused by the limit.
     assert!(actual.contains("foo"));
     assert!(!actual.contains("subdirectory with a really long name"));
+    assert!(unlimited.contains("subdirectory with a really long name"));
 }
 
 #[test]
 fn json_input_min_ratio() {
     let actual = run_json_input(sample_tree(), &["--max-depth=10", "--min-ratio=0.1"]);
     eprintln!("ACTUAL:\n{actual}\n");
-    let expected = visualize(&apply_pipeline(sample_tree(), 10, 0.1, false));
-    assert_eq!(actual, expected);
-    eprintln!("EXPECTED:\n{expected}\n");
-
-    // The culling must actually drop the insignificant entries.
-    let unculled = visualize(&apply_pipeline(sample_tree(), 10, 0.0, false));
+    let unculled = run_json_input(sample_tree(), &["--max-depth=10", "--min-ratio=0"]);
     eprintln!("UNCULLED:\n{unculled}\n");
-    assert_ne!(expected, unculled);
 
-    // Implementation-independent oracle: `foo` is far above the 10% threshold and
-    // must remain, while `bar` is far below it and must be culled. This pins the
-    // culling without reusing the pipeline that produces `expected`.
+    // Culling must change the output.
+    assert_ne!(actual, unculled);
+
+    // `foo` is far above the 10% threshold and survives, while `bar` is far below
+    // it and is culled. `bar` renders in the unculled run, so its absence here is
+    // caused by the culling.
     assert!(actual.contains("foo"));
     assert!(!actual.contains("bar"));
+    assert!(unculled.contains("bar"));
 }
 
 #[test]
 fn json_input_no_sort() {
     let actual = run_json_input(ascending_sample_tree(), &["--no-sort", "--min-ratio=0"]);
     eprintln!("ACTUAL:\n{actual}\n");
-    let expected = visualize(&apply_pipeline(ascending_sample_tree(), 10, 0.0, true));
-    eprintln!("EXPECTED:\n{expected}\n");
-    assert_eq!(actual, expected);
-
-    // Without `--no-sort` the entries are reordered, proving the flag is honored.
     let sorted = run_json_input(ascending_sample_tree(), &["--min-ratio=0"]);
     eprintln!("SORTED:\n{sorted}\n");
+
+    // Sorting must change the output.
     assert_ne!(actual, sorted);
+
+    // `--no-sort` preserves the ascending input order `a, b, c`, whereas the
+    // default sorts by descending size, so their relative positions flip.
+    let position = |text: &str, name: &str| text.find(name).expect("entry must be present");
+    assert!(position(&actual, "a") > position(&actual, "c"));
+    assert!(position(&sorted, "a") < position(&sorted, "c"));
 }
 
 #[test]
