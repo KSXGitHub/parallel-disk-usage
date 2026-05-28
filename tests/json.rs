@@ -254,6 +254,12 @@ fn json_input_min_ratio() {
     let unculled = visualize(&apply_pipeline(sample_tree(), 10, 0.0, false));
     eprintln!("UNCULLED:\n{unculled}\n");
     assert_ne!(expected, unculled);
+
+    // Implementation-independent oracle: `foo` is far above the 10% threshold and
+    // must remain, while `bar` is far below it and must be culled. This pins the
+    // culling without reusing the pipeline that produces `expected`.
+    assert!(actual.contains("foo"));
+    assert!(!actual.contains("bar"));
 }
 
 #[test]
