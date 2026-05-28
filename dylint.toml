@@ -26,6 +26,7 @@ prefix = [
 
 ["perfectionist::macro_argument_binding"]
 deny_extra = ["debug_assert_op", "debug_assert_op_expr"]
+allow_extra = ["assert_op_expr"]
 
 ["perfectionist::single_letter_closure_param"]
 extra_trivial_callback_methods = ["sort_reflection_by"]
