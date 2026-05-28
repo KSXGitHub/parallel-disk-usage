@@ -49,6 +49,18 @@ fn equal_to_one() {
 }
 
 #[test]
+fn not_a_number() {
+    let actual_error = "NaN".parse::<Fraction>().expect_err("cause nan error");
+    let actual_message = actual_error.to_string();
+    let expected_error = Conversion(NotANumber);
+    let expected_message = "not a number".to_string();
+    assert_eq!(
+        (actual_error, actual_message),
+        (expected_error, expected_message),
+    );
+}
+
+#[test]
 fn invalid_float_literal() {
     let actual = "a"
         .parse::<Fraction>()
