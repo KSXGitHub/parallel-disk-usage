@@ -106,14 +106,12 @@ fn run_json_input(tree: SampleTree, extra_args: &[&str]) -> String {
     };
     let json = serde_json::to_string_pretty(&json_data).expect("convert sample tree to JSON");
     let workspace = Temp::new_dir().expect("create temporary directory");
-    let mut command = Command::new(PDU)
+    let command = Command::new(PDU)
         .with_current_dir(&workspace)
         .with_arg("--json-input")
         .with_arg("--bytes-format=metric")
-        .with_arg("--total-width=100");
-    for arg in extra_args {
-        command = command.with_arg(*arg);
-    }
+        .with_arg("--total-width=100")
+        .with_args(extra_args);
     let mut child = command
         .with_stdin(Stdio::piped())
         .with_stdout(Stdio::piped())
