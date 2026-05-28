@@ -4,6 +4,7 @@
 pub mod _utils;
 pub use _utils::*;
 
+use assert_cmp::assert_op;
 use command_extra::CommandExtra;
 use parallel_disk_usage::{
     bytes_format::BytesFormat,
@@ -251,8 +252,12 @@ fn json_input_no_sort() {
     // `--no-sort` preserves the ascending input order `a, b, c`, whereas the
     // default sorts by descending size, so their relative positions flip.
     let position = |text: &str, name: &str| text.find(name).expect("entry must be present");
-    assert!(position(&actual, "a") > position(&actual, "c"));
-    assert!(position(&sorted, "a") < position(&sorted, "c"));
+    let actual_a = position(&actual, "a");
+    let actual_c = position(&actual, "c");
+    assert_op!(actual_a > actual_c);
+    let sorted_a = position(&sorted, "a");
+    let sorted_c = position(&sorted, "c");
+    assert_op!(sorted_a < sorted_c);
 }
 
 #[test]
