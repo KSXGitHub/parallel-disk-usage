@@ -107,9 +107,7 @@ impl App {
                         .par_try_into_tree()
                         .map_err(|error| RuntimeError::InvalidInputReflection(error.to_string()))?
                         .into_par_retained(|_, depth| depth + 1 < max_depth);
-                    if min_ratio > 0.0 {
-                        data_tree.par_cull_insignificant_data(min_ratio);
-                    }
+                    data_tree.par_cull_insignificant_data(min_ratio);
                     if !no_sort {
                         data_tree
                             .par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());

@@ -74,9 +74,7 @@ fn ascending_sample_tree() -> SampleTree {
 /// so that the expected visualization can be derived directly from a tree.
 fn apply_pipeline(tree: SampleTree, max_depth: u64, min_ratio: f32, no_sort: bool) -> SampleTree {
     let mut tree = tree.into_par_retained(|_, depth| depth + 1 < max_depth);
-    if min_ratio > 0.0 {
-        tree.par_cull_insignificant_data(min_ratio);
-    }
+    tree.par_cull_insignificant_data(min_ratio);
     if !no_sort {
         tree.par_sort_by(|left, right| left.size().cmp(&right.size()).reverse());
     }

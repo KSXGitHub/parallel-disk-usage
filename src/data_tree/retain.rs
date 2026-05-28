@@ -36,11 +36,16 @@ where
     }
 
     /// Recursively cull all descendants whose sizes are too small relative to root.
+    ///
+    /// A `min_ratio` that is not greater than zero, including `NaN`, leaves the tree unchanged.
     #[cfg(feature = "cli")]
     pub fn par_cull_insignificant_data(&mut self, min_ratio: f32)
     where
         Size: Into<u64>,
     {
+        if min_ratio <= 0.0 || min_ratio.is_nan() {
+            return;
+        }
         let minimal = self.size().into() as f32 * min_ratio;
         self.par_retain(|descendant, _| descendant.size().into() as f32 >= minimal);
     }
