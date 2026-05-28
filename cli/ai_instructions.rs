@@ -1,3 +1,13 @@
+#![cfg_attr(dylint_lib = "perfectionist", feature(register_tool))]
+#![cfg_attr(dylint_lib = "perfectionist", register_tool(perfectionist))]
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    allow(
+        perfectionist::lint_silence_reason,
+        reason = "false positive on `clap`-derive-generated `#[allow]` attributes; see https://github.com/KSXGitHub/parallel-disk-usage/issues/430"
+    )
+)]
+
 use clap::Parser;
 use derive_more::Display;
 use pipe_trait::Pipe;
