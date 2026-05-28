@@ -30,17 +30,6 @@ pub struct App {
     args: Args,
 }
 
-/// Tree-shaping options applied to a deserialized `--json-input` tree before visualization.
-#[derive(Clone, Copy)]
-struct JsonInputShaping {
-    /// Maximum number of levels to display.
-    max_depth: u64,
-    /// Minimal size proportion required to appear.
-    min_ratio: f32,
-    /// Whether to preserve the input order of the entries.
-    no_sort: bool,
-}
-
 /// Geometry options that control how the chart is laid out.
 #[derive(Clone, Copy)]
 struct ChartLayout {
@@ -50,6 +39,17 @@ struct ChartLayout {
     direction: Direction,
     /// Whether the bars are aligned to the left or to the right.
     bar_alignment: BarAlignment,
+}
+
+/// Tree-shaping options applied to a deserialized `--json-input` tree before visualization.
+#[derive(Clone, Copy)]
+struct JsonInputShaping {
+    /// Maximum number of levels to display.
+    max_depth: u64,
+    /// Minimal size proportion required to appear.
+    min_ratio: f32,
+    /// Whether to preserve the input order of the entries.
+    no_sort: bool,
 }
 
 impl App {
