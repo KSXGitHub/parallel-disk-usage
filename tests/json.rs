@@ -245,22 +245,28 @@ fn json_input_max_depth() {
 #[test]
 fn json_input_min_ratio() {
     let actual = run_json_input(sample_tree(), &["--max-depth=10", "--min-ratio=0.1"]);
+    eprintln!("ACTUAL:\n{actual}\n");
     let expected = visualize(&apply_pipeline(sample_tree(), 10, 0.1, false));
     assert_eq!(actual, expected);
+    eprintln!("EXPECTED:\n{expected}\n");
 
     // The culling must actually drop the insignificant entries.
     let unculled = visualize(&apply_pipeline(sample_tree(), 10, 0.0, false));
+    eprintln!("UNCULLED:\n{unculled}\n");
     assert_ne!(expected, unculled);
 }
 
 #[test]
 fn json_input_no_sort() {
     let actual = run_json_input(ascending_sample_tree(), &["--no-sort", "--min-ratio=0"]);
+    eprintln!("ACTUAL:\n{actual}\n");
     let expected = visualize(&apply_pipeline(ascending_sample_tree(), 10, 0.0, true));
+    eprintln!("EXPECTED:\n{expected}\n");
     assert_eq!(actual, expected);
 
     // Without `--no-sort` the entries are reordered, proving the flag is honored.
     let sorted = run_json_input(ascending_sample_tree(), &["--min-ratio=0"]);
+    eprintln!("SORTED:\n{sorted}\n");
     assert_ne!(actual, sorted);
 }
 
