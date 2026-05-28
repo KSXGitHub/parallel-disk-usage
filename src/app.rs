@@ -41,6 +41,17 @@ struct JsonInputShaping {
     no_sort: bool,
 }
 
+/// Geometry options that control how the chart is laid out.
+#[derive(Clone, Copy)]
+struct ChartLayout {
+    /// How the available width is distributed across the columns.
+    column_width_distribution: ColumnWidthDistribution,
+    /// Whether the tree grows from the top down or from the bottom up.
+    direction: Direction,
+    /// Whether the bars are aligned to the left or to the right.
+    bar_alignment: BarAlignment,
+}
+
 impl App {
     /// Initialize the application from the environment.
     pub fn from_env() -> Self {
@@ -74,8 +85,11 @@ impl App {
                 no_sort,
                 ..
             } = self.args;
-            let direction = Direction::from_top_down(top_down);
-            let bar_alignment = BarAlignment::from_align_right(align_right);
+            let layout = ChartLayout {
+                column_width_distribution,
+                direction: Direction::from_top_down(top_down),
+                bar_alignment: BarAlignment::from_align_right(align_right),
+            };
             let shaping = JsonInputShaping {
                 max_depth: max_depth.get(),
                 min_ratio: min_ratio.into(),
@@ -91,12 +105,15 @@ impl App {
                 fn visualize_json_tree(
                     tree: JsonTree<Self>,
                     bytes_format: Self::DisplayFormat,
-                    column_width_distribution: ColumnWidthDistribution,
-                    direction: Direction,
-                    bar_alignment: BarAlignment,
+                    layout: ChartLayout,
                     shaping: JsonInputShaping,
                 ) -> Result<String, RuntimeError> {
                     let JsonTree { tree, shared } = tree;
+                    let ChartLayout {
+                        column_width_distribution,
+                        direction,
+                        bar_alignment,
+                    } = layout;
                     let JsonInputShaping {
                         max_depth,
                         min_ratio,
@@ -140,14 +157,7 @@ impl App {
 
             macro_rules! visualize {
                 ($tree:expr, $bytes_format:expr) => {
-                    VisualizeJsonTree::visualize_json_tree(
-                        $tree,
-                        $bytes_format,
-                        column_width_distribution,
-                        direction,
-                        bar_alignment,
-                        shaping,
-                    )
+                    VisualizeJsonTree::visualize_json_tree($tree, $bytes_format, layout, shaping)
                 };
             }
 
