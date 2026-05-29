@@ -6,25 +6,23 @@ pub use _utils::*;
 
 use assert_cmp::assert_op_expr;
 use command_extra::CommandExtra;
-use parallel_disk_usage::{
-    bytes_format::BytesFormat,
-    data_tree::DataTree,
-    device::DeviceBoundary,
-    fs_tree_builder::FsTreeBuilder,
-    get_size::GetApparentSize,
-    hardlink::HardlinkIgnorant,
-    json_data::{JsonData, JsonTree, SchemaVersion},
-    reporter::{ErrorOnlyReporter, ErrorReport},
-    size::Bytes,
-    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
+use parallel_disk_usage::bytes_format::BytesFormat;
+use parallel_disk_usage::data_tree::DataTree;
+use parallel_disk_usage::device::DeviceBoundary;
+use parallel_disk_usage::fs_tree_builder::FsTreeBuilder;
+use parallel_disk_usage::get_size::GetApparentSize;
+use parallel_disk_usage::hardlink::HardlinkIgnorant;
+use parallel_disk_usage::json_data::{JsonData, JsonTree, SchemaVersion};
+use parallel_disk_usage::reporter::{ErrorOnlyReporter, ErrorReport};
+use parallel_disk_usage::size::Bytes;
+use parallel_disk_usage::visualizer::{
+    BarAlignment, ColumnWidthDistribution, Direction, Visualizer,
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use std::{
-    convert::TryInto,
-    io::Write,
-    process::{Command, Stdio},
-};
+use std::convert::TryInto;
+use std::io::Write;
+use std::process::{Command, Stdio};
 
 type SampleName = String;
 type SampleSize = Bytes;

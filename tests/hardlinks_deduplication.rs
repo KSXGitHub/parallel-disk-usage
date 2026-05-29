@@ -8,27 +8,22 @@ use command_extra::CommandExtra;
 use into_sorted::IntoSorted;
 use itertools::Itertools;
 use normalize_path::NormalizePath;
-use parallel_disk_usage::{
-    bytes_format::BytesFormat,
-    data_tree::Reflection,
-    hardlink::{
-        LinkPathListReflection,
-        hardlink_list::{Summary, reflection::ReflectionEntry},
-    },
-    inode::InodeNumber,
-    json_data::{JsonData, JsonTree},
-    size::Bytes,
-};
+use parallel_disk_usage::bytes_format::BytesFormat;
+use parallel_disk_usage::data_tree::Reflection;
+use parallel_disk_usage::hardlink::LinkPathListReflection;
+use parallel_disk_usage::hardlink::hardlink_list::Summary;
+use parallel_disk_usage::hardlink::hardlink_list::reflection::ReflectionEntry;
+use parallel_disk_usage::inode::InodeNumber;
+use parallel_disk_usage::json_data::{JsonData, JsonTree};
+use parallel_disk_usage::size::Bytes;
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use rayon::prelude::*;
-use std::{
-    collections::HashSet,
-    iter,
-    ops::Add,
-    path::PathBuf,
-    process::{Command, Stdio},
-};
+use std::collections::HashSet;
+use std::iter;
+use std::ops::Add;
+use std::path::PathBuf;
+use std::process::{Command, Stdio};
 
 fn stdio(command: Command) -> Command {
     command

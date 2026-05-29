@@ -1,8 +1,6 @@
 use derive_more::{AsMut, AsRef, Deref, DerefMut, From, FromStr};
-use std::{
-    ffi::{OsStr, OsString},
-    fmt::{Debug, Display, Error, Formatter},
-};
+use std::ffi::{OsStr, OsString};
+use std::fmt::{Debug, Display, Error, Formatter};
 
 #[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};

@@ -14,7 +14,8 @@ use tree_table::*;
 
 use super::{ColumnWidthDistribution, Visualizer};
 use crate::size;
-use std::{cmp::min, fmt::Display};
+use std::cmp::min;
+use std::fmt::Display;
 use zero_copy_pads::{align_left, align_right};
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>

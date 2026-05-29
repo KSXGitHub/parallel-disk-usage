@@ -9,7 +9,10 @@ pub use summary::Summary;
 pub use Reflection as HardlinkListReflection;
 pub use Summary as SharedLinkSummary;
 
-use crate::{device::DeviceNumber, hardlink::LinkPathList, inode::InodeNumber, size};
+use crate::device::DeviceNumber;
+use crate::hardlink::LinkPathList;
+use crate::inode::InodeNumber;
+use crate::size;
 use dashmap::DashMap;
 use derive_more::{Display, Error};
 use smart_default::SmartDefault;

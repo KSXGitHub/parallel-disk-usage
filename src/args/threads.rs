@@ -1,8 +1,6 @@
 use derive_more::{Display, Error};
-use std::{
-    num::{NonZeroUsize, ParseIntError},
-    str::FromStr,
-};
+use std::num::{NonZeroUsize, ParseIntError};
+use std::str::FromStr;
 
 const AUTO: &str = "auto";
 const MAX: &str = "max";

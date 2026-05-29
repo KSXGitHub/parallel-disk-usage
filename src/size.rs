@@ -1,10 +1,8 @@
 use super::bytes_format::{self, BytesFormat};
 use derive_more::{Add, AddAssign, From, Into, Sub, SubAssign, Sum};
-use std::{
-    fmt::{Debug, Display},
-    iter::Sum,
-    ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign},
-};
+use std::fmt::{Debug, Display};
+use std::iter::Sum;
+use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
 #[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};

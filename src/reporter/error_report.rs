@@ -2,7 +2,8 @@ pub mod operation;
 
 pub use operation::Operation;
 
-use std::{io::Error, path::Path};
+use std::io::Error;
+use std::path::Path;
 
 /// Information regarding a filesystem error.
 #[derive(Debug)]

@@ -1,4 +1,5 @@
-use super::{Direction::*, Visualizer};
+use super::Direction::*;
+use super::Visualizer;
 use crate::size;
 use std::fmt::{Display, Error, Formatter};
 

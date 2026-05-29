@@ -1,8 +1,10 @@
 use super::HardlinkSubroutines;
-use crate::{
-    data_tree::DataTree, hardlink::HardlinkAware, json_data::JsonShared,
-    os_string_display::OsStringDisplay, runtime_error::RuntimeError, size,
-};
+use crate::data_tree::DataTree;
+use crate::hardlink::HardlinkAware;
+use crate::json_data::JsonShared;
+use crate::os_string_display::OsStringDisplay;
+use crate::runtime_error::RuntimeError;
+use crate::size;
 use pipe_trait::Pipe;
 
 impl<Size> HardlinkSubroutines<Size> for HardlinkAware<Size>

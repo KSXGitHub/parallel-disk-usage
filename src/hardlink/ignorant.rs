@@ -1,5 +1,7 @@
 use super::{DeduplicateSharedSize, RecordHardlinks, RecordHardlinksArgument};
-use crate::{data_tree::DataTree, os_string_display::OsStringDisplay, size};
+use crate::data_tree::DataTree;
+use crate::os_string_display::OsStringDisplay;
+use crate::size;
 use std::convert::Infallible;
 
 /// Be ignorant of hardlinks. Treat them as real files.

@@ -1,11 +1,9 @@
 use pipe_trait::Pipe;
-use std::{
-    collections::HashSet,
-    fs::{canonicalize, symlink_metadata},
-    io,
-    mem::take,
-    path::PathBuf,
-};
+use std::collections::HashSet;
+use std::fs::{canonicalize, symlink_metadata};
+use std::io;
+use std::mem::take;
+use std::path::PathBuf;
 
 /// Mockable APIs to interact with the system.
 pub trait Api {

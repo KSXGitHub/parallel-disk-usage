@@ -1,4 +1,6 @@
-use crate::{data_tree::DataTree, os_string_display::OsStringDisplay, size};
+use crate::data_tree::DataTree;
+use crate::os_string_display::OsStringDisplay;
+use crate::size;
 
 /// Ability to correct the sizes in a [`DataTree`] by reducing the size of recorded shared links.
 ///

@@ -1,7 +1,9 @@
 use super::{ConversionError, Reflection};
-use crate::{data_tree::DataTree, size};
+use crate::data_tree::DataTree;
+use crate::size;
 use rayon::prelude::*;
-use std::{ffi::OsStr, iter::once};
+use std::ffi::OsStr;
+use std::iter::once;
 
 impl<Name, Size> Reflection<Name, Size>
 where

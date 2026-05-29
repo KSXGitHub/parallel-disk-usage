@@ -1,8 +1,8 @@
-use parallel_disk_usage::{
-    bytes_format::BytesFormat::*,
-    data_tree::DataTree,
-    size::{self, Blocks, Bytes},
-    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
+use parallel_disk_usage::bytes_format::BytesFormat::*;
+use parallel_disk_usage::data_tree::DataTree;
+use parallel_disk_usage::size::{self, Blocks, Bytes};
+use parallel_disk_usage::visualizer::{
+    BarAlignment, ColumnWidthDistribution, Direction, Visualizer,
 };
 use pretty_assertions::assert_eq;
 use std::cmp::Ordering;

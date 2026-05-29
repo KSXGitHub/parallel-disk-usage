@@ -1,10 +1,8 @@
 use super::{FsApi, VIRTUAL_DISK_KIND, parse_block_device_name, reclassify_virtual_hdd};
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use std::{
-    io,
-    path::{Path, PathBuf},
-};
+use std::io;
+use std::path::{Path, PathBuf};
 use sysinfo::DiskKind;
 
 /// Test pure parsing of block device names — no sysfs dependency.

@@ -1,8 +1,10 @@
 use super::{NodeInfo, TreeRow, TreeTable};
-use crate::{size, visualizer::ProportionBar};
+use crate::size;
+use crate::visualizer::ProportionBar;
 use assert_cmp::debug_assert_op;
 use derive_more::{Deref, DerefMut};
-use std::{collections::LinkedList, fmt::Display};
+use std::collections::LinkedList;
+use std::fmt::Display;
 
 #[derive(Deref, DerefMut)]
 pub(super) struct BarRow<Name, NodeData> {

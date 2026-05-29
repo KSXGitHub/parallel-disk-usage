@@ -14,7 +14,8 @@ pub use parenthood::Parenthood;
 pub use proportion_bar::{ProportionBar, ProportionBarBlock};
 pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
 
-use super::{data_tree::DataTree, size};
+use super::data_tree::DataTree;
+use super::size;
 use std::fmt::Display;
 
 /// Visualize a [`DataTree`].

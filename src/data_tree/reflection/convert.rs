@@ -1,5 +1,6 @@
 use super::Reflection;
-use crate::{data_tree::DataTree, size};
+use crate::data_tree::DataTree;
+use crate::size;
 
 impl<Name, Size: size::Size> From<DataTree<Name, Size>> for Reflection<Name, Size> {
     fn from(source: DataTree<Name, Size>) -> Self {

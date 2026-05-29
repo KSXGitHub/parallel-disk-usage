@@ -1,7 +1,6 @@
-use parallel_disk_usage::{
-    data_tree::{DataTree, Reflection, reflection::ConversionError},
-    size::Bytes,
-};
+use parallel_disk_usage::data_tree::reflection::ConversionError;
+use parallel_disk_usage::data_tree::{DataTree, Reflection};
+use parallel_disk_usage::size::Bytes;
 use pretty_assertions::assert_eq;
 use std::mem::transmute;
 

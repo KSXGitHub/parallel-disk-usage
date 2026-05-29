@@ -1,9 +1,7 @@
 use derive_more::{AsRef, Deref, Display, Error, Into};
-use std::{
-    convert::{TryFrom, TryInto},
-    num::ParseFloatError,
-    str::FromStr,
-};
+use std::convert::{TryFrom, TryInto};
+use std::num::ParseFloatError;
+use std::str::FromStr;
 
 /// Floating-point value that is greater than or equal to 0 and less than 1.
 #[derive(Debug, Display, Default, Clone, Copy, PartialEq, PartialOrd, AsRef, Deref, Into)]

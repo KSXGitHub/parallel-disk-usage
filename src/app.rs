@@ -2,22 +2,20 @@ pub mod sub;
 
 pub use sub::Sub;
 
-use crate::{
-    args::{Args, Quantity, Threads},
-    bytes_format::BytesFormat,
-    device::DeviceBoundary,
-    get_size::{GetApparentSize, GetSize},
-    hardlink,
-    json_data::{JsonData, JsonDataBody, JsonShared, JsonTree},
-    reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport},
-    runtime_error::RuntimeError,
-    size,
-    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
-};
+use crate::args::{Args, Quantity, Threads};
+use crate::bytes_format::BytesFormat;
+use crate::device::DeviceBoundary;
+use crate::get_size::{GetApparentSize, GetSize};
+use crate::json_data::{JsonData, JsonDataBody, JsonShared, JsonTree};
+use crate::reporter::{ErrorOnlyReporter, ErrorReport, ProgressAndErrorReporter, ProgressReport};
+use crate::runtime_error::RuntimeError;
+use crate::visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer};
+use crate::{hardlink, size};
 use clap::Parser;
 use hdd::any_path_is_in_hdd;
 use pipe_trait::Pipe;
-use std::{io::stdin, time::Duration};
+use std::io::stdin;
+use std::time::Duration;
 use sub::JsonOutputParam;
 use sysinfo::{Disk, Disks};
 

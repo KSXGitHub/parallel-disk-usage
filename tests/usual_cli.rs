@@ -4,16 +4,16 @@ pub mod _utils;
 pub use _utils::*;
 
 use command_extra::CommandExtra;
-use parallel_disk_usage::{
-    bytes_format::BytesFormat,
-    data_tree::DataTree,
-    device::DeviceBoundary,
-    fs_tree_builder::FsTreeBuilder,
-    get_size::GetApparentSize,
-    hardlink::HardlinkIgnorant,
-    os_string_display::OsStringDisplay,
-    reporter::{ErrorOnlyReporter, ErrorReport},
-    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
+use parallel_disk_usage::bytes_format::BytesFormat;
+use parallel_disk_usage::data_tree::DataTree;
+use parallel_disk_usage::device::DeviceBoundary;
+use parallel_disk_usage::fs_tree_builder::FsTreeBuilder;
+use parallel_disk_usage::get_size::GetApparentSize;
+use parallel_disk_usage::hardlink::HardlinkIgnorant;
+use parallel_disk_usage::os_string_display::OsStringDisplay;
+use parallel_disk_usage::reporter::{ErrorOnlyReporter, ErrorReport};
+use parallel_disk_usage::visualizer::{
+    BarAlignment, ColumnWidthDistribution, Direction, Visualizer,
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;

@@ -1,10 +1,8 @@
 use super::mount_point::find_mount_point;
-use std::{
-    ffi::OsStr,
-    fs::canonicalize,
-    io,
-    path::{Path, PathBuf},
-};
+use std::ffi::OsStr;
+use std::fs::canonicalize;
+use std::io;
+use std::path::{Path, PathBuf};
 use sysinfo::{Disk, DiskKind};
 
 #[cfg(target_os = "linux")]

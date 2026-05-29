@@ -2,7 +2,8 @@ use super::{Api, remove_overlapping_paths};
 use normalize_path::NormalizePath;
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use std::{convert::Infallible, path::PathBuf};
+use std::convert::Infallible;
+use std::path::PathBuf;
 
 const MOCKED_CURRENT_DIR: &str = "/home/user/current-dir";
 

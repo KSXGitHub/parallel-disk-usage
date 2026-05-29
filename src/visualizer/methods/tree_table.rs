@@ -1,19 +1,15 @@
 use super::{InitialColumnWidth, InitialRow, InitialTable, Table};
-use crate::{
-    size,
-    visualizer::{
-        ChildPosition, Parenthood, TreeHorizontalSlice, TreeSkeletalComponent, Visualizer,
-    },
+use crate::size;
+use crate::visualizer::{
+    ChildPosition, Parenthood, TreeHorizontalSlice, TreeSkeletalComponent, Visualizer,
 };
 use assert_cmp::{debug_assert_op, debug_assert_op_expr};
 use derive_more::{Deref, DerefMut};
 use pipe_trait::Pipe;
-use std::{
-    cmp::max,
-    collections::{HashSet, LinkedList},
-    fmt::Display,
-    ops::{Index, IndexMut},
-};
+use std::cmp::max;
+use std::collections::{HashSet, LinkedList};
+use std::fmt::Display;
+use std::ops::{Index, IndexMut};
 use zero_copy_pads::Width;
 
 #[derive(Deref, DerefMut)]
