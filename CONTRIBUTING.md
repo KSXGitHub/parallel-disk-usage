@@ -36,7 +36,7 @@ Automated tools enforce formatting (`cargo fmt`), linting (`cargo clippy`), and 
 
 ### Import Organization
 
-Prefer **merged imports**. Combine multiple items from the same crate or module into a single `use` statement with braces rather than separate `use` lines. Import ordering is enforced by `cargo fmt`. Imports gated by a platform attribute such as `#[cfg(unix)]` go in a separate block after the main imports.
+**Merged imports** are enforced by the `perfectionist::import_granularity` rule. With the `crate` granularity configured in `dylint.toml`, multiple items from the same crate are combined into a single `use` statement with braces rather than separate `use` lines. The intended long-term granularity is `module`, but it is set to `crate` for now (see issue [#432](https://github.com/KSXGitHub/parallel-disk-usage/issues/432)). Import ordering is enforced by `cargo fmt`. Imports gated by a platform attribute such as `#[cfg(unix)]` go in a separate block after the main imports.
 
 ```rust
 use crate::{
