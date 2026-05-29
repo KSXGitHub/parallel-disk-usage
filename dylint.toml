@@ -1,6 +1,6 @@
 [workspace.metadata.dylint]
 libraries = [
-    { git = "https://github.com/KSXGitHub/perfectionist", rev = "d793ada" },
+    { git = "https://github.com/KSXGitHub/perfectionist", rev = "34be521" },
 ]
 
 ["perfectionist::derive_ordering"]
