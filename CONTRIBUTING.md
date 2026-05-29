@@ -134,14 +134,6 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   .fold(PathBuf::new(), |acc, x| acc.join(x))
   ```
 
-- **Test fixtures:** `let a`, `let b`, `let c` for interchangeable specimens with identical roles in equality or comparison tests. Do not use single letters when the variables have distinct roles; use `actual`/`expected` or similar descriptive names instead.
-
-  ```rust
-  let a = vec![3, 1, 2].into_iter().collect::<BTreeSet<_>>();
-  let b = vec![2, 3, 1].into_iter().collect::<BTreeSet<_>>();
-  assert_eq!(a, b);
-  ```
-
 #### When single-letter names are NOT allowed
 
 - **Multi-line functions and closures:** Use a descriptive name when a function or closure body spans multiple lines. Examples include a body that contains a `let` binding followed by another expression, or a body with multiple chained operations.
@@ -160,7 +152,7 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   })
   ```
 
-- **`let` bindings in non-test code:** Always use descriptive names.
+- **`let` bindings:** Always use descriptive names, in test code as well as non-test code. This includes interchangeable specimens in equality or comparison tests, where names such as `first_order` and `second_order` are preferred over `a` and `b`.
 
   ```rust
   // Good
