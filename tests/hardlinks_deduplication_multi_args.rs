@@ -35,7 +35,10 @@ fn stdio(command: Command) -> Command {
 
 #[test]
 fn simple_tree_with_some_hardlinks() {
-    #![expect(clippy::identity_op)]
+    #![expect(
+        clippy::identity_op,
+        reason = "the explicit identity terms keep each component aligned with the structure it represents"
+    )]
 
     let sizes = [200_000, 220_000, 310_000, 110_000, 210_000];
     let workspace = SampleWorkspace::simple_tree_with_some_hardlinks(sizes);
@@ -397,7 +400,10 @@ fn multiple_hardlinks_to_a_single_file() {
 
 #[test]
 fn multiple_duplicated_arguments() {
-    #![expect(clippy::identity_op)]
+    #![expect(
+        clippy::identity_op,
+        reason = "the explicit identity terms keep each component aligned with the structure it represents"
+    )]
 
     let sizes = [200_000, 220_000, 310_000, 110_000, 210_000];
     let workspace = SampleWorkspace::simple_tree_with_some_symlinks_and_hardlinks(sizes);

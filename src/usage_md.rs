@@ -1,6 +1,5 @@
 use crate::args::Args;
-use clap::builder::PossibleValue;
-use clap::{Arg, ArgAction, Command, CommandFactory};
+use clap::{Arg, ArgAction, Command, CommandFactory, builder::PossibleValue};
 use derive_more::{Display, Error};
 use itertools::Itertools;
 use pipe_trait::Pipe;

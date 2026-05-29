@@ -39,7 +39,10 @@ fn stdio(command: Command) -> Command {
 
 #[test]
 fn simple_tree_with_some_hardlinks() {
-    #![expect(clippy::identity_op)]
+    #![expect(
+        clippy::identity_op,
+        reason = "the explicit identity terms keep each component aligned with the structure it represents"
+    )]
 
     let sizes = [200_000, 220_000, 310_000, 110_000, 210_000];
     let workspace = SampleWorkspace::simple_tree_with_some_hardlinks(sizes);
@@ -488,7 +491,10 @@ fn complex_tree_with_shared_and_unique_files() {
     // of reasoning.
     // It should still produce the same result as the proper
     // deduplication formula however.
-    #[expect(clippy::erasing_op)]
+    #[expect(
+        clippy::erasing_op,
+        reason = "the explicit zero term keeps the external branch aligned with its siblings in the size breakdown"
+    )]
     let expected_size: Bytes = [
         inode_size("."),
         inode_size("no-hardlinks"),
@@ -665,7 +671,10 @@ fn complex_tree_with_shared_and_unique_files() {
 
 #[test]
 fn hardlinks_and_non_hardlinks() {
-    #![expect(clippy::identity_op)]
+    #![expect(
+        clippy::identity_op,
+        reason = "the explicit identity terms keep each component aligned with the structure it represents"
+    )]
 
     let files_per_branch = 2 * 4;
     let workspace =

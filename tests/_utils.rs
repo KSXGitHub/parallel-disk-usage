@@ -34,7 +34,7 @@ pub const DEFAULT_GET_SIZE: get_size::GetApparentSize = get_size::GetApparentSiz
 
 /// Representation of a temporary filesystem item.
 ///
-/// **NOTE:** Delete this once https://github.com/samgiles/rs-mktemp/issues/8 is resolved.
+/// **NOTE:** Delete this once <https://github.com/samgiles/rs-mktemp/issues/8> is resolved.
 #[derive(Debug, AsRef, Deref)]
 #[as_ref(forward)]
 #[deref(forward)]
