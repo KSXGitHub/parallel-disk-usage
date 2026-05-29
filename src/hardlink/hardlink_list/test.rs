@@ -26,7 +26,7 @@ fn add<const ROW: usize>(list: HardlinkList<Bytes>) -> HardlinkList<Bytes> {
 
 #[test]
 fn insertion_order_is_irrelevant_to_equality() {
-    let a = HardlinkList::new()
+    let first_order = HardlinkList::new()
         .pipe(add::<3>)
         .pipe(add::<1>)
         .pipe(add::<4>)
@@ -37,7 +37,7 @@ fn insertion_order_is_irrelevant_to_equality() {
         .pipe(add::<2>)
         .into_reflection();
 
-    let b = HardlinkList::new()
+    let second_order = HardlinkList::new()
         .pipe(add::<5>)
         .pipe(add::<6>)
         .pipe(add::<2>)
@@ -48,7 +48,7 @@ fn insertion_order_is_irrelevant_to_equality() {
         .pipe(add::<4>)
         .into_reflection();
 
-    let c = HardlinkList::new()
+    let sorted_order = HardlinkList::new()
         .pipe(add::<0>)
         .pipe(add::<1>)
         .pipe(add::<2>)
@@ -59,14 +59,14 @@ fn insertion_order_is_irrelevant_to_equality() {
         .pipe(add::<7>)
         .into_reflection();
 
-    assert_eq!(a, b);
-    assert_eq!(b, c);
-    assert_eq!(a, c);
+    assert_eq!(first_order, second_order);
+    assert_eq!(second_order, sorted_order);
+    assert_eq!(first_order, sorted_order);
 }
 
 #[test]
 fn omitting_insertion_cause_inequality() {
-    let a = HardlinkList::new()
+    let complete = HardlinkList::new()
         .pipe(add::<0>)
         .pipe(add::<1>)
         .pipe(add::<2>)
@@ -77,7 +77,7 @@ fn omitting_insertion_cause_inequality() {
         .pipe(add::<7>)
         .into_reflection();
 
-    let b = HardlinkList::new()
+    let missing_one = HardlinkList::new()
         .pipe(add::<0>)
         .pipe(add::<1>)
         .pipe(add::<2>)
@@ -87,13 +87,13 @@ fn omitting_insertion_cause_inequality() {
         .pipe(add::<7>)
         .into_reflection();
 
-    assert_ne!(a, b);
-    assert_ne!(b, a);
+    assert_ne!(complete, missing_one);
+    assert_ne!(missing_one, complete);
 }
 
 #[test]
 fn insertion_difference_cause_inequality() {
-    let a = HardlinkList::new()
+    let with_row_6 = HardlinkList::new()
         .pipe(add::<0>)
         .pipe(add::<1>)
         .pipe(add::<2>)
@@ -103,7 +103,7 @@ fn insertion_difference_cause_inequality() {
         .pipe(add::<6>)
         .into_reflection();
 
-    let b = HardlinkList::new()
+    let with_row_7 = HardlinkList::new()
         .pipe(add::<0>)
         .pipe(add::<1>)
         .pipe(add::<2>)
@@ -113,8 +113,8 @@ fn insertion_difference_cause_inequality() {
         .pipe(add::<7>)
         .into_reflection();
 
-    assert_ne!(a, b);
-    assert_ne!(b, a);
+    assert_ne!(with_row_6, with_row_7);
+    assert_ne!(with_row_7, with_row_6);
 }
 
 #[test]

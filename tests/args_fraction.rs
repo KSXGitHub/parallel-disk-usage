@@ -4,14 +4,20 @@ use parallel_disk_usage::args::fraction::{ConversionError::*, Fraction, FromStrE
 use pretty_assertions::assert_eq;
 
 #[test]
-#[allow(clippy::float_cmp)]
+#[allow(
+    clippy::float_cmp,
+    reason = "the parsed fraction is expected to equal the source literal exactly"
+)]
 fn typical() {
     let actual: f32 = "0.5".parse::<Fraction>().expect("create ratio").into();
     assert_eq!(actual, 0.5);
 }
 
 #[test]
-#[allow(clippy::float_cmp)]
+#[allow(
+    clippy::float_cmp,
+    reason = "the parsed fraction is expected to equal the source literal exactly"
+)]
 fn equal_to_zero() {
     let actual: f32 = "0".parse::<Fraction>().expect("create ratio").into();
     assert_eq!(actual, 0.0);
@@ -30,7 +36,10 @@ fn less_than_zero() {
 }
 
 #[test]
-#[allow(clippy::float_cmp)]
+#[allow(
+    clippy::float_cmp,
+    reason = "the parsed fraction is expected to equal the source literal exactly"
+)]
 fn less_than_one() {
     let actual: f32 = "0.99999".parse::<Fraction>().expect("create ratio").into();
     assert_eq!(actual, 0.99999);
