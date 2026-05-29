@@ -89,7 +89,7 @@ Use **descriptive names** for type parameters, not single letters:
 
 - `Size`, `Name`, `SizeGetter`, `HardlinksRecorder`, `Report`
 
-Single-letter type parameters are flagged by `perfectionist::single_letter_generic`, which has no configuration. Genuinely canonical cases, such as `impl<T> From<T> for Wrapper<T>` where the trait already fixes the role of `T`, may be silenced site-by-site with `#[allow]` or `#[expect]`.
+Single-letter type parameters are flagged by `perfectionist::single_letter_generic`.
 
 ### Variable and Closure Parameter Naming
 
