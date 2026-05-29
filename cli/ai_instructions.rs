@@ -1,6 +1,3 @@
-#![cfg_attr(dylint_lib = "perfectionist", feature(register_tool))]
-#![cfg_attr(dylint_lib = "perfectionist", register_tool(perfectionist))]
-
 use clap::Parser;
 use derive_more::Display;
 use pipe_trait::Pipe;
