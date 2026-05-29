@@ -36,7 +36,9 @@ Automated tools enforce formatting (`cargo fmt`), linting (`cargo clippy`), and 
 
 ### Import Organization
 
-Prefer **merged imports** at module granularity. Combine multiple items from the same module into a single `use` statement with braces, but write a separate `use` statement for each module rather than collapsing every path from a crate into one nested-braces statement. This granularity is enforced by the `perfectionist::import_granularity` dylint check (`style = "module"`). Import ordering is enforced by `cargo fmt`. Imports gated by a platform attribute such as `#[cfg(unix)]` go in a separate block after the main imports.
+Import granularity is enforced automatically by the `perfectionist::import_granularity` rule, configured for the `module` style. Items from the same module are merged into a single braced `use` statement, while each module keeps its own `use` statement rather than collapsing an entire crate into one nested-braces statement. Import ordering is enforced separately by `cargo fmt`.
+
+The remaining convention is not enforced and must be applied by hand. Imports gated by a platform attribute such as `#[cfg(unix)]` go in a separate block after the main imports.
 
 ```rust
 use crate::args::{Args, Quantity, Threads};
