@@ -36,7 +36,9 @@ Automated tools enforce formatting (`cargo fmt`), linting (`cargo clippy`), and 
 
 ### Import Organization
 
-Prefer **merged imports** at module granularity. Combine multiple items from the same module into a single `use` statement with braces, but write a separate `use` statement for each module rather than collapsing every path from a crate into one nested-braces statement. This granularity is enforced by the `perfectionist::import_granularity` dylint check (`style = "module"`). Import ordering is enforced by `cargo fmt`. Imports gated by a platform attribute such as `#[cfg(unix)]` go in a separate block after the main imports.
+Import granularity is enforced automatically by the `perfectionist::import_granularity` rule, configured for the `module` style. Items from the same module are merged into a single braced `use` statement, while each module keeps its own `use` statement rather than collapsing an entire crate into one nested-braces statement. Import ordering is enforced separately by `cargo fmt`.
+
+The remaining convention is not enforced and must be applied by hand. Imports gated by a platform attribute such as `#[cfg(unix)]` go in a separate block after the main imports.
 
 ```rust
 use crate::args::{Args, Quantity, Threads};
@@ -87,11 +89,11 @@ Use **descriptive names** for type parameters, not single letters:
 
 - `Size`, `Name`, `SizeGetter`, `HardlinksRecorder`, `Report`
 
-Single-letter generics are acceptable only in very short, self-contained trait impls. Enforced by `perfectionist::single_letter_generic`; the threshold for "very short" is the rule's `short_impl_max_lines` knob in `dylint.toml`.
+Single-letter type parameters are flagged by `perfectionist::single_letter_generic`.
 
 ### Variable and Closure Parameter Naming
 
-Use **descriptive names** for variables and closure parameters by default. Single-letter names are permitted only in the specific cases listed below. Enforced by `perfectionist::single_letter_let_binding`, `perfectionist::single_letter_function_param`, and `perfectionist::single_letter_closure_param`; the per-rule `allowed_idents` and `extra_trivial_callback_methods` knobs in `dylint.toml` reflect the exceptions documented here.
+Use **descriptive names** for variables and closure parameters by default. Single-letter names are permitted only in the specific cases listed below. Enforced by `perfectionist::single_letter_let_binding`, `perfectionist::single_letter_function_param`, and `perfectionist::single_letter_closure_param`. The exact exemptions differ by binding kind, as the cases below describe. The `extra_allowed_idents` and `extra_trivial_callback_methods` knobs in `dylint.toml` extend the built-in exempt sets, though the project currently relies on the defaults aside from the `sort_reflection_by` callback.
 
 #### When single-letter names are allowed
 
@@ -108,16 +110,16 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { todo!() }
   ```
 
-- **Index variables (`i`, `j`, `k`):** These may only be used in two contexts: short closures, and index-based loops or iterations. The latter is rare in Rust. In all other cases, use `index`, `idx`, or `*_index`.
+- **Index variables (`i`, `j`, `k`):** These are exempt as function and closure parameters, and they read naturally in index-based loops or iterations, which are rare in Rust. They are not exempt as `let` bindings, where only `n` is allowed, so a `let` that holds an index must use `index`, `idx`, or `*_index` instead.
 
   ```rust
-  // OK: short closure
+  // OK: closure parameter
   left_indices.zip(right_indices).map(|(i, j)| matrix[i][j])
 
   // OK: index-based loop
   for i in 0..len { /* ... */ }
 
-  // Bad: use a descriptive name instead
+  // Bad: a `let` binding allows only `n`, never `i`
   let i = items.iter().position(|item| item.is_active()).unwrap();
   ```
 
@@ -131,14 +133,6 @@ Use **descriptive names** for variables and closure parameters by default. Singl
 
   ```rust
   .fold(PathBuf::new(), |acc, x| acc.join(x))
-  ```
-
-- **Test fixtures:** `let a`, `let b`, `let c` for interchangeable specimens with identical roles in equality or comparison tests. Do not use single letters when the variables have distinct roles; use `actual`/`expected` or similar descriptive names instead.
-
-  ```rust
-  let a = vec![3, 1, 2].into_iter().collect::<BTreeSet<_>>();
-  let b = vec![2, 3, 1].into_iter().collect::<BTreeSet<_>>();
-  assert_eq!(a, b);
   ```
 
 #### When single-letter names are NOT allowed
@@ -159,7 +153,7 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   })
   ```
 
-- **`let` bindings in non-test code:** Always use descriptive names.
+- **`let` bindings:** Always use descriptive names.
 
   ```rust
   // Good
