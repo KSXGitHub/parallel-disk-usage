@@ -151,7 +151,7 @@ Use **descriptive names** for variables and closure parameters by default. Singl
   })
   ```
 
-- **`let` bindings:** Always use descriptive names, in test code as well as non-test code. This includes interchangeable specimens in equality or comparison tests, where names such as `first_order` and `second_order` are preferred over `a` and `b`.
+- **`let` bindings:** Always use descriptive names.
 
   ```rust
   // Good
