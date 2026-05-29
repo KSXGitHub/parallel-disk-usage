@@ -1,11 +1,3 @@
-#![cfg_attr(
-    dylint_lib = "perfectionist",
-    allow(
-        perfectionist::lint_silence_reason,
-        reason = "false positive on `clap`-derive-generated `#[allow]` attributes; see https://github.com/KSXGitHub/parallel-disk-usage/issues/430"
-    )
-)]
-
 pub mod depth;
 pub mod fraction;
 pub mod quantity;
