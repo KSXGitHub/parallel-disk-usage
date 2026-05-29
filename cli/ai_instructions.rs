@@ -1,13 +1,11 @@
 use clap::Parser;
 use derive_more::Display;
 use pipe_trait::Pipe;
-use std::{
-    fmt,
-    fs::{File, read_to_string},
-    io::{self, Write},
-    path::{Path, PathBuf},
-    process::ExitCode,
-};
+use std::fmt;
+use std::fs::{File, read_to_string};
+use std::io::{self, Write};
+use std::path::{Path, PathBuf};
+use std::process::ExitCode;
 
 const SHARED: &str = include_str!("../template/ai-instructions/shared.md");
 const CLAUDE: &str = include_str!("../template/ai-instructions/claude.md");

@@ -1,8 +1,6 @@
 use derive_more::{Display, Error};
-use std::{
-    num::{NonZeroU64, ParseIntError, TryFromIntError},
-    str::FromStr,
-};
+use std::num::{NonZeroU64, ParseIntError, TryFromIntError};
+use std::str::FromStr;
 
 const INFINITE: &str = "inf";
 

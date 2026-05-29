@@ -2,7 +2,8 @@ use super::DataTree;
 use crate::size;
 use assert_cmp::debug_assert_op;
 use rayon::prelude::*;
-use std::{ffi::OsStr, path::Path};
+use std::ffi::OsStr;
+use std::path::Path;
 
 impl<Name, Size> DataTree<Name, Size>
 where

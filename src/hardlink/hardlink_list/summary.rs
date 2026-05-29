@@ -1,11 +1,11 @@
-use super::{HardlinkList, Reflection, iter::Item as IterItem, reflection::ReflectionEntry};
+use super::iter::Item as IterItem;
+use super::reflection::ReflectionEntry;
+use super::{HardlinkList, Reflection};
 use crate::size;
 use derive_more::{Add, AddAssign, Sum};
 use derive_setters::Setters;
-use std::{
-    cmp::Ordering,
-    fmt::{self, Display},
-};
+use std::cmp::Ordering;
+use std::fmt::{self, Display};
 
 #[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};

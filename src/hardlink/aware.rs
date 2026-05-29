@@ -2,18 +2,20 @@ use super::{
     DeduplicateSharedSize, HardlinkList, LinkPathList, RecordHardlinks, RecordHardlinksArgument,
     hardlink_list,
 };
-use crate::{
-    data_tree::DataTree,
-    device::DeviceNumber,
-    inode::InodeNumber,
-    os_string_display::OsStringDisplay,
-    reporter::{Event, Reporter, event::HardlinkDetection},
-    size,
-};
+use crate::data_tree::DataTree;
+use crate::device::DeviceNumber;
+use crate::inode::InodeNumber;
+use crate::os_string_display::OsStringDisplay;
+use crate::reporter::event::HardlinkDetection;
+use crate::reporter::{Event, Reporter};
+use crate::size;
 use derive_more::{AsMut, AsRef, Display, Error, From, Into};
 use pipe_trait::Pipe;
 use smart_default::SmartDefault;
-use std::{convert::Infallible, fmt::Debug, os::unix::fs::MetadataExt, path::Path};
+use std::convert::Infallible;
+use std::fmt::Debug;
+use std::os::unix::fs::MetadataExt;
+use std::path::Path;
 
 /// Be aware of hardlinks. Treat them as links that share space.
 /// Detect files with more than 1 links and record them.

@@ -1,19 +1,16 @@
-use super::{
-    data_tree::DataTree,
-    device::DeviceBoundary,
-    get_size::GetSize,
-    hardlink::{RecordHardlinks, RecordHardlinksArgument},
-    os_string_display::OsStringDisplay,
-    reporter::{ErrorReport, Event, Reporter, error_report::Operation::*},
-    size,
-    tree_builder::{Info, TreeBuilder},
-};
+use super::data_tree::DataTree;
+use super::device::DeviceBoundary;
+use super::get_size::GetSize;
+use super::hardlink::{RecordHardlinks, RecordHardlinksArgument};
+use super::os_string_display::OsStringDisplay;
+use super::reporter::error_report::Operation::*;
+use super::reporter::{ErrorReport, Event, Reporter};
+use super::size;
+use super::tree_builder::{Info, TreeBuilder};
 use device_id::get_device_id;
 use pipe_trait::Pipe;
-use std::{
-    fs::{read_dir, symlink_metadata},
-    path::PathBuf,
-};
+use std::fs::{read_dir, symlink_metadata};
+use std::path::PathBuf;
 
 /// Build a [`DataTree`] from a directory tree using [`From`] or [`Into`].
 ///

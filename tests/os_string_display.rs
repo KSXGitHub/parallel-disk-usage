@@ -2,7 +2,9 @@
 use parallel_disk_usage::os_string_display::OsStringDisplay;
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use std::{ffi::OsString, os::unix::ffi::OsStringExt, path::PathBuf};
+use std::ffi::OsString;
+use std::os::unix::ffi::OsStringExt;
+use std::path::PathBuf;
 
 #[test]
 fn utf8_os_str() {

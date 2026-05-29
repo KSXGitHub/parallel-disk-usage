@@ -1,4 +1,5 @@
-use crate::{size, status_board::GLOBAL_STATUS_BOARD};
+use crate::size;
+use crate::status_board::GLOBAL_STATUS_BOARD;
 use derive_setters::Setters;
 use std::fmt::Write;
 

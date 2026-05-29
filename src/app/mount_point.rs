@@ -1,4 +1,5 @@
-use std::{ffi::OsStr, path::Path};
+use std::ffi::OsStr;
+use std::path::Path;
 
 /// Find a mount point that contains `absolute_path`.
 pub fn find_mount_point<'a>(

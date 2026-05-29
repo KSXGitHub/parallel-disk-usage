@@ -1,21 +1,23 @@
-use crate::{
-    args::{Depth, Fraction},
-    data_tree::DataTree,
-    device::DeviceBoundary,
-    fs_tree_builder::FsTreeBuilder,
-    get_size::GetSize,
-    hardlink::{DeduplicateSharedSize, HardlinkIgnorant, RecordHardlinks},
-    json_data::{BinaryVersion, JsonData, JsonDataBody, JsonShared, JsonTree, SchemaVersion},
-    os_string_display::OsStringDisplay,
-    reporter::ParallelReporter,
-    runtime_error::RuntimeError,
-    size,
-    status_board::GLOBAL_STATUS_BOARD,
-    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
+use crate::args::{Depth, Fraction};
+use crate::data_tree::DataTree;
+use crate::device::DeviceBoundary;
+use crate::fs_tree_builder::FsTreeBuilder;
+use crate::get_size::GetSize;
+use crate::hardlink::{DeduplicateSharedSize, HardlinkIgnorant, RecordHardlinks};
+use crate::json_data::{
+    BinaryVersion, JsonData, JsonDataBody, JsonShared, JsonTree, SchemaVersion,
 };
+use crate::os_string_display::OsStringDisplay;
+use crate::reporter::ParallelReporter;
+use crate::runtime_error::RuntimeError;
+use crate::size;
+use crate::status_board::GLOBAL_STATUS_BOARD;
+use crate::visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer};
 use pipe_trait::Pipe;
 use serde::Serialize;
-use std::{io::stdout, iter::once, path::PathBuf};
+use std::io::stdout;
+use std::iter::once;
+use std::path::PathBuf;
 
 /// The sub program of the main application.
 pub struct Sub<Size, SizeGetter, HardlinksHandler, Report>

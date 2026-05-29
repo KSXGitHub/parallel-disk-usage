@@ -1,7 +1,8 @@
 use crate::args::Args;
 use clap::{Arg, ArgAction, Command, CommandFactory};
 use itertools::Itertools;
-use std::{collections::BTreeMap, fmt::Write};
+use std::collections::BTreeMap;
+use std::fmt::Write;
 
 /// A map from argument ID to the set of argument IDs it conflicts with (bidirectional).
 type ConflictMap = BTreeMap<String, Vec<String>>;

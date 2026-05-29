@@ -1,6 +1,8 @@
-use crate::{data_tree::DataTree, size::Bytes};
+use crate::data_tree::DataTree;
+use crate::size::Bytes;
 use pretty_assertions::assert_eq;
-use std::{cmp::Ordering, ops::Not};
+use std::cmp::Ordering;
+use std::ops::Not;
 
 type SampleName = String;
 type SampleData = Bytes;

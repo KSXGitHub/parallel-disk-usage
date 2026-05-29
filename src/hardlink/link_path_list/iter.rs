@@ -1,6 +1,8 @@
 use super::LinkPathList;
 use pipe_trait::Pipe;
-use std::{iter::FusedIterator, path::PathBuf, slice};
+use std::iter::FusedIterator;
+use std::path::PathBuf;
+use std::slice;
 
 /// [Iterator] over the paths inside a [`LinkPathList`].
 #[derive(Debug, Clone)]

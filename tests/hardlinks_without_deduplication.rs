@@ -5,17 +5,13 @@ pub mod _utils;
 pub use _utils::*;
 
 use command_extra::CommandExtra;
-use parallel_disk_usage::{
-    data_tree::Reflection,
-    json_data::{JsonData, JsonTree},
-    size::Bytes,
-};
+use parallel_disk_usage::data_tree::Reflection;
+use parallel_disk_usage::json_data::{JsonData, JsonTree};
+use parallel_disk_usage::size::Bytes;
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use std::{
-    ops::{Add, Mul},
-    process::{Command, Stdio},
-};
+use std::ops::{Add, Mul};
+use std::process::{Command, Stdio};
 
 fn stdio(command: Command) -> Command {
     command
