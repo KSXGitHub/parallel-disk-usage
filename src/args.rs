@@ -8,7 +8,8 @@ pub use fraction::Fraction;
 pub use quantity::Quantity;
 pub use threads::Threads;
 
-use crate::{bytes_format::BytesFormat, visualizer::ColumnWidthDistribution};
+use crate::bytes_format::BytesFormat;
+use crate::visualizer::ColumnWidthDistribution;
 use clap::{ColorChoice, Parser};
 use derive_setters::Setters;
 use smart_default::SmartDefault;

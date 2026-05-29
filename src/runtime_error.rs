@@ -1,5 +1,6 @@
 use derive_more::{Display, Error};
-use std::{convert::Infallible, process::ExitCode};
+use std::convert::Infallible;
+use std::process::ExitCode;
 
 /// Error caused by the CLI program.
 #[derive(Debug, Display, Error)]

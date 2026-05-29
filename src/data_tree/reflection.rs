@@ -1,10 +1,8 @@
 use crate::size;
-use std::{
-    collections::VecDeque,
-    ffi::OsStr,
-    fmt::{Debug, Display, Error, Formatter},
-    path::PathBuf,
-};
+use std::collections::VecDeque;
+use std::ffi::OsStr;
+use std::fmt::{Debug, Display, Error, Formatter};
+use std::path::PathBuf;
 
 #[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};

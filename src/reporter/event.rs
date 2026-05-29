@@ -1,6 +1,7 @@
 use super::ErrorReport;
 use crate::size;
-use std::{fs::Metadata, path::Path};
+use std::fs::Metadata;
+use std::path::Path;
 
 /// Report trigger event.
 #[derive(Debug)]

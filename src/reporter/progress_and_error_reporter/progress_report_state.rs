@@ -1,8 +1,8 @@
-use crate::{reporter::ProgressReport, size};
-use std::{
-    ops::ControlFlow,
-    sync::atomic::{AtomicBool, AtomicU64, Ordering::Relaxed},
-};
+use crate::reporter::ProgressReport;
+use crate::size;
+use std::ops::ControlFlow;
+use std::sync::atomic::Ordering::Relaxed;
+use std::sync::atomic::{AtomicBool, AtomicU64};
 
 /// Like [`ProgressReport`] but mutable.
 #[derive(Debug, Default)]

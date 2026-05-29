@@ -4,11 +4,9 @@ pub mod schema_version;
 pub use binary_version::BinaryVersion;
 pub use schema_version::SchemaVersion;
 
-use crate::{
-    data_tree::DataTreeReflection,
-    hardlink::{HardlinkListReflection, SharedLinkSummary},
-    size::{self, Blocks, Bytes},
-};
+use crate::data_tree::DataTreeReflection;
+use crate::hardlink::{HardlinkListReflection, SharedLinkSummary};
+use crate::size::{self, Blocks, Bytes};
 use derive_more::{Deref, DerefMut, From, TryInto};
 use smart_default::SmartDefault;
 

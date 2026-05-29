@@ -1,7 +1,8 @@
 use super::LinkPathList;
 use derive_more::{From, Into, IntoIterator};
 use pipe_trait::Pipe;
-use std::{collections::HashSet, path::PathBuf};
+use std::collections::HashSet;
+use std::path::PathBuf;
 
 #[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};

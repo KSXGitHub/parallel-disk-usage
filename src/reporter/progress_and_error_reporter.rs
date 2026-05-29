@@ -1,14 +1,13 @@
 use super::{ErrorReport, Event, ParallelReporter, ProgressReport, Reporter};
 use crate::size;
 use progress_report_state::ProgressReportState;
-use std::{
-    any::Any,
-    marker::PhantomData,
-    ops::ControlFlow,
-    sync::{Arc, atomic::Ordering::Relaxed},
-    thread::{JoinHandle, sleep, spawn},
-    time::Duration,
-};
+use std::any::Any;
+use std::marker::PhantomData;
+use std::ops::ControlFlow;
+use std::sync::Arc;
+use std::sync::atomic::Ordering::Relaxed;
+use std::thread::{JoinHandle, sleep, spawn};
+use std::time::Duration;
 
 /// Store progress information and call report function on said information.
 ///

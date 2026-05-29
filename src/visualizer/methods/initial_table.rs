@@ -1,8 +1,12 @@
 use super::{BORDER_COLUMNS, NodeInfo, PERCENTAGE_COLUMN_MAX_WIDTH, Table};
-use crate::{data_tree::DataTree, size, visualizer::Visualizer};
+use crate::data_tree::DataTree;
+use crate::size;
+use crate::visualizer::Visualizer;
 use assert_cmp::debug_assert_op;
 use derive_more::{Deref, DerefMut};
-use std::{cmp::max, fmt::Display, num::NonZeroUsize};
+use std::cmp::max;
+use std::fmt::Display;
+use std::num::NonZeroUsize;
 
 #[derive(Deref, DerefMut)]
 pub(super) struct InitialRow<Name, NodeData> {

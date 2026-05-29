@@ -1,6 +1,9 @@
 use super::{HardlinkList, InodeKey, Value};
-use crate::{device::DeviceNumber, hardlink::LinkPathList, inode::InodeNumber};
-use dashmap::{iter::Iter as DashIter, mapref::multiple::RefMulti};
+use crate::device::DeviceNumber;
+use crate::hardlink::LinkPathList;
+use crate::inode::InodeNumber;
+use dashmap::iter::Iter as DashIter;
+use dashmap::mapref::multiple::RefMulti;
 use pipe_trait::Pipe;
 
 /// Iterator over entries in [`HardlinkList`].

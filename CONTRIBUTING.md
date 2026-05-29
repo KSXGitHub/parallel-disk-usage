@@ -36,17 +36,16 @@ Automated tools enforce formatting (`cargo fmt`), linting (`cargo clippy`), and 
 
 ### Import Organization
 
-**Merged imports** are enforced by the `perfectionist::import_granularity` rule. With the `crate` granularity configured in `dylint.toml`, multiple items from the same crate are combined into a single `use` statement with braces rather than separate `use` lines. The intended long-term granularity is `module`, but it is set to `crate` for now (see issue [#432](https://github.com/KSXGitHub/parallel-disk-usage/issues/432)). Import ordering is enforced by `cargo fmt`. Imports gated by a platform attribute such as `#[cfg(unix)]` go in a separate block after the main imports.
+Prefer **merged imports** at module granularity. Combine multiple items from the same module into a single `use` statement with braces, but write a separate `use` statement for each module rather than collapsing every path from a crate into one nested-braces statement. This granularity is enforced by the `perfectionist::import_granularity` dylint check (`style = "module"`). Import ordering is enforced by `cargo fmt`. Imports gated by a platform attribute such as `#[cfg(unix)]` go in a separate block after the main imports.
 
 ```rust
-use crate::{
-    args::{Args, Quantity, Threads},
-    bytes_format::BytesFormat,
-    size,
-};
+use crate::args::{Args, Quantity, Threads};
+use crate::bytes_format::BytesFormat;
+use crate::size;
 use clap::Parser;
 use pipe_trait::Pipe;
-use std::{io::stdin, time::Duration};
+use std::io::stdin;
+use std::time::Duration;
 
 #[cfg(unix)]
 use crate::get_size::{GetBlockCount, GetBlockSize};

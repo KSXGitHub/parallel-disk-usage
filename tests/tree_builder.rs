@@ -1,10 +1,8 @@
 use build_fs_tree::{FileSystemTree, dir, file};
 use derive_more::From;
-use parallel_disk_usage::{
-    data_tree::{DataTree, DataTreeReflection},
-    size::Bytes,
-    tree_builder::{Info, TreeBuilder},
-};
+use parallel_disk_usage::data_tree::{DataTree, DataTreeReflection};
+use parallel_disk_usage::size::Bytes;
+use parallel_disk_usage::tree_builder::{Info, TreeBuilder};
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 

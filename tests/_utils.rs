@@ -2,28 +2,25 @@ use build_fs_tree::{Build, MergeableFileSystemTree, dir, file};
 use command_extra::CommandExtra;
 use derive_more::{AsRef, Deref};
 use into_sorted::IntoSorted;
-use parallel_disk_usage::{
-    data_tree::{DataTree, DataTreeReflection},
-    device::DeviceBoundary,
-    fs_tree_builder::FsTreeBuilder,
-    get_size::{self, GetSize},
-    hardlink::HardlinkIgnorant,
-    os_string_display::OsStringDisplay,
-    reporter::ErrorOnlyReporter,
-    size,
-};
+use parallel_disk_usage::data_tree::{DataTree, DataTreeReflection};
+use parallel_disk_usage::device::DeviceBoundary;
+use parallel_disk_usage::fs_tree_builder::FsTreeBuilder;
+use parallel_disk_usage::get_size::{self, GetSize};
+use parallel_disk_usage::hardlink::HardlinkIgnorant;
+use parallel_disk_usage::os_string_display::OsStringDisplay;
+use parallel_disk_usage::reporter::ErrorOnlyReporter;
+use parallel_disk_usage::size;
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
-use rand::{RngExt, distr::Alphanumeric, rng};
+use rand::distr::Alphanumeric;
+use rand::{RngExt, rng};
 use rayon::prelude::*;
-use std::{
-    cmp::Ordering,
-    env::temp_dir,
-    fs::{create_dir, metadata, remove_dir_all, symlink_metadata},
-    io::Error,
-    path::{Path, PathBuf},
-    process::{Command, Output},
-};
+use std::cmp::Ordering;
+use std::env::temp_dir;
+use std::fs::{create_dir, metadata, remove_dir_all, symlink_metadata};
+use std::io::Error;
+use std::path::{Path, PathBuf};
+use std::process::{Command, Output};
 
 /// Default size getter method.
 #[cfg(unix)]

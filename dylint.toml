@@ -19,10 +19,8 @@ prefix = [
     "LowerHex", "UpperHex", "Octal",
 ]
 
-# The intended long-term style is "module". It is set to "crate" for now.
-# See https://github.com/KSXGitHub/parallel-disk-usage/issues/432.
 ["perfectionist::import_granularity"]
-style = "crate"
+style = "module"
 
 ["perfectionist::macro_argument_binding"]
 deny_extra = ["debug_assert_op", "debug_assert_op_expr"]

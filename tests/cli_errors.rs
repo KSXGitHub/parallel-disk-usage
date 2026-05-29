@@ -12,19 +12,29 @@ use text_block_macros::text_block;
 #[cfg(unix)]
 use maplit::btreeset;
 #[cfg(unix)]
-use parallel_disk_usage::{
-    bytes_format::BytesFormat,
-    data_tree::DataTree,
-    device::DeviceBoundary,
-    fs_tree_builder::FsTreeBuilder,
-    get_size::GetApparentSize,
-    hardlink::HardlinkIgnorant,
-    os_string_display::OsStringDisplay,
-    reporter::{ErrorOnlyReporter, ErrorReport},
-    visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visualizer},
+use parallel_disk_usage::bytes_format::BytesFormat;
+#[cfg(unix)]
+use parallel_disk_usage::data_tree::DataTree;
+#[cfg(unix)]
+use parallel_disk_usage::device::DeviceBoundary;
+#[cfg(unix)]
+use parallel_disk_usage::fs_tree_builder::FsTreeBuilder;
+#[cfg(unix)]
+use parallel_disk_usage::get_size::GetApparentSize;
+#[cfg(unix)]
+use parallel_disk_usage::hardlink::HardlinkIgnorant;
+#[cfg(unix)]
+use parallel_disk_usage::os_string_display::OsStringDisplay;
+#[cfg(unix)]
+use parallel_disk_usage::reporter::{ErrorOnlyReporter, ErrorReport};
+#[cfg(unix)]
+use parallel_disk_usage::visualizer::{
+    BarAlignment, ColumnWidthDistribution, Direction, Visualizer,
 };
 #[cfg(unix)]
-use std::{collections::BTreeSet, path::Path};
+use std::collections::BTreeSet;
+#[cfg(unix)]
+use std::path::Path;
 
 fn stdio(command: Command) -> Command {
     command

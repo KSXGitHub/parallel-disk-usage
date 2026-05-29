@@ -29,7 +29,9 @@ impl<'a> Display for TextReport<'a> {
 #[cfg(test)]
 use super::Operation;
 #[cfg(test)]
-use std::{io, path::PathBuf};
+use std::io;
+#[cfg(test)]
+use std::path::PathBuf;
 
 #[test]
 fn test() {

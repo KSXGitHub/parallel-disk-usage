@@ -1,4 +1,5 @@
-use std::{fs::Metadata, path::Path};
+use std::fs::Metadata;
+use std::path::Path;
 
 /// Argument to pass to [`RecordHardlinks::record_hardlinks`].
 #[derive(Debug, Clone, Copy)]

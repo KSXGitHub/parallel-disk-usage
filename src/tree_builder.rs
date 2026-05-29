@@ -2,7 +2,8 @@ pub mod info;
 
 pub use info::Info;
 
-use super::{data_tree::DataTree, size};
+use super::data_tree::DataTree;
+use super::size;
 use rayon::prelude::*;
 
 /// Collection of functions and starting points in order to build a [`DataTree`] with [`From`] or [`Into`].
