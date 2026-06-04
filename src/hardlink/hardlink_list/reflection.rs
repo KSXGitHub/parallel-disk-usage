@@ -1,3 +1,11 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping,
+        reason = "single_group cannot keep #[cfg]-gated imports in their own trailing group; see issue #436"
+    )
+)]
+
 use super::{HardlinkList, InodeKey, Value};
 use crate::device::DeviceNumber;
 use crate::hardlink::LinkPathListReflection;
@@ -17,11 +25,11 @@ use serde::{Deserialize, Serialize};
 /// * Every pair of an inode number and a device number is unique.
 /// * The internal list is always sorted by pairs of an inode number and a device number.
 ///
-/// **Equality:** `Reflection` implements `PartialEq` and `Eq` traits.
+/// **Equality:** [`Reflection`] implements `PartialEq` and `Eq` traits.
 ///
-/// **Serialization and deserialization:** _(feature: `json`)_ `Reflection` implements
+/// **Serialization and deserialization:** _(feature: `json`)_ [`Reflection`] implements
 /// `Serialize` and `Deserialize` traits, this allows functions in `serde_json` to convert
-/// a `Reflection` into/from JSON.
+/// a [`Reflection`] into/from JSON.
 #[derive(Debug, Clone, PartialEq, Eq, Into, IntoIterator)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 pub struct Reflection<Size>(Vec<ReflectionEntry<Size>>);

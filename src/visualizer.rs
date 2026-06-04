@@ -6,17 +6,16 @@ pub mod parenthood;
 pub mod proportion_bar;
 pub mod tree;
 
+use super::data_tree::DataTree;
+use super::size;
 pub use bar_alignment::BarAlignment;
 pub use child_position::ChildPosition;
 pub use column_width_distribution::ColumnWidthDistribution;
 pub use direction::Direction;
 pub use parenthood::Parenthood;
 pub use proportion_bar::{ProportionBar, ProportionBarBlock};
-pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
-
-use super::data_tree::DataTree;
-use super::size;
 use std::fmt::Display;
+pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
 
 /// Visualize a [`DataTree`].
 ///

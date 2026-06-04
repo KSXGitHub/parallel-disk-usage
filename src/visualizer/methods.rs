@@ -5,17 +5,16 @@ mod node_info;
 mod table;
 mod tree_table;
 
+use super::{ColumnWidthDistribution, Visualizer};
+use crate::size;
 use bar_table::*;
 use constants::*;
 use initial_table::*;
 use node_info::*;
-use table::*;
-use tree_table::*;
-
-use super::{ColumnWidthDistribution, Visualizer};
-use crate::size;
 use std::cmp::min;
 use std::fmt::Display;
+use table::*;
+use tree_table::*;
 use zero_copy_pads::{align_left, align_right};
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>

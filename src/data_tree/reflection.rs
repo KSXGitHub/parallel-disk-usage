@@ -1,3 +1,11 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping,
+        reason = "single_group cannot keep #[cfg]-gated imports in their own trailing group; see issue #436"
+    )
+)]
+
 use crate::size;
 use std::collections::VecDeque;
 use std::ffi::OsStr;
@@ -10,21 +18,21 @@ use serde::{Deserialize, Serialize};
 /// Intermediate format used for construction and inspection of
 /// [`DataTree`](crate::data_tree::DataTree)'s internal content.
 ///
-/// Unlike `DataTree` where the fields are all private, the fields of `Reflection`
+/// Unlike `DataTree` where the fields are all private, the fields of [`Reflection`]
 /// are all public to allow construction in tests.
 ///
-/// **Conversion between `DataTree` and `Reflection`:**
-/// * Any `DataTree` can be safely [transmuted](std::mem::transmute) to a valid `Reflection`.
-/// * Any `Reflection` can be safely transmuted to a potentially invalid `DataTree`.
-/// * To safely convert a `DataTree` into a `Reflection` without the `unsafe` keyword, use
+/// **Conversion between `DataTree` and [`Reflection`]:**
+/// * Any `DataTree` can be safely [transmuted](std::mem::transmute) to a valid [`Reflection`].
+/// * Any [`Reflection`] can be safely transmuted to a potentially invalid `DataTree`.
+/// * To safely convert a `DataTree` into a [`Reflection`] without the `unsafe` keyword, use
 ///   [`DataTree::into_reflection`](crate::data_tree::DataTree::into_reflection)
 ///   (it would be slower than using `transmute`).
-/// * To safely convert a `Reflection` into a valid `DataTree`,
+/// * To safely convert a [`Reflection`] into a valid `DataTree`,
 ///   use [`par_try_into_tree`](Self::par_try_into_tree).
 ///
-/// **Serialization and deserialization:** _(feature: `json`)_ `Reflection` implements
+/// **Serialization and deserialization:** _(feature: `json`)_ [`Reflection`] implements
 /// `Serialize` and `Deserialize` traits, this allows functions in `serde_json` to convert
-/// a `Reflection` into/from JSON.
+/// a [`Reflection`] into/from JSON.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "json", serde(rename_all = "kebab-case"))]

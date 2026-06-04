@@ -1,3 +1,11 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping,
+        reason = "single_group cannot keep #[cfg]-gated imports in their own trailing group; see issue #436"
+    )
+)]
+
 use super::LinkPathList;
 use derive_more::{From, Into, IntoIterator};
 use pipe_trait::Pipe;
@@ -10,11 +18,11 @@ use serde::{Deserialize, Serialize};
 /// Intermediate format used for construction and inspection of [`LinkPathList`]'s
 /// internal content.
 ///
-/// **Equality:** `Reflection` implements `PartialEq` and `Eq` traits.
+/// **Equality:** [`Reflection`] implements `PartialEq` and `Eq` traits.
 ///
-/// **Serialization and deserialization:** _(feature: `json`)_ `Reflection` implements
+/// **Serialization and deserialization:** _(feature: `json`)_ [`Reflection`] implements
 /// `Serialize` and `Deserialize` traits, this allows functions in `serde_json` to convert
-/// a `Reflection` into/from JSON.
+/// a [`Reflection`] into/from JSON.
 #[derive(Debug, Default, Clone, PartialEq, Eq, From, Into, IntoIterator)]
 #[cfg_attr(feature = "json", derive(Deserialize, Serialize))]
 pub struct Reflection(pub HashSet<PathBuf>);

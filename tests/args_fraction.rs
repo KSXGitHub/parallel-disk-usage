@@ -6,7 +6,7 @@ use parallel_disk_usage::args::fraction::FromStrError::*;
 use pretty_assertions::assert_eq;
 
 #[test]
-#[allow(
+#[expect(
     clippy::float_cmp,
     reason = "the parsed fraction is expected to equal the source literal exactly"
 )]
@@ -16,7 +16,7 @@ fn typical() {
 }
 
 #[test]
-#[allow(
+#[expect(
     clippy::float_cmp,
     reason = "the parsed fraction is expected to equal the source literal exactly"
 )]
@@ -38,7 +38,7 @@ fn less_than_zero() {
 }
 
 #[test]
-#[allow(
+#[expect(
     clippy::float_cmp,
     reason = "the parsed fraction is expected to equal the source literal exactly"
 )]

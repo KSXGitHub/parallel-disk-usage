@@ -36,11 +36,24 @@ Automated tools enforce formatting (`cargo fmt`), linting (`cargo clippy`), and 
 
 ### Import Organization
 
-Import granularity is enforced automatically by the `perfectionist::import_granularity` rule, configured for the `module` style. Items from the same module are merged into a single braced `use` statement, while each module keeps its own `use` statement rather than collapsing an entire crate into one nested-braces statement. Import ordering is enforced separately by `cargo fmt`.
+Two `perfectionist` rules govern imports automatically:
 
-The remaining convention is not enforced and must be applied by hand. Imports gated by a platform attribute such as `#[cfg(unix)]` go in a separate block after the main imports.
+- `perfectionist::import_granularity`, configured for the `module` style, controls how items are merged within each `use` statement. Items from the same module are merged into a single braced `use` statement, while each module keeps its own `use` statement rather than collapsing an entire crate into one nested-braces statement.
+- `perfectionist::import_grouping`, configured for the `single_group` style, controls how `use` statements are partitioned into blocks. Every `use` statement, whether a `pub use` re-export or a private import, sits in one contiguous block with no blank lines between them.
+
+Import ordering within the block is enforced separately by `cargo fmt`.
+
+Imports gated by a platform or feature attribute such as `#[cfg(unix)]` are kept in their own block after the main imports, separated by a blank line. The `single_group` style cannot yet express this exception, so each file that uses it carries a module-level suppression. See [issue #436](https://github.com/KSXGitHub/parallel-disk-usage/issues/436).
 
 ```rust
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping,
+        reason = "single_group cannot keep #[cfg]-gated imports in their own trailing group; see issue #436"
+    )
+)]
+
 use crate::args::{Args, Quantity, Threads};
 use crate::bytes_format::BytesFormat;
 use crate::size;
@@ -57,7 +70,7 @@ use crate::get_size::{GetBlockCount, GetBlockSize};
 
 The flat file pattern (`module.rs` rather than `module/mod.rs`) is enforced by the `perfectionist::flat_module_pattern` dylint check. In addition to that requirement, follow these conventions:
 
-- List `pub mod` declarations first, then `pub use` re-exports, then private imports and items.
+- List `pub mod` declarations first, followed by the `use` block, then the remaining items. The `use` block holds both `pub use` re-exports and private imports; `cargo fmt` and `perfectionist::import_grouping` keep them in one sorted group, so do not rely on a fixed order between the two kinds.
 - Use `pub use` to re-export key types at the module level for convenience.
 
 ```rust

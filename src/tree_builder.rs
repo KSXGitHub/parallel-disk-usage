@@ -1,9 +1,8 @@
 pub mod info;
 
-pub use info::Info;
-
 use super::data_tree::DataTree;
 use super::size;
+pub use info::Info;
 use rayon::prelude::*;
 
 /// Collection of functions and starting points in order to build a [`DataTree`] with [`From`] or [`Into`].
@@ -20,7 +19,7 @@ where
     pub path: Path,
     /// Name of the root.
     pub name: Name,
-    /// Function to extract necessary information from `path` (`size` and `children`).
+    /// Function to extract necessary information from `path` ([`size`] and `children`).
     pub get_info: GetInfo,
     /// Function to join parent's `path` with a child's name to make the child's `name`.
     pub join_path: JoinPath,

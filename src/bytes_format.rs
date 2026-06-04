@@ -1,3 +1,11 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping,
+        reason = "single_group cannot keep #[cfg]-gated imports in their own trailing group; see issue #436"
+    )
+)]
+
 pub mod formatter;
 pub mod output;
 pub mod parsed_value;
@@ -6,7 +14,6 @@ pub mod scale_base;
 pub use formatter::Formatter;
 pub use output::Output;
 pub use parsed_value::ParsedValue;
-
 use pipe_trait::Pipe;
 
 #[cfg(feature = "cli")]

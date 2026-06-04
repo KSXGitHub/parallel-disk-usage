@@ -39,8 +39,8 @@ fn test_parse_block_device_name() {
     }
 }
 
-/// Generate a test that builds a mock `FsApi` with identity `canonicalize`,
-/// then asserts that `reclassify_virtual_hdd` maps `DiskKind::HDD` to the
+/// Generate a test that builds a mock [`FsApi`] with identity `canonicalize`,
+/// then asserts that [`reclassify_virtual_hdd`] maps `DiskKind::HDD` to the
 /// expected `DiskKind`.
 ///
 /// The sysfs paths (`/sys/block/{block}` and
@@ -171,7 +171,7 @@ identity_reclassify_test_case! {
 ///
 /// **Note:** On real LVM setups, `/dev/mapper/vg0-lv0` canonicalizes to
 /// `/dev/dm-0`, not a partition device. See
-/// `test_mapper_dm_device_is_not_corrected` for that case.
+/// [`test_mapper_dm_device_is_not_corrected`] for that case.
 #[test]
 fn test_mapper_symlink_resolves_to_virtual_partition() {
     struct Fs;

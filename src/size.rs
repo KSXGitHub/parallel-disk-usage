@@ -1,3 +1,11 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping,
+        reason = "single_group cannot keep #[cfg]-gated imports in their own trailing group; see issue #436"
+    )
+)]
+
 use super::bytes_format::{self, BytesFormat};
 use derive_more::{Add, AddAssign, From, Into, Sub, SubAssign, Sum};
 use std::fmt::{Debug, Display};

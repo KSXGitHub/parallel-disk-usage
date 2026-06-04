@@ -1,7 +1,6 @@
 pub mod operation;
 
 pub use operation::Operation;
-
 use std::io::Error;
 use std::path::Path;
 

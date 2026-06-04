@@ -1,6 +1,12 @@
-pub mod sub;
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping,
+        reason = "single_group cannot keep #[cfg]-gated imports in their own trailing group; see issue #436"
+    )
+)]
 
-pub use sub::Sub;
+pub mod sub;
 
 use crate::args::{Args, Quantity, Threads};
 use crate::bytes_format::BytesFormat;
@@ -17,6 +23,7 @@ use pipe_trait::Pipe;
 use std::io::stdin;
 use std::time::Duration;
 use sub::JsonOutputParam;
+pub use sub::Sub;
 use sysinfo::{Disk, Disks};
 
 #[cfg(unix)]
