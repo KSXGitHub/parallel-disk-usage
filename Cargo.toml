@@ -105,3 +105,7 @@ normalize-path = "0.2.1"
 pretty_assertions = "1.4.1"
 rand = "0.10.1"
 which = "8.0.2"
+
+[profile.release]
+lto = true
+codegen-units = 1
