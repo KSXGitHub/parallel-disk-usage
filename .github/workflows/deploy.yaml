@@ -20,7 +20,7 @@ jobs:
           - macos-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install Rust
         shell: bash
@@ -77,7 +77,7 @@ jobs:
           - x86_64-unknown-linux-musl
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install Rust
         shell: bash
@@ -123,7 +123,7 @@ jobs:
           - x86_64-apple-darwin
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install Rust
         shell: bash
@@ -170,7 +170,7 @@ jobs:
           - x86_64-pc-windows-msvc
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install Rust
         shell: bash
@@ -216,7 +216,7 @@ jobs:
       release_tag: ${{ steps.release_type.outputs.release_tag }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install APT packages
         run: sudo apt install -y python3 python3-toml
@@ -254,7 +254,7 @@ jobs:
       attestations: write
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v4
@@ -352,7 +352,7 @@ jobs:
           - x86_64-apple-darwin
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download artifact
         uses: actions/download-artifact@v8
@@ -401,7 +401,7 @@ jobs:
       attestations: write
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download all artifacts
         uses: actions/download-artifact@v8
@@ -476,7 +476,7 @@ jobs:
       id-token: write # needed for crates.io Trusted Publishing
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install Rust
         shell: bash
@@ -519,7 +519,7 @@ jobs:
       attestations: write
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Cache (rust)
         uses: actions/cache@v5
