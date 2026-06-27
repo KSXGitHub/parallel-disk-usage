@@ -94,9 +94,6 @@ unexpected_cfgs = { level = "warn", check-cfg = ['cfg(dylint_lib, values("perfec
 [lints.clippy]
 clone_on_ref_ptr = "warn"
 if_then_some_else_none = "warn"
-# Enforces the flat module-file layout (`foo.rs`, never `foo/mod.rs`).
-# `perfectionist` `0.0.0-rc.19` dropped its own `flat_module_pattern` rule in
-# favor of this equivalent Clippy lint.
 mod_module_files = "warn"
 unnecessary_lazy_evaluations = "warn"
 

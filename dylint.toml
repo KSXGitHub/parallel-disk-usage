@@ -3,10 +3,6 @@ libraries = [
     { git = "https://github.com/KSXGitHub/perfectionist", tag = "0.0.0-rc.19" },
 ]
 
-# `import_grouping_mismatch` and `unordered_derives` (renamed from
-# `import_grouping` and `derive_ordering`) became inactive by default in
-# `0.0.0-rc.19`. Enable them to keep enforcing this project's import layout
-# and derive ordering.
 [perfectionist]
 enable = ["import_grouping_mismatch", "unordered_derives"]
 
@@ -29,10 +25,6 @@ prefix = [
 ["perfectionist::import_granularity_mismatch"]
 style = "module"
 
-# Under `single_block` the `#[cfg(...)]`-gated imports are carved into their
-# own trailing block automatically (`cfg_block_handling = "trailing"`, the
-# default), so the per-file suppressions this project carried under rc.18 are
-# no longer necessary.
 ["perfectionist::import_grouping_mismatch"]
 style = "single_block"
 
