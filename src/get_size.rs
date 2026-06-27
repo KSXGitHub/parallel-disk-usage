@@ -4,7 +4,7 @@ use std::fs::Metadata;
 #[cfg(unix)]
 use super::size::Blocks;
 #[cfg(unix)]
-use std::os::unix::prelude::MetadataExt;
+use std::os::unix::fs::MetadataExt;
 
 /// Infers size from a [`Metadata`].
 pub trait GetSize {

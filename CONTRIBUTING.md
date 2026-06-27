@@ -36,9 +36,14 @@ Automated tools enforce formatting (`cargo fmt`), linting (`cargo clippy`), and 
 
 ### Import Organization
 
-Import granularity is enforced automatically by the `perfectionist::import_granularity` rule, configured for the `module` style. Items from the same module are merged into a single braced `use` statement, while each module keeps its own `use` statement rather than collapsing an entire crate into one nested-braces statement. Import ordering is enforced separately by `cargo fmt`.
+Two `perfectionist` rules govern imports automatically:
 
-The remaining convention is not enforced and must be applied by hand. Imports gated by a platform attribute such as `#[cfg(unix)]` go in a separate block after the main imports.
+- `perfectionist::import_granularity_mismatch`, configured for the `module` style, controls how items are merged within each `use` statement. Items from the same module are merged into a single braced `use` statement, while each module keeps its own `use` statement rather than collapsing an entire crate into one nested-braces statement.
+- `perfectionist::import_grouping_mismatch`, configured for the `single_block` style, controls how `use` statements are partitioned into blocks. Every `use` statement, whether a `pub use` re-export or a private import, sits in one contiguous block with no blank lines between them.
+
+Import ordering within the block is enforced separately by `cargo fmt`.
+
+Imports gated by a platform or feature attribute such as `#[cfg(unix)]` are kept in their own block after the main imports, separated by a blank line. Under `single_block` the rule recognizes this trailing `#[cfg]` block automatically through its default `cfg_block_handling = "trailing"`, so no manual exception is required.
 
 ```rust
 use crate::args::{Args, Quantity, Threads};
@@ -55,9 +60,9 @@ use crate::get_size::{GetBlockCount, GetBlockSize};
 
 ### Module Organization
 
-The flat file pattern (`module.rs` rather than `module/mod.rs`) is enforced by the `perfectionist::flat_module_pattern` dylint check. In addition to that requirement, follow these conventions:
+The flat file pattern (`module.rs` rather than `module/mod.rs`) is enforced by `clippy::mod_module_files`, enabled in `Cargo.toml`. Earlier releases relied on a `perfectionist::flat_module_pattern` rule; `perfectionist` `0.0.0-rc.19` removed it in favor of the equivalent Clippy lint. In addition to that requirement, follow these conventions:
 
-- List `pub mod` declarations first, then `pub use` re-exports, then private imports and items.
+- List `pub mod` declarations first, followed by the `use` block, then the remaining items. The `use` block holds both `pub use` re-exports and private imports; `cargo fmt` and `perfectionist::import_grouping_mismatch` keep them in one sorted group, so do not rely on a fixed order between the two kinds.
 - Use `pub use` to re-export key types at the module level for convenience.
 
 ```rust
@@ -72,7 +77,7 @@ pub use event::Event;
 
 ### Derive Macro Ordering
 
-The order of trait names within each `#[derive(...)]` attribute is enforced automatically by the `perfectionist::derive_ordering` rule, configured for the `prefix_then_alphabetical` style. The configured `prefix` in `dylint.toml` lists the trait families in their project-preferred order: `Debug`, formatting / error derives (`Display`, `Error`), defaults (`Default`, `SmartDefault`), `Clone` / `Copy`, comparison and `Hash`, reference wrappers (`AsRef`, `AsMut`, `Deref`, `DerefMut`), conversions (`From`, `Into`, `TryFrom`, `TryInto`, `FromStr`), iteration, arithmetic operator pairs and folds, and integer-format derives. Any trait that is not in the `prefix` (project-specific derives such as `Setters` and `Parser`) falls in ASCII-case-insensitive alphabetical order after the prefix entries.
+The order of trait names within each `#[derive(...)]` attribute is enforced automatically by the `perfectionist::unordered_derives` rule, configured for the `prefix_then_alphabetical` style. The configured `prefix` in `dylint.toml` lists the trait families in their project-preferred order: `Debug`, formatting / error derives (`Display`, `Error`), defaults (`Default`, `SmartDefault`), `Clone` / `Copy`, comparison and `Hash`, reference wrappers (`AsRef`, `AsMut`, `Deref`, `DerefMut`), conversions (`From`, `Into`, `TryFrom`, `TryInto`, `FromStr`), iteration, arithmetic operator pairs and folds, and integer-format derives. Any trait that is not in the `prefix` (project-specific derives such as `Setters` and `Parser`) falls in ASCII-case-insensitive alphabetical order after the prefix entries.
 
 The remaining conventions are not enforced by the rule and must be applied by hand. When a type derives many traits, split them across multiple `#[derive(...)]` lines for readability, and place feature-gated derives on a separate `#[cfg_attr(...)]` line.
 

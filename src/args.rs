@@ -3,19 +3,18 @@ pub mod fraction;
 pub mod quantity;
 pub mod threads;
 
-pub use depth::Depth;
-pub use fraction::Fraction;
-pub use quantity::Quantity;
-pub use threads::Threads;
-
 use crate::bytes_format::BytesFormat;
 use crate::visualizer::ColumnWidthDistribution;
 use clap::{ColorChoice, Parser};
+pub use depth::Depth;
 use derive_setters::Setters;
+pub use fraction::Fraction;
+pub use quantity::Quantity;
 use smart_default::SmartDefault;
 use std::path::PathBuf;
 use terminal_size::{Width, terminal_size};
 use text_block_macros::text_block;
+pub use threads::Threads;
 
 /// The CLI arguments.
 #[derive(Debug, SmartDefault, Clone, Parser, Setters)]
@@ -169,11 +168,11 @@ pub struct Args {
     #[clap(long, default_value_t = Threads::Auto)]
     pub threads: Threads,
 
-    /// Do not output `.shared.details` in the JSON output.
+    /// Do not output .shared.details in the JSON output.
     #[clap(long, requires = "json_output", requires = "deduplicate_hardlinks")]
     pub omit_json_shared_details: bool,
 
-    /// Do not output `.shared.summary` in the JSON output.
+    /// Do not output .shared.summary in the JSON output.
     #[clap(long, requires = "json_output", requires = "deduplicate_hardlinks")]
     pub omit_json_shared_summary: bool,
 }

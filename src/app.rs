@@ -1,7 +1,5 @@
 pub mod sub;
 
-pub use sub::Sub;
-
 use crate::args::{Args, Quantity, Threads};
 use crate::bytes_format::BytesFormat;
 use crate::device::DeviceBoundary;
@@ -17,6 +15,7 @@ use pipe_trait::Pipe;
 use std::io::stdin;
 use std::time::Duration;
 use sub::JsonOutputParam;
+pub use sub::Sub;
 use sysinfo::{Disk, Disks};
 
 #[cfg(unix)]

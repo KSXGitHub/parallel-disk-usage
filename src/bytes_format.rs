@@ -1,3 +1,11 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::clap_help_markdown,
+        reason = "clap_help_markdown flags ValueEnum docs that never reach --help: the enum-level doc, and variant docs overridden by an explicit clap(help = ...); see issue #441"
+    )
+)]
+
 pub mod formatter;
 pub mod output;
 pub mod parsed_value;
@@ -6,7 +14,6 @@ pub mod scale_base;
 pub use formatter::Formatter;
 pub use output::Output;
 pub use parsed_value::ParsedValue;
-
 use pipe_trait::Pipe;
 
 #[cfg(feature = "cli")]

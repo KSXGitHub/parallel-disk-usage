@@ -1,4 +1,6 @@
-use super::{BORDER_COLUMNS, NodeInfo, PERCENTAGE_COLUMN_MAX_WIDTH, Table};
+use super::constants::{BORDER_COLUMNS, PERCENTAGE_COLUMN_MAX_WIDTH};
+use super::node_info::NodeInfo;
+use super::table::Table;
 use crate::data_tree::DataTree;
 use crate::size;
 use crate::visualizer::Visualizer;

@@ -53,8 +53,8 @@ block-count\:"Count numbers of blocks"))' \
 '--no-errors[Prevent filesystem error messages from appearing in stderr]' \
 '-p[Report progress being made at the expense of performance]' \
 '--progress[Report progress being made at the expense of performance]' \
-'--omit-json-shared-details[Do not output \`.shared.details\` in the JSON output]' \
-'--omit-json-shared-summary[Do not output \`.shared.summary\` in the JSON output]' \
+'--omit-json-shared-details[Do not output .shared.details in the JSON output]' \
+'--omit-json-shared-summary[Do not output .shared.summary in the JSON output]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '-V[Print version]' \

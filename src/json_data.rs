@@ -1,13 +1,12 @@
 pub mod binary_version;
 pub mod schema_version;
 
-pub use binary_version::BinaryVersion;
-pub use schema_version::SchemaVersion;
-
 use crate::data_tree::DataTreeReflection;
 use crate::hardlink::{HardlinkListReflection, SharedLinkSummary};
 use crate::size::{self, Blocks, Bytes};
+pub use binary_version::BinaryVersion;
 use derive_more::{Deref, DerefMut, From, TryInto};
+pub use schema_version::SchemaVersion;
 use smart_default::SmartDefault;
 
 #[cfg(feature = "json")]

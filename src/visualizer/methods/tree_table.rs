@@ -1,4 +1,5 @@
-use super::{InitialColumnWidth, InitialRow, InitialTable, Table};
+use super::initial_table::{InitialColumnWidth, InitialRow, InitialTable};
+use super::table::Table;
 use crate::size;
 use crate::visualizer::{
     ChildPosition, Parenthood, TreeHorizontalSlice, TreeSkeletalComponent, Visualizer,
