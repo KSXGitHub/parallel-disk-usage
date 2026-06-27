@@ -39,9 +39,9 @@ Options:
       --threads <THREADS>
           Set the maximum number of threads to spawn. Could be either "auto", "max", or a positive integer [default: auto]
       --omit-json-shared-details
-          Do not output .shared.details in the JSON output
+          Do not output `.shared.details` in the JSON output
       --omit-json-shared-summary
-          Do not output .shared.summary in the JSON output
+          Do not output `.shared.summary` in the JSON output
   -h, --help
           Print help (see more with '--help')
   -V, --version
