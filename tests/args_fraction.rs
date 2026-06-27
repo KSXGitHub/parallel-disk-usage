@@ -1,8 +1,8 @@
 #![cfg(feature = "cli")]
 
-use parallel_disk_usage::args::fraction::ConversionError::*;
+use parallel_disk_usage::args::fraction::ConversionError::{LowerBound, NotANumber, UpperBound};
 use parallel_disk_usage::args::fraction::Fraction;
-use parallel_disk_usage::args::fraction::FromStrError::*;
+use parallel_disk_usage::args::fraction::FromStrError::Conversion;
 use pretty_assertions::assert_eq;
 
 #[test]

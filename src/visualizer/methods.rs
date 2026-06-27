@@ -7,14 +7,12 @@ mod tree_table;
 
 use super::{ColumnWidthDistribution, Visualizer};
 use crate::size;
-use bar_table::*;
-use constants::*;
-use initial_table::*;
-use node_info::*;
+use bar_table::render_bars;
+use constants::{MIN_OVERALL_WIDTH, PERCENTAGE_COLUMN_MAX_WIDTH};
+use initial_table::render_initial;
 use std::cmp::min;
 use std::fmt::Display;
-use table::*;
-use tree_table::*;
+use tree_table::render_tree;
 use zero_copy_pads::{align_left, align_right};
 
 impl<'a, Name, Size> Visualizer<'a, Name, Size>

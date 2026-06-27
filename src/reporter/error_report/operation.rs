@@ -23,7 +23,7 @@ impl Operation {
 
 #[cfg(test)]
 mod test_operation {
-    use super::*;
+    use super::Operation;
 
     macro_rules! name_display {
         ($name:ident, $variant:ident, $text:literal) => {

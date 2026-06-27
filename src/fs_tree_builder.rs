@@ -3,7 +3,7 @@ use super::device::DeviceBoundary;
 use super::get_size::GetSize;
 use super::hardlink::{RecordHardlinks, RecordHardlinksArgument};
 use super::os_string_display::OsStringDisplay;
-use super::reporter::error_report::Operation::*;
+use super::reporter::error_report::Operation::{AccessEntry, ReadDirectory, SymlinkMetadata};
 use super::reporter::{ErrorReport, Event, Reporter};
 use super::size;
 use super::tree_builder::{Info, TreeBuilder};

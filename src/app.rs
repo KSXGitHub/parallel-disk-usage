@@ -1,11 +1,3 @@
-#![cfg_attr(
-    dylint_lib = "perfectionist",
-    expect(
-        perfectionist::import_grouping,
-        reason = "single_group cannot keep #[cfg]-gated imports in their own trailing group; see issue #436"
-    )
-)]
-
 pub mod sub;
 
 use crate::args::{Args, Quantity, Threads};

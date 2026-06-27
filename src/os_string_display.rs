@@ -1,11 +1,3 @@
-#![cfg_attr(
-    dylint_lib = "perfectionist",
-    expect(
-        perfectionist::import_grouping,
-        reason = "single_group cannot keep #[cfg]-gated imports in their own trailing group; see issue #436"
-    )
-)]
-
 use derive_more::{AsMut, AsRef, Deref, DerefMut, From, FromStr};
 use std::ffi::{OsStr, OsString};
 use std::fmt::{Debug, Display, Error, Formatter};

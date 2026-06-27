@@ -1,11 +1,3 @@
-#![cfg_attr(
-    dylint_lib = "perfectionist",
-    expect(
-        perfectionist::import_grouping,
-        reason = "single_group cannot keep #[cfg]-gated imports in their own trailing group; see issue #436"
-    )
-)]
-
 use super::mount_point::find_mount_point;
 use std::ffi::OsStr;
 use std::fs::canonicalize;

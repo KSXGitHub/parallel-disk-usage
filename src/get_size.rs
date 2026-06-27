@@ -1,18 +1,10 @@
-#![cfg_attr(
-    dylint_lib = "perfectionist",
-    expect(
-        perfectionist::import_grouping,
-        reason = "single_group cannot keep #[cfg]-gated imports in their own trailing group; see issue #436"
-    )
-)]
-
 use super::size::Bytes;
 use std::fs::Metadata;
 
 #[cfg(unix)]
 use super::size::Blocks;
 #[cfg(unix)]
-use std::os::unix::prelude::MetadataExt;
+use std::os::unix::fs::MetadataExt;
 
 /// Infers size from a [`Metadata`].
 pub trait GetSize {

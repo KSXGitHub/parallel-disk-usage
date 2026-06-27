@@ -1,13 +1,3 @@
-#![cfg_attr(dylint_lib = "perfectionist", feature(register_tool))]
-#![cfg_attr(dylint_lib = "perfectionist", register_tool(perfectionist))]
-#![cfg_attr(
-    dylint_lib = "perfectionist",
-    expect(
-        perfectionist::import_grouping,
-        reason = "single_group cannot keep #[cfg]-gated imports in their own trailing group; see issue #436"
-    )
-)]
-
 pub mod _utils;
 pub use _utils::*;
 use parallel_disk_usage::get_size::GetApparentSize;

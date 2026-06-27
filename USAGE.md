@@ -125,12 +125,12 @@ Set the maximum number of threads to spawn. Could be either "auto", "max", or a 
 <a id="omit-json-shared-details" name="omit-json-shared-details"></a>
 ### `--omit-json-shared-details`
 
-Do not output `.shared.details` in the JSON output.
+Do not output .shared.details in the JSON output.
 
 <a id="omit-json-shared-summary" name="omit-json-shared-summary"></a>
 ### `--omit-json-shared-summary`
 
-Do not output `.shared.summary` in the JSON output.
+Do not output .shared.summary in the JSON output.
 
 <a id="option-h" name="option-h"></a><a id="help" name="help"></a>
 ### `--help`
