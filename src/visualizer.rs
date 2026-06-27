@@ -1,3 +1,11 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping_mismatch,
+        reason = "pub use re-exports are kept in their own group; see #442"
+    )
+)]
+
 pub mod bar_alignment;
 pub mod child_position;
 pub mod column_width_distribution;
@@ -6,16 +14,17 @@ pub mod parenthood;
 pub mod proportion_bar;
 pub mod tree;
 
-use super::data_tree::DataTree;
-use super::size;
 pub use bar_alignment::BarAlignment;
 pub use child_position::ChildPosition;
 pub use column_width_distribution::ColumnWidthDistribution;
 pub use direction::Direction;
 pub use parenthood::Parenthood;
 pub use proportion_bar::{ProportionBar, ProportionBarBlock};
-use std::fmt::Display;
 pub use tree::{TreeHorizontalSlice, TreeSkeletalComponent};
+
+use super::data_tree::DataTree;
+use super::size;
+use std::fmt::Display;
 
 /// Visualize a [`DataTree`].
 ///

@@ -1,3 +1,11 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping_mismatch,
+        reason = "pub use re-exports are kept in their own group; see #442"
+    )
+)]
+
 pub mod formatter;
 pub mod output;
 pub mod parsed_value;
@@ -6,6 +14,7 @@ pub mod scale_base;
 pub use formatter::Formatter;
 pub use output::Output;
 pub use parsed_value::ParsedValue;
+
 use pipe_trait::Pipe;
 
 #[cfg(feature = "cli")]

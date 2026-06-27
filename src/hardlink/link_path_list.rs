@@ -1,9 +1,18 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping_mismatch,
+        reason = "pub use re-exports are kept in their own group; see #442"
+    )
+)]
+
 mod iter;
 mod reflection;
 
 pub use Reflection as LinkPathListReflection;
 pub use iter::Iter;
 pub use reflection::Reflection;
+
 use std::path::PathBuf;
 
 /// List of different hardlinks to the same file.

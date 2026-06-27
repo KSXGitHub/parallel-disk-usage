@@ -1,6 +1,15 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping_mismatch,
+        reason = "pub use re-exports are kept in their own group; see #442"
+    )
+)]
+
 pub mod operation;
 
 pub use operation::Operation;
+
 use std::io::Error;
 use std::path::Path;
 

@@ -1,4 +1,14 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping_mismatch,
+        reason = "pub use re-exports are kept in their own group; see #442"
+    )
+)]
+
 pub mod sub;
+
+pub use sub::Sub;
 
 use crate::args::{Args, Quantity, Threads};
 use crate::bytes_format::BytesFormat;
@@ -15,7 +25,6 @@ use pipe_trait::Pipe;
 use std::io::stdin;
 use std::time::Duration;
 use sub::JsonOutputParam;
-pub use sub::Sub;
 use sysinfo::{Disk, Disks};
 
 #[cfg(unix)]

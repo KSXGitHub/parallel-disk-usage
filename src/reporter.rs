@@ -1,15 +1,24 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping_mismatch,
+        reason = "pub use re-exports are kept in their own group; see #442"
+    )
+)]
+
 pub mod error_only_reporter;
 pub mod error_report;
 pub mod event;
 pub mod progress_and_error_reporter;
 pub mod progress_report;
 
-use crate::size;
 pub use error_only_reporter::ErrorOnlyReporter;
 pub use error_report::ErrorReport;
 pub use event::Event;
 pub use progress_and_error_reporter::ProgressAndErrorReporter;
 pub use progress_report::ProgressReport;
+
+use crate::size;
 
 /// Report progress.
 pub trait Reporter<Size: size::Size> {

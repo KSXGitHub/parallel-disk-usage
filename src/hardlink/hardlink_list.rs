@@ -1,20 +1,29 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping_mismatch,
+        reason = "pub use re-exports are kept in their own group; see #442"
+    )
+)]
+
 pub mod iter;
 pub mod reflection;
 pub mod summary;
+
+pub use Reflection as HardlinkListReflection;
+pub use Summary as SharedLinkSummary;
+pub use iter::Iter;
+pub use reflection::Reflection;
+pub use summary::Summary;
 
 use crate::device::DeviceNumber;
 use crate::hardlink::LinkPathList;
 use crate::inode::InodeNumber;
 use crate::size;
-pub use Reflection as HardlinkListReflection;
-pub use Summary as SharedLinkSummary;
 use dashmap::DashMap;
 use derive_more::{Display, Error};
-pub use iter::Iter;
-pub use reflection::Reflection;
 use smart_default::SmartDefault;
 use std::fmt::Debug;
-pub use summary::Summary;
 
 #[cfg(any(unix, test))]
 use pipe_trait::Pipe;

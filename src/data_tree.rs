@@ -1,8 +1,17 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping_mismatch,
+        reason = "pub use re-exports are kept in their own group; see #442"
+    )
+)]
+
 pub mod reflection;
 
-use super::size;
 pub use Reflection as DataTreeReflection;
 pub use reflection::Reflection;
+
+use super::size;
 
 /// Disk usage data of a filesystem tree.
 ///

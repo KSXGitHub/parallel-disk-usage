@@ -1,8 +1,17 @@
+#![cfg_attr(
+    dylint_lib = "perfectionist",
+    expect(
+        perfectionist::import_grouping_mismatch,
+        reason = "pub use re-exports are kept in their own group; see #442"
+    )
+)]
+
 pub mod info;
+
+pub use info::Info;
 
 use super::data_tree::DataTree;
 use super::size;
-pub use info::Info;
 use rayon::prelude::*;
 
 /// Collection of functions and starting points in order to build a [`DataTree`] with [`From`] or [`Into`].
