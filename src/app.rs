@@ -1,11 +1,3 @@
-#![cfg_attr(
-    dylint_lib = "perfectionist",
-    expect(
-        perfectionist::import_grouping_mismatch,
-        reason = "pub use re-exports are kept in their own group; see #442"
-    )
-)]
-
 pub mod sub;
 
 pub use sub::Sub;

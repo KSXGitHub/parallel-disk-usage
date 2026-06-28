@@ -1,11 +1,3 @@
-#![cfg_attr(
-    dylint_lib = "perfectionist",
-    expect(
-        perfectionist::import_grouping_mismatch,
-        reason = "pub use re-exports are kept in their own group; see #442"
-    )
-)]
-
 pub mod formatter;
 pub mod output;
 pub mod parsed_value;
@@ -23,13 +15,6 @@ use clap::ValueEnum;
 /// The [`DisplayFormat`](crate::size::Size::DisplayFormat) type of [`Bytes`](crate::size::Bytes).
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "cli", derive(ValueEnum))]
-#[cfg_attr(
-    dylint_lib = "perfectionist",
-    expect(
-        perfectionist::clap_help_markdown,
-        reason = "the enum-level doc is never used as --help text, and the variant docs are overridden by an explicit clap(help = ...); see issue #441"
-    )
-)]
 pub enum BytesFormat {
     /// Display the value as-is.
     #[cfg_attr(
