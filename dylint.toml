@@ -6,6 +6,9 @@ libraries = [
 [perfectionist]
 enable = ["import_grouping_mismatch", "unordered_derives"]
 
+["perfectionist::clap_help_markdown"]
+ignore_constructs = ["code_span"]
+
 ["perfectionist::unordered_derives"]
 style = "prefix_then_alphabetical"
 prefix = [
@@ -34,6 +37,3 @@ allow_extra = ["assert_op_expr"]
 
 ["perfectionist::single_letter_closure_param"]
 extra_trivial_callback_methods = ["sort_reflection_by"]
-
-["perfectionist::clap_help_markdown"]
-ignore_constructs = ["code_span"]
