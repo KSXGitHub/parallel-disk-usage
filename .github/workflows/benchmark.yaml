@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Cache (rust)
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         timeout-minutes: 2
         continue-on-error: true
         with:
@@ -69,7 +69,7 @@ jobs:
           node-version: '16.1.0'
 
       - name: Cache (pnpm)
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         timeout-minutes: 2
         continue-on-error: true
         with:
