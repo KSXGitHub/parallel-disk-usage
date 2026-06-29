@@ -94,6 +94,7 @@ unexpected_cfgs = { level = "warn", check-cfg = ['cfg(dylint_lib, values("perfec
 [lints.clippy]
 clone_on_ref_ptr = "warn"
 if_then_some_else_none = "warn"
+mod_module_files = "warn"
 unnecessary_lazy_evaluations = "warn"
 
 [dev-dependencies]

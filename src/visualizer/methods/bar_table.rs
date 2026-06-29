@@ -1,4 +1,5 @@
-use super::{NodeInfo, TreeRow, TreeTable};
+use super::node_info::NodeInfo;
+use super::tree_table::{TreeRow, TreeTable};
 use crate::size;
 use crate::visualizer::ProportionBar;
 use assert_cmp::debug_assert_op;

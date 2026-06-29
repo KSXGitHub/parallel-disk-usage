@@ -1,9 +1,15 @@
 [workspace.metadata.dylint]
 libraries = [
-    { git = "https://github.com/KSXGitHub/perfectionist", tag = "0.0.0-rc.17" },
+    { git = "https://github.com/KSXGitHub/perfectionist", tag = "0.0.0-rc.21" },
 ]
 
-["perfectionist::derive_ordering"]
+[perfectionist]
+enable = ["import_grouping_mismatch", "unordered_derives"]
+
+["perfectionist::clap_help_markdown"]
+ignore_constructs = ["code_span"]
+
+["perfectionist::unordered_derives"]
 style = "prefix_then_alphabetical"
 prefix = [
     "Debug", "Display", "Error",
@@ -19,10 +25,14 @@ prefix = [
     "LowerHex", "UpperHex", "Octal",
 ]
 
-["perfectionist::import_granularity"]
+["perfectionist::import_granularity_mismatch"]
 style = "module"
 
-["perfectionist::macro_argument_binding"]
+["perfectionist::import_grouping_mismatch"]
+style = "single_block"
+reexports = "split"
+
+["perfectionist::impure_macro_arguments"]
 deny_extra = ["debug_assert_op", "debug_assert_op_expr"]
 allow_extra = ["assert_op_expr"]
 

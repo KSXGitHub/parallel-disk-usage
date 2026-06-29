@@ -1,4 +1,4 @@
-use parallel_disk_usage::bytes_format::BytesFormat::*;
+use parallel_disk_usage::bytes_format::BytesFormat::{BinaryUnits, MetricUnits};
 use parallel_disk_usage::data_tree::DataTree;
 use parallel_disk_usage::size::{self, Blocks, Bytes};
 use parallel_disk_usage::visualizer::{

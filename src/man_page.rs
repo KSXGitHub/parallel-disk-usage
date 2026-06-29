@@ -58,7 +58,7 @@ fn resolve_flag_name(command: &Command, arg_id: &str) -> Option<String> {
         .get_arguments()
         .find(|arg| arg.get_id().as_str() == arg_id)
         .and_then(|arg| arg.get_long())
-        .map(|long| format!("\\fB\\-\\-{}\\fR", roff_escape(long)))
+        .map(|long| format!(r"\fB\-\-{}\fR", roff_escape(long)))
 }
 
 /// Escapes a string for roff by replacing hyphens with `\-`.
@@ -69,7 +69,7 @@ fn roff_escape(text: &str) -> String {
 fn render_title(out: &mut String, command: &Command) {
     let name = command.get_name();
     let version = command.get_version().unwrap_or_default();
-    writeln!(out, ".TH {name} 1 \"{name} {version}\"").unwrap();
+    writeln!(out, r#".TH {name} 1 "{name} {version}""#).unwrap();
 }
 
 fn render_name_section(out: &mut String, command: &Command) {
@@ -79,12 +79,12 @@ fn render_name_section(out: &mut String, command: &Command) {
         .map(ToString::to_string)
         .unwrap_or_default();
     writeln!(out, ".SH NAME").unwrap();
-    writeln!(out, "{name} \\- {}", roff_escape(&about)).unwrap();
+    writeln!(out, r"{name} \- {}", roff_escape(&about)).unwrap();
 }
 
 fn render_synopsis_section(out: &mut String, command: &Command) {
     out.push_str(".SH SYNOPSIS\n");
-    write!(out, "\\fB{}\\fR", command.get_name()).unwrap();
+    write!(out, r"\fB{}\fR", command.get_name()).unwrap();
     let options = command
         .get_arguments()
         .filter(|arg| !arg.is_positional())
@@ -107,19 +107,19 @@ fn render_synopsis_section(out: &mut String, command: &Command) {
 fn render_synopsis_option(out: &mut String, arg: &Arg) {
     out.push('[');
     if let Some(short) = arg.get_short() {
-        write!(out, "\\fB\\-{}\\fR", roff_escape(&short.to_string())).unwrap();
+        write!(out, r"\fB\-{}\fR", roff_escape(&short.to_string())).unwrap();
         if arg.get_long().is_some() {
             out.push('|');
         }
     }
     if let Some(long) = arg.get_long() {
-        write!(out, "\\fB\\-\\-{}\\fR", roff_escape(long)).unwrap();
+        write!(out, r"\fB\-\-{}\fR", roff_escape(long)).unwrap();
     }
     if arg.get_action().takes_values()
         && let Some(value_names) = arg.get_value_names()
     {
         for name in value_names {
-            write!(out, " \\fI{}\\fR", roff_escape(name)).unwrap();
+            write!(out, r" \fI{}\fR", roff_escape(name)).unwrap();
         }
     }
     out.push(']');
@@ -139,9 +139,9 @@ fn render_synopsis_positional(out: &mut String, arg: &Arg) {
         .unwrap_or_else(|| arg.get_id().as_str());
     let ellipsis = if is_multiple(arg) { "..." } else { "" };
     if arg.is_required_set() {
-        write!(out, "\\fI{}\\fR{ellipsis}", roff_escape(name)).unwrap();
+        write!(out, r"\fI{}\fR{ellipsis}", roff_escape(name)).unwrap();
     } else {
-        write!(out, "[\\fI{}\\fR]{ellipsis}", roff_escape(name)).unwrap();
+        write!(out, r"[\fI{}\fR]{ellipsis}", roff_escape(name)).unwrap();
     }
 }
 
@@ -213,9 +213,9 @@ fn render_option_header_positional(out: &mut String, arg: &Arg) {
         .unwrap_or_else(|| arg.get_id().as_str());
     let ellipsis = if is_multiple(arg) { "..." } else { "" };
     if arg.is_required_set() {
-        writeln!(out, "\\fI{name}\\fR{ellipsis}").unwrap();
+        writeln!(out, r"\fI{name}\fR{ellipsis}").unwrap();
     } else {
-        writeln!(out, "[\\fI{name}\\fR]{ellipsis}").unwrap();
+        writeln!(out, r"[\fI{name}\fR]{ellipsis}").unwrap();
     }
 }
 
@@ -223,17 +223,17 @@ fn render_option_header_flag(out: &mut String, arg: &Arg) {
     let short = arg
         .get_short()
         .map(|short| roff_escape(&short.to_string()))
-        .map(|short| format!("\\fB\\-{short}\\fR"));
+        .map(|short| format!(r"\fB\-{short}\fR"));
     let long = arg
         .get_long()
         .map(roff_escape)
-        .map(|long| format!("\\fB\\-\\-{long}\\fR"));
+        .map(|long| format!(r"\fB\-\-{long}\fR"));
     let aliases = arg
         .get_visible_aliases()
         .into_iter()
         .flatten()
         .map(roff_escape)
-        .map(|alias| format!("\\fB\\-\\-{alias}\\fR"));
+        .map(|alias| format!(r"\fB\-\-{alias}\fR"));
     let header = short.into_iter().chain(long).chain(aliases).join(", ");
     if arg.get_action().takes_values() {
         let value_str = render_value_hint(arg);
@@ -252,7 +252,7 @@ fn render_value_hint(arg: &Arg) -> String {
         .unwrap_or_else(|| vec![arg.get_id().as_str()])
         .into_iter()
         .map(roff_escape)
-        .map(|name| format!("\\fI<{name}>\\fR"))
+        .map(|name| format!(r"\fI<{name}>\fR"))
         .join(" ");
     let defaults = arg
         .get_default_values()
@@ -291,7 +291,7 @@ fn render_possible_values(out: &mut String, arg: &Arg) {
     let flag = arg
         .get_long()
         .map(roff_escape)
-        .map(|long| format!("\\-\\-{long}"))
+        .map(|long| format!(r"\-\-{long}"))
         .unwrap_or_default();
     out.push_str(".RS\n");
     for value in &possible_values {

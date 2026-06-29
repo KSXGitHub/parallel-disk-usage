@@ -45,7 +45,7 @@ struct Value<Size> {
 
 /// Storage to be used by [`crate::hardlink::RecordHardlinks`].
 ///
-/// **Reflection:** `HardlinkList` does not implement `PartialEq`, `Eq`,
+/// **Reflection:** [`HardlinkList`] does not implement `PartialEq`, `Eq`,
 /// `Deserialize`, and `Serialize` directly. Instead, it can be converted into a
 /// [`Reflection`] which implement these traits.
 #[derive(Debug, SmartDefault, Clone)]

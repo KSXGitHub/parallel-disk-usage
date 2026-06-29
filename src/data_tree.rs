@@ -8,7 +8,7 @@ use super::size;
 
 /// Disk usage data of a filesystem tree.
 ///
-/// **Construction:** There are 3 main ways to create a `DataTree`:
+/// **Construction:** There are 3 main ways to create a [`DataTree`]:
 /// * Use [`FsTreeBuilder`](crate::fs_tree_builder::FsTreeBuilder) to create it from the real
 ///   filesystem.
 /// * Use [`TreeBuilder`](crate::tree_builder::TreeBuilder) to create it from a representation
@@ -16,9 +16,9 @@ use super::size;
 /// * Use [`Reflection`].
 ///
 /// **Visualization:** Use the [`Visualizer`](crate::visualizer::Visualizer) struct to create an
-/// ASCII chart that visualizes `DataTree`.
+/// ASCII chart that visualizes [`DataTree`].
 ///
-/// **Serialization and deserialization:** _(feature: `json`)_ `DataTree` does not implement
+/// **Serialization and deserialization:** _(feature: `json`)_ [`DataTree`] does not implement
 /// `Serialize` and `Deserialize` traits directly, instead, it can be converted into/from a
 /// [`Reflection`] which implements these traits.
 #[derive(Debug, PartialEq, Eq)]

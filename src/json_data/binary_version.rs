@@ -12,7 +12,7 @@ pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub struct BinaryVersion(String);
 
 impl BinaryVersion {
-    /// Get version of the current `pdu` program as a `BinaryVersion`.
+    /// Get version of the current `pdu` program as a [`BinaryVersion`].
     #[inline]
     pub fn current() -> Self {
         CURRENT_VERSION.to_string().into()
