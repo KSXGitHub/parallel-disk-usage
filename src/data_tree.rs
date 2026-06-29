@@ -1,7 +1,8 @@
 pub mod reflection;
 
-pub use Reflection as DataTreeReflection;
 pub use reflection::Reflection;
+
+pub use Reflection as DataTreeReflection;
 
 use super::size;
 

@@ -2,11 +2,12 @@ pub mod iter;
 pub mod reflection;
 pub mod summary;
 
-pub use Reflection as HardlinkListReflection;
-pub use Summary as SharedLinkSummary;
 pub use iter::Iter;
 pub use reflection::Reflection;
 pub use summary::Summary;
+
+pub use Reflection as HardlinkListReflection;
+pub use Summary as SharedLinkSummary;
 
 use crate::device::DeviceNumber;
 use crate::hardlink::LinkPathList;

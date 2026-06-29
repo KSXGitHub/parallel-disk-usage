@@ -39,32 +39,30 @@ Automated tools enforce formatting (`cargo fmt`), linting (`cargo clippy`), and 
 Two `perfectionist` rules govern imports automatically:
 
 - `perfectionist::import_granularity_mismatch`, configured for the `module` style, controls how items are merged within each `use` statement. Items from the same module are merged into a single braced `use` statement, while each module keeps its own `use` statement rather than collapsing an entire crate into one nested-braces statement.
-- `perfectionist::import_grouping_mismatch`, configured for the `single_block` style, controls how `use` statements are partitioned into blocks. Private imports sit in one contiguous block with no blank lines between them, while `pub use` re-exports are pulled into their own leading block, separated by a blank line (the rule's default `separate_reexports = true`).
+- `perfectionist::import_grouping_mismatch`, configured for the `single_block` style with `reexports = "split"`, controls how `use` statements are partitioned into blocks. Private imports sit in one contiguous block with no blank lines between them. `pub use` re-exports lead, split into two blank-separated sub-blocks: submodule re-exports (a multi-segment path such as `pub use child::Item;`) above alias re-exports (a single-segment path such as `pub use Item as Alias;`).
 
 Import ordering within the block is enforced separately by `cargo fmt`.
 
 Imports gated by a platform or feature attribute such as `#[cfg(unix)]` are kept in their own block after the main imports, separated by a blank line. Under `single_block` the rule recognizes this trailing `#[cfg]` block automatically through its default `cfg_block_handling = "trailing"`, so no manual exception is required.
 
 ```rust
-pub use sub::Sub;
+pub use iter::Iter;
+pub use reflection::Reflection;
 
-use crate::args::{Args, Quantity, Threads};
-use crate::bytes_format::BytesFormat;
+pub use Reflection as ListReflection;
+
 use crate::size;
-use clap::Parser;
-use pipe_trait::Pipe;
-use std::io::stdin;
-use std::time::Duration;
+use std::path::PathBuf;
 
 #[cfg(unix)]
-use crate::get_size::{GetBlockCount, GetBlockSize};
+use std::os::unix::fs::MetadataExt;
 ```
 
 ### Module Organization
 
 The flat file pattern (`module.rs` rather than `module/mod.rs`) is enforced by `clippy::mod_module_files`, enabled in `Cargo.toml`. Earlier releases relied on a `perfectionist::flat_module_pattern` rule; `perfectionist` `0.0.0-rc.19` removed it in favor of the equivalent Clippy lint. In addition to that requirement, follow these conventions:
 
-- List `pub mod` declarations first, then the `pub use` re-exports in their own group, then the private `use` block, then the remaining items. `perfectionist::import_grouping_mismatch` (`separate_reexports`) keeps the re-exports in a block of their own above the private imports, and `cargo fmt` sorts within each block.
+- List `pub mod` declarations first, then the `pub use` re-exports, then the private `use` block, then the remaining items. `perfectionist::import_grouping_mismatch` (`reexports = "split"`) keeps re-exports above the private imports, split into a submodule-re-export block and an alias-re-export block, and `cargo fmt` sorts within each block.
 - Use `pub use` to re-export key types at the module level for convenience.
 
 ```rust

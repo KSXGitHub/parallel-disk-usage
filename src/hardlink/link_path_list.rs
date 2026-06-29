@@ -1,9 +1,10 @@
 mod iter;
 mod reflection;
 
-pub use Reflection as LinkPathListReflection;
 pub use iter::Iter;
 pub use reflection::Reflection;
+
+pub use Reflection as LinkPathListReflection;
 
 use std::path::PathBuf;
 
