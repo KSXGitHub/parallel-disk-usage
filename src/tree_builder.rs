@@ -20,7 +20,7 @@ where
     pub path: Path,
     /// Name of the root.
     pub name: Name,
-    /// Function to extract the necessary information ([`size`](Info::size) and [`children`](Info::children)) from `path`.
+    /// Function to extract necessary information from `path` ([`size`](Info::size) and [`children`](Info::children)).
     pub get_info: GetInfo,
     /// Function to join parent's `path` with a child's name to make the child's `name`.
     pub join_path: JoinPath,
