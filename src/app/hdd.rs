@@ -173,7 +173,10 @@ where
 /// this function should be revisited — virtual disks on macOS (e.g. virtio
 /// in QEMU) or FreeBSD (e.g. virtio-blk) could face the same misclassification.
 #[cfg(not(target_os = "linux"))]
-fn reclassify_virtual_hdd<Sys>(kind: DiskKind, _: &str) -> DiskKind {
+fn reclassify_virtual_hdd<Sys>(kind: DiskKind, _: &str) -> DiskKind
+where
+    Sys: Canonicalize,
+{
     kind
 }
 
