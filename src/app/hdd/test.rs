@@ -12,80 +12,73 @@ use sysinfo::DiskKind;
 #[cfg(target_os = "linux")]
 use super::{PathExists, ReadLink};
 
-/// Fake disk value read by the disk-reading capabilities.
+/// Declare, inside the calling test, a function-scoped `DISKS` fixture and a
+/// zero-sized `FakeDisk` provider that reads it, so no state is shared between
+/// tests.
 ///
-/// It carries only the three fields the capabilities expose, standing in for
-/// [`sysinfo::Disk`], which a test cannot construct.
-struct FakeDisk {
-    kind: DiskKind,
-    name: &'static str,
-    mount_point: &'static str,
-}
+/// `FakeDisk` holds no state of its own: the disk records live in the `DISKS`
+/// static fixture, and each `Disk` value is one such record. The sysfs is
+/// empty, so `canonicalize` is the identity, `path_exists` is `false`, and
+/// `read_link` fails, which leaves every disk kind unchanged.
+macro_rules! empty_sysfs_fake {
+    () => {
+        static DISKS: &[(DiskKind, &str, &str)] = &[
+            (DiskKind::SSD, "/dev/sda", "/"),
+            (DiskKind::HDD, "/dev/sdb", "/home"),
+            (DiskKind::HDD, "/dev/sdc", "/mnt/hdd-data"),
+            (DiskKind::SSD, "/dev/sdd", "/mnt/ssd-data"),
+            (DiskKind::HDD, "/dev/sde", "/mnt/hdd-data/repo"),
+        ];
 
-impl FakeDisk {
-    fn new(kind: DiskKind, name: &'static str, mount_point: &'static str) -> Self {
-        Self {
-            kind,
-            name,
-            mount_point,
+        struct FakeDisk;
+
+        impl DiskSource for FakeDisk {
+            type Disk = (DiskKind, &'static str, &'static str);
         }
-    }
-}
 
-/// Fake provider whose sysfs is empty.
-struct EmptySysfs;
+        impl GetDiskKind for FakeDisk {
+            fn get_disk_kind(disk: &Self::Disk) -> DiskKind {
+                disk.0
+            }
+        }
 
-impl DiskSource for EmptySysfs {
-    type Disk = FakeDisk;
-}
+        impl GetDiskName for FakeDisk {
+            fn get_disk_name(disk: &Self::Disk) -> &OsStr {
+                OsStr::new(disk.1)
+            }
+        }
 
-impl GetDiskKind for EmptySysfs {
-    fn get_disk_kind(disk: &Self::Disk) -> DiskKind {
-        disk.kind
-    }
-}
+        impl GetMountPoint for FakeDisk {
+            fn get_mount_point(disk: &Self::Disk) -> &Path {
+                Path::new(disk.2)
+            }
+        }
 
-impl GetDiskName for EmptySysfs {
-    fn get_disk_name(disk: &Self::Disk) -> &OsStr {
-        OsStr::new(disk.name)
-    }
-}
+        impl Canonicalize for FakeDisk {
+            fn canonicalize(path: &Path) -> io::Result<PathBuf> {
+                path.to_path_buf().pipe(Ok)
+            }
+        }
 
-impl GetMountPoint for EmptySysfs {
-    fn get_mount_point(disk: &Self::Disk) -> &Path {
-        Path::new(disk.mount_point)
-    }
-}
+        #[cfg(target_os = "linux")]
+        impl PathExists for FakeDisk {
+            fn path_exists(_: &Path) -> bool {
+                false
+            }
+        }
 
-impl Canonicalize for EmptySysfs {
-    fn canonicalize(path: &Path) -> io::Result<PathBuf> {
-        path.to_path_buf().pipe(Ok)
-    }
-}
-
-#[cfg(target_os = "linux")]
-impl PathExists for EmptySysfs {
-    fn path_exists(_: &Path) -> bool {
-        false
-    }
-}
-
-#[cfg(target_os = "linux")]
-impl ReadLink for EmptySysfs {
-    fn read_link(_: &Path) -> io::Result<PathBuf> {
-        Err(io::Error::new(io::ErrorKind::NotFound, "mocked"))
-    }
+        #[cfg(target_os = "linux")]
+        impl ReadLink for FakeDisk {
+            fn read_link(_: &Path) -> io::Result<PathBuf> {
+                Err(io::Error::new(io::ErrorKind::NotFound, "mocked"))
+            }
+        }
+    };
 }
 
 #[test]
 fn test_any_path_in_hdd() {
-    let disks = &[
-        FakeDisk::new(DiskKind::SSD, "/dev/sda", "/"),
-        FakeDisk::new(DiskKind::HDD, "/dev/sdb", "/home"),
-        FakeDisk::new(DiskKind::HDD, "/dev/sdc", "/mnt/hdd-data"),
-        FakeDisk::new(DiskKind::SSD, "/dev/sdd", "/mnt/ssd-data"),
-        FakeDisk::new(DiskKind::HDD, "/dev/sde", "/mnt/hdd-data/repo"),
-    ];
+    empty_sysfs_fake!();
 
     let cases: &[(&[&str], bool)] = &[
         (&[], false),
@@ -112,19 +105,13 @@ fn test_any_path_in_hdd() {
     for (paths, in_hdd) in cases {
         let paths: Vec<_> = paths.iter().map(PathBuf::from).collect();
         println!("CASE: {paths:?} → {in_hdd:?}");
-        assert_eq!(any_path_is_in_hdd::<EmptySysfs>(&paths, disks), *in_hdd);
+        assert_eq!(any_path_is_in_hdd::<FakeDisk>(&paths, DISKS), *in_hdd);
     }
 }
 
 #[test]
 fn test_path_in_hdd() {
-    let disks = &[
-        FakeDisk::new(DiskKind::SSD, "/dev/sda", "/"),
-        FakeDisk::new(DiskKind::HDD, "/dev/sdb", "/home"),
-        FakeDisk::new(DiskKind::HDD, "/dev/sdc", "/mnt/hdd-data"),
-        FakeDisk::new(DiskKind::SSD, "/dev/sdd", "/mnt/ssd-data"),
-        FakeDisk::new(DiskKind::HDD, "/dev/sde", "/mnt/hdd-data/repo"),
-    ];
+    empty_sysfs_fake!();
 
     for (path, in_hdd) in [
         ("/etc/fstab", false),
@@ -134,6 +121,6 @@ fn test_path_in_hdd() {
         ("/mnt/ssd-data/test/test", false),
     ] {
         println!("CASE: {path} → {in_hdd:?}");
-        assert_eq!(path_is_in_hdd::<EmptySysfs>(Path::new(path), disks), in_hdd);
+        assert_eq!(path_is_in_hdd::<FakeDisk>(Path::new(path), DISKS), in_hdd);
     }
 }
