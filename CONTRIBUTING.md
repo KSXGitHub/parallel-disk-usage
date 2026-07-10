@@ -358,9 +358,9 @@ The opposite is also a smell: a function that carries a `Sys` generic but is onl
 ### Naming
 
 - The generic parameter is named `Sys`.
-- The single production provider is named `Host`. It lives in `src/app/host.rs` and delegates every capability to the real operating system.
+- The single production provider is named `Host`. It delegates every capability to the real operating system.
 - A capability trait is named for the action it performs, such as `GetDiskKind`, `Canonicalize`, or `IsRealDir`.
-- A fake is named for its behavior, such as `SymlinkFs` for one that resolves a fixed table of symbolic links, or for what it stands in for, such as `FakeDisk` for a fake through which disk detection is tested.
+- A fake is named for its behavior, such as a fake filesystem that resolves a fixed table of symbolic links, or for what it stands in for, such as a fake through which disk detection is tested.
 
 ### One trait per capability
 
@@ -380,7 +380,7 @@ pub trait ReadLink {
 }
 ```
 
-Keep capabilities at the level of leaf primitives, each mirroring a single standard-library function, and compose higher-level behavior as ordinary free functions on top of them. The pure `starts_with` prefix check in `overlapping_arguments` is a plain method call inside the algorithm rather than a capability, because it touches no side effect.
+Keep capabilities at the level of leaf primitives, each mirroring a single standard-library function, and compose higher-level behavior as ordinary free functions on top of them. A pure computation such as a path-prefix check is a plain method call inside the algorithm rather than a capability, because it touches no side effect.
 
 ### Self-less methods and a stateless provider
 
@@ -406,13 +406,13 @@ impl GetMountPoint for Host {
 }
 ```
 
-Production call sites name the provider explicitly through a turbofish, such as `any_path_is_in_hdd::<Host>(&files, &disks)` and `remove_overlapping_paths::<Host>(&mut files)`, so the production choice is visible at the call site rather than left to inference.
+Production call sites name the provider explicitly through a turbofish, such as `some_operation::<Host>(&files)`, so the production choice is visible at the call site rather than left to inference.
 
 ### Fakes and their state are function-scoped
 
 Each test defines its own fake `struct`, and, when the fake needs state, its own `static` for that state, both inside the test body. Rust allows `static`, `struct`, `const`, and `impl` items inside a function, and a function-local `static` still has `'static` lifetime, so each test stays self-contained and shares nothing with the others. Do not hoist fixture state to a module-level or global `static` to share it across tests, and do not reach for `thread_local!` to paper over such sharing.
 
-The reclassification tests in `src/app/hdd/test_linux.rs` follow this rule. Each generated test declares its own `DEVICES` and `DRIVERS` tables as `static` items inside the test function, and its own `Fs` fake next to them.
+For example, a test that needs specific host state declares its fixture tables as `static` items inside the test function, with its fake alongside them:
 
 ```rust
 #[test]
@@ -430,7 +430,7 @@ fn some_reclassification_case() {
 }
 ```
 
-A fake that holds no state is the one exception. Because it has nothing to race on, it may sit at module scope and be shared, in the manner of a frozen clock. `SymlinkFs` in `src/app/overlapping_arguments/test_remove_overlapping_paths.rs` is stateless, so it is declared once and reused across the tests in its module. Small stateless helpers, such as a symlink resolver, may likewise stay at module scope.
+A fake that holds no state is the one exception. Because it has nothing to race on, it may sit at module scope and be shared, in the manner of a frozen clock. A stateless fake that only reads a fixed table of module constants is such a case, so it may be declared once and reused across the tests in its module. Small stateless helpers, such as a symlink resolver, may likewise stay at module scope.
 
 ## Unit Tests
 
