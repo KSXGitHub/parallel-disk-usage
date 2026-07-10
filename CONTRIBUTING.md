@@ -343,13 +343,13 @@ ExitCode::from(match self {
 
 ## Dependency Injection for Tests
 
-Some code paths cannot be reached by a real fixture. Reading a [`sysinfo::Disk`], which has no public constructor, probing sysfs under `/sys/block`, resolving symbolic links, and canonicalizing paths against the live filesystem are all examples. For these paths this project adopts the dependency-injection-for-tests pattern from [pnpm's Rust code style guide](https://github.com/pnpm/pnpm/blob/main/pacquet/CODE_STYLE_GUIDE.md#dependency-injection-for-tests). The side effects a function needs are expressed as capability traits, production supplies a real provider, and each test supplies a fake.
+Some code paths cannot be reached by a real fixture. Reading a `sysinfo::Disk`, which has no public constructor, probing sysfs under `/sys/block`, resolving symbolic links, and canonicalizing paths against the live filesystem are all examples. For these paths this project adopts the dependency-injection-for-tests pattern from [pnpm's Rust code style guide](https://github.com/pnpm/pnpm/blob/main/pacquet/CODE_STYLE_GUIDE.md#dependency-injection-for-tests). The side effects a function needs are expressed as capability traits, production supplies a real provider, and each test supplies a fake.
 
 ### When to reach for it
 
 The default remains real fixtures, such as a temporary directory or an integration test that runs the built binary. Reach for a dependency-injection seam only for paths that a real fixture cannot reach portably or deterministically.
 
-- Values the standard library and third-party crates will not let a test construct, such as a [`sysinfo::Disk`].
+- Values the standard library and third-party crates will not let a test construct, such as a `sysinfo::Disk`.
 - Host state that a test cannot stage on demand, such as the sysfs block-device tree or a specific arrangement of symbolic links.
 - Filesystem error branches that the host will not reproduce on request.
 
@@ -384,7 +384,7 @@ Keep capabilities at the level of leaf primitives, each mirroring a single stand
 
 ### Self-less methods and a stateless provider
 
-The provider holds no state of its own, so every capability method is an associated function that takes no `&self`. The disk value the disk-reading capabilities operate on is exposed as an associated type, so production reads a real [`sysinfo::Disk`] while a test substitutes a lightweight stand-in that the provider chooses.
+The provider holds no state of its own, so every capability method is an associated function that takes no `&self`. The disk value the disk-reading capabilities operate on is exposed as an associated type, so production reads a real `sysinfo::Disk` while a test substitutes a lightweight stand-in that the provider chooses.
 
 ```rust
 pub trait DiskSource {
