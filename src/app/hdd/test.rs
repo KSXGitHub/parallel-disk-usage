@@ -33,12 +33,6 @@ impl FakeDisk {
 }
 
 /// Fake provider whose sysfs is empty.
-///
-/// `canonicalize` returns the path unchanged (all paths are canonical),
-/// `path_exists` returns `false`, and `read_link` returns `NotFound`, so
-/// [`reclassify_virtual_hdd`](super::reclassify_virtual_hdd) is effectively a
-/// no-op: disk kinds pass through unchanged. The provider holds no state, so it
-/// is shared across the tests in this module rather than declared inside each.
 struct EmptySysfs;
 
 impl DiskSource for EmptySysfs {

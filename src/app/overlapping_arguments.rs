@@ -6,10 +6,6 @@ use std::mem::take;
 use std::path::PathBuf;
 
 /// The command-line argument that the argument-resolution capabilities operate on.
-///
-/// The argument type is exposed as an associated type so that production can
-/// resolve real [`PathBuf`] arguments while a test substitutes a lightweight
-/// stand-in, such as a `&'static str`, that its fake filesystem understands.
 pub trait ArgumentSource {
     /// The argument value that the capabilities below resolve.
     type Argument;

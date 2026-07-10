@@ -43,9 +43,6 @@ fn resolve_symlink(absolute_path: PathBuf) -> PathBuf {
 
 /// Fake filesystem whose symlinks and current directory are the module
 /// constants above.
-///
-/// The provider holds no state of its own, so it is shared across the tests in
-/// this module rather than declared inside each.
 struct SymlinkFs;
 
 impl ArgumentSource for SymlinkFs {
