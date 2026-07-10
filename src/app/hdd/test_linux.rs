@@ -1,4 +1,7 @@
-use super::{FsApi, VIRTUAL_DISK_KIND, parse_block_device_name, reclassify_virtual_hdd};
+use super::{
+    Canonicalize, PathExists, ReadLink, VIRTUAL_DISK_KIND, parse_block_device_name,
+    reclassify_virtual_hdd,
+};
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use std::io;
@@ -39,7 +42,7 @@ fn test_parse_block_device_name() {
     }
 }
 
-/// Generate a test that builds a mock [`FsApi`] with identity `canonicalize`,
+/// Generate a test that builds a fake provider with identity `canonicalize`,
 /// then asserts that [`reclassify_virtual_hdd`] maps `DiskKind::HDD` to the
 /// expected `DiskKind`.
 ///
@@ -47,6 +50,10 @@ fn test_parse_block_device_name() {
 /// `/sys/block/{block}/device/driver`) are derived from `block_device`,
 /// so callers only supply the four varying pieces: block device name, kernel
 /// driver name, disk name, and expected `DiskKind`.
+///
+/// The provider's state, the `DEVICES` and `DRIVERS` tables, lives in `static`
+/// items declared inside each generated test function, so the tests share no
+/// storage and never race on it.
 macro_rules! identity_reclassify_test_case {
     (
         $(#[$attr:meta])*
@@ -64,13 +71,17 @@ macro_rules! identity_reclassify_test_case {
                 &[(concat!("/sys/block/", $block, "/device/driver"), $driver)];
 
             struct Fs;
-            impl FsApi for Fs {
+            impl Canonicalize for Fs {
                 fn canonicalize(path: &Path) -> io::Result<PathBuf> {
                     path.to_path_buf().pipe(Ok)
                 }
+            }
+            impl PathExists for Fs {
                 fn path_exists(path: &Path) -> bool {
                     DEVICES.iter().any(|dev| path == Path::new(*dev))
                 }
+            }
+            impl ReadLink for Fs {
                 fn read_link(path: &Path) -> io::Result<PathBuf> {
                     DRIVERS
                         .iter()
@@ -175,7 +186,7 @@ identity_reclassify_test_case! {
 #[test]
 fn test_mapper_symlink_resolves_to_virtual_partition() {
     struct Fs;
-    impl FsApi for Fs {
+    impl Canonicalize for Fs {
         fn canonicalize(path: &Path) -> io::Result<PathBuf> {
             [("/dev/mapper/vg0-lv0", "/dev/vda1")]
                 .iter()
@@ -183,9 +194,13 @@ fn test_mapper_symlink_resolves_to_virtual_partition() {
                 .map(|(_, target)| PathBuf::from(*target))
                 .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
         }
+    }
+    impl PathExists for Fs {
         fn path_exists(path: &Path) -> bool {
             ["/sys/block/vda"].iter().any(|dev| path == Path::new(*dev))
         }
+    }
+    impl ReadLink for Fs {
         fn read_link(path: &Path) -> io::Result<PathBuf> {
             [("/sys/block/vda/device/driver", "virtio_blk")]
                 .iter()
@@ -209,7 +224,7 @@ fn test_mapper_symlink_resolves_to_virtual_partition() {
 #[test]
 fn test_mapper_dm_device_is_not_corrected() {
     struct Fs;
-    impl FsApi for Fs {
+    impl Canonicalize for Fs {
         fn canonicalize(path: &Path) -> io::Result<PathBuf> {
             [("/dev/mapper/vg0-lv0", "/dev/dm-0")]
                 .iter()
@@ -217,16 +232,20 @@ fn test_mapper_dm_device_is_not_corrected() {
                 .map(|(_, target)| PathBuf::from(*target))
                 .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "mocked"))
         }
+    }
+    impl PathExists for Fs {
         fn path_exists(path: &Path) -> bool {
             path == Path::new("/sys/block/dm-0")
         }
+    }
+    impl ReadLink for Fs {
         fn read_link(_: &Path) -> io::Result<PathBuf> {
             Err(io::Error::new(io::ErrorKind::NotFound, "mocked"))
         }
     }
 
     // dm-0 is recognized but has no /sys/block/dm-0/device/driver
-    // symlink, so driver detection fails — HDD classification is preserved.
+    // symlink, so driver detection fails and HDD classification is preserved.
     assert_eq!(
         reclassify_virtual_hdd::<Fs>(DiskKind::HDD, "/dev/mapper/vg0-lv0"),
         DiskKind::HDD,
@@ -237,13 +256,17 @@ fn test_mapper_dm_device_is_not_corrected() {
 #[test]
 fn test_ssd_is_not_corrected() {
     struct Fs;
-    impl FsApi for Fs {
+    impl Canonicalize for Fs {
         fn canonicalize(_: &Path) -> io::Result<PathBuf> {
             panic!("canonicalize should not be called for non-HDD disks");
         }
+    }
+    impl PathExists for Fs {
         fn path_exists(_: &Path) -> bool {
             panic!("path_exists should not be called for non-HDD disks");
         }
+    }
+    impl ReadLink for Fs {
         fn read_link(_: &Path) -> io::Result<PathBuf> {
             panic!("read_link should not be called for non-HDD disks");
         }

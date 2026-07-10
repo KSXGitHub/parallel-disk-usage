@@ -13,11 +13,12 @@ use crate::visualizer::{BarAlignment, ColumnWidthDistribution, Direction, Visual
 use crate::{hardlink, size};
 use clap::Parser;
 use hdd::any_path_is_in_hdd;
+use host::Host;
 use pipe_trait::Pipe;
 use std::io::stdin;
 use std::time::Duration;
 use sub::JsonOutputParam;
-use sysinfo::{Disk, Disks};
+use sysinfo::Disks;
 
 #[cfg(unix)]
 use crate::get_size::{GetBlockCount, GetBlockSize};
@@ -185,7 +186,7 @@ impl App {
         let threads = match self.args.threads {
             Threads::Auto => {
                 let disks = Disks::new_with_refreshed_list();
-                any_path_is_in_hdd::<Disk, hdd::RealFs>(&self.args.files, &disks).then(|| {
+                any_path_is_in_hdd::<Host>(&self.args.files, &disks).then(|| {
                     eprintln!("warning: HDD detected, the thread limit will be set to 1");
                     eprintln!("hint: You can pass --threads=max disable this behavior");
                     1
@@ -206,8 +207,8 @@ impl App {
             // Hardlinks deduplication doesn't work properly if there are more than 1 paths pointing to
             // the same tree or if a path points to a subtree of another path. Therefore, we must find
             // and remove such overlapping paths before they cause problems.
-            use overlapping_arguments::{RealApi, remove_overlapping_paths};
-            remove_overlapping_paths::<RealApi>(&mut self.args.files);
+            use overlapping_arguments::remove_overlapping_paths;
+            remove_overlapping_paths::<Host>(&mut self.args.files);
         }
 
         let report_error = if self.args.silent_errors {
@@ -379,5 +380,6 @@ impl App {
 }
 
 mod hdd;
+mod host;
 mod mount_point;
 mod overlapping_arguments;
