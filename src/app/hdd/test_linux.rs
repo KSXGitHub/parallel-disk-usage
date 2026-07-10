@@ -8,7 +8,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 use sysinfo::DiskKind;
 
-/// Test pure parsing of block device names — no sysfs dependency.
+/// Test the pure parsing of block device names, which has no sysfs dependency.
 #[test]
 fn test_parse_block_device_name() {
     let cases: &[(&str, Option<&str>)] = &[
@@ -252,7 +252,7 @@ fn test_mapper_dm_device_is_not_corrected() {
     );
 }
 
-/// SSD disk should pass through unchanged — correction is not applied.
+/// An SSD disk should pass through unchanged, because correction is not applied.
 #[test]
 fn test_ssd_is_not_corrected() {
     struct Fs;

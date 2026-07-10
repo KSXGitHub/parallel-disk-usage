@@ -170,8 +170,8 @@ where
 /// in [`is_hdd`] never matches, so this function is effectively a no-op.
 ///
 /// If `sysinfo` ever gains accurate disk-kind detection on these platforms,
-/// this function should be revisited — virtual disks on macOS (e.g. virtio
-/// in QEMU) or FreeBSD (e.g. virtio-blk) could face the same misclassification.
+/// this function should be revisited. Virtual disks on macOS (e.g. virtio in
+/// QEMU) or FreeBSD (e.g. virtio-blk) could then face the same misclassification.
 #[cfg(not(target_os = "linux"))]
 fn reclassify_virtual_hdd<Sys>(kind: DiskKind, _: &str) -> DiskKind
 where
