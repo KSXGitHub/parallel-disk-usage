@@ -15,11 +15,6 @@ use super::{PathExists, ReadLink};
 /// Declare, inside the calling test, a function-scoped `DISKS` fixture and a
 /// zero-sized `FakeDisk` provider that reads it, so no state is shared between
 /// tests.
-///
-/// `FakeDisk` holds no state of its own: the disk records live in the `DISKS`
-/// static fixture, and each `Disk` value is one such record. The sysfs is
-/// empty, so `canonicalize` is the identity, `path_exists` is `false`, and
-/// `read_link` fails, which leaves every disk kind unchanged.
 macro_rules! empty_sysfs_fake {
     () => {
         static DISKS: &[(DiskKind, &str, &str)] = &[
