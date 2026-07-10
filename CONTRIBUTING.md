@@ -341,6 +341,97 @@ ExitCode::from(match self {
 })
 ```
 
+## Dependency Injection for Tests
+
+Some code paths cannot be reached by a real fixture. Reading a [`sysinfo::Disk`], which has no public constructor, probing sysfs under `/sys/block`, resolving symbolic links, and canonicalizing paths against the live filesystem are all examples. For these paths this project adopts the dependency-injection-for-tests pattern from [pnpm's Rust code style guide](https://github.com/pnpm/pnpm/blob/main/pacquet/CODE_STYLE_GUIDE.md#dependency-injection-for-tests). The side effects a function needs are expressed as capability traits, production supplies a real provider, and each test supplies a fake.
+
+### When to reach for it
+
+The default remains real fixtures, such as a temporary directory or an integration test that runs the built binary. Reach for a dependency-injection seam only for paths that a real fixture cannot reach portably or deterministically.
+
+- Values the standard library and third-party crates will not let a test construct, such as a [`sysinfo::Disk`].
+- Host state that a test cannot stage on demand, such as the sysfs block-device tree or a specific arrangement of symbolic links.
+- Filesystem error branches that the host will not reproduce on request.
+
+The upstream guide names the opposite smell as well: a function that carries a `Sys` generic but is only ever exercised through real fixtures is over-designed. If no test substitutes a fake for the seam, remove the generic and call the real operation directly.
+
+### Naming
+
+- The generic parameter is named `Sys`.
+- The single production provider is named `Host`. It lives in `src/app/host.rs` and delegates every capability to the real operating system.
+- A capability trait is named for the action it performs, such as `GetDiskKind`, `Canonicalize`, or `IsRealDir`.
+- A fake is named for its behavior, such as `EmptySysfs` for a provider whose sysfs contains nothing or `SymlinkFs` for one that resolves a fixed table of symbolic links.
+
+### One trait per capability
+
+Each capability is its own trait with a single method. A function then binds only the capabilities it actually consumes. Carry those capabilities as a single `Sys` generic with several bounds rather than one generic per capability, so call sites stay short and a fake only implements the methods the function under test exercises.
+
+```rust
+pub trait Canonicalize {
+    fn canonicalize(path: &Path) -> io::Result<PathBuf>;
+}
+
+pub trait PathExists {
+    fn path_exists(path: &Path) -> bool;
+}
+
+pub trait ReadLink {
+    fn read_link(path: &Path) -> io::Result<PathBuf>;
+}
+```
+
+Keep capabilities at the level of leaf primitives, each mirroring a single standard-library function, and compose higher-level behavior as ordinary free functions on top of them. The pure `starts_with` prefix check in `overlapping_arguments` is a plain method call inside the algorithm rather than a capability, because it touches no side effect.
+
+### Self-less methods and a stateless provider
+
+The provider holds no state of its own, so every capability method is an associated function that takes no `&self`. The disk value the disk-reading capabilities operate on is exposed as an associated type, so production reads a real [`sysinfo::Disk`] while a test substitutes a lightweight stand-in that the provider chooses.
+
+```rust
+pub trait DiskSource {
+    type Disk;
+}
+
+pub trait GetMountPoint: DiskSource {
+    fn get_mount_point(disk: &Self::Disk) -> &Path;
+}
+
+impl DiskSource for Host {
+    type Disk = sysinfo::Disk;
+}
+
+impl GetMountPoint for Host {
+    fn get_mount_point(disk: &Self::Disk) -> &Path {
+        disk.mount_point()
+    }
+}
+```
+
+Production call sites name the provider explicitly through a turbofish, such as `any_path_is_in_hdd::<Host>(&files, &disks)` and `remove_overlapping_paths::<Host>(&mut files)`, so the production choice is visible at the call site rather than left to inference.
+
+### Fakes and their state are function-scoped
+
+Each test defines its own fake `struct`, and, when the fake needs state, its own `static` for that state, both inside the test body. Rust allows `static`, `struct`, `const`, and `impl` items inside a function, and a function-local `static` still has `'static` lifetime, so each test stays self-contained and shares nothing with the others. Do not hoist fixture state to a module-level or global `static` to share it across tests, and do not reach for `thread_local!` to paper over such sharing.
+
+The reclassification tests in `src/app/hdd/test_linux.rs` follow this rule. Each generated test declares its own `DEVICES` and `DRIVERS` tables as `static` items inside the test function, and its own `Fs` fake next to them.
+
+```rust
+#[test]
+fn some_reclassification_case() {
+    static DEVICES: &[&str] = &["/sys/block/vda"];
+    static DRIVERS: &[(&str, &str)] = &[("/sys/block/vda/device/driver", "virtio_blk")];
+
+    struct Fs;
+    impl PathExists for Fs {
+        fn path_exists(path: &Path) -> bool {
+            DEVICES.iter().any(|dev| path == Path::new(*dev))
+        }
+    }
+    // ... the remaining capabilities, then the assertion ...
+}
+```
+
+A fake that holds no state is the one exception. Because it has nothing to race on, it may sit at module scope and be shared, in the manner of a frozen clock. `EmptySysfs` in `src/app/hdd/test.rs` and `SymlinkFs` in `src/app/overlapping_arguments/test_remove_overlapping_paths.rs` are stateless, so each is declared once and reused across the tests in its module. Small stateless helpers, such as a fake-disk constructor or a symlink resolver, may likewise stay at module scope.
+
 ## Unit Tests
 
 A unit-test module may either sit inline as `mod tests { ... }` in its parent or live in a dedicated external `tests` submodule. Use the inline form for short test modules. Once the block becomes long enough to obscure the surrounding module, move the tests into an external file.
