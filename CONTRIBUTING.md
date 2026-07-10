@@ -343,7 +343,7 @@ ExitCode::from(match self {
 
 ## Dependency Injection for Tests
 
-Some code paths cannot be reached by a real fixture. Reading a `sysinfo::Disk`, which has no public constructor, probing sysfs under `/sys/block`, resolving symbolic links, and canonicalizing paths against the live filesystem are all examples. For these paths this project adopts the dependency-injection-for-tests pattern from [pnpm's Rust code style guide](https://github.com/pnpm/pnpm/blob/main/pacquet/CODE_STYLE_GUIDE.md#dependency-injection-for-tests). The side effects a function needs are expressed as capability traits, production supplies a real provider, and each test supplies a fake.
+Some code paths cannot be reached by a real fixture. Reading a `sysinfo::Disk`, which has no public constructor, probing sysfs under `/sys/block`, resolving symbolic links, and canonicalizing paths against the live filesystem are all examples. For these paths this project uses a dependency-injection-for-tests pattern: the side effects a function needs are expressed as capability traits, production supplies a real provider, and each test supplies a fake.
 
 ### When to reach for it
 
@@ -353,7 +353,7 @@ The default remains real fixtures, such as a temporary directory or an integrati
 - Host state that a test cannot stage on demand, such as the sysfs block-device tree or a specific arrangement of symbolic links.
 - Filesystem error branches that the host will not reproduce on request.
 
-The upstream guide names the opposite smell as well: a function that carries a `Sys` generic but is only ever exercised through real fixtures is over-designed. If no test substitutes a fake for the seam, remove the generic and call the real operation directly.
+The opposite is also a smell: a function that carries a `Sys` generic but is only ever exercised through real fixtures is over-designed. If no test substitutes a fake for the seam, remove the generic and call the real operation directly.
 
 ### Naming
 
