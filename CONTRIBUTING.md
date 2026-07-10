@@ -360,7 +360,7 @@ The upstream guide names the opposite smell as well: a function that carries a `
 - The generic parameter is named `Sys`.
 - The single production provider is named `Host`. It lives in `src/app/host.rs` and delegates every capability to the real operating system.
 - A capability trait is named for the action it performs, such as `GetDiskKind`, `Canonicalize`, or `IsRealDir`.
-- A fake is named for its behavior, such as `EmptySysfs` for a provider whose sysfs contains nothing or `SymlinkFs` for one that resolves a fixed table of symbolic links.
+- A fake is named for its behavior, such as `SymlinkFs` for one that resolves a fixed table of symbolic links, or for what it stands in for, such as `FakeDisk` for a fake through which disk detection is tested.
 
 ### One trait per capability
 
@@ -430,7 +430,7 @@ fn some_reclassification_case() {
 }
 ```
 
-A fake that holds no state is the one exception. Because it has nothing to race on, it may sit at module scope and be shared, in the manner of a frozen clock. `EmptySysfs` in `src/app/hdd/test.rs` and `SymlinkFs` in `src/app/overlapping_arguments/test_remove_overlapping_paths.rs` are stateless, so each is declared once and reused across the tests in its module. Small stateless helpers, such as a fake-disk constructor or a symlink resolver, may likewise stay at module scope.
+A fake that holds no state is the one exception. Because it has nothing to race on, it may sit at module scope and be shared, in the manner of a frozen clock. `SymlinkFs` in `src/app/overlapping_arguments/test_remove_overlapping_paths.rs` is stateless, so it is declared once and reused across the tests in its module. Small stateless helpers, such as a symlink resolver, may likewise stay at module scope.
 
 ## Unit Tests
 
