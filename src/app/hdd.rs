@@ -54,41 +54,6 @@ pub trait ReadLink {
     fn read_link(path: &Path) -> io::Result<PathBuf>;
 }
 
-/// The capabilities the HDD-detection functions require.
-///
-/// This is a bound alias over the individual capability traits above, not an
-/// umbrella capability of its own. It declares no method, and every side
-/// effect still lives in its own single-method trait. It exists only so the
-/// requirement, which varies by platform, is written once rather than repeated
-/// on [`is_hdd`], [`path_is_in_hdd`], and [`any_path_is_in_hdd`].
-///
-/// On Linux the detection additionally probes sysfs to reclassify virtual
-/// block devices, so it also needs [`PathExists`] and [`ReadLink`]. On other
-/// platforms the reclassification is a no-op, so those capabilities are neither
-/// required nor defined.
-#[cfg(target_os = "linux")]
-pub trait HddDetection:
-    GetDiskKind + GetDiskName + GetMountPoint + Canonicalize + PathExists + ReadLink
-{
-}
-
-#[cfg(target_os = "linux")]
-impl<Sys> HddDetection for Sys where
-    Sys: GetDiskKind + GetDiskName + GetMountPoint + Canonicalize + PathExists + ReadLink
-{
-}
-
-/// The capabilities the HDD-detection functions require.
-///
-/// See the Linux definition of this trait for the full explanation. On this
-/// platform the virtual-disk reclassification is a no-op, so only the
-/// disk-reading capabilities and [`Canonicalize`] are needed.
-#[cfg(not(target_os = "linux"))]
-pub trait HddDetection: GetDiskKind + GetDiskName + GetMountPoint + Canonicalize {}
-
-#[cfg(not(target_os = "linux"))]
-impl<Sys> HddDetection for Sys where Sys: GetDiskKind + GetDiskName + GetMountPoint + Canonicalize {}
-
 impl DiskSource for Host {
     type Disk = Disk;
 }
@@ -322,9 +287,29 @@ where
 }
 
 /// Check if any path is in any HDD.
+///
+/// Every capability in the bound below is one this function or its callees
+/// consume directly. The set varies by platform. On Linux, [`is_hdd`] reaches
+/// [`reclassify_virtual_hdd`], which probes sysfs and therefore also needs
+/// [`PathExists`] and [`ReadLink`]. On other platforms that reclassification is
+/// a no-op, so those two capabilities are neither required nor defined. The
+/// same platform split appears on [`path_is_in_hdd`] and [`is_hdd`] below.
+#[cfg(target_os = "linux")]
 pub fn any_path_is_in_hdd<Sys>(paths: &[PathBuf], disks: &[Sys::Disk]) -> bool
 where
-    Sys: HddDetection,
+    Sys: GetDiskKind + GetDiskName + GetMountPoint + Canonicalize + PathExists + ReadLink,
+{
+    paths
+        .iter()
+        .filter_map(|file| Sys::canonicalize(file).ok())
+        .any(|path| path_is_in_hdd::<Sys>(&path, disks))
+}
+
+/// Check if any path is in any HDD.
+#[cfg(not(target_os = "linux"))]
+pub fn any_path_is_in_hdd<Sys>(paths: &[PathBuf], disks: &[Sys::Disk]) -> bool
+where
+    Sys: GetDiskKind + GetDiskName + GetMountPoint + Canonicalize,
 {
     paths
         .iter()
@@ -336,9 +321,29 @@ where
 ///
 /// Applies [`reclassify_virtual_hdd`] to each disk's reported kind to work
 /// around virtual block devices being falsely reported as HDDs on Linux.
+#[cfg(target_os = "linux")]
 fn path_is_in_hdd<Sys>(path: &Path, disks: &[Sys::Disk]) -> bool
 where
-    Sys: HddDetection,
+    Sys: GetDiskKind + GetDiskName + GetMountPoint + Canonicalize + PathExists + ReadLink,
+{
+    let mount_point = find_mount_point(path, disks.iter().map(Sys::get_mount_point));
+    let Some(mount_point) = mount_point else {
+        return false;
+    };
+    disks
+        .iter()
+        .filter(|disk| Sys::get_mount_point(disk) == mount_point)
+        .any(|disk| is_hdd::<Sys>(disk))
+}
+
+/// Check if path is in any HDD.
+///
+/// Applies [`reclassify_virtual_hdd`] to each disk's reported kind to work
+/// around virtual block devices being falsely reported as HDDs on Linux.
+#[cfg(not(target_os = "linux"))]
+fn path_is_in_hdd<Sys>(path: &Path, disks: &[Sys::Disk]) -> bool
+where
+    Sys: GetDiskKind + GetDiskName + GetMountPoint + Canonicalize,
 {
     let mount_point = find_mount_point(path, disks.iter().map(Sys::get_mount_point));
     let Some(mount_point) = mount_point else {
@@ -351,9 +356,30 @@ where
 }
 
 /// Check if a disk is an HDD after applying platform-specific corrections.
+///
+/// This does not read a mount point, so it omits [`GetMountPoint`] from its
+/// bounds even though its callers require it.
+#[cfg(target_os = "linux")]
 fn is_hdd<Sys>(disk: &Sys::Disk) -> bool
 where
-    Sys: HddDetection,
+    Sys: GetDiskKind + GetDiskName + Canonicalize + PathExists + ReadLink,
+{
+    let kind = Sys::get_disk_kind(disk);
+    let name = Sys::get_disk_name(disk).to_str();
+    match name {
+        Some(name) => reclassify_virtual_hdd::<Sys>(kind, name) == DiskKind::HDD,
+        None => kind == DiskKind::HDD, // can't parse name, keep original classification
+    }
+}
+
+/// Check if a disk is an HDD after applying platform-specific corrections.
+///
+/// This does not read a mount point, so it omits [`GetMountPoint`] from its
+/// bounds even though its callers require it.
+#[cfg(not(target_os = "linux"))]
+fn is_hdd<Sys>(disk: &Sys::Disk) -> bool
+where
+    Sys: GetDiskKind + GetDiskName + Canonicalize,
 {
     let kind = Sys::get_disk_kind(disk);
     let name = Sys::get_disk_name(disk).to_str();
