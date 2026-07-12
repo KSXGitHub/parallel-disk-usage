@@ -43,14 +43,20 @@ pub trait Canonicalize {
 }
 
 /// Capability: check whether a path exists, mirroring [`Path::exists`].
-#[cfg(target_os = "linux")]
+///
+/// Only the sysfs probe in [`reclassify_virtual_hdd`] exercises this, so it is
+/// unused on platforms where that probe is a no-op.
 pub trait PathExists {
+    #[cfg_attr(not(target_os = "linux"), expect(dead_code))]
     fn path_exists(path: &Path) -> bool;
 }
 
 /// Capability: read a symbolic link, mirroring [`std::fs::read_link`].
-#[cfg(target_os = "linux")]
+///
+/// Only the sysfs probe in [`reclassify_virtual_hdd`] exercises this, so it is
+/// unused on platforms where that probe is a no-op.
 pub trait ReadLink {
+    #[cfg_attr(not(target_os = "linux"), expect(dead_code))]
     fn read_link(path: &Path) -> io::Result<PathBuf>;
 }
 
@@ -86,7 +92,6 @@ impl Canonicalize for Host {
     }
 }
 
-#[cfg(target_os = "linux")]
 impl PathExists for Host {
     #[inline]
     fn path_exists(path: &Path) -> bool {
@@ -94,7 +99,6 @@ impl PathExists for Host {
     }
 }
 
-#[cfg(target_os = "linux")]
 impl ReadLink for Host {
     #[inline]
     fn read_link(path: &Path) -> io::Result<PathBuf> {
@@ -287,22 +291,9 @@ where
 }
 
 /// Check if any path is in any HDD.
-#[cfg(target_os = "linux")]
 pub fn any_path_is_in_hdd<Sys>(paths: &[PathBuf], disks: &[Sys::Disk]) -> bool
 where
     Sys: GetDiskKind + GetDiskName + GetMountPoint + Canonicalize + PathExists + ReadLink,
-{
-    paths
-        .iter()
-        .filter_map(|file| Sys::canonicalize(file).ok())
-        .any(|path| path_is_in_hdd::<Sys>(&path, disks))
-}
-
-/// Check if any path is in any HDD.
-#[cfg(not(target_os = "linux"))]
-pub fn any_path_is_in_hdd<Sys>(paths: &[PathBuf], disks: &[Sys::Disk]) -> bool
-where
-    Sys: GetDiskKind + GetDiskName + GetMountPoint + Canonicalize,
 {
     paths
         .iter()
@@ -314,29 +305,9 @@ where
 ///
 /// Applies [`reclassify_virtual_hdd`] to each disk's reported kind to work
 /// around virtual block devices being falsely reported as HDDs on Linux.
-#[cfg(target_os = "linux")]
 fn path_is_in_hdd<Sys>(path: &Path, disks: &[Sys::Disk]) -> bool
 where
     Sys: GetDiskKind + GetDiskName + GetMountPoint + Canonicalize + PathExists + ReadLink,
-{
-    let mount_point = find_mount_point(path, disks.iter().map(Sys::get_mount_point));
-    let Some(mount_point) = mount_point else {
-        return false;
-    };
-    disks
-        .iter()
-        .filter(|disk| Sys::get_mount_point(disk) == mount_point)
-        .any(|disk| is_hdd::<Sys>(disk))
-}
-
-/// Check if path is in any HDD.
-///
-/// Applies [`reclassify_virtual_hdd`] to each disk's reported kind to work
-/// around virtual block devices being falsely reported as HDDs on Linux.
-#[cfg(not(target_os = "linux"))]
-fn path_is_in_hdd<Sys>(path: &Path, disks: &[Sys::Disk]) -> bool
-where
-    Sys: GetDiskKind + GetDiskName + GetMountPoint + Canonicalize,
 {
     let mount_point = find_mount_point(path, disks.iter().map(Sys::get_mount_point));
     let Some(mount_point) = mount_point else {
@@ -349,30 +320,9 @@ where
 }
 
 /// Check if a disk is an HDD after applying platform-specific corrections.
-///
-/// This does not read a mount point, so it omits [`GetMountPoint`] from its
-/// bounds even though its callers require it.
-#[cfg(target_os = "linux")]
 fn is_hdd<Sys>(disk: &Sys::Disk) -> bool
 where
     Sys: GetDiskKind + GetDiskName + Canonicalize + PathExists + ReadLink,
-{
-    let kind = Sys::get_disk_kind(disk);
-    let name = Sys::get_disk_name(disk).to_str();
-    match name {
-        Some(name) => reclassify_virtual_hdd::<Sys>(kind, name) == DiskKind::HDD,
-        None => kind == DiskKind::HDD, // can't parse name, keep original classification
-    }
-}
-
-/// Check if a disk is an HDD after applying platform-specific corrections.
-///
-/// This does not read a mount point, so it omits [`GetMountPoint`] from its
-/// bounds even though its callers require it.
-#[cfg(not(target_os = "linux"))]
-fn is_hdd<Sys>(disk: &Sys::Disk) -> bool
-where
-    Sys: GetDiskKind + GetDiskName + Canonicalize,
 {
     let kind = Sys::get_disk_kind(disk);
     let name = Sys::get_disk_name(disk).to_str();

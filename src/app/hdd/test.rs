@@ -1,6 +1,6 @@
 use super::{
-    Canonicalize, DiskSource, GetDiskKind, GetDiskName, GetMountPoint, any_path_is_in_hdd,
-    path_is_in_hdd,
+    Canonicalize, DiskSource, GetDiskKind, GetDiskName, GetMountPoint, PathExists, ReadLink,
+    any_path_is_in_hdd, path_is_in_hdd,
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
@@ -8,9 +8,6 @@ use std::ffi::OsStr;
 use std::io;
 use std::path::{Path, PathBuf};
 use sysinfo::DiskKind;
-
-#[cfg(target_os = "linux")]
-use super::{PathExists, ReadLink};
 
 /// Declare, inside the calling test, a function-scoped `DISKS` fixture and a
 /// zero-sized `FakeDisk` provider that reads it, so no state is shared between
@@ -55,14 +52,12 @@ macro_rules! empty_sysfs_fake {
             }
         }
 
-        #[cfg(target_os = "linux")]
         impl PathExists for FakeDisk {
             fn path_exists(_: &Path) -> bool {
                 false
             }
         }
 
-        #[cfg(target_os = "linux")]
         impl ReadLink for FakeDisk {
             fn read_link(_: &Path) -> io::Result<PathBuf> {
                 Err(io::Error::new(io::ErrorKind::NotFound, "mocked"))
