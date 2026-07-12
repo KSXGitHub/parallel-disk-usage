@@ -287,13 +287,6 @@ where
 }
 
 /// Check if any path is in any HDD.
-///
-/// Every capability in the bound below is one this function or its callees
-/// consume directly. The set varies by platform. On Linux, [`is_hdd`] reaches
-/// [`reclassify_virtual_hdd`], which probes sysfs and therefore also needs
-/// [`PathExists`] and [`ReadLink`]. On other platforms that reclassification is
-/// a no-op, so those two capabilities are neither required nor defined. The
-/// same platform split appears on [`path_is_in_hdd`] and [`is_hdd`] below.
 #[cfg(target_os = "linux")]
 pub fn any_path_is_in_hdd<Sys>(paths: &[PathBuf], disks: &[Sys::Disk]) -> bool
 where
