@@ -43,18 +43,12 @@ pub trait Canonicalize {
 }
 
 /// Capability: check whether a path exists, mirroring [`Path::exists`].
-///
-/// Only the sysfs probe in [`reclassify_virtual_hdd`] exercises this, so it is
-/// unused on platforms where that probe is a no-op.
 pub trait PathExists {
     #[cfg_attr(not(target_os = "linux"), expect(dead_code))]
     fn path_exists(path: &Path) -> bool;
 }
 
 /// Capability: read a symbolic link, mirroring [`std::fs::read_link`].
-///
-/// Only the sysfs probe in [`reclassify_virtual_hdd`] exercises this, so it is
-/// unused on platforms where that probe is a no-op.
 pub trait ReadLink {
     #[cfg_attr(not(target_os = "linux"), expect(dead_code))]
     fn read_link(path: &Path) -> io::Result<PathBuf>;
