@@ -44,13 +44,19 @@ pub trait Canonicalize {
 
 /// Capability: check whether a path exists, mirroring [`Path::exists`].
 pub trait PathExists {
-    #[cfg_attr(not(target_os = "linux"), expect(dead_code))]
+    #[cfg_attr(
+        not(target_os = "linux"),
+        expect(dead_code, reason = "kept cross-platform for uniform bounds")
+    )]
     fn path_exists(path: &Path) -> bool;
 }
 
 /// Capability: read a symbolic link, mirroring [`std::fs::read_link`].
 pub trait ReadLink {
-    #[cfg_attr(not(target_os = "linux"), expect(dead_code))]
+    #[cfg_attr(
+        not(target_os = "linux"),
+        expect(dead_code, reason = "kept cross-platform for uniform bounds")
+    )]
     fn read_link(path: &Path) -> io::Result<PathBuf>;
 }
 
