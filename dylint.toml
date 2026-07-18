@@ -9,6 +9,20 @@ enable = ["import_grouping_mismatch", "unordered_derives"]
 ["perfectionist::clap_help_markdown"]
 ignore_constructs = ["code_span"]
 
+["perfectionist::import_granularity_mismatch"]
+style = "module"
+
+["perfectionist::import_grouping_mismatch"]
+style = "single_block"
+reexports = "split"
+
+["perfectionist::impure_macro_arguments"]
+deny_extra = ["debug_assert_op", "debug_assert_op_expr"]
+allow_extra = ["assert_op_expr"]
+
+["perfectionist::single_letter_closure_param"]
+extra_trivial_callback_methods = ["sort_reflection_by"]
+
 ["perfectionist::unordered_derives"]
 style = "prefix_then_alphabetical"
 prefix = [
@@ -24,17 +38,3 @@ prefix = [
     "Sum", "Product",
     "LowerHex", "UpperHex", "Octal",
 ]
-
-["perfectionist::import_granularity_mismatch"]
-style = "module"
-
-["perfectionist::import_grouping_mismatch"]
-style = "single_block"
-reexports = "split"
-
-["perfectionist::impure_macro_arguments"]
-deny_extra = ["debug_assert_op", "debug_assert_op_expr"]
-allow_extra = ["assert_op_expr"]
-
-["perfectionist::single_letter_closure_param"]
-extra_trivial_callback_methods = ["sort_reflection_by"]
