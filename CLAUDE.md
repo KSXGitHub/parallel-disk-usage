@@ -10,6 +10,7 @@ Read and follow the CONTRIBUTING.md file in this repository for all code style c
 - Use descriptive names for generics, such as `Size` and `Report`. Do not use single letters.
 - Use descriptive names for variables and closure parameters. Single letters are permitted only in these cases: (1) conventional names like `n` for count or `f` for formatter; (2) comparison closures like `|a, b|`; (3) trivial single-expression closures; (4) fold accumulators; and (5) index variables `i`/`j`/`k` in short closures or index-based loops. Single letters are never permitted in `let` bindings, including test fixtures, nor in multi-line functions or closures.
 - Use `pipe-trait` to chain through unary functions such as constructors, `Some`, `Ok`, and free functions. Use it to flatten nested calls and to continue method chains. Do not use it for simple standalone calls; prefer `foo(value)` over `value.pipe(foo)`.
+- In test code, use the `command-extra` crate (the `CommandExtra` trait) when building `std::process::Command`. Call `.with_arg(...)`, `.with_env(...)`, `.without_env(...)`, `.with_no_env()`, and similar methods rather than `.arg(...)`, `.env(...)`, `.env_remove(...)`, and `.env_clear()`, so construction remains a single owned expression chain.
 - Prefer `where` clauses when a type has multiple trait bounds.
 - For error types, only derive `Display` and `Error` from `derive_more` when each is actually needed. Not all displayable types are errors.
 - Minimize `unwrap()` in non-test code. Use proper error handling instead.
