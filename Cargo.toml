@@ -106,3 +106,17 @@ normalize-path = "0.2.1"
 pretty_assertions = "1.4.1"
 rand = "0.10.1"
 which = "8.0.2"
+
+# The release profile is tuned for reproducible builds. The compiled binary
+# should be determined solely by the source code and the pinned toolchain,
+# never by the host that happens to compile it.
+[profile.release]
+# Strip symbols as part of linking, so the toolchain itself produces the final
+# artifact. This keeps stripping deterministic and identical on every host,
+# instead of depending on the version of an external `strip` program.
+strip = "symbols"
+# Keep the default parallel code generation. On a fixed toolchain the output of
+# parallel codegen is already deterministic, so reproducibility does not require
+# serializing compilation with `codegen-units = 1`. Pinning the value preserves
+# this parallelism against any future change to the default.
+codegen-units = 16

@@ -89,11 +89,12 @@ jobs:
       - name: Install compilation target
         run: rustup target add ${{ matrix.target }}
 
+      - name: Configure reproducible build environment
+        shell: bash
+        run: ./ci/github-actions/reproducible-build-env.sh
+
       - name: Build
         run: cargo build --target ${{ matrix.target }} --release --all-features
-
-      - name: Strip all debug symbols
-        run: strip --strip-all target/${{ matrix.target }}/release/pdu
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v4
@@ -135,11 +136,12 @@ jobs:
       - name: Install compilation target
         run: rustup target add ${{ matrix.target }}
 
+      - name: Configure reproducible build environment
+        shell: bash
+        run: ./ci/github-actions/reproducible-build-env.sh
+
       - name: Build
         run: cargo build --target ${{ matrix.target }} --release --all-features
-
-      - name: Strip all debug symbols
-        run: strip target/${{ matrix.target }}/release/pdu
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v4
@@ -182,6 +184,9 @@ jobs:
       - name: Install compilation target
         run: rustup target add ${{ matrix.target }}
 
+      - name: Configure reproducible build environment
+        shell: bash
+        run: ./ci/github-actions/reproducible-build-env.sh
 
       - name: Build
         run: cargo build --target ${{ matrix.target }} --release --all-features
