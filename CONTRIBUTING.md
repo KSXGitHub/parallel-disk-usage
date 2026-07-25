@@ -539,23 +539,6 @@ checksums, follow from the source code and the pinned toolchain alone. A build
 performed on a different host, with a different number of threads, or at a
 different time yields the same artifact.
 
-Reproducibility does not cost compilation speed. Parallel code generation is
-deterministic on a fixed toolchain, so the release profile keeps the default
-`codegen-units` instead of serializing the build with `codegen-units = 1`.
-
-Two mechanisms remove the host-specific information that would otherwise differ
-between machines:
-
-- The `[profile.release]` section of `Cargo.toml` sets `strip = "symbols"`, so
-  the toolchain strips the binary while linking. The result no longer depends on
-  the version of an external `strip` program, which was previously invoked as a
-  separate step and produced host-dependent output.
-- The `ci/github-actions/reproducible-build-env.sh` script, run by the
-  deployment workflow before each build, adds `--remap-path-prefix` entries that
-  replace the absolute paths of the cargo home and the workspace with fixed
-  placeholders. This is the stable counterpart of the still-unstable
-  `-Z trim-paths` option, and it leaves code generation untouched.
-
 To reproduce a release binary locally and compare its checksum, replay the same
 environment:
 
