@@ -98,7 +98,7 @@ impl<Name: Width> Display for TreeHorizontalSlice<Name> {
             "{}{}{}",
             self.indent(),
             self.skeletal_component,
-            &self.name,
+            self.name,
         )
     }
 }
