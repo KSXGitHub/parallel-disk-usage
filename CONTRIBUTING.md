@@ -539,12 +539,5 @@ checksums, follow from the source code and the pinned toolchain alone. A build
 performed on a different host, with a different number of threads, or at a
 different time yields the same artifact.
 
-To reproduce a release binary locally and compare its checksum, replay the same
-environment:
-
-```sh
-export CARGO_INCREMENTAL=0
-export RUSTFLAGS="--remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=$PWD=/build"
-cargo build --release --all-features
-sha256sum target/release/pdu
-```
+To reproduce a release binary locally and compare its checksum against a
+published release, run `./verify-reproducible-build.sh`.
