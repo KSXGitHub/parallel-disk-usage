@@ -19,6 +19,19 @@ workspace="${GITHUB_WORKSPACE:-$PWD}"
 # still-unstable "-Z trim-paths" option, and it does not affect codegen.
 remap="--remap-path-prefix=$cargo_home=/cargo"
 remap="$remap --remap-path-prefix=$workspace=/build"
+
+# The standard library's own source paths are baked into the binary through
+# panic locations. They normally read "/rustc/<commit-hash>/...", but when the
+# "rust-src" component is installed the compiler rewrites them to the local
+# toolchain directory, which differs from one machine to the next. Remap that
+# directory back to the canonical form, so the result no longer depends on
+# whether "rust-src" happens to be installed.
+commit_hash="$(rustc --version --verbose | awk '/^commit-hash:/ { print $2 }')"
+rust_src="$(rustc --print sysroot)/lib/rustlib/src/rust"
+if [[ -n "$commit_hash" ]]; then
+  remap="$remap --remap-path-prefix=$rust_src=/rustc/$commit_hash"
+fi
+
 if [[ -n "${RUSTFLAGS:-}" ]]; then
   remap="$RUSTFLAGS $remap"
 fi
