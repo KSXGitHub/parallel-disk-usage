@@ -534,10 +534,11 @@ FMT=true LINT=true BUILD=true TEST=true DOC=true DYLINT=true ./test.sh
 
 ## Reproducible Builds
 
-The release binaries are built so that their exact bytes, including the
-checksums, follow from the source code and the pinned toolchain alone. A build
-performed on a different host, with a different number of threads, or at a
-different time yields the same artifact.
+The Linux release binaries are built inside a container image pinned by digest,
+so their exact bytes are identical on every host, independent of the host's
+distribution, thread count, or clock.
 
-To reproduce a release binary locally and compare its checksum against a
-published release, run `./verify-reproducible-build.sh`.
+To rebuild a release binary and compare its checksum against a published
+release, run `./verify-reproducible-build.sh` (requires Docker or Podman). The
+target defaults to `x86_64-unknown-linux-gnu`; pass another as the first
+argument, such as `x86_64-unknown-linux-musl`.
