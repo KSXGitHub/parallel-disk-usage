@@ -46,25 +46,6 @@ mkdir -p target
   --volume "$PWD/target":/build/target \
   ${PDU_CONTAINER_RUN_ARGS:-} \
   "$image" \
-  bash -s -- "$target" <<'INNER'
-set -o errexit -o pipefail -o nounset
-target="$1"
-cd /build
-
-# The chosen target is not always the image's host target, so make sure its
-# standard library is present.
-rustup target add "$target" >/dev/null
-
-# Remap the machine-independent but still absolute paths that the compiler
-# embeds, exactly as an ordinary reproducible build would. Inside the pinned
-# image these prefixes are already fixed, so this mainly keeps the embedded
-# paths canonical and matches the non-container build environment.
-commit_hash="$(rustc --version --verbose | awk '/^commit-hash:/ { print $2 }')"
-rust_src="$(rustc --print sysroot)/lib/rustlib/src/rust"
-export CARGO_INCREMENTAL=0
-export RUSTFLAGS="--remap-path-prefix=${CARGO_HOME:-/usr/local/cargo}=/cargo --remap-path-prefix=$rust_src=/rustc/$commit_hash"
-
-cargo build --release --all-features --target "$target"
-INNER
+  bash /build/ci/build-in-container.sh "$target"
 
 echo "reproducible-build: built target/$target/release/pdu" >&2
