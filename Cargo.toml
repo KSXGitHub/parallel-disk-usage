@@ -107,11 +107,6 @@ pretty_assertions = "1.4.1"
 rand = "0.10.1"
 which = "8.0.2"
 
-# The release profile is tuned for reproducible builds. The compiled binary
-# should be determined solely by the source code and the pinned toolchain,
-# never by the host that happens to compile it.
 [profile.release]
-# Strip symbols as part of linking, so the toolchain itself produces the final
-# artifact. This keeps stripping deterministic and identical on every host,
-# instead of depending on the version of an external `strip` program.
+# Strip while linking, so the result does not depend on an external `strip`.
 strip = "symbols"

@@ -79,10 +79,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # The Linux binaries are built inside a digest-pinned container image so
-      # that their C runtime, and therefore the exact bytes, are identical on
-      # every host. The image provides Rust, so no separate toolchain
-      # installation step is required. Docker is preinstalled on the runner.
+      # The container image provides Rust, so no toolchain install step is needed.
       - name: Build in pinned container
         run: ./reproducible-build.sh ${{ matrix.target }}
 
