@@ -79,21 +79,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install Rust
-        shell: bash
-        run: |
-          installer=$(mktemp -d)/install-rustup
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > $installer
-          bash $installer --default-toolchain $(cat rust-toolchain) -y
-
-      - name: Install compilation target
-        run: rustup target add ${{ matrix.target }}
-
-      - name: Build
-        run: cargo build --target ${{ matrix.target }} --release --all-features
-
-      - name: Strip all debug symbols
-        run: strip --strip-all target/${{ matrix.target }}/release/pdu
+      # The container image provides Rust, so no toolchain install step is needed.
+      - name: Build in pinned container
+        run: ./reproducible-build.sh ${{ matrix.target }}
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v4
@@ -135,11 +123,12 @@ jobs:
       - name: Install compilation target
         run: rustup target add ${{ matrix.target }}
 
+      - name: Configure reproducible build environment
+        shell: bash
+        run: ./ci/github-actions/reproducible-build-env.sh
+
       - name: Build
         run: cargo build --target ${{ matrix.target }} --release --all-features
-
-      - name: Strip all debug symbols
-        run: strip target/${{ matrix.target }}/release/pdu
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v4
@@ -182,6 +171,9 @@ jobs:
       - name: Install compilation target
         run: rustup target add ${{ matrix.target }}
 
+      - name: Configure reproducible build environment
+        shell: bash
+        run: ./ci/github-actions/reproducible-build-env.sh
 
       - name: Build
         run: cargo build --target ${{ matrix.target }} --release --all-features
