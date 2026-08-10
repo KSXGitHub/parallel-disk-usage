@@ -531,3 +531,14 @@ FMT=true LINT=true BUILD=true TEST=true DOC=true DYLINT=true ./test.sh
 
 > [!NOTE]
 > Some tests may fail with a hint about `TEST_SKIP`. Follow the hint and rerun with the suggested variable.
+
+## Reproducible Builds
+
+The Linux release binaries are built inside a container image pinned by digest,
+so their exact bytes are identical on every host, independent of the host's
+distribution, thread count, or clock.
+
+To rebuild a release binary and compare its checksum against a published
+release, run `./verify-reproducible-build.sh` (requires Docker or Podman). The
+target defaults to `x86_64-unknown-linux-gnu`; pass another as the first
+argument, such as `x86_64-unknown-linux-musl`.
