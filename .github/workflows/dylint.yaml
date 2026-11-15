@@ -23,10 +23,10 @@ jobs:
             ~/.cargo
             ~/.dylint_drivers
             target
-          key: ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('dylint.toml') }}-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('dylint.toml', 'dylint-version') }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('dylint.toml') }}-${{ hashFiles('**/Cargo.lock') }}
-            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('dylint.toml') }}-
+            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('dylint.toml', 'dylint-version') }}-${{ hashFiles('**/Cargo.lock') }}
+            ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-${{ hashFiles('dylint.toml', 'dylint-version') }}-
             ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-
 
       - name: Install Rust
@@ -38,7 +38,7 @@ jobs:
 
       - name: Install dylint tooling
         shell: bash
-        run: cargo install --locked cargo-dylint dylint-link
+        run: cargo install --locked --version "$(< dylint-version)" cargo-dylint dylint-link
 
       # When the primary cache key did not match exactly, the cache was either
       # missed entirely or restored from one of the looser `restore-keys`
