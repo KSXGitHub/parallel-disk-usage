@@ -490,7 +490,7 @@ rustup toolchain install "$(< rust-toolchain)"
 rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy
 ```
 
-To run the dylint checks locally, also install `cargo-dylint` and `dylint-link` at the version recorded in `dylint-version`:
+To run the dylint checks locally, also install `cargo-dylint` and `dylint-link`:
 
 ```sh
 cargo install --locked --version "$(< dylint-version)" cargo-dylint dylint-link
