@@ -22,8 +22,6 @@ categories = [
 include = [
   "/src",
   "/cli",
-  # `cli/ai_instructions.rs` embeds these files with `include_str!`.
-  "/template/ai-instructions",
   "/Cargo.toml",
   "/README.md",
   "/USAGE.md",
