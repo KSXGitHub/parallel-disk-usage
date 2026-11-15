@@ -490,13 +490,19 @@ rustup toolchain install "$(< rust-toolchain)"
 rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy
 ```
 
-To run the dylint checks locally, also install `cargo-dylint` and `dylint-link`:
+To run the dylint checks locally, also install `cargo-dylint` and `dylint-link` at the version recorded in `dylint-version`:
 
 ```sh
-cargo install cargo-dylint dylint-link
+cargo install --locked --version "$(< dylint-version)" cargo-dylint dylint-link
 ```
 
 These are only required when running with `DYLINT=true`. The dylint libraries declared in `dylint.toml` are built against their own pinned nightly toolchain, which `cargo-dylint` fetches automatically on first run.
+
+### Why the dylint tooling is pinned
+
+An unpinned `cargo install` resolves to the newest release at the moment it runs, so an upstream release can break the build without any change in this repository. The dylint tooling raises its minimum supported Rust version from time to time, and version 6.4.0 requires rustc 1.98, which is newer than the toolchain in `rust-toolchain`. The `dylint-version` file therefore records a version that the pinned toolchain can build, and CI installs exactly that version.
+
+Upgrading the tooling is a deliberate step rather than something that happens on its own. When `rust-toolchain` moves forward, raise `dylint-version` to the newest release that the new toolchain supports, then run the dylint checks locally to confirm the pair works together.
 
 ## Optional External Dependencies
 
