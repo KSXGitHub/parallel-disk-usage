@@ -493,7 +493,7 @@ rustup component add --toolchain "$(< rust-toolchain)" rustfmt clippy
 To run the dylint checks locally, also install `cargo-dylint` and `dylint-link`:
 
 ```sh
-cargo install cargo-dylint dylint-link
+cargo install --locked --version "$(< dylint-version)" cargo-dylint dylint-link
 ```
 
 These are only required when running with `DYLINT=true`. The dylint libraries declared in `dylint.toml` are built against their own pinned nightly toolchain, which `cargo-dylint` fetches automatically on first run.
