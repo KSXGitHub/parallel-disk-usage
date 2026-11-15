@@ -36,20 +36,13 @@ jobs:
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > $installer
           bash $installer --default-toolchain $(cat rust-toolchain) -y
 
-      # An unpinned `cargo install` resolves to whatever version the registry
-      # offers on the day the job runs, so an upstream release can break this
-      # job without any change on our side. A release whose minimum supported
-      # Rust version exceeds the toolchain in `rust-toolchain` fails to
-      # compile at all, so `dylint-version` pins a version that the pinned
-      # toolchain can build.
       - name: Install dylint tooling
         shell: bash
         run: cargo install --locked --version "$(< dylint-version)" cargo-dylint dylint-link
 
       # When the primary cache key did not match exactly, the cache was either
       # missed entirely or restored from one of the looser `restore-keys`
-      # entries. The third entry ignores both `dylint.toml` and
-      # `dylint-version`, so the restored library at
+      # entries. The third entry ignores `dylint.toml`, so the restored
       # `target/dylint/libraries/libperfectionist.so` may have been built from
       # a different `dylint.toml`. `cargo dylint` does not always detect a
       # changed `git` `rev`/`tag` and reuses the cached `.so` as-is. Remove
