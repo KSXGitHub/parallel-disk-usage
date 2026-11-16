@@ -184,14 +184,18 @@ impl App {
         }
 
         let threads = match self.args.threads {
-            Threads::Auto => {
-                let disks = Disks::new_with_refreshed_list();
-                any_path_is_in_hdd::<Host>(&self.args.files, &disks).then(|| {
+            Threads::Auto => match Disks::new_with_refreshed_list() {
+                Ok(disks) => any_path_is_in_hdd::<Host>(&self.args.files, &disks).then(|| {
                     eprintln!("warning: HDD detected, the thread limit will be set to 1");
                     eprintln!("hint: You can pass --threads=max disable this behavior");
                     1
-                })
-            }
+                }),
+                Err(error) => {
+                    eprintln!("warning: Failed to list the disks: {error}");
+                    eprintln!("hint: HDD detection is skipped, the thread limit won't be set");
+                    None
+                }
+            },
             Threads::Max => None,
             Threads::Fixed(threads) => Some(threads.get()),
         };
