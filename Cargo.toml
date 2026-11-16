@@ -68,22 +68,22 @@ ai-instructions = ["clap/derive"]
 
 [dependencies]
 assert-cmp = "0.3.0"
-clap = { version = "4.6.1", optional = true }
-clap_complete = { version = "4.6.5", optional = true }
+clap = { version = "4.6.7", optional = true }
+clap_complete = { version = "4.6.11", optional = true }
 clap-utilities = { version = "0.3.0", optional = true }
 dashmap = "6.2.1"
 derive_more = { version = "2.1.1", features = ["full"] }
 derive_setters = "0.1.9"
 fmt-iter = "0.2.1"
 into-sorted = "0.0.3"
-itertools = "0.14.0"
+itertools = "0.15.0"
 pipe-trait = "0.4.0"
 rayon = "1.12.0"
 rounded-div = "0.1.4"
-serde = { version = "1.0.228", optional = true }
-serde_json = { version = "1.0.150", optional = true }
+serde = { version = "1.0.229", optional = true }
+serde_json = { version = "1.0.154", optional = true }
 smart-default = "0.7.1"
-sysinfo = "0.39.2"
+sysinfo = "0.40.3"
 terminal_size = "0.4.4"
 text-block-macros = "0.2.0"
 zero-copy-pads = "0.2.0"
@@ -99,10 +99,10 @@ unnecessary_lazy_evaluations = "warn"
 
 [dev-dependencies]
 build-fs-tree = "0.8.1"
-command-extra = "1.0.0"
-libc = "0.2.186"
+command-extra = "1.5.0"
+libc = "0.2.191"
 maplit = "1.0.2"
-normalize-path = "0.2.1"
+normalize-path = "0.2.2"
 pretty_assertions = "1.4.1"
-rand = "0.10.1"
-which = "8.0.2"
+rand = "0.10.4"
+which = "8.0.6"

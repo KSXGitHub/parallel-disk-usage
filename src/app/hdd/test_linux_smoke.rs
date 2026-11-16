@@ -23,12 +23,15 @@ fn nonexistent_device_is_not_virtual() {
 ///
 /// Does **not** assert any specific virtual/non-virtual classification
 /// because the result depends on the host hardware. Only verifies that
-/// the pipeline completes without panicking.
+/// the pipeline completes without panicking. Silently skips if the disk
+/// list cannot be read.
 #[test]
 fn full_pipeline_does_not_panic() {
     use sysinfo::Disks;
-    let disks = Disks::new_with_refreshed_list();
-    for disk in disks.list() {
+    let Ok(disks) = Disks::new_with_refreshed_list() else {
+        return;
+    };
+    for disk in disks.iter() {
         let name = disk.name().to_str().unwrap_or_default();
         if let Some(block_dev) = extract_block_device_name::<Host>(name) {
             let _ = is_virtual_block_device::<Host>(&block_dev);

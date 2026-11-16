@@ -23,9 +23,9 @@ Options:
   -q, --quantity <QUANTITY>
           Aspect of the files/directories to be measured [default: block-size] [possible values: apparent-size, block-size, block-count]
   -d, --max-depth <MAX_DEPTH>
-          Maximum depth to display the data. Could be either "inf" or a positive integer [default: 10] [aliases: --depth]
+          Maximum depth to display the data. Could be either "inf" or a positive integer [default: 10] [alias: --depth]
   -w, --total-width <TOTAL_WIDTH>
-          Width of the visualization [aliases: --width]
+          Width of the visualization [alias: --width]
       --column-width <TREE_WIDTH> <BAR_WIDTH>
           Maximum widths of the tree column and width of the bar column
   -m, --min-ratio <MIN_RATIO>
@@ -33,7 +33,7 @@ Options:
       --no-sort
           Do not sort the branches in the tree
   -s, --silent-errors
-          Prevent filesystem error messages from appearing in stderr [aliases: --no-errors]
+          Prevent filesystem error messages from appearing in stderr [alias: --no-errors]
   -p, --progress
           Report progress being made at the expense of performance
       --threads <THREADS>

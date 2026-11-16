@@ -54,12 +54,12 @@ Options:
           Maximum depth to display the data. Could be either "inf" or a positive integer
 
           [default: 10]
-          [aliases: --depth]
+          [alias: --depth]
 
   -w, --total-width <TOTAL_WIDTH>
           Width of the visualization
 
-          [aliases: --width]
+          [alias: --width]
 
       --column-width <TREE_WIDTH> <BAR_WIDTH>
           Maximum widths of the tree column and width of the bar column
@@ -75,7 +75,7 @@ Options:
   -s, --silent-errors
           Prevent filesystem error messages from appearing in stderr
 
-          [aliases: --no-errors]
+          [alias: --no-errors]
 
   -p, --progress
           Report progress being made at the expense of performance
