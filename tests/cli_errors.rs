@@ -168,7 +168,7 @@ fn fs_errors() {
         column_width_distribution: ColumnWidthDistribution::total(100),
     };
     let expected_stdout = format!("{visualizer}");
-    eprintln!("EXPECTED STDOUT:\n{}\n", &expected_stdout);
+    eprintln!("EXPECTED STDOUT:\n{}\n", expected_stdout);
 
     fs_permission(&workspace, "+rwx", true); // to allow SampleWorkspace destructor to clean itself
 
