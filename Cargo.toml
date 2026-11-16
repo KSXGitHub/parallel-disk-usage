@@ -72,7 +72,23 @@ clap = { version = "4.6.7", optional = true }
 clap_complete = { version = "4.6.11", optional = true }
 clap-utilities = { version = "0.3.0", optional = true }
 dashmap = "6.2.1"
-derive_more = { version = "2.1.1", features = ["full"] }
+derive_more = { version = "2.1.1", default-features = false, features = [
+  "add",
+  "add_assign",
+  "as_ref",
+  "debug",
+  "deref",
+  "deref_mut",
+  "display",
+  "error",
+  "from",
+  "from_str",
+  "into",
+  "into_iterator",
+  "std",
+  "sum",
+  "try_into",
+] }
 derive_setters = "0.1.9"
 fmt-iter = "0.2.1"
 into-sorted = "0.0.3"
@@ -83,7 +99,7 @@ rounded-div = "0.1.4"
 serde = { version = "1.0.229", optional = true }
 serde_json = { version = "1.0.154", optional = true }
 smart-default = "0.7.1"
-sysinfo = "0.40.3"
+sysinfo = { version = "0.40.3", default-features = false, features = ["disk"] }
 terminal_size = "0.4.4"
 text-block-macros = "0.2.0"
 zero-copy-pads = "0.2.0"
