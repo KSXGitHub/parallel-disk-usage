@@ -1,13 +1,2 @@
-# Windows does not ship the Visual C++ runtime, so an executable that links the
-# MSVC C runtime dynamically imports `VCRUNTIME140.dll` and refuses to start on
-# a machine that lacks the Visual C++ Redistributable. Linking the C runtime
-# statically removes that import at the cost of a slightly larger executable.
-#
-# The `cfg` expression covers every MSVC target rather than naming the single
-# triple that the deployment workflow builds.
-#
-# Cargo ignores this table whenever the `RUSTFLAGS` environment variable is set,
-# so a workflow that sets `RUSTFLAGS` and ships the executable it builds has to
-# pass this flag itself.
 [target.'cfg(target_env = "msvc")']
 rustflags = ["-C", "target-feature=+crt-static"]
