@@ -1,0 +1,16 @@
+[package]
+name = "pdu-completions"
+description = "Render the shell completion scripts of the `pdu` command"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[[bin]]
+name = "pdu-completions"
+path = "src/main.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+parallel-disk-usage = { path = "../..", features = ["cli"] }

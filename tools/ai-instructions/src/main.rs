@@ -1,3 +1,11 @@
+//! Check or generate the AI instruction files from the templates under
+//! `template/ai-instructions/`.
+//!
+//! Each generated file is the concatenation of the shared fragment and a
+//! fragment specific to the assistant that reads it. The check mode compares
+//! the file on disk against that concatenation, so `tests/sync.rs` fails
+//! whenever a template is edited without regenerating the files.
+
 use clap::Parser;
 use derive_more::Display;
 use pipe_trait::Pipe;
@@ -7,10 +15,10 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-const SHARED: &str = include_str!("../template/ai-instructions/shared.md");
-const CLAUDE: &str = include_str!("../template/ai-instructions/claude.md");
-const COPILOT: &str = include_str!("../template/ai-instructions/copilot.md");
-const AGENTS: &str = include_str!("../template/ai-instructions/agents.md");
+const SHARED: &str = include_str!("../../../template/ai-instructions/shared.md");
+const CLAUDE: &str = include_str!("../../../template/ai-instructions/claude.md");
+const COPILOT: &str = include_str!("../../../template/ai-instructions/copilot.md");
+const AGENTS: &str = include_str!("../../../template/ai-instructions/agents.md");
 
 #[derive(Clone, Copy)]
 struct Fragments(&'static [&'static str]);

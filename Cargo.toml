@@ -1,3 +1,15 @@
+[workspace]
+members = ["tools/*"]
+
+[workspace.lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(dylint_lib, values("perfectionist"))'] }
+
+[workspace.lints.clippy]
+clone_on_ref_ptr = "warn"
+if_then_some_else_none = "warn"
+mod_module_files = "warn"
+unnecessary_lazy_evaluations = "warn"
+
 [package]
 name = "parallel-disk-usage"
 description = "Highly parallelized, blazing fast directory tree analyzer"
@@ -37,34 +49,10 @@ name = "pdu"
 path = "cli/main.rs"
 required-features = ["cli"]
 
-[[bin]]
-name = "pdu-completions"
-path = "cli/completions.rs"
-required-features = ["cli-completions"]
-
-[[bin]]
-name = "pdu-man-page"
-path = "cli/man_page.rs"
-required-features = ["man-page"]
-
-[[bin]]
-name = "pdu-usage-md"
-path = "cli/usage_md.rs"
-required-features = ["usage-md"]
-
-[[bin]]
-name = "pdu-ai-instructions"
-path = "cli/ai_instructions.rs"
-required-features = ["ai-instructions"]
-
 [features]
 default = ["cli"]
 json = ["serde/derive", "serde_json"]
 cli = ["clap/derive", "clap_complete", "clap-utilities", "json"]
-cli-completions = ["cli"]
-man-page = ["cli"]
-usage-md = ["cli"]
-ai-instructions = ["clap/derive"]
 
 [dependencies]
 assert-cmp = "0.3.0"
@@ -88,14 +76,8 @@ terminal_size = "0.4.4"
 text-block-macros = "0.2.0"
 zero-copy-pads = "0.2.0"
 
-[lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(dylint_lib, values("perfectionist"))'] }
-
-[lints.clippy]
-clone_on_ref_ptr = "warn"
-if_then_some_else_none = "warn"
-mod_module_files = "warn"
-unnecessary_lazy_evaluations = "warn"
+[lints]
+workspace = true
 
 [dev-dependencies]
 build-fs-tree = "0.8.1"

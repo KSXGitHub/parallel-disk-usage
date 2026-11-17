@@ -623,6 +623,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "pdu-ai-instructions"
+version = "0.0.0"
+dependencies = [
+ "clap",
+ "command-extra",
+ "derive_more 2.1.1",
+ "pipe-trait",
+]
+
+[[package]]
+name = "pdu-completions"
+version = "0.0.0"
+dependencies = [
+ "parallel-disk-usage",
+]
+
+[[package]]
+name = "pdu-man-page"
+version = "0.0.0"
+dependencies = [
+ "parallel-disk-usage",
+]
+
+[[package]]
+name = "pdu-usage-md"
+version = "0.0.0"
+dependencies = [
+ "parallel-disk-usage",
+]
+
+[[package]]
 name = "pipe-trait"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

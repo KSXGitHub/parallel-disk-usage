@@ -72,15 +72,30 @@ unit() (
   fi
 )
 
+# The feature combinations below apply to the `parallel-disk-usage` package
+# alone. The crates under `tools/` and `utils/` declare no features of their
+# own, so a single pass covers all of them.
+aux() (
+  read -ra build_flags <<<"${BUILD_FLAGS:-}"
+  read -ra test_flags <<<"${TEST_FLAGS:-}"
+  selection=(--workspace --exclude parallel-disk-usage)
+  run_if "${LINT:-true}" cargo clippy "${selection[@]}" "$@" -- -D warnings
+  run_if "${DOC:-false}" env RUSTDOCFLAGS="-D warnings ${RUSTDOCFLAGS:-}" \
+    cargo doc --document-private-items --no-deps "${selection[@]}" "$@"
+  run_if "${BUILD:-true}" cargo build ${build_flags[@]+"${build_flags[@]}"} "${selection[@]}" "$@"
+  run_if "${TEST:-true}" cargo test ${test_flags[@]+"${test_flags[@]}"} "${selection[@]}" "$@"
+)
+
 run_if "${FMT:-true}" cargo fmt -- --check
 # Dylint inspects the source under all feature gates in a single pass, so it is
 # run once with `--all-features` rather than across every feature combination.
 run_if "${DYLINT:-false}" env RUSTFLAGS="-D warnings ${RUSTFLAGS:-}" \
-  cargo dylint --all -- --all-features --all-targets
+  cargo dylint --all -- --workspace --all-features --all-targets
 unit "$@"
 unit --no-default-features "$@"
 unit --all-features "$@"
 unit --features cli "$@"
+aux "$@"
 
 if [[ -f "$failure_marker" ]]; then
   echo >&2
