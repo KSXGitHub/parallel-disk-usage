@@ -72,10 +72,11 @@ unit() (
   fi
 )
 
-# The feature combinations below apply to the `parallel-disk-usage` package
-# alone. The crates under `tools/` and `utils/` declare no features of their
-# own, so a single pass covers all of them.
-aux() (
+# Check every workspace member other than the root package, which is to say
+# the utility binaries under `tools/` and the test helpers under `utils/`.
+# None of them declares a feature of its own, so one pass covers all of them,
+# whereas `unit` runs once per feature combination of the root package.
+helper_crates() (
   read -ra build_flags <<<"${BUILD_FLAGS:-}"
   read -ra test_flags <<<"${TEST_FLAGS:-}"
   selection=(--workspace --exclude parallel-disk-usage)
@@ -95,7 +96,7 @@ unit "$@"
 unit --no-default-features "$@"
 unit --all-features "$@"
 unit --features cli "$@"
-aux "$@"
+helper_crates "$@"
 
 if [[ -f "$failure_marker" ]]; then
   echo >&2
