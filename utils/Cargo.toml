@@ -17,4 +17,7 @@ command-extra = "1.5.0"
 derive_more = { version = "2.1.1", default-features = false, features = ["as_ref", "deref"] }
 pipe-trait = "0.4.0"
 rand = "0.10.4"
+
+# Only the POSIX-exclusive sample workspaces build their trees in parallel.
+[target.'cfg(unix)'.dependencies]
 rayon = "1.12.0"

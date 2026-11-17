@@ -3,7 +3,10 @@
 use crate::temp::Temp;
 use build_fs_tree::{Build, MergeableFileSystemTree, dir, file};
 use derive_more::{AsRef, Deref};
+
+#[cfg(unix)]
 use pipe_trait::Pipe;
+#[cfg(unix)]
 use rayon::prelude::*;
 
 /// Temporary workspace with sample filesystem tree.
