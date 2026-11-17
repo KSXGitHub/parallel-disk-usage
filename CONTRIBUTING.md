@@ -30,6 +30,22 @@ Version release commits use **only** the version number as the message, with no 
 
 Write documentation, comments, and other prose for ease of understanding first. Prefer a formal tone when it does not hurt clarity, and use complete sentences. Avoid mid-sentence breaks introduced by em dashes or long parenthetical clauses. Em dashes are a reliable symptom of loose phrasing; when one appears, restructure the surrounding sentence so each clause stands on its own rather than swapping the em dash for another punctuation mark.
 
+## Repository Layout
+
+The repository is a Cargo workspace. Its root package, `parallel-disk-usage`, provides both the library and the `pdu` command.
+
+- `src/` holds the `parallel_disk_usage` library.
+- `cli/` holds `main.rs`, the entry point of `pdu`. That binary is the only one the published crate provides.
+- `tools/` holds one crate per development utility, each providing a single binary named after its package: `pdu-completions`, `pdu-man-page`, `pdu-usage-md`, and `pdu-ai-instructions`. Each of them sets `publish = false`, so none of them reaches the published crate. Run one with `./run.sh <binary> [arguments]`, which resolves the package that owns the binary.
+- `utils/` holds `_utils`, a test-support crate whose helpers are independent of the `parallel_disk_usage` library.
+- `tests/` holds the integration tests of the root package.
+
+A development utility belongs in its own crate under `tools/`, never in a `[[bin]]` entry of the root package. A binary declared in the root package has to be gated behind a feature to keep it out of an ordinary build, and the feature then advertises to every consumer of the published crate a program that only this repository runs.
+
+`tests/_utils.rs` re-exports the `_utils` crate and adds the helpers that do read the library, so an integration test reaches both halves by declaring `pub mod _utils;` followed by `pub use _utils::*;`. A new helper belongs in `utils/` whenever it compiles without the library, and in `tests/_utils.rs` otherwise. The split keeps `utils/` buildable on its own, and a change to the library no longer rebuilds the helpers that never read it.
+
+The workspace shares a single lint configuration. The top-level `Cargo.toml` declares it under `[workspace.lints]`, and every member opts in with `[lints] workspace = true`.
+
 ## Code Style
 
 Automated tools enforce formatting (`cargo fmt`), linting (`cargo clippy`), and a curated set of project-specific rules via dylint (`cargo dylint --all`, run with `DYLINT=true ./test.sh`). The following conventions must be followed manually unless a subsection notes that a specific dylint rule enforces them.
@@ -518,7 +534,7 @@ Before submitting, ensure:
 - The project builds with no default features, with default features, and with all features.
 - `cargo dylint --all` passes (requires `cargo-dylint` and `dylint-link`).
 
-The CI script `test.sh` runs all of these across every supported feature combination. You can run it locally with:
+The CI script `test.sh` runs all of these across every supported feature combination. The feature combinations apply to the root package alone. The crates under `tools/` and `utils/` declare no features of their own, so `test.sh` checks all of them in one additional pass. You can run it locally with:
 
 ```sh
 FMT=true LINT=true BUILD=true TEST=true DOC=true DYLINT=true ./test.sh
