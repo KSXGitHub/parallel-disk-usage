@@ -3,6 +3,18 @@
 version = 4
 
 [[package]]
+name = "_utils"
+version = "0.0.0"
+dependencies = [
+ "build-fs-tree",
+ "command-extra",
+ "derive_more 2.1.1",
+ "pipe-trait",
+ "rand",
+ "rayon",
+]
+
+[[package]]
 name = "anstream"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -579,6 +591,7 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 name = "parallel-disk-usage"
 version = "0.24.0"
 dependencies = [
+ "_utils",
  "assert-cmp",
  "build-fs-tree",
  "clap",
@@ -596,7 +609,6 @@ dependencies = [
  "normalize-path",
  "pipe-trait",
  "pretty_assertions",
- "rand",
  "rayon",
  "rounded-div",
  "serde",

@@ -20,7 +20,7 @@ fn flag_combinations() {
         .option_matrix("--quantity", quantity)
         .flag_matrix("--progress");
 
-    for command in list.commands() {
+    for command in list.commands(PDU) {
         dbg!(&command);
         let workspace = SampleWorkspace::default();
         dbg!(&workspace);
