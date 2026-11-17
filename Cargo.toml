@@ -83,7 +83,7 @@ rounded-div = "0.1.4"
 serde = { version = "1.0.229", optional = true }
 serde_json = { version = "1.0.154", optional = true }
 smart-default = "0.7.1"
-sysinfo = "0.40.3"
+sysinfo = { version = "0.40.3", default-features = false, features = ["disk"] }
 terminal_size = "0.4.4"
 text-block-macros = "0.2.0"
 zero-copy-pads = "0.2.0"
