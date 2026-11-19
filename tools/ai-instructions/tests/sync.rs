@@ -1,19 +1,34 @@
 use command_extra::CommandExtra;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 const PDU_AI_INSTRUCTIONS: &str = env!("CARGO_BIN_EXE_pdu-ai-instructions");
 
-const CARGO_MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
+const CARGO: &str = env!("CARGO");
+
+fn workspace_root() -> PathBuf {
+    let output = Command::new(CARGO)
+        .with_arg("locate-project")
+        .with_arg("--workspace")
+        .with_arg("--message-format=plain")
+        .output()
+        .expect("spawn cargo locate-project");
+    assert!(
+        output.status.success(),
+        "cargo locate-project exits with non-zero status: {:?}",
+        output.status.code(),
+    );
+    let manifest = String::from_utf8(output.stdout).expect("parse stdout as UTF-8");
+    Path::new(manifest.trim())
+        .parent()
+        .expect("get the directory that holds the workspace manifest")
+        .to_path_buf()
+}
 
 #[test]
 fn ai_instructions_up_to_date() {
-    let repository = Path::new(CARGO_MANIFEST_DIR)
-        .ancestors()
-        .nth(2)
-        .expect("locate the repository root above tools/ai-instructions");
     let output = Command::new(PDU_AI_INSTRUCTIONS)
-        .with_arg(repository)
+        .with_arg(workspace_root())
         .output()
         .expect("spawn pdu-ai-instructions");
     let stdout = String::from_utf8_lossy(&output.stdout);
