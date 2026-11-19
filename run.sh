@@ -1,11 +1,10 @@
 #! /bin/bash
 set -o errexit -o pipefail -o nounset
 
-# `cargo run --bin` searches the current package only, hence `--package`.
-bin="$1"
-case "$bin" in
+# `cargo run` takes no `--workspace` and resolves `--bin` within one package.
+case "$1" in
 pdu) package='parallel-disk-usage' ;;
-*) package="$bin" ;;
+*) package="$1" ;;
 esac
 
-exec cargo run --package="$package" --bin="$bin" -- "${@:2}"
+exec cargo run --package="$package" --bin="$1" -- "${@:2}"
