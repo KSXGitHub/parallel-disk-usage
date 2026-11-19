@@ -170,7 +170,7 @@ pub fn sort_reflection_by<Name, Size, Order>(
     }
 }
 
-/// Read [device number](std::os::unix::fs::MetadataExt::dev) of a path.
+/// Read [dev](std::os::unix::fs::MetadataExt::dev) of a path.
 #[cfg(unix)]
 pub fn read_device_number(path: &Path) -> parallel_disk_usage::device::DeviceNumber {
     use std::os::unix::fs::MetadataExt;
