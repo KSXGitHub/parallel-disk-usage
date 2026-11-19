@@ -518,7 +518,7 @@ Before submitting, ensure:
 - The project builds with no default features, with default features, and with all features.
 - `cargo dylint --all` passes (requires `cargo-dylint` and `dylint-link`).
 
-The CI script `test.sh` runs all of these across every supported feature combination. The feature combinations apply to the root package alone. The crates under `tools/` and `utils/` declare no features of their own, so `test.sh` checks all of them in one additional pass. You can run it locally with:
+The CI script `test.sh` runs all of these across every supported feature combination. You can run it locally with:
 
 ```sh
 FMT=true LINT=true BUILD=true TEST=true DOC=true DYLINT=true ./test.sh
