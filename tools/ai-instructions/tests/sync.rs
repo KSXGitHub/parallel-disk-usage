@@ -8,11 +8,6 @@ const CARGO_MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
 
 #[test]
 fn ai_instructions_up_to_date() {
-    // The top-level directory of the repository, which holds both the
-    // templates and the generated files, sits two levels above this crate.
-    // Trimming the path is preferred over appending `..`, because Windows
-    // stops resolving `..` once a path is long enough for the standard
-    // library to address it in the verbatim form.
     let repository = Path::new(CARGO_MANIFEST_DIR)
         .ancestors()
         .nth(2)
