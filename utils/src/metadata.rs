@@ -9,7 +9,7 @@ pub fn read_apparent_size(path: &Path) -> u64 {
         .len()
 }
 
-/// Read [ino](std::os::unix::fs::MetadataExt::ino) of a path.
+/// Read [inode number](std::os::unix::fs::MetadataExt::ino) of a path.
 #[cfg(unix)]
 pub fn read_inode_number(path: &Path) -> u64 {
     use std::os::unix::fs::MetadataExt;
