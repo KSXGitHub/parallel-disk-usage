@@ -1,4 +1,5 @@
 use command_extra::CommandExtra;
+use pipe_trait::Pipe;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -18,8 +19,13 @@ fn workspace_root() -> PathBuf {
         "cargo locate-project exits with non-zero status: {:?}",
         output.status.code(),
     );
-    let manifest = String::from_utf8(output.stdout).expect("parse stdout as UTF-8");
-    Path::new(manifest.trim())
+    let manifest = output
+        .stdout
+        .pipe(String::from_utf8)
+        .expect("parse stdout as UTF-8");
+    manifest
+        .trim()
+        .pipe(Path::new)
         .parent()
         .expect("get the directory that holds the workspace manifest")
         .to_path_buf()
