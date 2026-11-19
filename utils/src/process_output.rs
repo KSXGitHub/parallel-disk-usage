@@ -1,5 +1,3 @@
-//! Inspection of the output of a finished child process.
-
 use pipe_trait::Pipe;
 use std::process::Output;
 

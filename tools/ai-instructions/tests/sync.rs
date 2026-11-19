@@ -1,8 +1,3 @@
-//! The following test checks whether the AI instruction files are outdated.
-//!
-//! If the test fails, run `./run.sh pdu-ai-instructions --generate .` on the
-//! root of the repo to update the files.
-
 use command_extra::CommandExtra;
 use std::path::Path;
 use std::process::Command;

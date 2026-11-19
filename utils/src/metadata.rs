@@ -1,5 +1,3 @@
-//! Readers of the filesystem metadata of a path.
-
 use pipe_trait::Pipe;
 use std::fs::symlink_metadata;
 use std::path::Path;

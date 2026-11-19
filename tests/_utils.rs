@@ -1,9 +1,3 @@
-//! Test-support helpers that read the `parallel_disk_usage` library.
-//!
-//! The helpers that do not read the library live in the `_utils` crate under
-//! `utils/`, which this module re-exports, so an integration test reaches
-//! both halves by declaring `pub mod _utils;` and `pub use _utils::*;`.
-
 pub use _utils::*;
 
 use into_sorted::IntoSorted;

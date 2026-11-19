@@ -1,6 +1,3 @@
-//! POSIX-exclusive sample workspaces, whose trees hold hardlinks and
-//! symbolic links.
-
 use super::SampleWorkspace;
 use crate::temp::Temp;
 use build_fs_tree::{Build, MergeableFileSystemTree, dir, file};

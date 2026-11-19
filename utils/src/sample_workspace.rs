@@ -1,5 +1,3 @@
-//! Temporary workspaces populated with sample filesystem trees.
-
 use crate::temp::Temp;
 use build_fs_tree::{Build, MergeableFileSystemTree, dir, file};
 use derive_more::{AsRef, Deref};

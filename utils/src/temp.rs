@@ -1,5 +1,3 @@
-//! Temporary directory that deletes itself when dropped.
-
 use derive_more::{AsRef, Deref};
 use pipe_trait::Pipe;
 use rand::distr::Alphanumeric;

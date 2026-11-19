@@ -1,11 +1,3 @@
-//! Check or generate the AI instruction files from the templates under
-//! `template/ai-instructions/`.
-//!
-//! Each generated file is the concatenation of the shared fragment and a
-//! fragment specific to the assistant that reads it. The check mode compares
-//! the file on disk against that concatenation, so `tests/sync.rs` fails
-//! whenever a template is edited without regenerating the files.
-
 use clap::Parser;
 use derive_more::Display;
 use pipe_trait::Pipe;

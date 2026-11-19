@@ -1,5 +1,3 @@
-//! Matrices of command-line arguments for running a program.
-
 use command_extra::CommandExtra;
 use derive_more::{AsRef, Deref};
 use pipe_trait::Pipe;

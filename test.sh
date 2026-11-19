@@ -72,10 +72,8 @@ unit() (
   fi
 )
 
-# Check every workspace member other than the root package, which is to say
-# the utility binaries under `tools/` and the test helpers under `utils/`.
-# None of them declares a feature of its own, so one pass covers all of them,
-# whereas `unit` runs once per feature combination of the root package.
+# No member outside the root package declares a feature, so one pass covers
+# them all rather than a run per feature combination.
 helper_crates() (
   read -ra build_flags <<<"${BUILD_FLAGS:-}"
   read -ra test_flags <<<"${TEST_FLAGS:-}"
