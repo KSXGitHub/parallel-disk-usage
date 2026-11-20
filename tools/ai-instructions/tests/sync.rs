@@ -5,10 +5,8 @@ use std::process::Command;
 
 const PDU_AI_INSTRUCTIONS: &str = env!("CARGO_BIN_EXE_pdu-ai-instructions");
 
-const CARGO: &str = env!("CARGO");
-
 fn workspace_root() -> PathBuf {
-    let output = CARGO
+    let output = env!("CARGO")
         .pipe(Command::new)
         .with_arg("locate-project")
         .with_arg("--workspace")
