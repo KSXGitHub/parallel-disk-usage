@@ -4,12 +4,21 @@ use pipe_trait::Pipe;
 use std::process::Command;
 
 /// Representation of a `pdu` command.
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct CommandRepresentation<'a> {
+    program: &'a str,
     args: Vec<&'a str>,
 }
 
 impl<'a> CommandRepresentation<'a> {
+    /// Create a command that runs given `program` without arguments.
+    pub fn new(program: &'a str) -> Self {
+        CommandRepresentation {
+            program,
+            args: Vec::new(),
+        }
+    }
+
     /// Add an argument.
     pub fn arg(mut self, arg: &'a str) -> Self {
         self.args.push(arg);
@@ -21,10 +30,10 @@ impl<'a> CommandRepresentation<'a> {
 #[derive(Debug, Clone, AsRef, Deref)]
 pub struct CommandList<'a>(Vec<CommandRepresentation<'a>>);
 
-impl<'a> Default for CommandList<'a> {
-    /// Initialize a list with one `pdu` command.
-    fn default() -> Self {
-        CommandRepresentation::default()
+impl<'a> CommandList<'a> {
+    /// Initialize a list with one command that runs given `program`.
+    pub fn new(program: &'a str) -> Self {
+        CommandRepresentation::new(program)
             .pipe(|x| vec![x])
             .pipe(CommandList)
     }
@@ -66,10 +75,10 @@ impl<'a> CommandList<'a> {
         CommandList(head)
     }
 
-    /// Create a list of `program` [command](Command).
-    pub fn commands(&'a self, program: &'a str) -> impl Iterator<Item = Command> + 'a {
+    /// Create a list of `pdu` [command](Command).
+    pub fn commands(&'a self) -> impl Iterator<Item = Command> + 'a {
         self.iter()
-            .map(move |cmd| Command::new(program).with_args(&cmd.args))
+            .map(|cmd| Command::new(cmd.program).with_args(&cmd.args))
     }
 
     /// Make sure a flag name has valid syntax.

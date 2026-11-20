@@ -16,11 +16,11 @@ fn flag_combinations() {
     #[cfg(windows)]
     let quantity = ["apparent-size"];
 
-    let list = CommandList::default()
+    let list = CommandList::new(PDU)
         .option_matrix("--quantity", quantity)
         .flag_matrix("--progress");
 
-    for command in list.commands(PDU) {
+    for command in list.commands() {
         dbg!(&command);
         let workspace = SampleWorkspace::default();
         dbg!(&workspace);
