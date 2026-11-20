@@ -1,0 +1,21 @@
+[package]
+name = "pdu-ai-instructions"
+description = "Check or generate the AI instruction files from the templates under `template/ai-instructions/`"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[[bin]]
+name = "pdu-ai-instructions"
+path = "src/main.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+clap = { version = "4.6.7", features = ["derive"] }
+derive_more = { version = "2.1.1", default-features = false, features = ["display"] }
+pipe-trait = "0.4.0"
+
+[dev-dependencies]
+command-extra = "1.5.0"

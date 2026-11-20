@@ -1,0 +1,23 @@
+[package]
+name = "_utils"
+description = "Internal test-support helpers shared by parallel-disk-usage's integration tests"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+build-fs-tree = "0.8.1"
+command-extra = "1.5.0"
+derive_more = { version = "2.1.1", default-features = false, features = ["as_ref", "deref"] }
+pipe-trait = "0.4.0"
+rand = "0.10.4"
+
+# Only the POSIX-exclusive sample workspaces build their trees in parallel.
+[target.'cfg(unix)'.dependencies]
+rayon = "1.12.0"

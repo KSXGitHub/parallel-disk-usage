@@ -7,10 +7,10 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-const SHARED: &str = include_str!("../template/ai-instructions/shared.md");
-const CLAUDE: &str = include_str!("../template/ai-instructions/claude.md");
-const COPILOT: &str = include_str!("../template/ai-instructions/copilot.md");
-const AGENTS: &str = include_str!("../template/ai-instructions/agents.md");
+const SHARED: &str = include_str!("../../../template/ai-instructions/shared.md");
+const CLAUDE: &str = include_str!("../../../template/ai-instructions/claude.md");
+const COPILOT: &str = include_str!("../../../template/ai-instructions/copilot.md");
+const AGENTS: &str = include_str!("../../../template/ai-instructions/agents.md");
 
 #[derive(Clone, Copy)]
 struct Fragments(&'static [&'static str]);

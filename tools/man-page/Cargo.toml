@@ -1,0 +1,16 @@
+[package]
+name = "pdu-man-page"
+description = "Render the man page of the `pdu` command"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[[bin]]
+name = "pdu-man-page"
+path = "src/main.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+parallel-disk-usage = { path = "../..", features = ["cli"] }

@@ -1,3 +1,10 @@
 #! /bin/bash
 set -o errexit -o pipefail -o nounset
-exec cargo run --bin="$1" --features cli-completions,man-page,usage-md,ai-instructions -- "${@:2}"
+
+# `cargo run` takes no `--workspace` and resolves `--bin` within one package.
+case "$1" in
+pdu) package='parallel-disk-usage' ;;
+*) package="$1" ;;
+esac
+
+exec cargo run --package="$package" --bin="$1" -- "${@:2}"

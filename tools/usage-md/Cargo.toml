@@ -1,0 +1,16 @@
+[package]
+name = "pdu-usage-md"
+description = "Render the content of USAGE.md from the `pdu` command-line interface"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[[bin]]
+name = "pdu-usage-md"
+path = "src/main.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+parallel-disk-usage = { path = "../..", features = ["cli"] }
