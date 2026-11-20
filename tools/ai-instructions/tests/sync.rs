@@ -8,7 +8,8 @@ const PDU_AI_INSTRUCTIONS: &str = env!("CARGO_BIN_EXE_pdu-ai-instructions");
 const CARGO: &str = env!("CARGO");
 
 fn workspace_root() -> PathBuf {
-    let output = Command::new(CARGO)
+    let output = CARGO
+        .pipe(Command::new)
         .with_arg("locate-project")
         .with_arg("--workspace")
         .with_arg("--message-format=plain")
@@ -33,7 +34,8 @@ fn workspace_root() -> PathBuf {
 
 #[test]
 fn ai_instructions_up_to_date() {
-    let output = Command::new(PDU_AI_INSTRUCTIONS)
+    let output = PDU_AI_INSTRUCTIONS
+        .pipe(Command::new)
         .with_arg(workspace_root())
         .output()
         .expect("spawn pdu-ai-instructions");
