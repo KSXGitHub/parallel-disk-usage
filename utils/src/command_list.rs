@@ -3,7 +3,7 @@ use derive_more::{AsRef, Deref};
 use pipe_trait::Pipe;
 use std::process::Command;
 
-/// Representation of a command's argument list.
+/// Representation of a `pdu` command.
 #[derive(Debug, Default, Clone)]
 pub struct CommandRepresentation<'a> {
     args: Vec<&'a str>,
@@ -17,12 +17,12 @@ impl<'a> CommandRepresentation<'a> {
     }
 }
 
-/// List of argument lists to run a program with.
+/// List of `pdu` commands.
 #[derive(Debug, Clone, AsRef, Deref)]
 pub struct CommandList<'a>(Vec<CommandRepresentation<'a>>);
 
 impl<'a> Default for CommandList<'a> {
-    /// Initialize a list with one empty argument list.
+    /// Initialize a list with one `pdu` command.
     fn default() -> Self {
         CommandRepresentation::default()
             .pipe(|x| vec![x])
@@ -66,7 +66,7 @@ impl<'a> CommandList<'a> {
         CommandList(head)
     }
 
-    /// Create a list of [commands](Command) that run `program`.
+    /// Create a list of `program` [command](Command).
     pub fn commands(&'a self, program: &'a str) -> impl Iterator<Item = Command> + 'a {
         self.iter()
             .map(move |cmd| Command::new(program).with_args(&cmd.args))

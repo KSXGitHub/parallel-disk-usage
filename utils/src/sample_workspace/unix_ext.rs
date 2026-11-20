@@ -4,6 +4,7 @@ use build_fs_tree::{Build, MergeableFileSystemTree, dir, file};
 use pipe_trait::Pipe;
 use rayon::prelude::*;
 
+/// POSIX-exclusive functions
 impl SampleWorkspace {
     /// Set up a temporary directory for tests.
     ///
