@@ -1,8 +1,8 @@
-pub mod command_list;
-pub mod metadata;
-pub mod process_output;
-pub mod sample_workspace;
-pub mod temp;
+mod command_list;
+mod metadata;
+mod process_output;
+mod sample_workspace;
+mod temp;
 
 pub use command_list::{CommandList, CommandRepresentation};
 pub use metadata::read_apparent_size;
