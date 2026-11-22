@@ -16,7 +16,7 @@ fn flag_combinations() {
     #[cfg(windows)]
     let quantity = ["apparent-size"];
 
-    let list = CommandList::default()
+    let list = CommandList::new(PDU)
         .option_matrix("--quantity", quantity)
         .flag_matrix("--progress");
 

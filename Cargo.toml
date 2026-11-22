@@ -1,3 +1,18 @@
+[workspace]
+members = ["tools/*", "utils"]
+
+[workspace.lints.cargo]
+unused_dependencies = "deny"
+
+[workspace.lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(dylint_lib, values("perfectionist"))'] }
+
+[workspace.lints.clippy]
+clone_on_ref_ptr = "warn"
+if_then_some_else_none = "warn"
+mod_module_files = "warn"
+unnecessary_lazy_evaluations = "warn"
+
 [package]
 name = "parallel-disk-usage"
 description = "Highly parallelized, blazing fast directory tree analyzer"
@@ -37,26 +52,6 @@ name = "pdu"
 path = "cli/main.rs"
 required-features = ["cli"]
 
-[[bin]]
-name = "pdu-completions"
-path = "cli/completions.rs"
-required-features = ["cli-completions"]
-
-[[bin]]
-name = "pdu-man-page"
-path = "cli/man_page.rs"
-required-features = ["man-page"]
-
-[[bin]]
-name = "pdu-usage-md"
-path = "cli/usage_md.rs"
-required-features = ["usage-md"]
-
-[[bin]]
-name = "pdu-ai-instructions"
-path = "cli/ai_instructions.rs"
-required-features = ["ai-instructions"]
-
 [features]
 default = ["cli"]
 json = ["serde/derive", "serde_json"]
@@ -70,10 +65,6 @@ cli = [
   "text-block-macros",
   "json",
 ]
-cli-completions = ["cli"]
-man-page = ["cli"]
-usage-md = ["cli"]
-ai-instructions = ["clap/derive"]
 
 [dependencies]
 assert-cmp = "0.3.0"
@@ -97,25 +88,16 @@ terminal_size = { version = "0.4.4", optional = true }
 text-block-macros = { version = "0.2.0", optional = true }
 zero-copy-pads = "0.2.0"
 
-[lints.cargo]
-unused_dependencies = "deny"
-
-[lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(dylint_lib, values("perfectionist"))'] }
-
-[lints.clippy]
-clone_on_ref_ptr = "warn"
-if_then_some_else_none = "warn"
-mod_module_files = "warn"
-unnecessary_lazy_evaluations = "warn"
+[lints]
+workspace = true
 
 [dev-dependencies]
+_utils = { path = "utils" }
 build-fs-tree = "0.8.1"
 command-extra = "1.5.0"
 libc = "0.2.191"
 maplit = "1.0.2"
 normalize-path = "0.2.2"
 pretty_assertions = "1.4.1"
-rand = "0.10.4"
 text-block-macros = "0.2.0"
 which = "8.0.6"
