@@ -3,7 +3,6 @@
 //! The things you are most interested in are likely [`fs_tree_builder::FsTreeBuilder`],
 //! [`tree_builder::TreeBuilder`], [`data_tree::DataTree`], or [`visualizer::Visualizer`].
 
-#![deny(warnings)]
 #![cfg_attr(dylint_lib = "perfectionist", feature(register_tool))]
 #![cfg_attr(dylint_lib = "perfectionist", register_tool(perfectionist))]
 
