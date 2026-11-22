@@ -11,7 +11,7 @@ pub struct CommandRepresentation<'a> {
 }
 
 impl<'a> CommandRepresentation<'a> {
-    /// Create a command that runs given `program` without arguments.
+    /// Create a `pdu` command without arguments.
     pub fn new(program: &'a str) -> Self {
         CommandRepresentation {
             program,
@@ -31,16 +31,14 @@ impl<'a> CommandRepresentation<'a> {
 pub struct CommandList<'a>(Vec<CommandRepresentation<'a>>);
 
 impl<'a> CommandList<'a> {
-    /// Initialize a list with one command that runs given `program`.
+    /// Initialize a list with one `pdu` command.
     pub fn new(program: &'a str) -> Self {
         program
             .pipe(CommandRepresentation::new)
             .pipe(|x| vec![x])
             .pipe(CommandList)
     }
-}
 
-impl<'a> CommandList<'a> {
     /// Duplicate the list with a flag argument.
     ///
     /// The resulting list would include the original list with the flag
