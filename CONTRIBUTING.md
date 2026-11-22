@@ -481,16 +481,6 @@ The external file itself sits in a directory named after the parent, using the s
 
 Do not flatten the tests into a sibling file such as `src/foo_tests.rs`, and do not skip the intermediate directory when the parent currently has no other submodules. This mirrors the flat file pattern (`module.rs` rather than `module/mod.rs`) described under [Module Organization](#module-organization).
 
-## Dependency Declarations
-
-Cargo's `unused_dependencies` lint is set to `deny` under `[lints.cargo]` in `Cargo.toml`, so a dependency that the compiled targets never reach is a hard error rather than a warning. The check runs on every feature combination that `test.sh` builds, which means a dependency has to be reachable under every combination that pulls it in.
-
-A dependency that only the command-line interface needs must therefore be declared with `optional = true` and listed in the `cli` feature. Leaving it unconditional fails `cargo build --no-default-features`, because the `#[cfg(feature = "cli")]` modules that use it are gone while the dependency itself remains in the build graph.
-
-An integration test that needs a crate declared `optional = true` has two ways to stay buildable. Gate the whole test file with `#![cfg(feature = "...")]` so the test disappears alongside the dependency, or declare the crate in `[dev-dependencies]` as well so it is present regardless of the enabled features. The lint does not inspect `[dev-dependencies]`, so the second form never triggers it.
-
-The `DYLINT=true` step is the one exception. It checks the crate with the nightly toolchain that `dylint.toml` pins for the lint libraries, and a nightly that predates the stabilization of `[lints.cargo]` reports the table as an unused manifest key instead of honoring it. Every other step runs on the toolchain pinned by `rust-toolchain`, so the lint still applies there.
-
 ## Setup
 
 Install the required Rust toolchain and components before running any checks:
@@ -526,7 +516,6 @@ Before submitting, ensure:
 - `cargo clippy` passes on all feature combinations.
 - `cargo test` passes.
 - The project builds with no default features, with default features, and with all features.
-- No declared dependency goes unused in any feature combination. See [Dependency Declarations](#dependency-declarations).
 - `cargo dylint --all` passes (requires `cargo-dylint` and `dylint-link`).
 
 The CI script `test.sh` runs all of these across every supported feature combination. You can run it locally with:
