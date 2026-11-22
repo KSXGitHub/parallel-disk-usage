@@ -72,8 +72,6 @@ unit() (
   fi
 )
 
-# No member outside the root package declares a feature, so one pass covers
-# them all rather than a run per feature combination.
 helper_crates() (
   read -ra build_flags <<<"${BUILD_FLAGS:-}"
   read -ra test_flags <<<"${TEST_FLAGS:-}"
