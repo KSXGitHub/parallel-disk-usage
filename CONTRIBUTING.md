@@ -526,17 +526,6 @@ FMT=true LINT=true BUILD=true TEST=true DOC=true DYLINT=true ./test.sh
 
 `DYLINT` defaults to `false` because it requires extra tooling and a separate nightly toolchain. Enable it once `cargo-dylint` and `dylint-link` are installed.
 
-### Warnings Are Errors
-
-`test.sh` exports `RUSTFLAGS` and `RUSTDOCFLAGS` with `-D warnings`, so a warning fails the check that emitted it. Those variables reach every crate in the workspace and every target within those crates, which covers the library, the `pdu` binary, the test targets, the generated documentation, and the helper crates under `tools/` and `utils/`. Dependencies are unaffected, because cargo compiles them with `--cap-lints allow`. Flags that are already present in the environment are kept, so `RUSTFLAGS='-A unused_variables' ./test.sh` relaxes that one lint for a single run.
-
-Do not enforce the policy from the source instead. A crate-level attribute such as `#![deny(warnings)]` also applies when somebody installs the crate from crates.io or builds it from a checkout, which turns a lint that a newer toolchain has only just introduced into a hard compile error that the user has no way to opt out of. Such an attribute is also confined to the crate root that carries it, so one in `src/lib.rs` leaves both the `pdu` binary and the helper crates unchecked.
-
-The policy leaves these cases out:
-
-- Code inside a documentation example. Rustdoc hides the warnings that the compilation of an example emits, and the flags that would surface them, `--display-doctest-warnings` and `--doctest-build-arg`, are available only on a nightly toolchain.
-- The `rustflags` tables of `.cargo/config.toml`. `RUSTFLAGS` replaces those tables rather than extending them, so the MSVC static runtime flag declared there does not apply while `test.sh` runs. The build jobs of the deployment workflow set no `RUSTFLAGS`, so the published binaries keep that flag.
-
 > [!IMPORTANT]
 > Always run the full test suite before every commit. This rule applies to all changes, including documentation edits, comment changes, and config updates. Any change can break formatting, linting, building, tests, or doc generation across the different feature combinations.
 

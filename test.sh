@@ -1,14 +1,6 @@
 #! /bin/bash
 set -o errexit -o pipefail -o nounset
 
-# Warnings are errors for every crate in this workspace and for every target
-# within those crates, which covers the library, the `pdu` binary, the test
-# targets, the generated documentation, and the helper crates under `tools/` and
-# `utils/`. Clippy reads `RUSTFLAGS` too, so the invocations below need no
-# `-- -D warnings` of their own. Flags that the caller has already placed in
-# these variables are preserved. The "Warnings Are Errors" section of
-# CONTRIBUTING.md explains why the policy lives in this script rather than in
-# the source, and which cases it leaves out.
 export RUSTFLAGS="-D warnings ${RUSTFLAGS:-}"
 export RUSTDOCFLAGS="-D warnings ${RUSTDOCFLAGS:-}"
 
