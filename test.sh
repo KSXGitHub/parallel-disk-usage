@@ -1,6 +1,9 @@
 #! /bin/bash
 set -o errexit -o pipefail -o nounset
 
+export RUSTFLAGS="-D warnings ${RUSTFLAGS:-}"
+export RUSTDOCFLAGS="-D warnings ${RUSTDOCFLAGS:-}"
+
 # Validate PDU_NO_FAIL_FAST
 no_fail_fast="${PDU_NO_FAIL_FAST:-false}"
 case "$no_fail_fast" in
@@ -61,9 +64,8 @@ unit() (
   for name in ${test_skip[@]+"${test_skip[@]}"}; do
     skip_args+=(--skip "$name")
   done
-  run_if "${LINT:-true}" cargo clippy "$@" -- -D warnings
-  run_if "${DOC:-false}" env RUSTDOCFLAGS="-D warnings ${RUSTDOCFLAGS:-}" \
-    cargo doc --document-private-items --no-deps "$@"
+  run_if "${LINT:-true}" cargo clippy --all-targets "$@"
+  run_if "${DOC:-false}" cargo doc --document-private-items --no-deps "$@"
   run_if "${BUILD:-true}" cargo build ${build_flags[@]+"${build_flags[@]}"} "$@"
   if [[ ${#skip_args[@]} -gt 0 ]]; then
     run_if "${TEST:-true}" cargo test ${test_flags[@]+"${test_flags[@]}"} "$@" -- "${skip_args[@]}"
@@ -76,9 +78,8 @@ helper_crates() (
   read -ra build_flags <<<"${BUILD_FLAGS:-}"
   read -ra test_flags <<<"${TEST_FLAGS:-}"
   selection=(--workspace --exclude parallel-disk-usage)
-  run_if "${LINT:-true}" cargo clippy "${selection[@]}" "$@" -- -D warnings
-  run_if "${DOC:-false}" env RUSTDOCFLAGS="-D warnings ${RUSTDOCFLAGS:-}" \
-    cargo doc --document-private-items --no-deps "${selection[@]}" "$@"
+  run_if "${LINT:-true}" cargo clippy --all-targets "${selection[@]}" "$@"
+  run_if "${DOC:-false}" cargo doc --document-private-items --no-deps "${selection[@]}" "$@"
   run_if "${BUILD:-true}" cargo build ${build_flags[@]+"${build_flags[@]}"} "${selection[@]}" "$@"
   run_if "${TEST:-true}" cargo test ${test_flags[@]+"${test_flags[@]}"} "${selection[@]}" "$@"
 )
@@ -86,8 +87,7 @@ helper_crates() (
 run_if "${FMT:-true}" cargo fmt -- --check
 # Dylint inspects the source under all feature gates in a single pass, so it is
 # run once with `--all-features` rather than across every feature combination.
-run_if "${DYLINT:-false}" env RUSTFLAGS="-D warnings ${RUSTFLAGS:-}" \
-  cargo dylint --all -- --workspace --all-features --all-targets
+run_if "${DYLINT:-false}" cargo dylint --all -- --workspace --all-features --all-targets
 unit "$@"
 unit --no-default-features "$@"
 unit --all-features "$@"

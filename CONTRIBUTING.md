@@ -513,7 +513,7 @@ Tests that need these tools will panic with a diagnostic message if they are mis
 Before submitting, ensure:
 
 - `cargo fmt -- --check` passes.
-- `cargo clippy` passes on all feature combinations.
+- `cargo clippy --all-targets` passes on all feature combinations.
 - `cargo test` passes.
 - The project builds with no default features, with default features, and with all features.
 - `cargo dylint --all` passes (requires `cargo-dylint` and `dylint-link`).

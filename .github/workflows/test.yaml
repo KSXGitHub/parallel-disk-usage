@@ -63,8 +63,6 @@ jobs:
       - name: Test (release)
         shell: bash
         env:
-          RUSTFLAGS: '-D warnings'
-          RUSTDOCFLAGS: '-D warnings'
           FMT: 'false'
           LINT: 'false'
           DOC: 'true'
