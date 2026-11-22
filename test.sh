@@ -77,6 +77,8 @@ run_if "${FMT:-true}" cargo fmt -- --check
 # run once with `--all-features` rather than across every feature combination.
 run_if "${DYLINT:-false}" env RUSTFLAGS="-D warnings ${RUSTFLAGS:-}" \
   cargo dylint --all -- --all-features --all-targets
+# Cargo's `unused_dependencies` lint is set to `deny` in `Cargo.toml`, so every cargo
+# invocation below also fails when a dependency goes unused under its feature combination.
 unit "$@"
 unit --no-default-features "$@"
 unit --all-features "$@"

@@ -97,6 +97,9 @@ terminal_size = { version = "0.4.4", optional = true }
 text-block-macros = { version = "0.2.0", optional = true }
 zero-copy-pads = "0.2.0"
 
+[lints.cargo]
+unused_dependencies = "deny"
+
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(dylint_lib, values("perfectionist"))'] }
 
