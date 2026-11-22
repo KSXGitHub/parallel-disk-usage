@@ -33,7 +33,8 @@ pub struct CommandList<'a>(Vec<CommandRepresentation<'a>>);
 impl<'a> CommandList<'a> {
     /// Initialize a list with one command that runs given `program`.
     pub fn new(program: &'a str) -> Self {
-        CommandRepresentation::new(program)
+        program
+            .pipe(CommandRepresentation::new)
             .pipe(|x| vec![x])
             .pipe(CommandList)
     }
